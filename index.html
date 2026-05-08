@@ -43,7 +43,7 @@ var COLS = 8,
   PLASMA_SPEED = 0.55,
   START_PLASMA = 10,
   BONUS_PTS = 2;
-var GAME_VERSION = "v69.6";
+var GAME_VERSION = "v69.8";
 var BLOCK_LABELS = {
   1: "Standard",
   2: "Cross Shot",
@@ -4744,7 +4744,6 @@ function CosmicDriftGame() {
     if (tc === shipCol) fire(shipCol);else setShipCol(tc);
   }, [shipCol, getColFromX, fire, gameState, armedItem, deployAngleBounce, deployLightning]);
   var handleTouchStart = useCallback(function (e) {
-    e.preventDefault();
     touchUsedRef.current = true;
     var t = e.touches[0];
     touchStartRef.current = {
@@ -4758,7 +4757,6 @@ function CosmicDriftGame() {
     }, 200);
   }, []);
   var handleTouchMove = useCallback(function (e) {
-    e.preventDefault();
     if (!touchStartRef.current) return;
     var t = e.touches[0];
     if (Math.abs(t.clientX - touchStartRef.current.x) > 10) {
@@ -4769,12 +4767,12 @@ function CosmicDriftGame() {
       }
       setIsDragging(true);
     }
-    if (touchStartRef.current.moved) {
+    if (isDragging || touchStartRef.current.moved) {
       if (levelRef.current <= 3 && !getTutorialAllow(levelRef.current, tutPhaseRef.current).drag) return;
       var br = boardRef.current ? boardRef.current.getBoundingClientRect() : null;
       if (br) setShipCol(getColFromX(t.clientX - br.left));
     }
-  }, [getColFromX]);
+  }, [isDragging, getColFromX]);
   var handleTouchEnd = useCallback(function (e) {
     e.preventDefault();
     if (dragTimerRef.current) {
@@ -4785,37 +4783,6 @@ function CosmicDriftGame() {
     setIsDragging(false);
     touchStartRef.current = null;
   }, [isDragging, handleShipZoneAction]);
-  // Attach touch handlers as non-passive for iOS preventDefault support
-  var touchStartHandlerRef = useRef(null);
-  var touchMoveHandlerRef = useRef(null);
-  var touchEndHandlerRef = useRef(null);
-  touchStartHandlerRef.current = handleTouchStart;
-  touchMoveHandlerRef.current = handleTouchMove;
-  touchEndHandlerRef.current = handleTouchEnd;
-  useEffect(function () {
-    var el = shipZoneRef.current;
-    if (!el) return;
-    var opts = {
-      passive: false
-    };
-    var ts = function (e) {
-      touchStartHandlerRef.current(e);
-    };
-    var tm = function (e) {
-      touchMoveHandlerRef.current(e);
-    };
-    var te = function (e) {
-      touchEndHandlerRef.current(e);
-    };
-    el.addEventListener("touchstart", ts, opts);
-    el.addEventListener("touchmove", tm, opts);
-    el.addEventListener("touchend", te, opts);
-    return function () {
-      el.removeEventListener("touchstart", ts);
-      el.removeEventListener("touchmove", tm);
-      el.removeEventListener("touchend", te);
-    };
-  }, []);
   var handleShipMouseDown = useCallback(function (e) {
     if (touchUsedRef.current) return;
     mouseDragRef.current = {
@@ -8051,10 +8018,7 @@ function CosmicDriftGame() {
     }, isSelected && /*#__PURE__*/React.createElement("svg", {
       viewBox: "0 0 36 40",
       width: "28",
-      height: "32",
-      style: {
-        filter: "drop-shadow(0 0 10px rgba(255,168,255,0.5))"
-      }
+      height: "32"
     }, /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("linearGradient", {
       id: "bsg",
       x1: "0",
@@ -9915,7 +9879,7 @@ function CosmicDriftGame() {
         boxShadow: "0 0 10px #50c8ff,0 0 20px rgba(80,200,255,0.5),0 8px 16px rgba(80,200,255,0.4)"
       }
     }));
-  })), armedItem === "anglebounce" && gameState === "playing" && !isDragging && function () {
+  })), armedItem === "anglebounce" && gameState === "playing" && function () {
     var shipY = getShipY();
     var sx = getBlockX(shipCol) + 4;
     var sp = computeSplitPaths(shipCol);
@@ -10621,8 +10585,7 @@ function CosmicDriftGame() {
       padding: "0 " + BOARD_PAD + "px",
       cursor: "pointer",
       userSelect: "none",
-      WebkitUserSelect: "none",
-      touchAction: "none"
+      WebkitUserSelect: "none"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
