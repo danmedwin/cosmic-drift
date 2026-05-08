@@ -20,7 +20,6 @@
 <body>
 <div id="root"></div>
 <script>
-// Storage shim: wraps localStorage in the same async API as the artifact environment
 window.storage = {
   get: function(key) {
     try { var val = localStorage.getItem(key); return Promise.resolve(val != null ? { key: key, value: val } : null); }
@@ -44,7 +43,7 @@ var COLS = 8,
   PLASMA_SPEED = 0.55,
   START_PLASMA = 10,
   BONUS_PTS = 2;
-var GAME_VERSION = "v68.9";
+var GAME_VERSION = "v69.1";
 var BLOCK_LABELS = {
   1: "Standard",
   2: "Cross Shot",
@@ -138,6 +137,490 @@ var CRATE_VARIANTS = [{
   name: "Hammer",
   color: "rgba(160,160,180,0.8)"
 }];
+
+// ── AUDIO SYSTEM ──
+var _audioCtx = null;
+function _getCtx() {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (_audioCtx.state === "suspended") _audioCtx.resume();
+  return _audioCtx;
+}
+var _sfxMuteRef = {
+  current: false
+};
+var _musicMuteRef = {
+  current: false
+};
+var _musicEl = null;
+var MUSIC_URL = "Space_Fighter_Loop.mp3";
+function playSound(name) {
+  if (_sfxMuteRef.current) return;
+  var fn = _SOUNDS[name];
+  if (fn) try {
+    fn();
+  } catch (e) {}
+}
+function startMusic() {
+  if (_musicMuteRef.current) return;
+  if (!_musicEl) {
+    _musicEl = new Audio(MUSIC_URL);
+    _musicEl.loop = true;
+    _musicEl.volume = 0.3;
+  }
+  try {
+    _musicEl.play().catch(function () {});
+  } catch (e) {}
+}
+function stopMusic() {
+  if (_musicEl) {
+    _musicEl.pause();
+    _musicEl.currentTime = 0;
+  }
+}
+function pauseMusic() {
+  if (_musicEl) _musicEl.pause();
+}
+function resumeMusic() {
+  if (_musicEl && !_musicMuteRef.current) try {
+    _musicEl.play().catch(function () {});
+  } catch (e) {}
+}
+var _SOUNDS = {
+  plasmaFire: function () {
+    var ctx = _getCtx();
+    var t = ctx.currentTime;
+    [800, 820].forEach(function (freq) {
+      var o = ctx.createOscillator();
+      var g = ctx.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(freq, t);
+      o.frequency.exponentialRampToValueAtTime(120, t + 0.15);
+      g.gain.setValueAtTime(0.2, t);
+      g.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+      o.connect(g);
+      g.connect(ctx.destination);
+      o.start();
+      o.stop(t + 0.18);
+    });
+  },
+  blockPop: function () {
+    var ctx = _getCtx();
+    var t = ctx.currentTime;
+    var o = ctx.createOscillator();
+    var g = ctx.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(500, t);
+    o.frequency.exponentialRampToValueAtTime(100, t + 0.06);
+    g.gain.setValueAtTime(0.4, t);
+    g.gain.exponentialRampToValueAtTime(0.01, t + 0.08);
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.start();
+    o.stop(t + 0.1);
+  },
+  crossShot: function () {
+    var ctx = _getCtx();
+    var t = ctx.currentTime;
+    [0, 0.04, 0.08, 0.12].forEach(function (d) {
+      var o = ctx.createOscillator();
+      var g = ctx.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(600 + d * 2000, t + d);
+      o.frequency.exponentialRampToValueAtTime(200, t + d + 0.06);
+      g.gain.setValueAtTime(0.2, t + d);
+      g.gain.exponentialRampToValueAtTime(0.01, t + d + 0.08);
+      o.connect(g);
+      g.connect(ctx.destination);
+      o.start(t + d);
+      o.stop(t + d + 0.1);
+    });
+  },
+  lightning: function () {
+    var ctx = _getCtx();
+    var t = ctx.currentTime;
+    var o = ctx.createOscillator();
+    var g = ctx.createGain();
+    o.type = "sawtooth";
+    o.frequency.setValueAtTime(60, t);
+    var lfo = ctx.createOscillator();
+    lfo.frequency.value = 30;
+    var lg = ctx.createGain();
+    lg.gain.value = 400;
+    lfo.connect(lg);
+    lg.connect(o.frequency);
+    g.gain.setValueAtTime(0.18, t);
+    g.gain.linearRampToValueAtTime(0.22, t + 0.12);
+    g.gain.exponentialRampToValueAtTime(0.01, t + 0.35);
+    var f = ctx.createBiquadFilter();
+    f.type = "bandpass";
+    f.frequency.value = 800;
+    f.Q.value = 1.5;
+    o.connect(f);
+    f.connect(g);
+    g.connect(ctx.destination);
+    o.start();
+    lfo.start();
+    o.stop(t + 0.4);
+    lfo.stop(t + 0.4);
+    for (var i = 0; i < 4; i++) {
+      var buf = ctx.createBuffer(1, ctx.sampleRate * 0.04, ctx.sampleRate);
+      var d = buf.getChannelData(0);
+      for (var j = 0; j < d.length; j++) d[j] = Math.random() * 2 - 1;
+      var s = ctx.createBufferSource();
+      s.buffer = buf;
+      var g2 = ctx.createGain();
+      var f2 = ctx.createBiquadFilter();
+      f2.type = "bandpass";
+      f2.frequency.value = 600 + i * 200;
+      f2.Q.value = 1;
+      g2.gain.setValueAtTime(0.15, t + i * 0.06);
+      g2.gain.exponentialRampToValueAtTime(0.01, t + i * 0.06 + 0.05);
+      s.connect(f2);
+      f2.connect(g2);
+      g2.connect(ctx.destination);
+      s.start(t + i * 0.06);
+      s.stop(t + i * 0.06 + 0.06);
+    }
+  },
+  droneExplosion: function () {
+    var ctx = _getCtx();
+    var t = ctx.currentTime;
+    var buf = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
+    var d = buf.getChannelData(0);
+    for (var i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 1.5);
+    var s = ctx.createBufferSource();
+    s.buffer = buf;
+    var g = ctx.createGain();
+    var f = ctx.createBiquadFilter();
+    f.type = "lowpass";
+    f.frequency.setValueAtTime(1200, t);
+    f.frequency.exponentialRampToValueAtTime(80, t + 0.45);
+    g.gain.setValueAtTime(0.4, t);
+    g.gain.exponentialRampToValueAtTime(0.01, t + 0.5);
+    s.connect(f);
+    f.connect(g);
+    g.connect(ctx.destination);
+    s.start();
+    s.stop(t + 0.55);
+    [40, 42, 38].forEach(function (freq) {
+      var o = ctx.createOscillator();
+      var g2 = ctx.createGain();
+      o.type = "sine";
+      o.frequency.setValueAtTime(freq, t);
+      o.frequency.exponentialRampToValueAtTime(18, t + 0.6);
+      g2.gain.setValueAtTime(0.3, t);
+      g2.gain.exponentialRampToValueAtTime(0.01, t + 0.6);
+      o.connect(g2);
+      g2.connect(ctx.destination);
+      o.start();
+      o.stop(t + 0.65);
+    });
+  },
+  ooze: function () {
+    var ctx = _getCtx();
+    var t = ctx.currentTime;
+    var o = ctx.createOscillator();
+    var g = ctx.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(300, t);
+    o.frequency.exponentialRampToValueAtTime(80, t + 0.4);
+    var lfo = ctx.createOscillator();
+    lfo.frequency.value = 8;
+    var lg = ctx.createGain();
+    lg.gain.value = 50;
+    lfo.connect(lg);
+    lg.connect(o.frequency);
+    g.gain.setValueAtTime(0.2, t);
+    g.gain.linearRampToValueAtTime(0.15, t + 0.2);
+    g.gain.exponentialRampToValueAtTime(0.01, t + 0.5);
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.start();
+    lfo.start();
+    o.stop(t + 0.55);
+    lfo.stop(t + 0.55);
+  },
+  crateOpen: function () {
+    var ctx = _getCtx();
+    var t = ctx.currentTime;
+    [523, 659, 784].forEach(function (freq, i) {
+      var o = ctx.createOscillator();
+      var g = ctx.createGain();
+      o.type = "sine";
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(0, t + i * 0.08);
+      g.gain.linearRampToValueAtTime(0.25, t + i * 0.08 + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.01, t + i * 0.08 + 0.2);
+      o.connect(g);
+      g.connect(ctx.destination);
+      o.start(t + i * 0.08);
+      o.stop(t + i * 0.08 + 0.25);
+    });
+  },
+  powerArm: function () {
+    var ctx = _getCtx();
+    var t = ctx.currentTime;
+    var o = ctx.createOscillator();
+    var g = ctx.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(200, t);
+    o.frequency.exponentialRampToValueAtTime(900, t + 0.35);
+    g.gain.setValueAtTime(0.08, t);
+    g.gain.linearRampToValueAtTime(0.2, t + 0.25);
+    g.gain.exponentialRampToValueAtTime(0.01, t + 0.4);
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.start();
+    o.stop(t + 0.45);
+    var o2 = ctx.createOscillator();
+    var g2 = ctx.createGain();
+    o2.type = "sine";
+    o2.frequency.setValueAtTime(400, t);
+    o2.frequency.exponentialRampToValueAtTime(1800, t + 0.35);
+    g2.gain.setValueAtTime(0.03, t);
+    g2.gain.linearRampToValueAtTime(0.08, t + 0.25);
+    g2.gain.exponentialRampToValueAtTime(0.01, t + 0.4);
+    o2.connect(g2);
+    g2.connect(ctx.destination);
+    o2.start();
+    o2.stop(t + 0.45);
+  },
+  forceFieldHit: function () {
+    var ctx = _getCtx();
+    var t = ctx.currentTime;
+    var o = ctx.createOscillator();
+    var g = ctx.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(800, t);
+    o.frequency.exponentialRampToValueAtTime(200, t + 0.2);
+    var lfo = ctx.createOscillator();
+    lfo.frequency.value = 20;
+    var lg = ctx.createGain();
+    lg.gain.value = 200;
+    lfo.connect(lg);
+    lg.connect(o.frequency);
+    g.gain.setValueAtTime(0.25, t);
+    g.gain.exponentialRampToValueAtTime(0.01, t + 0.25);
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.start();
+    lfo.start();
+    o.stop(t + 0.3);
+    lfo.stop(t + 0.3);
+  },
+  recharge: function () {
+    var ctx = _getCtx();
+    var t = ctx.currentTime;
+    var o = ctx.createOscillator();
+    var g = ctx.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(200, t);
+    o.frequency.exponentialRampToValueAtTime(1200, t + 0.4);
+    g.gain.setValueAtTime(0.15, t);
+    g.gain.linearRampToValueAtTime(0.25, t + 0.3);
+    g.gain.exponentialRampToValueAtTime(0.01, t + 0.5);
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.start();
+    o.stop(t + 0.55);
+  },
+  levelClear: function () {
+    var ctx = _getCtx();
+    var t = ctx.currentTime;
+    [392, 523, 659].forEach(function (freq, i) {
+      var o = ctx.createOscillator();
+      var g = ctx.createGain();
+      o.type = "triangle";
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(0.2, t + i * 0.15);
+      g.gain.exponentialRampToValueAtTime(0.01, t + i * 0.15 + 0.5);
+      o.connect(g);
+      g.connect(ctx.destination);
+      o.start(t + i * 0.15);
+      o.stop(t + i * 0.15 + 0.55);
+      var o2 = ctx.createOscillator();
+      var g2 = ctx.createGain();
+      o2.type = "sine";
+      o2.frequency.value = freq * 2;
+      g2.gain.setValueAtTime(0.08, t + i * 0.15);
+      g2.gain.exponentialRampToValueAtTime(0.01, t + i * 0.15 + 0.3);
+      o2.connect(g2);
+      g2.connect(ctx.destination);
+      o2.start(t + i * 0.15);
+      o2.stop(t + i * 0.15 + 0.35);
+    });
+  },
+  gameOver: function () {
+    var ctx = _getCtx();
+    var t = ctx.currentTime;
+    var o = ctx.createOscillator();
+    var g = ctx.createGain();
+    o.type = "sawtooth";
+    o.frequency.setValueAtTime(300, t);
+    o.frequency.exponentialRampToValueAtTime(40, t + 0.8);
+    g.gain.setValueAtTime(0.12, t);
+    g.gain.exponentialRampToValueAtTime(0.01, t + 0.9);
+    var f = ctx.createBiquadFilter();
+    f.type = "lowpass";
+    f.frequency.setValueAtTime(2000, t);
+    f.frequency.exponentialRampToValueAtTime(100, t + 0.8);
+    o.connect(f);
+    f.connect(g);
+    g.connect(ctx.destination);
+    o.start();
+    o.stop(t + 1);
+  },
+  warp: function () {
+    var ctx = _getCtx();
+    var t = ctx.currentTime;
+    var buf = ctx.createBuffer(1, ctx.sampleRate * 0.15, ctx.sampleRate);
+    var d = buf.getChannelData(0);
+    for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    var s = ctx.createBufferSource();
+    s.buffer = buf;
+    var g = ctx.createGain();
+    var f = ctx.createBiquadFilter();
+    f.type = "bandpass";
+    f.frequency.setValueAtTime(400, t);
+    f.frequency.exponentialRampToValueAtTime(3000, t + 0.1);
+    f.Q.value = 1.5;
+    g.gain.setValueAtTime(0.25, t);
+    g.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
+    s.connect(f);
+    f.connect(g);
+    g.connect(ctx.destination);
+    s.start();
+    s.stop(t + 0.18);
+  },
+  hammer: function () {
+    var ctx = _getCtx();
+    var t = ctx.currentTime;
+    var buf = ctx.createBuffer(1, ctx.sampleRate * 0.15, ctx.sampleRate);
+    var d = buf.getChannelData(0);
+    for (var i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 2);
+    var s = ctx.createBufferSource();
+    s.buffer = buf;
+    var g = ctx.createGain();
+    var f = ctx.createBiquadFilter();
+    f.type = "lowpass";
+    f.frequency.value = 800;
+    g.gain.setValueAtTime(0.5, t);
+    g.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+    s.connect(f);
+    f.connect(g);
+    g.connect(ctx.destination);
+    s.start();
+    s.stop(t + 0.25);
+    var o = ctx.createOscillator();
+    var g2 = ctx.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(100, t);
+    o.frequency.exponentialRampToValueAtTime(30, t + 0.15);
+    g2.gain.setValueAtTime(0.35, t);
+    g2.gain.exponentialRampToValueAtTime(0.01, t + 0.2);
+    o.connect(g2);
+    g2.connect(ctx.destination);
+    o.start();
+    o.stop(t + 0.25);
+  },
+  splitShot: function () {
+    var ctx = _getCtx();
+    var t = ctx.currentTime;
+    var o = ctx.createOscillator();
+    var g = ctx.createGain();
+    o.type = "triangle";
+    o.frequency.setValueAtTime(800, t);
+    o.frequency.exponentialRampToValueAtTime(300, t + 0.12);
+    g.gain.setValueAtTime(0.2, t);
+    g.gain.exponentialRampToValueAtTime(0.01, t + 0.08);
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.start();
+    o.stop(t + 0.1);
+    setTimeout(function () {
+      var ctx2 = _getCtx();
+      var t2 = ctx2.currentTime;
+      var o2 = ctx2.createOscillator();
+      var g2 = ctx2.createGain();
+      o2.type = "sine";
+      o2.frequency.setValueAtTime(500, t2);
+      o2.frequency.exponentialRampToValueAtTime(1000, t2 + 0.06);
+      g2.gain.setValueAtTime(0.15, t2);
+      g2.gain.exponentialRampToValueAtTime(0.01, t2 + 0.08);
+      o2.connect(g2);
+      g2.connect(ctx2.destination);
+      o2.start();
+      o2.stop(t2 + 0.1);
+    }, 70);
+  },
+  oozeHit: function () {
+    var ctx = _getCtx();
+    var t = ctx.currentTime;
+    var o = ctx.createOscillator();
+    var g = ctx.createGain();
+    o.type = "sawtooth";
+    o.frequency.setValueAtTime(400, t);
+    o.frequency.exponentialRampToValueAtTime(80, t + 0.25);
+    g.gain.setValueAtTime(0.2, t);
+    g.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+    var f = ctx.createBiquadFilter();
+    f.type = "lowpass";
+    f.frequency.setValueAtTime(1500, t);
+    f.frequency.exponentialRampToValueAtTime(200, t + 0.25);
+    o.connect(f);
+    f.connect(g);
+    g.connect(ctx.destination);
+    o.start();
+    o.stop(t + 0.35);
+    var o2 = ctx.createOscillator();
+    var g2 = ctx.createGain();
+    o2.type = "sine";
+    o2.frequency.setValueAtTime(250, t + 0.05);
+    o2.frequency.exponentialRampToValueAtTime(60, t + 0.3);
+    g2.gain.setValueAtTime(0.15, t + 0.05);
+    g2.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+    o2.connect(g2);
+    g2.connect(ctx.destination);
+    o2.start(t + 0.05);
+    o2.stop(t + 0.35);
+  },
+  plasmaWarning: function () {
+    var ctx = _getCtx();
+    var t = ctx.currentTime;
+    [600, 400].forEach(function (freq, i) {
+      var o = ctx.createOscillator();
+      var g = ctx.createGain();
+      o.type = "square";
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(0.1, t + i * 0.1);
+      g.gain.exponentialRampToValueAtTime(0.01, t + i * 0.1 + 0.08);
+      var f = ctx.createBiquadFilter();
+      f.type = "lowpass";
+      f.frequency.value = 1500;
+      o.connect(f);
+      f.connect(g);
+      g.connect(ctx.destination);
+      o.start(t + i * 0.1);
+      o.stop(t + i * 0.1 + 0.1);
+    });
+  },
+  highScore: function () {
+    var ctx = _getCtx();
+    var t = ctx.currentTime;
+    [784, 988, 1175, 1568].forEach(function (freq, i) {
+      var o = ctx.createOscillator();
+      var g = ctx.createGain();
+      o.type = "triangle";
+      o.frequency.value = freq;
+      g.gain.setValueAtTime(0.15, t + i * 0.08);
+      g.gain.exponentialRampToValueAtTime(0.01, t + i * 0.08 + 0.35);
+      o.connect(g);
+      g.connect(ctx.destination);
+      o.start(t + i * 0.08);
+      o.stop(t + i * 0.08 + 0.4);
+    });
+  }
+};
 var BLOCK_COLORS = {
   1: {
     bg: "linear-gradient(135deg,#7b5ea7,#9f7fd0)",
@@ -2260,6 +2743,13 @@ function CosmicDriftGame() {
     saveGameInfo = _saveInfo[0],
     setSaveGameInfo = _saveInfo[1];
   var saveDataRef = useRef(null);
+  // ── AUDIO ──
+  var _sfxM = useState(false),
+    sfxMute = _sfxM[0],
+    setSfxMute = _sfxM[1];
+  var _musM = useState(false),
+    musicMute = _musM[0],
+    setMusicMute = _musM[1];
   var boardRef = useRef(null),
     shipZoneRef = useRef(null),
     gridAreaRef = useRef(null),
@@ -2506,6 +2996,43 @@ function CosmicDriftGame() {
       }).catch(function () {});
     } catch (e) {}
   }, []);
+  useEffect(function () {
+    try {
+      window.storage.get("cosmic_drift_sfx_mute").then(function (r) {
+        if (r && r.value === "true") {
+          setSfxMute(true);
+          _sfxMuteRef.current = true;
+        }
+      }).catch(function () {});
+    } catch (e) {}
+  }, []);
+  useEffect(function () {
+    try {
+      window.storage.get("cosmic_drift_music_mute").then(function (r) {
+        if (r && r.value === "true") {
+          setMusicMute(true);
+          _musicMuteRef.current = true;
+        }
+      }).catch(function () {});
+    } catch (e) {}
+  }, []);
+  function toggleSfxMute() {
+    var nv = !_sfxMuteRef.current;
+    _sfxMuteRef.current = nv;
+    setSfxMute(nv);
+    try {
+      window.storage.set("cosmic_drift_sfx_mute", String(nv));
+    } catch (e) {}
+  }
+  function toggleMusicMute() {
+    var nv = !_musicMuteRef.current;
+    _musicMuteRef.current = nv;
+    setMusicMute(nv);
+    if (nv) pauseMusic();else resumeMusic();
+    try {
+      window.storage.set("cosmic_drift_music_mute", String(nv));
+    } catch (e) {}
+  }
   var blockSize = (boardWidth - GAP * (COLS - 1)) / COLS,
     gridPadTop = 14;
   var getColCenter = useCallback(function (col) {
@@ -2704,6 +3231,7 @@ function CosmicDriftGame() {
       var t = setTimeout(function () {
         setBonusDone(false);
         setBonusEarned(0);
+        playSound("levelClear");
         setGameState("bonus");
       }, 400);
       return function () {
@@ -2774,6 +3302,7 @@ function CosmicDriftGame() {
   // Recharge
   useEffect(function () {
     if (gameState !== "recharging") return;
+    playSound("recharge");
     var cp = getHudPos("cores");
     var pp = getHudPos("plasma");
     var cid = addVfx({
@@ -2809,7 +3338,10 @@ function CosmicDriftGame() {
   }, [gameState, plasma]);
   var triggerRecharge = useCallback(function () {
     if (gameStateRef.current !== "playing" || countDestructible() <= 0) return;
-    if (baseCoresRef.current + extraCoresRef.current > 0) setGameState("needsRecharge");else setGameState("lost");
+    if (baseCoresRef.current + extraCoresRef.current > 0) {
+      playSound("plasmaWarning");
+      setGameState("needsRecharge");
+    } else setGameState("lost");
   }, []);
   var scheduleRechargeCheck = useCallback(function () {
     if (rechargeTimerRef.current) clearTimeout(rechargeTimerRef.current);
@@ -2822,10 +3354,12 @@ function CosmicDriftGame() {
   // ── HIGH SCORE / HIGHEST LEVEL CHECK ON GAME OVER ──
   useEffect(function () {
     if (gameState !== "lost" || customLevelMode) return;
+    playSound("gameOver");
     if (score > bestScoreRef.current) {
       bestScoreRef.current = score;
       setBestScore(score);
       setNewHighScore(true);
+      playSound("highScore");
       try {
         window.storage.set("cosmic_drift_best_score", String(score));
       } catch (e) {}
@@ -2847,6 +3381,7 @@ function CosmicDriftGame() {
     var isBurnt = burntBlocksRef.current.has(idx);
     var pc = isBurnt ? "#ff8830" : BLOCK_COLORS[type] ? BLOCK_COLORS[type].particle : "#c8b8ff";
     removingRef.current.add(idx);
+    playSound("blockPop");
     setRemovingBlocks(function (p) {
       var n = new Set(p);
       n.add(idx);
@@ -2987,6 +3522,7 @@ function CosmicDriftGame() {
         if (shipColRef.current === col && plasmaRef.current > 0) {
           plasmaRef.current = 0;
           setPlasma(0);
+          playSound("oozeHit");
           setShipHit(true);
           setTimeout(function () {
             setShipHit(false);
@@ -3108,6 +3644,7 @@ function CosmicDriftGame() {
       }
       if (type === 10 && shieldRef.current[idx] > 0) {
         shieldRef.current[idx]--;
+        playSound("forceFieldHit");
         shakeBlock(idx);
         var sid2 = addVfx({
           type: "fizzle",
@@ -3211,6 +3748,7 @@ function CosmicDriftGame() {
           for (var hi = 0; hi < hits.length; hi++) processHit(hits[hi].idx, 200 + hi * 100, hits[hi].dir);
         }
       } else if (type === 3) {
+        playSound("lightning");
         var above = [],
           hitInd = false;
         for (var r4 = row - 1; r4 >= 0; r4--) {
@@ -3318,6 +3856,7 @@ function CosmicDriftGame() {
             tc2 = ti2 % COLS;
           if (tr2 === tr && tc2 === tc) {
             rmVfx(chId2, 0);
+            playSound("droneExplosion");
             setVfx(function (p) {
               return p.map(function (v) {
                 return v.id === bid2 ? Object.assign({}, v, {
@@ -3367,6 +3906,7 @@ function CosmicDriftGame() {
             });
             setTimeout(function () {
               rmVfx(chId3, 0);
+              playSound("droneExplosion");
               setVfx(function (p) {
                 return p.map(function (v) {
                   return v.id === bid3 ? Object.assign({}, v, {
@@ -3392,7 +3932,8 @@ function CosmicDriftGame() {
         }, 650);
         rmVfx(bid2, 1400);
       } else if (type === 8) {
-        /* Acid barrel: start ooze flowing down */processOoze(col, row + 1);
+        playSound("ooze"); /* Acid barrel: start ooze flowing down */
+        processOoze(col, row + 1);
       } else if (isCrate(type)) {
         // Treasure crate: specific or random power-up
         var powerUps = ["drone", "lightning", "crossshot", "anglebounce", "hammer"];
@@ -3422,6 +3963,7 @@ function CosmicDriftGame() {
             return h2 + 1;
           });
           advanceTutorial("crateOpened");
+          playSound("crateOpen");
           // Show intro card for first-seen power-up (level 4+)
           if (levelRef.current > 9 && !seenPowerUpsRef.current[chosen]) {
             seenPowerUpsRef.current[chosen] = true;
@@ -3524,6 +4066,7 @@ function CosmicDriftGame() {
     });
     setTimeout(function () {
       rmVfx(chId, 0);
+      playSound("droneExplosion");
       setVfx(function (p) {
         return p.map(function (v) {
           return v.id === bid ? Object.assign({}, v, {
@@ -3766,6 +4309,7 @@ function CosmicDriftGame() {
     };
   }
   var deployAngleBounce = useCallback(function () {
+    playSound("splitShot");
     setArmedItem(null);
     setInvAngleBounces(function (n) {
       return n - 1;
@@ -3872,6 +4416,7 @@ function CosmicDriftGame() {
   }, [getBlockX, getBlockY, addVfx, rmVfx, processHit, scheduleRechargeCheck]);
   var fire = useCallback(function (fromCol) {
     if (gameState !== "playing" || plasmaRef.current <= 0) return;
+    playSound("plasmaFire");
     setFiring(true);
     setTimeout(function () {
       setFiring(false);
@@ -4066,6 +4611,7 @@ function CosmicDriftGame() {
         if (tAllow.shipTap) fire(shipCol);
       } else {
         if (tAllow.warp) {
+          playSound("warp");
           setShipCol(tc);
           advanceTutorial("warped");
         }
@@ -4246,6 +4792,7 @@ function CosmicDriftGame() {
       } else {
         nl = getNextSigLevel(levelRef.current);
         if (!nl) {
+          stopMusic();
           setScreen("splash");
           return;
         }
@@ -4363,7 +4910,9 @@ function CosmicDriftGame() {
       hammer: true
     };
     setSigLevelsOpen(false);
+    startMusic();
     setScreen("game");
+    startMusic();
   }
 
   // ── SAVE / CONTINUE GAME ──
@@ -4401,6 +4950,7 @@ function CosmicDriftGame() {
     } catch (e) {}
     setGameMenuOpen(false);
     setGameState("playing");
+    stopMusic();
     setScreen("splash");
   }
   function loadSaveGame() {
@@ -4439,6 +4989,7 @@ function CosmicDriftGame() {
     clearBoardState();
     highestLevelNotifiedRef.current = false;
     setNewHighScore(false);
+    startMusic();
     setScreen("game");
   }
 
@@ -4749,6 +5300,7 @@ function CosmicDriftGame() {
       anglebounce: true,
       hammer: true
     };
+    startMusic();
     setScreen("game");
   }
   function exportLevel(levelData) {
@@ -6060,6 +6612,7 @@ function CosmicDriftGame() {
   }, gameModeRef.current === "highlights" ? "Start Over" : "Try Again"), /*#__PURE__*/React.createElement("div", {
     onClick: function () {
       setGameState("playing");
+      stopMusic();
       setScreen("splash");
     },
     style: {
@@ -6376,6 +6929,7 @@ function CosmicDriftGame() {
     onClick: function () {
       if (gameModeRef.current === "highlights") {
         fullRestart();
+        startMusic();
         setScreen("game");
         return;
       }
@@ -6393,11 +6947,13 @@ function CosmicDriftGame() {
           anglebounce: true,
           hammer: true
         };
+        startMusic();
         setScreen("game");
         return;
       }
       if (npSavedChoice === "training") {
         fullRestart();
+        startMusic();
         setScreen("game");
         return;
       }
@@ -6663,7 +7219,91 @@ function CosmicDriftGame() {
     fontSize: "10",
     fontWeight: "700",
     opacity: "0.7"
-  }, "?")), "Guide")), /*#__PURE__*/React.createElement("div", {
+  }, "?")), "Guide"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 12,
+      background: "rgba(10,10,20,0.5)",
+      border: "1px solid rgba(60,60,80,0.4)",
+      borderRadius: 8,
+      padding: "8px 14px",
+      display: "flex",
+      gap: 10,
+      justifyContent: "center",
+      boxShadow: "inset 0 1px 4px rgba(0,0,0,0.3)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    onClick: toggleSfxMute,
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 5,
+      padding: "5px 12px",
+      borderRadius: 5,
+      background: sfxMute ? "rgba(30,30,45,0.5)" : "rgba(40,30,60,0.5)",
+      border: "1px solid " + (sfxMute ? "rgba(60,60,80,0.3)" : "rgba(180,140,255,0.3)"),
+      color: sfxMute ? "rgba(180,200,220,0.25)" : "rgba(200,170,255,0.7)",
+      fontSize: 9,
+      fontWeight: 700,
+      letterSpacing: 1,
+      cursor: "pointer"
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "12",
+    height: "12",
+    viewBox: "0 0 24 24"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M3 9v6h4l5 5V4L7 9H3z",
+    fill: "currentColor",
+    opacity: "0.7"
+  }), sfxMute && /*#__PURE__*/React.createElement("line", {
+    x1: "18",
+    y1: "6",
+    x2: "6",
+    y2: "18",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    opacity: "0.7"
+  })), "SFX ", sfxMute ? "OFF" : "ON"), /*#__PURE__*/React.createElement("div", {
+    onClick: toggleMusicMute,
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 5,
+      padding: "5px 12px",
+      borderRadius: 5,
+      background: musicMute ? "rgba(30,30,45,0.5)" : "rgba(40,30,60,0.5)",
+      border: "1px solid " + (musicMute ? "rgba(60,60,80,0.3)" : "rgba(180,140,255,0.3)"),
+      color: musicMute ? "rgba(180,200,220,0.25)" : "rgba(200,170,255,0.7)",
+      fontSize: 9,
+      fontWeight: 700,
+      letterSpacing: 1,
+      cursor: "pointer"
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "12",
+    height: "12",
+    viewBox: "0 0 24 24"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M12 3v18l-7-5H2V8h3l7-5z",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    opacity: "0.7"
+  }), !musicMute && /*#__PURE__*/React.createElement("path", {
+    d: "M16 8.5a4 4 0 010 7M19 5a9 9 0 010 14",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "1.5",
+    opacity: "0.5"
+  }), musicMute && /*#__PURE__*/React.createElement("line", {
+    x1: "20",
+    y1: "6",
+    x2: "8",
+    y2: "18",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    opacity: "0.7"
+  })), "MUSIC ", musicMute ? "OFF" : "ON"))), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 24,
       display: "flex",
@@ -6770,6 +7410,7 @@ function CosmicDriftGame() {
         hammer: true
       };
       setDevJumpOpen(false);
+      startMusic();
       setScreen("game");
     },
     style: {
@@ -6909,6 +7550,7 @@ function CosmicDriftGame() {
         } catch (e) {}
       }
       fullRestart();
+      startMusic();
       setScreen("game");
     },
     style: {
@@ -6948,6 +7590,7 @@ function CosmicDriftGame() {
         anglebounce: true,
         hammer: true
       };
+      startMusic();
       setScreen("game");
     },
     style: {
@@ -8128,6 +8771,7 @@ function CosmicDriftGame() {
     }
   }, /*#__PURE__*/React.createElement("div", {
     onClick: function () {
+      stopMusic();
       setScreen("splash");
     },
     style: {
@@ -8918,6 +9562,7 @@ function CosmicDriftGame() {
       customLevelDataRef.current = null;
       customPlasmaRef.current = START_PLASMA;
       setGameState("playing");
+      stopMusic();
       setScreen("splash");
     },
     style: {
@@ -9535,6 +10180,80 @@ function CosmicDriftGame() {
     fill: "rgba(80,200,100,0.7)"
   })), "Save + Quit"), /*#__PURE__*/React.createElement("div", {
     style: {
+      display: "flex",
+      gap: 6,
+      padding: "6px 16px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      toggleSfxMute();
+    },
+    style: {
+      flex: 1,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 4,
+      padding: "6px 0",
+      borderRadius: 4,
+      background: sfxMute ? "rgba(60,60,80,0.3)" : "rgba(40,30,60,0.4)",
+      border: "1px solid " + (sfxMute ? "rgba(60,60,80,0.3)" : "rgba(180,140,255,0.3)"),
+      cursor: "pointer",
+      fontSize: 9,
+      fontWeight: 700,
+      color: sfxMute ? "rgba(180,200,220,0.3)" : "rgba(200,170,255,0.7)"
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "10",
+    height: "10",
+    viewBox: "0 0 24 24"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M3 9v6h4l5 5V4L7 9H3z",
+    fill: "currentColor"
+  }), sfxMute && /*#__PURE__*/React.createElement("line", {
+    x1: "18",
+    y1: "6",
+    x2: "6",
+    y2: "18",
+    stroke: "currentColor",
+    strokeWidth: "2.5"
+  })), "SFX"), /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      toggleMusicMute();
+    },
+    style: {
+      flex: 1,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 4,
+      padding: "6px 0",
+      borderRadius: 4,
+      background: musicMute ? "rgba(60,60,80,0.3)" : "rgba(40,30,60,0.4)",
+      border: "1px solid " + (musicMute ? "rgba(60,60,80,0.3)" : "rgba(180,140,255,0.3)"),
+      cursor: "pointer",
+      fontSize: 9,
+      fontWeight: 700,
+      color: musicMute ? "rgba(180,200,220,0.3)" : "rgba(200,170,255,0.7)"
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "10",
+    height: "10",
+    viewBox: "0 0 24 24"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M12 3v18l-7-5H2V8h3l7-5z",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2.5"
+  }), musicMute && /*#__PURE__*/React.createElement("line", {
+    x1: "20",
+    y1: "6",
+    x2: "8",
+    y2: "18",
+    stroke: "currentColor",
+    strokeWidth: "2.5"
+  })), "Music")), /*#__PURE__*/React.createElement("div", {
+    style: {
       height: 1,
       background: "rgba(80,100,140,0.2)",
       margin: "2px 12px"
@@ -10040,7 +10759,10 @@ function CosmicDriftGame() {
     return /*#__PURE__*/React.createElement("div", {
       key: slot.key,
       onClick: function () {
-        if (hasItem && !isTbd) setArmedItem(isArmed ? null : slot.key);else if (canConvert) setConvertOffer(slot.key);
+        if (hasItem && !isTbd) {
+          if (!isArmed) playSound("powerArm");
+          setArmedItem(isArmed ? null : slot.key);
+        } else if (canConvert) setConvertOffer(slot.key);
       },
       style: {
         flex: 1,
