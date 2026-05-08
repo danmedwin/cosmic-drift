@@ -2936,7 +2936,8 @@ function CosmicDriftGame() {
     dragTimerRef = useRef(null);
   var mouseDragRef = useRef(null);
   var idRef = useRef(0),
-    processedRef = useRef(new Set());
+    processedRef = useRef(new Set()),
+    levelGenRef = useRef(0);
   var touchUsedRef = useRef(false),
     plasmaRef = useRef(START_PLASMA);
   var baseCoresRef = useRef(3),
@@ -3717,7 +3718,9 @@ function CosmicDriftGame() {
   }, []);
 
   // ── OOZE MECHANIC ──
-  var processOoze = useCallback(function (col, currentRow) {
+  var processOoze = useCallback(function (col, currentRow, gen) {
+    if (gen !== undefined && gen !== levelGenRef.current) return;
+    var curGen = levelGenRef.current;
     var ox = getBlockX(col);
     if (currentRow >= ROWS) {
       // Flow ooze from grid bottom to HUD panel top with puddle
@@ -3730,6 +3733,7 @@ function CosmicDriftGame() {
       for (var step = 0; step < numSteps; step++) {
         (function (s) {
           setTimeout(function () {
+            if (levelGenRef.current !== curGen) return;
             var ey = gridBottom + (s + 1) * (totalDist / numSteps);
             var eid = addVfx({
               type: "ooze",
@@ -3744,6 +3748,7 @@ function CosmicDriftGame() {
       // Puddle right at panel line
       var puddleY = hudRect ? hudRect.top : panelTop;
       setTimeout(function () {
+        if (levelGenRef.current !== curGen) return;
         var pid4 = addVfx({
           type: "oozePuddle",
           x: ox,
@@ -3761,6 +3766,7 @@ function CosmicDriftGame() {
       }, numSteps * 120);
       // Check ship after ooze reaches bottom
       setTimeout(function () {
+        if (levelGenRef.current !== curGen) return;
         if (shipColRef.current === col && plasmaRef.current > 0) {
           plasmaRef.current = 0;
           setPlasma(0);
@@ -3845,7 +3851,7 @@ function CosmicDriftGame() {
       }
     }
     setTimeout(function () {
-      processOoze(col, currentRow + 1);
+      processOoze(col, currentRow + 1, curGen);
     }, 200);
   }, [getBlockX, getBlockY, blockSize, addVfx, rmVfx, shakeBlock, removeBlockSilent, scheduleRechargeCheck, triggerRecharge]);
   var processHit = useCallback(function (idx, delay, fromDir, noPoints) {
@@ -4178,7 +4184,7 @@ function CosmicDriftGame() {
         rmVfx(bid2, 1400);
       } else if (type === 8) {
         playSound("ooze"); /* Acid barrel: start ooze flowing down */
-        processOoze(col, row + 1);
+        processOoze(col, row + 1, levelGenRef.current);
       } else if (isCrate(type)) {
         // Treasure crate: specific or random power-up (or core)
         var powerUps = ["drone", "lightning", "crossshot", "anglebounce", "hammer", "core"];
@@ -4989,6 +4995,7 @@ function CosmicDriftGame() {
   }, [convertOffer, loseCore, getHudPos, getInvPos, addVfx, rmVfx]);
   // ── SHARED RESET HELPERS ──
   function clearBoardState() {
+    levelGenRef.current += 1;
     processedRef.current.clear();
     removingRef.current.clear();
     burntBlocksRef.current.clear();
