@@ -43,7 +43,7 @@ var COLS = 8,
   PLASMA_SPEED = 0.55,
   START_PLASMA = 10,
   BONUS_PTS = 2;
-var GAME_VERSION = "v69.2";
+var GAME_VERSION = "v69.3";
 var BLOCK_LABELS = {
   1: "Standard",
   2: "Cross Shot",
@@ -152,26 +152,32 @@ var _musicMuteRef = {
   current: false
 };
 var MUSIC_URL = "Space_Fighter_Loop.mp3";
-var _musicEl = new Audio(MUSIC_URL);
-_musicEl.loop = true;
-_musicEl.volume = 0.3;
-_musicEl.preload = "auto";
-var _musicUnlocked = false;
-function _unlockMusic() {
-  if (_musicUnlocked) return;
-  _musicUnlocked = true;
-  var p = _musicEl.play();
-  if (p) p.then(function () {
-    _musicEl.pause();
-    _musicEl.currentTime = 0;
+var _musicBuffer = null;
+var _musicSource = null;
+var _musicGain = null;
+var _musicLoading = false;
+function _loadMusicBuffer(cb) {
+  if (_musicBuffer) {
+    if (cb) cb();
+    return;
+  }
+  if (_musicLoading) return;
+  _musicLoading = true;
+  fetch(MUSIC_URL).then(function (r) {
+    return r.arrayBuffer();
+  }).then(function (buf) {
+    var ctx = _getCtx();
+    ctx.decodeAudioData(buf, function (decoded) {
+      _musicBuffer = decoded;
+      _musicLoading = false;
+      if (cb) cb();
+    }, function () {
+      _musicLoading = false;
+    });
   }).catch(function () {
-    _musicUnlocked = false;
+    _musicLoading = false;
   });
-  document.removeEventListener("touchstart", _unlockMusic);
-  document.removeEventListener("click", _unlockMusic);
 }
-document.addEventListener("touchstart", _unlockMusic);
-document.addEventListener("click", _unlockMusic);
 function playSound(name) {
   if (_sfxMuteRef.current) return;
   var fn = _SOUNDS[name];
@@ -181,21 +187,45 @@ function playSound(name) {
 }
 function startMusic() {
   if (_musicMuteRef.current) return;
-  try {
-    _musicEl.play().catch(function () {});
+  if (_musicBuffer) {
+    _playMusicNow();
+    return;
+  }
+  _loadMusicBuffer(function () {
+    if (!_musicMuteRef.current) _playMusicNow();
+  });
+}
+function _playMusicNow() {
+  if (_musicSource) try {
+    _musicSource.stop();
   } catch (e) {}
+  var ctx = _getCtx();
+  _musicSource = ctx.createBufferSource();
+  _musicSource.buffer = _musicBuffer;
+  _musicSource.loop = true;
+  _musicGain = ctx.createGain();
+  _musicGain.gain.value = 0.3;
+  _musicSource.connect(_musicGain);
+  _musicGain.connect(ctx.destination);
+  _musicSource.start();
 }
 function stopMusic() {
-  _musicEl.pause();
-  _musicEl.currentTime = 0;
+  if (_musicSource) {
+    try {
+      _musicSource.stop();
+    } catch (e) {}
+    _musicSource = null;
+  }
 }
 function pauseMusic() {
-  _musicEl.pause();
+  if (_musicGain) _musicGain.gain.value = 0;
 }
 function resumeMusic() {
-  if (!_musicMuteRef.current) try {
-    _musicEl.play().catch(function () {});
-  } catch (e) {}
+  if (!_musicMuteRef.current && _musicSource) {
+    if (_musicGain) _musicGain.gain.value = 0.3;
+  } else if (!_musicMuteRef.current && !_musicSource && _musicBuffer) {
+    _playMusicNow();
+  }
 }
 var _SOUNDS = {
   plasmaFire: function () {
@@ -4778,6 +4808,7 @@ function CosmicDriftGame() {
     var key = convertOffer;
     if (!key) return;
     setConvertOffer(null);
+    playSound("recharge");
     loseCore();
     // Animate core flying to power-up slot
     var cp = getHudPos("cores");
