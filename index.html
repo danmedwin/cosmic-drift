@@ -43,7 +43,7 @@ var COLS = 8,
   PLASMA_SPEED = 0.55,
   START_PLASMA = 10,
   BONUS_PTS = 2;
-var GAME_VERSION = "v69.5";
+var GAME_VERSION = "v69.6";
 var BLOCK_LABELS = {
   1: "Standard",
   2: "Cross Shot",
@@ -9915,7 +9915,7 @@ function CosmicDriftGame() {
         boxShadow: "0 0 10px #50c8ff,0 0 20px rgba(80,200,255,0.5),0 8px 16px rgba(80,200,255,0.4)"
       }
     }));
-  })), armedItem === "anglebounce" && gameState === "playing" && function () {
+  })), armedItem === "anglebounce" && gameState === "playing" && !isDragging && function () {
     var shipY = getShipY();
     var sx = getBlockX(shipCol) + 4;
     var sp = computeSplitPaths(shipCol);
@@ -10606,6 +10606,9 @@ function CosmicDriftGame() {
     }
   }), /*#__PURE__*/React.createElement("div", {
     ref: shipZoneRef,
+    onTouchStart: handleTouchStart,
+    onTouchMove: handleTouchMove,
+    onTouchEnd: handleTouchEnd,
     onMouseDown: handleShipMouseDown,
     onMouseMove: handleShipMouseMove,
     onMouseUp: handleShipMouseUp,
