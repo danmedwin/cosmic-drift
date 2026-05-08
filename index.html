@@ -43,7 +43,7 @@ var COLS = 8,
   PLASMA_SPEED = 0.55,
   START_PLASMA = 10,
   BONUS_PTS = 2;
-var GAME_VERSION = "v69.1";
+var GAME_VERSION = "v69.2";
 var BLOCK_LABELS = {
   1: "Standard",
   2: "Cross Shot",
@@ -151,8 +151,27 @@ var _sfxMuteRef = {
 var _musicMuteRef = {
   current: false
 };
-var _musicEl = null;
 var MUSIC_URL = "Space_Fighter_Loop.mp3";
+var _musicEl = new Audio(MUSIC_URL);
+_musicEl.loop = true;
+_musicEl.volume = 0.3;
+_musicEl.preload = "auto";
+var _musicUnlocked = false;
+function _unlockMusic() {
+  if (_musicUnlocked) return;
+  _musicUnlocked = true;
+  var p = _musicEl.play();
+  if (p) p.then(function () {
+    _musicEl.pause();
+    _musicEl.currentTime = 0;
+  }).catch(function () {
+    _musicUnlocked = false;
+  });
+  document.removeEventListener("touchstart", _unlockMusic);
+  document.removeEventListener("click", _unlockMusic);
+}
+document.addEventListener("touchstart", _unlockMusic);
+document.addEventListener("click", _unlockMusic);
 function playSound(name) {
   if (_sfxMuteRef.current) return;
   var fn = _SOUNDS[name];
@@ -162,26 +181,19 @@ function playSound(name) {
 }
 function startMusic() {
   if (_musicMuteRef.current) return;
-  if (!_musicEl) {
-    _musicEl = new Audio(MUSIC_URL);
-    _musicEl.loop = true;
-    _musicEl.volume = 0.3;
-  }
   try {
     _musicEl.play().catch(function () {});
   } catch (e) {}
 }
 function stopMusic() {
-  if (_musicEl) {
-    _musicEl.pause();
-    _musicEl.currentTime = 0;
-  }
+  _musicEl.pause();
+  _musicEl.currentTime = 0;
 }
 function pauseMusic() {
-  if (_musicEl) _musicEl.pause();
+  _musicEl.pause();
 }
 function resumeMusic() {
-  if (_musicEl && !_musicMuteRef.current) try {
+  if (!_musicMuteRef.current) try {
     _musicEl.play().catch(function () {});
   } catch (e) {}
 }
@@ -587,22 +599,89 @@ var _SOUNDS = {
   plasmaWarning: function () {
     var ctx = _getCtx();
     var t = ctx.currentTime;
-    [600, 400].forEach(function (freq, i) {
-      var o = ctx.createOscillator();
-      var g = ctx.createGain();
-      o.type = "square";
-      o.frequency.value = freq;
-      g.gain.setValueAtTime(0.1, t + i * 0.1);
-      g.gain.exponentialRampToValueAtTime(0.01, t + i * 0.1 + 0.08);
-      var f = ctx.createBiquadFilter();
-      f.type = "lowpass";
-      f.frequency.value = 1500;
-      o.connect(f);
-      f.connect(g);
-      g.connect(ctx.destination);
-      o.start(t + i * 0.1);
-      o.stop(t + i * 0.1 + 0.1);
-    });
+    var o = ctx.createOscillator();
+    var g = ctx.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(400, t);
+    o.frequency.exponentialRampToValueAtTime(60, t + 0.4);
+    g.gain.setValueAtTime(0.25, t);
+    g.gain.exponentialRampToValueAtTime(0.01, t + 0.45);
+    var f = ctx.createBiquadFilter();
+    f.type = "lowpass";
+    f.frequency.setValueAtTime(800, t);
+    f.frequency.exponentialRampToValueAtTime(100, t + 0.4);
+    o.connect(f);
+    f.connect(g);
+    g.connect(ctx.destination);
+    o.start();
+    o.stop(t + 0.5);
+    var o2 = ctx.createOscillator();
+    var g2 = ctx.createGain();
+    o2.type = "triangle";
+    o2.frequency.setValueAtTime(200, t);
+    o2.frequency.exponentialRampToValueAtTime(30, t + 0.35);
+    g2.gain.setValueAtTime(0.12, t);
+    g2.gain.exponentialRampToValueAtTime(0.01, t + 0.4);
+    o2.connect(g2);
+    g2.connect(ctx.destination);
+    o2.start();
+    o2.stop(t + 0.45);
+  },
+  specialBlock: function () {
+    var ctx = _getCtx();
+    var t = ctx.currentTime;
+    var o = ctx.createOscillator();
+    var g = ctx.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(600, t);
+    o.frequency.exponentialRampToValueAtTime(200, t + 0.08);
+    g.gain.setValueAtTime(0.3, t);
+    g.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.start();
+    o.stop(t + 0.12);
+    var o2 = ctx.createOscillator();
+    var g2 = ctx.createGain();
+    o2.type = "triangle";
+    o2.frequency.setValueAtTime(900, t + 0.03);
+    g2.gain.setValueAtTime(0.15, t + 0.03);
+    g2.gain.exponentialRampToValueAtTime(0.01, t + 0.12);
+    o2.connect(g2);
+    g2.connect(ctx.destination);
+    o2.start(t + 0.03);
+    o2.stop(t + 0.15);
+  },
+  indestructibleHit: function () {
+    var ctx = _getCtx();
+    var t = ctx.currentTime;
+    var buf = ctx.createBuffer(1, ctx.sampleRate * 0.08, ctx.sampleRate);
+    var d = buf.getChannelData(0);
+    for (var i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 3);
+    var s = ctx.createBufferSource();
+    s.buffer = buf;
+    var g = ctx.createGain();
+    var f = ctx.createBiquadFilter();
+    f.type = "lowpass";
+    f.frequency.value = 600;
+    g.gain.setValueAtTime(0.3, t);
+    g.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+    s.connect(f);
+    f.connect(g);
+    g.connect(ctx.destination);
+    s.start();
+    s.stop(t + 0.12);
+    var o = ctx.createOscillator();
+    var g2 = ctx.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(150, t);
+    o.frequency.exponentialRampToValueAtTime(60, t + 0.08);
+    g2.gain.setValueAtTime(0.2, t);
+    g2.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+    o.connect(g2);
+    g2.connect(ctx.destination);
+    o.start();
+    o.stop(t + 0.12);
   },
   highScore: function () {
     var ctx = _getCtx();
@@ -3381,7 +3460,13 @@ function CosmicDriftGame() {
     var isBurnt = burntBlocksRef.current.has(idx);
     var pc = isBurnt ? "#ff8830" : BLOCK_COLORS[type] ? BLOCK_COLORS[type].particle : "#c8b8ff";
     removingRef.current.add(idx);
-    playSound("blockPop");
+    if (type >= 2 && type <= 6 || type === 10) {
+      playSound("specialBlock");
+    } else if (!isCrate(type)) {
+      playSound("blockPop");
+    } else {
+      playSound("crateOpen");
+    }
     setRemovingBlocks(function (p) {
       var n = new Set(p);
       n.add(idx);
@@ -3963,7 +4048,6 @@ function CosmicDriftGame() {
             return h2 + 1;
           });
           advanceTutorial("crateOpened");
-          playSound("crateOpen");
           // Show intro card for first-seen power-up (level 4+)
           if (levelRef.current > 9 && !seenPowerUpsRef.current[chosen]) {
             seenPowerUpsRef.current[chosen] = true;
@@ -4461,6 +4545,9 @@ function CosmicDriftGame() {
       });
       rmProj(pid2, dur2 + 50);
       setTimeout(function () {
+        if (targetType === 7) {
+          playSound("indestructibleHit");
+        }
         if (targetType !== 7) {
           var impId = addVfx({
             type: "plasmaImpact",
