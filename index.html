@@ -76,7 +76,7 @@ var COLS = 8,
   PLASMA_SPEED = 0.85,
   START_PLASMA = 10,
   BONUS_PTS = 2;
-var GAME_VERSION = "v74.7";
+var GAME_VERSION = "v74.8";
 var RELEASE_NOTES = [{
   version: "v71",
   title: "UFO Enemy",
@@ -4654,7 +4654,7 @@ function CosmicDriftGame() {
   // Global win check
   useEffect(function () {
     if (gameState !== "playing" && gameState !== "needsRecharge") return;
-    if (countDestructible() === 0 && pendingFFRef.current <= 0) {
+    if (countDestructible() === 0 && pendingFFRef.current <= 0 && removingRef.current.size === 0) {
       // Level 8: intercept for acid barrel demo
       if (levelRef.current === 8 && !acidDemoRef.current) {
         var ha = false;
@@ -4670,6 +4670,13 @@ function CosmicDriftGame() {
           return;
         }
       }
+      _shotTimingLog.unshift({
+        winPath: "main",
+        cd: countDestructible(),
+        pff: pendingFFRef.current,
+        rm: removingRef.current.size,
+        t: Date.now()
+      });
       var t = setTimeout(function () {
         setBonusDone(false);
         setBonusEarned(0);
@@ -4693,6 +4700,14 @@ function CosmicDriftGame() {
     }
     if (!ha) {
       var t = setTimeout(function () {
+        if (countDestructible() > 0 || pendingFFRef.current > 0 || removingRef.current.size > 0) return;
+        _shotTimingLog.unshift({
+          winPath: "acid",
+          cd: countDestructible(),
+          pff: pendingFFRef.current,
+          rm: removingRef.current.size,
+          t: Date.now()
+        });
         setBonusDone(false);
         setBonusEarned(0);
         setGameState("bonus");
@@ -4758,7 +4773,13 @@ function CosmicDriftGame() {
       var amt = customGridRef.current ? customPlasmaRef.current : START_PLASMA;
       plasmaRef.current = amt;
       setPlasma(amt);
-      if (countDestructible() <= 0) {
+      if (countDestructible() <= 0 && pendingFFRef.current <= 0) {
+        _shotTimingLog.unshift({
+          winPath: "recharge",
+          cd: countDestructible(),
+          pff: pendingFFRef.current,
+          t: Date.now()
+        });
         setBonusDone(false);
         setBonusEarned(0);
         setGameState("bonus");
@@ -13002,7 +13023,28 @@ function CosmicDriftGame() {
       letterSpacing: 1,
       boxSizing: "border-box"
     }
-  }, "Report a Bug"))));
+  }, "Report a Bug"), _shotTimingLog.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: "rgba(180,200,220,0.3)",
+      letterSpacing: 2,
+      marginBottom: 6
+    }
+  }, "DEBUG LOG (last 10)"), _shotTimingLog.slice(0, 10).map(function (s, si) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: si,
+      style: {
+        fontSize: 9,
+        color: s.winPath ? "rgba(255,140,140,0.7)" : "rgba(180,200,220,0.35)",
+        fontFamily: "'Courier New', monospace",
+        lineHeight: 1.6
+      }
+    }, s.winPath ? "WIN:" + s.winPath + " cd=" + s.cd + " pff=" + s.pff + " rm=" + (s.rm != null ? s.rm : "?") : "#" + (si + 1) + " err=" + Math.round(s.arriveT - s.fireT - s.dur) + "ms cb=" + Math.round(s.hitT - s.arriveT) + "ms");
+  })))));
 }
 var root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(React.createElement(CosmicDriftGame));
