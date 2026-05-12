@@ -73,7 +73,7 @@ var COLS = 8,
   PLASMA_SPEED = 0.85,
   START_PLASMA = 10,
   BONUS_PTS = 2;
-var GAME_VERSION = "v73.7";
+var GAME_VERSION = "v74.1";
 var RELEASE_NOTES = [{
   version: "v71",
   title: "UFO Enemy",
@@ -4091,6 +4091,7 @@ function CosmicDriftGame() {
   var levelRef = useRef(1);
   var processHitRef = useRef(null);
   var shieldRef = useRef(initShields(gridRef2.current));
+  var pendingFFRef = useRef(0);
   var gameStateRef = useRef("playing");
   // Keep refs in sync
   useEffect(function () {
@@ -4629,7 +4630,7 @@ function CosmicDriftGame() {
   // Global win check
   useEffect(function () {
     if (gameState !== "playing" && gameState !== "needsRecharge") return;
-    if (countDestructible() === 0) {
+    if (countDestructible() === 0 && pendingFFRef.current <= 0) {
       // Level 8: intercept for acid barrel demo
       if (levelRef.current === 8 && !acidDemoRef.current) {
         var ha = false;
@@ -4753,6 +4754,7 @@ function CosmicDriftGame() {
   }, [gameState, plasma]);
   var triggerRecharge = useCallback(function () {
     if (gameStateRef.current !== "playing" || countDestructible() <= 0) return;
+    if (_canvasProjectiles.length > 0) return;
     processedRef.current.clear();
     removingRef.current.clear();
     if (baseCoresRef.current + extraCoresRef.current > 0) {
@@ -5497,6 +5499,7 @@ function CosmicDriftGame() {
           });
           empties.splice(ri, 1);
         }
+        pendingFFRef.current += spawned.length;
         // Animate each spawned block flying from FF position to target
         for (var sa = 0; sa < spawned.length; sa++) {
           (function (spawn, delay) {
@@ -5517,6 +5520,7 @@ function CosmicDriftGame() {
               processedRef.current.delete(spawn.idx);
               removingRef.current.delete(spawn.idx);
               gridRef2.current[spawn.idx] = spawn.type;
+              pendingFFRef.current--;
               flushGrid();
             }, 500);
           })(spawned[sa], sa * 100);
@@ -6399,6 +6403,7 @@ function CosmicDriftGame() {
     removingRef.current.clear();
     visualRemovingRef.current.clear();
     burntBlocksRef.current.clear();
+    pendingFFRef.current = 0;
     projRef.current = [];
     projDomRefs.current = {};
     vfxRef.current = [];
@@ -9525,223 +9530,7 @@ function CosmicDriftGame() {
         fontSize: 10
       }
     }, "Lvl ", k));
-  }))), showTesterMenu && /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      setShowTesterMenu(false);
-    },
-    style: {
-      position: "absolute",
-      inset: 0,
-      zIndex: 20,
-      display: "flex",
-      alignItems: "flex-end",
-      justifyContent: "center",
-      background: "rgba(5,5,15,0.75)",
-      backdropFilter: "blur(5px)",
-      paddingBottom: 0
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    onClick: function (e) {
-      e.stopPropagation();
-    },
-    style: {
-      width: "100%",
-      maxWidth: 420,
-      background: "linear-gradient(180deg,#0d1022,#080d1a)",
-      borderTop: "1px solid rgba(80,120,200,0.25)",
-      borderRadius: "16px 16px 0 0",
-      padding: "20px 22px 36px",
-      fontFamily: "'Quicksand',sans-serif"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 18
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      fontWeight: 700,
-      color: "rgba(180,200,220,0.5)",
-      letterSpacing: 3
-    }
-  }, "FOR TESTERS"), /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      setShowTesterMenu(false);
-    },
-    style: {
-      fontSize: 11,
-      color: "rgba(180,200,220,0.3)",
-      cursor: "pointer",
-      padding: "4px 8px"
-    }
-  }, "CLOSE")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginBottom: 18,
-      padding: "10px 14px",
-      background: "rgba(255,255,255,0.03)",
-      borderRadius: 8,
-      border: "1px solid rgba(180,200,220,0.08)"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 9,
-      color: "rgba(180,200,220,0.3)",
-      letterSpacing: 2,
-      marginBottom: 4
-    }
-  }, "VERSION"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 15,
-      fontWeight: 700,
-      color: "rgba(180,200,220,0.55)",
-      letterSpacing: 1
-    }
-  }, GAME_VERSION)), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginBottom: 18
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 9,
-      color: "rgba(180,200,220,0.3)",
-      letterSpacing: 2,
-      marginBottom: 8
-    }
-  }, "JUMP TO LEVEL"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 8,
-      alignItems: "center"
-    }
-  }, /*#__PURE__*/React.createElement("input", {
-    value: devJumpLevel,
-    onChange: function (e) {
-      setDevJumpLevel(e.target.value.replace(/[^0-9]/g, ""));
-    },
-    placeholder: "Level #",
-    style: {
-      flex: 1,
-      padding: "9px 12px",
-      borderRadius: 6,
-      background: "rgba(10,10,20,0.8)",
-      border: "1px solid rgba(80,140,255,0.2)",
-      color: "rgba(180,200,220,0.8)",
-      fontSize: 16,
-      fontFamily: "'Quicksand',sans-serif",
-      outline: "none"
-    }
-  }), /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      var lv = Number(devJumpLevel);
-      if (lv < 1) return;
-      gameModeRef.current = "campaign";
-      setGameMode("campaign");
-      fullRestart();
-      setLevel(lv);
-      levelRef.current = lv;
-      gridRef2.current = generateGrid(lv);
-      shieldRef.current = initShields(gridRef2.current);
-      setGrid(gridRef2.current.slice());
-      var p = getLevelPlasma(lv);
-      plasmaRef.current = p;
-      setPlasma(p);
-      var sc = getLevelShipStart(lv);
-      setShipCol(sc);
-      shipColRef.current = sc;
-      seenPowerUpsRef.current = {
-        crossshot: true,
-        drone: true,
-        lightning: true,
-        anglebounce: true,
-        hammer: true
-      };
-      setShowTesterMenu(false);
-      startMusic();
-      setScreen("game");
-    },
-    style: {
-      padding: "9px 18px",
-      borderRadius: 6,
-      background: "rgba(80,140,255,0.12)",
-      border: "1px solid rgba(80,140,255,0.25)",
-      color: "rgba(120,170,255,0.8)",
-      fontSize: 13,
-      fontWeight: 700,
-      cursor: "pointer",
-      whiteSpace: "nowrap"
-    }
-  }, "Go"))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginBottom: 18
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 9,
-      color: "rgba(180,200,220,0.3)",
-      letterSpacing: 2,
-      marginBottom: 8
-    }
-  }, "RELEASE NOTES"), RELEASE_NOTES.map(function (r, ri) {
-    return /*#__PURE__*/React.createElement("div", {
-      key: ri,
-      style: {
-        marginBottom: 10,
-        padding: "10px 12px",
-        background: "rgba(255,255,255,0.02)",
-        borderRadius: 6,
-        border: "1px solid rgba(180,200,220,0.06)"
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        justifyContent: "space-between",
-        marginBottom: 5
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 11,
-        fontWeight: 700,
-        color: "rgba(180,200,220,0.6)"
-      }
-    }, r.title), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 9,
-        color: "rgba(180,200,220,0.25)",
-        letterSpacing: 1
-      }
-    }, r.version)), r.notes.map(function (n, ni) {
-      return /*#__PURE__*/React.createElement("div", {
-        key: ni,
-        style: {
-          fontSize: 11,
-          color: "rgba(180,200,220,0.4)",
-          lineHeight: 1.7,
-          paddingLeft: 8
-        }
-      }, "- " + n);
-    }));
-  })), /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      window.location.href = "mailto:cosmicdriftapp@gmail.com?subject=I%20found%20a%20bug!";
-    },
-    style: {
-      width: "100%",
-      padding: "11px 0",
-      borderRadius: 8,
-      background: "rgba(255,80,80,0.07)",
-      border: "1px solid rgba(255,80,80,0.18)",
-      color: "rgba(255,140,140,0.7)",
-      fontSize: 12,
-      fontWeight: 700,
-      cursor: "pointer",
-      textAlign: "center",
-      letterSpacing: 1,
-      boxSizing: "border-box"
-    }
-  }, "Report a Bug"))), showNewPlayerPopup && /*#__PURE__*/React.createElement("div", {
+  }))), showNewPlayerPopup && /*#__PURE__*/React.createElement("div", {
     onClick: function () {
       setShowNewPlayerPopup(false);
     },
@@ -12520,20 +12309,8 @@ function CosmicDriftGame() {
     }
   }), /*#__PURE__*/React.createElement("div", {
     onClick: function () {
-      var snap = "=== SHOT TIMING " + GAME_VERSION + " Lv" + level + " ===\n" + "Last " + _shotTimingLog.length + " shots (newest first):\n\n";
-      for (var si = 0; si < _shotTimingLog.length; si++) {
-        var s = _shotTimingLog[si];
-        var actualDur = s.arriveT - s.fireT;
-        var cbDelay = s.hitT - s.arriveT;
-        var popDelay = s.popT ? s.hitT > 0 ? s.popT - s.hitT : "?" : "n/a";
-        var totalErr = actualDur - s.dur;
-        snap += "#" + (si + 1) + " expected=" + Math.round(s.dur) + "ms actual=" + Math.round(actualDur) + "ms err=" + (totalErr > 0 ? "+" : "") + Math.round(totalErr) + "ms\n" + "   cb=" + Math.round(cbDelay) + "ms pop=" + popDelay + (typeof popDelay === "number" ? "ms" : "") + "\n";
-      }
-      if (_shotTimingLog.length === 0) snap += "(fire some shots first)\n";
-      snap += "\n--- UFO ---\n";
-      var ufoIdx2 = findUfoIdx();
-      snap += "UFO: " + (ufoIdx2 >= 0 ? "r" + Math.floor(ufoIdx2 / COLS) + "c" + ufoIdx2 % COLS : "gone") + "\n" + "phase=" + ufoPhaseRef.current + " active=" + ufoActiveRef.current + " emp=" + empActiveRef.current + " shots=" + ufoShotCountRef.current + "\n" + (ufoLogRef.current.length ? ufoLogRef.current.slice(0, 10).join("\n") : "(none)");
-      setUfoDebugText(snap);
+      setShowTesterMenu(true);
+      setDevJumpLevel("");
       setGameMenuOpen(false);
     },
     style: {
@@ -12553,7 +12330,7 @@ function CosmicDriftGame() {
   }, /*#__PURE__*/React.createElement("path", {
     d: "M12 2a10 10 0 100 20A10 10 0 0012 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z",
     fill: "rgba(100,180,255,0.5)"
-  })), "Shot Timing Debug"), /*#__PURE__*/React.createElement("div", {
+  })), "For Testers"), /*#__PURE__*/React.createElement("div", {
     style: {
       height: 1,
       background: "rgba(80,100,140,0.2)",
@@ -12853,7 +12630,223 @@ function CosmicDriftGame() {
     hasPowerUps: hasPowerUps,
     coreCount: baseCores + extraCores,
     gameState: gameState
-  }))));
+  }))), showTesterMenu && /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      setShowTesterMenu(false);
+    },
+    style: {
+      position: "fixed",
+      inset: 0,
+      zIndex: 450,
+      display: "flex",
+      alignItems: "flex-end",
+      justifyContent: "center",
+      background: "rgba(5,5,15,0.75)",
+      backdropFilter: "blur(5px)",
+      paddingBottom: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    onClick: function (e) {
+      e.stopPropagation();
+    },
+    style: {
+      width: "100%",
+      maxWidth: 420,
+      background: "linear-gradient(180deg,#0d1022,#080d1a)",
+      borderTop: "1px solid rgba(80,120,200,0.25)",
+      borderRadius: "16px 16px 0 0",
+      padding: "20px 22px 36px",
+      fontFamily: "'Quicksand',sans-serif"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 18
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      color: "rgba(180,200,220,0.5)",
+      letterSpacing: 3
+    }
+  }, "FOR TESTERS"), /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      setShowTesterMenu(false);
+    },
+    style: {
+      fontSize: 11,
+      color: "rgba(180,200,220,0.3)",
+      cursor: "pointer",
+      padding: "4px 8px"
+    }
+  }, "CLOSE")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 18,
+      padding: "10px 14px",
+      background: "rgba(255,255,255,0.03)",
+      borderRadius: 8,
+      border: "1px solid rgba(180,200,220,0.08)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: "rgba(180,200,220,0.3)",
+      letterSpacing: 2,
+      marginBottom: 4
+    }
+  }, "VERSION"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 15,
+      fontWeight: 700,
+      color: "rgba(180,200,220,0.55)",
+      letterSpacing: 1
+    }
+  }, GAME_VERSION)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 18
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: "rgba(180,200,220,0.3)",
+      letterSpacing: 2,
+      marginBottom: 8
+    }
+  }, "JUMP TO LEVEL"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    value: devJumpLevel,
+    onChange: function (e) {
+      setDevJumpLevel(e.target.value.replace(/[^0-9]/g, ""));
+    },
+    placeholder: "Level #",
+    style: {
+      flex: 1,
+      padding: "9px 12px",
+      borderRadius: 6,
+      background: "rgba(10,10,20,0.8)",
+      border: "1px solid rgba(80,140,255,0.2)",
+      color: "rgba(180,200,220,0.8)",
+      fontSize: 16,
+      fontFamily: "'Quicksand',sans-serif",
+      outline: "none"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      var lv = Number(devJumpLevel);
+      if (lv < 1) return;
+      gameModeRef.current = "campaign";
+      setGameMode("campaign");
+      fullRestart();
+      setLevel(lv);
+      levelRef.current = lv;
+      gridRef2.current = generateGrid(lv);
+      shieldRef.current = initShields(gridRef2.current);
+      setGrid(gridRef2.current.slice());
+      var p = getLevelPlasma(lv);
+      plasmaRef.current = p;
+      setPlasma(p);
+      var sc = getLevelShipStart(lv);
+      setShipCol(sc);
+      shipColRef.current = sc;
+      seenPowerUpsRef.current = {
+        crossshot: true,
+        drone: true,
+        lightning: true,
+        anglebounce: true,
+        hammer: true
+      };
+      setShowTesterMenu(false);
+      startMusic();
+      setScreen("game");
+    },
+    style: {
+      padding: "9px 18px",
+      borderRadius: 6,
+      background: "rgba(80,140,255,0.12)",
+      border: "1px solid rgba(80,140,255,0.25)",
+      color: "rgba(120,170,255,0.8)",
+      fontSize: 13,
+      fontWeight: 700,
+      cursor: "pointer",
+      whiteSpace: "nowrap"
+    }
+  }, "Go"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 18
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 9,
+      color: "rgba(180,200,220,0.3)",
+      letterSpacing: 2,
+      marginBottom: 8
+    }
+  }, "RELEASE NOTES"), RELEASE_NOTES.map(function (r, ri) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: ri,
+      style: {
+        marginBottom: 10,
+        padding: "10px 12px",
+        background: "rgba(255,255,255,0.02)",
+        borderRadius: 6,
+        border: "1px solid rgba(180,200,220,0.06)"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        marginBottom: 5
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        fontWeight: 700,
+        color: "rgba(180,200,220,0.6)"
+      }
+    }, r.title), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 9,
+        color: "rgba(180,200,220,0.25)",
+        letterSpacing: 1
+      }
+    }, r.version)), r.notes.map(function (n, ni) {
+      return /*#__PURE__*/React.createElement("div", {
+        key: ni,
+        style: {
+          fontSize: 11,
+          color: "rgba(180,200,220,0.4)",
+          lineHeight: 1.7,
+          paddingLeft: 8
+        }
+      }, "- " + n);
+    }));
+  })), /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      window.location.href = "mailto:cosmicdriftapp@gmail.com?subject=I%20found%20a%20bug!";
+    },
+    style: {
+      width: "100%",
+      padding: "11px 0",
+      borderRadius: 8,
+      background: "rgba(255,80,80,0.07)",
+      border: "1px solid rgba(255,80,80,0.18)",
+      color: "rgba(255,140,140,0.7)",
+      fontSize: 12,
+      fontWeight: 700,
+      cursor: "pointer",
+      textAlign: "center",
+      letterSpacing: 1,
+      boxSizing: "border-box"
+    }
+  }, "Report a Bug"))));
 }
 var root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(React.createElement(CosmicDriftGame));
