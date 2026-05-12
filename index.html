@@ -76,7 +76,7 @@ var COLS = 8,
   PLASMA_SPEED = 0.85,
   START_PLASMA = 10,
   BONUS_PTS = 2;
-var GAME_VERSION = "v74.8";
+var GAME_VERSION = "v75";
 var RELEASE_NOTES = [{
   version: "v71",
   title: "UFO Enemy",
@@ -4670,13 +4670,6 @@ function CosmicDriftGame() {
           return;
         }
       }
-      _shotTimingLog.unshift({
-        winPath: "main",
-        cd: countDestructible(),
-        pff: pendingFFRef.current,
-        rm: removingRef.current.size,
-        t: Date.now()
-      });
       var t = setTimeout(function () {
         setBonusDone(false);
         setBonusEarned(0);
@@ -4701,13 +4694,6 @@ function CosmicDriftGame() {
     if (!ha) {
       var t = setTimeout(function () {
         if (countDestructible() > 0 || pendingFFRef.current > 0 || removingRef.current.size > 0) return;
-        _shotTimingLog.unshift({
-          winPath: "acid",
-          cd: countDestructible(),
-          pff: pendingFFRef.current,
-          rm: removingRef.current.size,
-          t: Date.now()
-        });
         setBonusDone(false);
         setBonusEarned(0);
         setGameState("bonus");
@@ -4774,12 +4760,6 @@ function CosmicDriftGame() {
       plasmaRef.current = amt;
       setPlasma(amt);
       if (countDestructible() <= 0 && pendingFFRef.current <= 0) {
-        _shotTimingLog.unshift({
-          winPath: "recharge",
-          cd: countDestructible(),
-          pff: pendingFFRef.current,
-          t: Date.now()
-        });
         setBonusDone(false);
         setBonusEarned(0);
         setGameState("bonus");
