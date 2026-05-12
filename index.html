@@ -76,7 +76,7 @@ var COLS = 8,
   PLASMA_SPEED = 0.85,
   START_PLASMA = 10,
   BONUS_PTS = 2;
-var GAME_VERSION = "v74.6";
+var GAME_VERSION = "v74.7";
 var RELEASE_NOTES = [{
   version: "v71",
   title: "UFO Enemy",
@@ -5084,6 +5084,7 @@ function CosmicDriftGame() {
       logUfo("PROCESSED-ADD fromDir=" + dir + " delay=" + d);
       ufoBeingDestroyedRef.current = true;
     }
+    if (type === 10) pendingFFRef.current++;
     var row = Math.floor(idx / COLS),
       col = idx % COLS,
       bx = getBlockX(col),
@@ -5162,7 +5163,6 @@ function CosmicDriftGame() {
         scoreRef.current += BLOCK_POINTS[type] || 0;
         flushGrid();
       }
-      if (type === 10) pendingFFRef.current++;
       removeBlock(idx);
       if (type === 1) {
         scheduleRechargeCheck();
