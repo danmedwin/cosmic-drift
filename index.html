@@ -76,7 +76,7 @@ var COLS = 8,
   PLASMA_SPEED = 0.85,
   START_PLASMA = 10,
   BONUS_PTS = 2;
-var GAME_VERSION = "v74.5";
+var GAME_VERSION = "v74.6";
 var RELEASE_NOTES = [{
   version: "v71",
   title: "UFO Enemy",
@@ -5162,6 +5162,7 @@ function CosmicDriftGame() {
         scoreRef.current += BLOCK_POINTS[type] || 0;
         flushGrid();
       }
+      if (type === 10) pendingFFRef.current++;
       removeBlock(idx);
       if (type === 1) {
         scheduleRechargeCheck();
@@ -5523,7 +5524,7 @@ function CosmicDriftGame() {
           });
           empties.splice(ri, 1);
         }
-        pendingFFRef.current += spawned.length;
+        pendingFFRef.current += spawned.length - 1;
         // Animate each spawned block flying from FF position to target
         for (var sa = 0; sa < spawned.length; sa++) {
           (function (spawn, delay) {
