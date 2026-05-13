@@ -2,71 +2,84 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="mobile-web-app-capable" content="yes">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Cosmic Drift</title>
-<link rel="icon" type="image/png" href="favicon.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { width: 100%; height: 100%; overflow: hidden; background: #0b0c1a; }
-  #root { width: 100%; height: 100%; }
-  #loading-screen {
-    position: fixed; inset: 0; background: #0b0c1a; display: flex;
-    flex-direction: column; align-items: center; justify-content: center;
-    font-family: "Quicksand", sans-serif; z-index: 9999;
-  }
-  #loading-screen .title { font-size: 32px; font-weight: 700; color: #c8b8ff;
-    letter-spacing: 6px; text-transform: uppercase; margin-bottom: 20px; }
-  #loading-screen .bar-track { width: 200px; height: 4px; background: rgba(200,184,255,0.15);
-    border-radius: 2px; overflow: hidden; }
-  #loading-screen .bar-fill { height: 100%; width: 30%; background: linear-gradient(90deg, #c8b8ff, #50c8ff);
-    border-radius: 2px; animation: loadSlide 1.2s ease-in-out infinite; }
-  @keyframes loadSlide { 0% { transform: translateX(-100%); } 100% { transform: translateX(400%); } }
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #0b0c1a; }
+#root { width: 100%; height: 100%; }
+#loading-screen { position: fixed; inset: 0; background: #0b0c1a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; font-family: "Quicksand", sans-serif; }
+#loading-screen .title { font-size: 11px; font-weight: 700; letter-spacing: 4px; color: rgba(180,200,220,0.3); text-transform: uppercase; margin-bottom: 8px; }
+#loading-screen .main { font-size: 24px; font-weight: 700; letter-spacing: 3px; color: #80ddff; text-transform: uppercase; text-shadow: 0 0 20px rgba(80,200,255,0.3); }
+#loading-screen .dots { margin-top: 20px; display: flex; gap: 8px; }
+#loading-screen .dot { width: 6px; height: 6px; border-radius: 50%; background: #80ddff; opacity: 0.3; animation: loadPulse 1.2s ease-in-out infinite; }
+#loading-screen .dot:nth-child(2) { animation-delay: 0.2s; }
+#loading-screen .dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes loadPulse { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.3); } }
+@font-face { font-family: "Quicksand"; font-display: swap; src: local("Quicksand"); }
 </style>
-<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-<div id="loading-screen"><div class="title">Cosmic Drift</div><div class="bar-track"><div class="bar-fill"></div></div></div>
+<div id="loading-screen">
+  <div class="title">COSMIC DRIFT</div>
+  <div class="main">Loading...</div>
+  <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+</div>
 <div id="root"></div>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script>
-// Storage shim: wraps localStorage with cd_ prefix
-window.storage = {
-  get: function(key) {
-    try { var val = localStorage.getItem("cd_" + key);
-      return Promise.resolve(val != null ? { key: key, value: val } : null);
-    } catch(e) { return Promise.resolve(null); }
-  },
-  set: function(key, value) {
-    try { localStorage.setItem("cd_" + key, value);
-      return Promise.resolve({ key: key, value: value });
-    } catch(e) { return Promise.resolve(null); }
-  },
-  delete: function(key) {
-    try { localStorage.removeItem("cd_" + key);
-      return Promise.resolve({ key: key, deleted: true });
-    } catch(e) { return Promise.resolve(null); }
-  },
-  list: function(prefix) {
-    try { var keys = []; var pfx = "cd_" + (prefix || "");
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
-        if (k.indexOf(pfx) === 0) keys.push(k.substring(3));
-      }
-      return Promise.resolve({ keys: keys });
-    } catch(e) { return Promise.resolve({ keys: [] }); }
-  }
-};
+var useState = React.useState;
+var useRef = React.useRef;
+var useCallback = React.useCallback;
+var useEffect = React.useEffect;
+var memo = React.memo;
 
-var useState = React.useState, useRef = React.useRef, useCallback = React.useCallback, useEffect = React.useEffect, memo = React.memo;
-
+// window.storage shim using localStorage
+if (!window.storage) {
+  window.storage = {
+    get: function(key) {
+      return new Promise(function(resolve, reject) {
+        try {
+          var val = localStorage.getItem("csd_" + key);
+          if (val !== null) resolve({ key: key, value: val });
+          else reject(new Error("Key not found"));
+        } catch(e) { reject(e); }
+      });
+    },
+    set: function(key, value) {
+      return new Promise(function(resolve, reject) {
+        try {
+          localStorage.setItem("csd_" + key, value);
+          resolve({ key: key, value: value });
+        } catch(e) { reject(e); }
+      });
+    },
+    delete: function(key) {
+      return new Promise(function(resolve) {
+        localStorage.removeItem("csd_" + key);
+        resolve({ key: key, deleted: true });
+      });
+    },
+    list: function(prefix) {
+      return new Promise(function(resolve) {
+        var keys = [];
+        for (var i = 0; i < localStorage.length; i++) {
+          var k = localStorage.key(i);
+          if (k.indexOf("csd_") === 0) {
+            var realKey = k.substring(4);
+            if (!prefix || realKey.indexOf(prefix) === 0) keys.push(realKey);
+          }
+        }
+        resolve({ keys: keys });
+      });
+    }
+  };
+}
 </script>
 <script>
 var COLS = 8,
@@ -76,7 +89,7 @@ var COLS = 8,
   PLASMA_SPEED = 0.85,
   START_PLASMA = 10,
   BONUS_PTS = 2;
-var GAME_VERSION = "v75";
+var GAME_VERSION = "v76";
 var RELEASE_NOTES = [{
   version: "v71",
   title: "UFO Enemy",
@@ -926,25 +939,6 @@ var BLOCK_COLORS = {
     particle: "#d4a843"
   }
 };
-var BUILDER_TOUR_STEPS = [{
-  title: "The Grid",
-  desc: "Select a block type from the palette, then tap or drag across cells to place them. Tap a filled cell with the same block type to remove it."
-}, {
-  title: "Block Palette",
-  desc: "Choose from 10 block types. The selected type highlights in blue. Tap it again to deselect."
-}, {
-  title: "Crate Variants",
-  desc: "Tap the Crate icon in the palette to pick a reward type: Random, Drone, Lightning, Cross, Split, or Hammer."
-}, {
-  title: "Ship Position",
-  desc: "Tap one of the eight columns below the grid to set where the player's ship starts."
-}, {
-  title: "Starting Plasma",
-  desc: "Use the +/- buttons to set how much plasma the player starts with (1 to 20)."
-}, {
-  title: "Save & Play",
-  desc: "Name your level, then Save it. Use Save & Play to test it right away. Your levels are always in My Levels."
-}];
 
 // ── TUTORIAL SYSTEM ──
 function generateTutorialGrid(lvl) {
@@ -3891,80 +3885,12 @@ function CosmicDriftGame() {
   var _cf = useState(null),
     convertFlash = _cf[0],
     setConvertFlash = _cf[1];
-
-  // ── LEVEL BUILDER STATE ──
-  var _bg = useState(function () {
-      return new Array(COLS * ROWS).fill(0);
-    }),
-    builderGrid = _bg[0],
-    setBuilderGrid = _bg[1];
-  var _bss = useState(3),
-    builderShipStart = _bss[0],
-    setBuilderShipStart = _bss[1];
-  var _sbt = useState(null),
-    selectedBlockType = _sbt[0],
-    setSelectedBlockType = _sbt[1];
-  var _cratePanel = useState(false),
-    crateSubPanelOpen = _cratePanel[0],
-    setCrateSubPanelOpen = _cratePanel[1];
-  var _crateType = useState(9),
-    selectedCrateType = _crateType[0],
-    setSelectedCrateType = _crateType[1];
-  var _eli = useState(null),
-    editingLevelId = _eli[0],
-    setEditingLevelId = _eli[1];
-  var _bln = useState(""),
-    builderLevelName = _bln[0],
-    setBuilderLevelName = _bln[1];
-  var _bdr = useState(false),
-    builderDirty = _bdr[0],
-    setBuilderDirty = _bdr[1];
-  var _bwarn = useState(null),
-    builderWarn = _bwarn[0],
-    setBuilderWarn = _bwarn[1];
-  var _erase = useState(false),
-    eraserActive = _erase[0],
-    setEraserActive = _erase[1];
-  var _bplasma = useState(START_PLASMA),
-    builderPlasma = _bplasma[0],
-    setBuilderPlasma = _bplasma[1];
-  var builderDragRef = useRef(null);
-  var builderTouchUsedRef = useRef(false);
-  var _btour = useState(null),
-    builderTourStep = _btour[0],
-    setBuilderTourStep = _btour[1];
-  var builderTourSeenRef = useRef(false);
-  // ── MY LEVELS STATE ──
   var _slvls = useState([]),
     savedLevels = _slvls[0],
     setSavedLevels = _slvls[1];
   var _sload = useState(false),
     levelsLoading = _sload[0],
     setLevelsLoading = _sload[1];
-  var _renid = useState(null),
-    renamingId = _renid[0],
-    setRenamingId = _renid[1];
-  var _renn = useState(""),
-    renamingName = _renn[0],
-    setRenamingName = _renn[1];
-  var _delid = useState(null),
-    deletingId = _delid[0],
-    setDeletingId = _delid[1];
-  var _expid = useState(null),
-    exportId = _expid[0],
-    setExportId = _expid[1];
-  var _exptext = useState(""),
-    exportText = _exptext[0],
-    setExportText = _exptext[1];
-  var _copied = useState(false),
-    copied = _copied[0],
-    setCopied = _copied[1];
-  var _expAll = useState(false),
-    showExportAll = _expAll[0],
-    setShowExportAll = _expAll[1];
-  var _expAllText = useState(""),
-    exportAllText = _expAllText[0],
-    setExportAllText = _expAllText[1];
   var _sortMode = useState("date_new"),
     sortMode = _sortMode[0],
     setSortMode = _sortMode[1];
@@ -4006,16 +3932,6 @@ function CosmicDriftGame() {
     difficulty = _diff[0],
     setDifficulty = _diff[1];
   var difficultyRef = useRef("regular");
-  // ── IMPORT ──
-  var _showImp = useState(false),
-    showImport = _showImp[0],
-    setShowImport = _showImp[1];
-  var _impText = useState(""),
-    importText = _impText[0],
-    setImportText = _impText[1];
-  var _impErr = useState(""),
-    importError = _impErr[0],
-    setImportError = _impErr[1];
   // ── CUSTOM LEVEL PLAY ──
   var _clm = useState(false),
     customLevelMode = _clm[0],
@@ -4023,9 +3939,6 @@ function CosmicDriftGame() {
   var _cln = useState(""),
     customLevelName = _cln[0],
     setCustomLevelName = _cln[1];
-  var _backWarn = useState(false),
-    showBackWarn = _backWarn[0],
-    setShowBackWarn = _backWarn[1];
   var _gameMenu = useState(false),
     gameMenuOpen = _gameMenu[0],
     setGameMenuOpen = _gameMenu[1];
@@ -4317,13 +4230,6 @@ function CosmicDriftGame() {
     try {
       window.storage.get("cosmic_drift_ios_prompt_dismissed").then(function (r) {
         if (r && r.value === "true") setIosPromptDismissed(true);
-      }).catch(function () {});
-    } catch (e) {}
-  }, []);
-  useEffect(function () {
-    try {
-      window.storage.get("cosmic_drift_builder_tour").then(function (r) {
-        if (r && r.value === "seen") builderTourSeenRef.current = true;
       }).catch(function () {});
     } catch (e) {}
   }, []);
@@ -6754,243 +6660,8 @@ function CosmicDriftGame() {
     startMusic();
     setScreen("game");
   }
-
-  // ── LEVEL BUILDER & STORAGE FUNCTIONS ──
   function genUUID() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
-  }
-  function openBuilder(levelData) {
-    if (levelData) {
-      setBuilderGrid(levelData.grid.slice());
-      setBuilderShipStart(levelData.shipStart != null ? levelData.shipStart : 3);
-      setEditingLevelId(levelData.id || null);
-      setBuilderLevelName(levelData.name || "");
-      setBuilderPlasma(levelData.startPlasma || START_PLASMA);
-    } else {
-      setBuilderGrid(new Array(COLS * ROWS).fill(0));
-      setBuilderShipStart(3);
-      setEditingLevelId(null);
-      setBuilderLevelName("");
-      setBuilderPlasma(START_PLASMA);
-    }
-    setSelectedBlockType(null);
-    setEraserActive(false);
-    setBuilderDirty(false);
-    setBuilderWarn(null);
-    if (!builderTourSeenRef.current) {
-      setBuilderTourStep(0);
-    }
-    setScreen("builder");
-  }
-  function builderCellAction(idx) {
-    setCrateSubPanelOpen(false);
-    if (selectedBlockType === 17 && builderGrid.indexOf(17) >= 0 && builderGrid[idx] !== 17) {
-      setBuilderWarn("Only one UFO allowed. Remove it from the board to place in a new location.");
-      setTimeout(function () {
-        setBuilderWarn(null);
-      }, 3000);
-      return;
-    }
-    setBuilderGrid(function (prev) {
-      var g = prev.slice();
-      if (eraserActive) {
-        g[idx] = 0;
-      } else if (selectedBlockType !== null) {
-        if (g[idx] === selectedBlockType) {
-          g[idx] = 0;
-        } else {
-          g[idx] = selectedBlockType;
-        }
-      } else {
-        // No tool selected: tap occupied cell to remove (implicit eraser)
-        if (g[idx] > 0) g[idx] = 0;else return prev; // empty cell, nothing selected - no change
-      }
-      return g;
-    });
-    setBuilderDirty(true);
-  }
-  function handleBuilderGridTS(e) {
-    e.preventDefault();
-    builderTouchUsedRef.current = true;
-    var t = e.touches[0];
-    var canDrag = selectedBlockType !== null || eraserActive;
-    builderDragRef.current = {
-      lastIdx: -1,
-      active: canDrag
-    };
-    var idx = getBuilderIdxFromTouch(t);
-    if (idx >= 0) {
-      builderCellAction(idx);
-      builderDragRef.current.lastIdx = idx;
-    }
-  }
-  function handleBuilderGridTM(e) {
-    e.preventDefault();
-    if (!builderDragRef.current || !builderDragRef.current.active) return;
-    var t = e.touches[0];
-    var idx = getBuilderIdxFromTouch(t);
-    if (idx >= 0 && idx !== builderDragRef.current.lastIdx) {
-      setBuilderGrid(function (prev) {
-        var g = prev.slice();
-        if (eraserActive) {
-          g[idx] = 0;
-        } else if (selectedBlockType !== null && g[idx] !== selectedBlockType) {
-          if (selectedBlockType === 17 && g.indexOf(17) >= 0) return prev;
-          g[idx] = selectedBlockType;
-        }
-        return g;
-      });
-      setBuilderDirty(true);
-      builderDragRef.current.lastIdx = idx;
-    }
-  }
-  function handleBuilderGridTE(e) {
-    e.preventDefault();
-    builderDragRef.current = null;
-    setTimeout(function () {
-      builderTouchUsedRef.current = false;
-    }, 300);
-  }
-  function handleBuilderGridMD(e) {
-    if (builderTouchUsedRef.current) return;
-    builderTouchUsedRef.current = true;
-    var canDrag = selectedBlockType !== null || eraserActive;
-    builderDragRef.current = {
-      lastIdx: -1,
-      active: canDrag
-    };
-    var idx = getBuilderIdxFromTouch(e);
-    if (idx >= 0) {
-      builderCellAction(idx);
-      builderDragRef.current.lastIdx = idx;
-    }
-  }
-  function handleBuilderGridMM(e) {
-    if (!builderDragRef.current || !builderDragRef.current.active) return;
-    var idx = getBuilderIdxFromTouch(e);
-    if (idx >= 0 && idx !== builderDragRef.current.lastIdx) {
-      setBuilderGrid(function (prev) {
-        var g = prev.slice();
-        if (eraserActive) {
-          g[idx] = 0;
-        } else if (selectedBlockType !== null && g[idx] !== selectedBlockType) {
-          if (selectedBlockType === 17 && g.indexOf(17) >= 0) return prev;
-          g[idx] = selectedBlockType;
-        }
-        return g;
-      });
-      setBuilderDirty(true);
-      builderDragRef.current.lastIdx = idx;
-    }
-  }
-  function handleBuilderGridMU() {
-    builderDragRef.current = null;
-    setTimeout(function () {
-      builderTouchUsedRef.current = false;
-    }, 100);
-  }
-  function handleBuilderGridClick(e) {
-    if (builderTouchUsedRef.current) return;
-    if (!builderGridRef.current) return;
-    var r = builderGridRef.current.getBoundingClientRect();
-    var x = e.clientX - r.left,
-      y = e.clientY - r.top;
-    var col = Math.floor(x / (r.width / COLS));
-    var row = Math.floor(y / (r.height / ROWS));
-    if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
-      builderCellAction(row * COLS + col);
-    }
-  }
-  var builderGridRef = useRef(null);
-  function getBuilderIdxFromTouch(touch) {
-    if (!builderGridRef.current) return -1;
-    var r = builderGridRef.current.getBoundingClientRect();
-    var x = touch.clientX - r.left,
-      y = touch.clientY - r.top;
-    var col = Math.floor(x / (r.width / COLS));
-    var row = Math.floor(y / (r.height / ROWS));
-    if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return -1;
-    return row * COLS + col;
-  }
-  function validateBuilderGrid(g) {
-    var hasDestructible = false;
-    for (var i = 0; i < g.length; i++) {
-      if (g[i] > 0 && !WIN_EXEMPT[g[i]]) {
-        hasDestructible = true;
-        break;
-      }
-    }
-    return hasDestructible;
-  }
-  function handleBuilderSave() {
-    if (!validateBuilderGrid(builderGrid)) {
-      setBuilderWarn("Level has no destructible blocks and cannot be won.");
-      return;
-    }
-    if (editingLevelId) {
-      doSaveLevel(editingLevelId, builderLevelName || "Untitled Level");
-    } else {
-      doSaveLevel(null, builderLevelName || "Untitled Level");
-    }
-  }
-  var savingRef = useRef(false);
-  var STORAGE_KEY = "cosmic_drift_levels";
-  var storageWorking = useRef(true);
-  function persistLevels(levels) {
-    // Background persist - don't block UI on this
-    if (!window.storage || !window.storage.set) return;
-    try {
-      window.storage.set(STORAGE_KEY, JSON.stringify(levels), false).then(function () {
-        storageWorking.current = true;
-      }).catch(function () {
-        storageWorking.current = false;
-      });
-    } catch (e) {
-      storageWorking.current = false;
-    }
-  }
-  function doSaveLevel(id, name) {
-    if (savingRef.current) return;
-    savingRef.current = true;
-    var levelId = id || genUUID();
-    var now = Date.now();
-    var nowStr = new Date().toLocaleString();
-    var entry = {
-      id: levelId,
-      name: name || "Untitled Level",
-      grid: builderGrid.slice(),
-      shipStart: builderShipStart,
-      startPlasma: builderPlasma,
-      created: now,
-      modified: now,
-      savedAt: nowStr
-    };
-
-    // Update in-memory state immediately (always works)
-    setSavedLevels(function (prev) {
-      var levels = prev.slice();
-      var found = false;
-      for (var i = 0; i < levels.length; i++) {
-        if (levels[i].id === levelId) {
-          entry.created = levels[i].created || now;
-          levels[i] = entry;
-          found = true;
-          break;
-        }
-      }
-      if (!found) levels.push(entry);
-      // Persist in background
-      persistLevels(levels);
-      return levels;
-    });
-    savingRef.current = false;
-    setEditingLevelId(levelId);
-    setBuilderLevelName(entry.name);
-    setBuilderDirty(false);
-    setBuilderWarn("Saved!" + (storageWorking.current ? "" : " (session only - use Export to keep)"));
-    setTimeout(function () {
-      setBuilderWarn(null);
-    }, storageWorking.current ? 2000 : 4000);
   }
   function loadSavedLevels() {
     setLevelsLoading(true);
@@ -6999,43 +6670,31 @@ function CosmicDriftGame() {
       setLevelsLoading(false);
       return;
     }
-    window.storage.get(STORAGE_KEY).then(function (r) {
+    window.storage.get("cosmic_drift_levels").then(function (r) {
       if (r && r.value) {
         var levels = JSON.parse(r.value);
         levels.sort(function (a, b) {
           return (b.modified || 0) - (a.modified || 0);
         });
         setSavedLevels(levels);
-        storageWorking.current = true;
       }
       setLevelsLoading(false);
     }).catch(function () {
-      storageWorking.current = false;
       setLevelsLoading(false);
     });
   }
-  function deleteLevel(id) {
-    setSavedLevels(function (prev) {
-      var levels = prev.filter(function (l) {
-        return l.id !== id;
-      });
-      persistLevels(levels);
-      return levels;
-    });
-    setDeletingId(null);
-  }
-  function renameLevel(id, newName) {
-    setSavedLevels(function (prev) {
-      var levels = prev.map(function (l) {
-        return l.id === id ? Object.assign({}, l, {
-          name: newName,
-          modified: Date.now()
-        }) : l;
-      });
-      persistLevels(levels);
-      return levels;
-    });
-    setRenamingId(null);
+  function navigateToWorkshop(editId) {
+    var workshopUrl = "workshop.html";
+    if (editId) workshopUrl = workshopUrl + "?edit=" + editId;
+    try {
+      if (window.location.hostname === "localhost" || window.location.hostname.indexOf("techrabbi") >= 0) {
+        window.location.href = workshopUrl;
+      } else {
+        alert("Workshop is available at your hosted site: /workshop.html");
+      }
+    } catch (e) {
+      alert("Workshop is available at your hosted site: /workshop.html");
+    }
   }
   function playCustomLevel(levelData) {
     setCustomLevelMode(true);
@@ -7074,137 +6733,6 @@ function CosmicDriftGame() {
     startMusic();
     setScreen("game");
   }
-  function exportLevel(levelData) {
-    var out = JSON.stringify({
-      name: levelData.name || "Untitled",
-      grid: levelData.grid,
-      ship: levelData.shipStart != null ? levelData.shipStart : 3,
-      plasma: levelData.startPlasma || START_PLASMA,
-      savedAt: levelData.savedAt || new Date().toLocaleString()
-    });
-    setExportText(out);
-    setExportId(levelData.id);
-    setCopied(false);
-  }
-  function exportAllLevels() {
-    var arr = savedLevels.map(function (lv) {
-      return {
-        name: lv.name || "Untitled",
-        grid: lv.grid,
-        ship: lv.shipStart != null ? lv.shipStart : 3,
-        plasma: lv.startPlasma || START_PLASMA,
-        savedAt: lv.savedAt || new Date().toLocaleString()
-      };
-    });
-    setExportAllText(JSON.stringify(arr));
-    setShowExportAll(true);
-    setCopied(false);
-  }
-  function editCustomLevel() {
-    var data = customLevelDataRef.current;
-    if (data) {
-      setCustomLevelMode(false);
-      customGridRef.current = null;
-      setGameState("playing");
-      openBuilder(data);
-    }
-  }
-  function validateLevelData(parsed) {
-    if (!parsed.grid || !Array.isArray(parsed.grid)) return "Missing or invalid grid data";
-    if (parsed.grid.length !== COLS * ROWS) return "Grid must have " + COLS * ROWS + " cells (got " + parsed.grid.length + ")";
-    for (var i = 0; i < parsed.grid.length; i++) {
-      var v = parsed.grid[i];
-      if (typeof v !== "number" || v < 0 || v > 15 || v !== Math.floor(v)) return "Invalid block type at position " + i;
-    }
-    return null;
-  }
-  function handleImport() {
-    var text = importText.trim();
-    if (!text) {
-      setImportError("Paste a level code first");
-      return;
-    }
-    var parsed;
-    try {
-      parsed = JSON.parse(text);
-    } catch (e) {
-      setImportError("Invalid format - not valid JSON");
-      return;
-    }
-
-    // Handle array of levels (from Export All)
-    if (Array.isArray(parsed)) {
-      if (parsed.length === 0) {
-        setImportError("Empty array - no levels to import");
-        return;
-      }
-      var newEntries = [];
-      for (var a = 0; a < parsed.length; a++) {
-        var err = validateLevelData(parsed[a]);
-        if (err) {
-          setImportError("Level " + (a + 1) + ": " + err);
-          return;
-        }
-        var now = Date.now();
-        newEntries.push({
-          id: genUUID(),
-          name: parsed[a].name || "Imported " + (a + 1),
-          grid: parsed[a].grid,
-          shipStart: typeof parsed[a].ship === "number" ? Math.max(0, Math.min(COLS - 1, Math.floor(parsed[a].ship))) : 3,
-          startPlasma: typeof parsed[a].plasma === "number" ? parsed[a].plasma : START_PLASMA,
-          created: now,
-          modified: now,
-          savedAt: parsed[a].savedAt || new Date().toLocaleString()
-        });
-      }
-      setSavedLevels(function (prev) {
-        var levels = prev.concat(newEntries);
-        persistLevels(levels);
-        return levels;
-      });
-      setShowImport(false);
-      setImportText("");
-      setImportError("");
-      return;
-    }
-
-    // Single level
-    var err2 = validateLevelData(parsed);
-    if (err2) {
-      setImportError(err2);
-      return;
-    }
-    var shipStart = typeof parsed.ship === "number" ? Math.max(0, Math.min(COLS - 1, Math.floor(parsed.ship))) : 3;
-    var levelName = parsed.name || "Imported Level";
-    var plasmaAmt = typeof parsed.plasma === "number" ? parsed.plasma : START_PLASMA;
-    var now2 = Date.now();
-    var entry = {
-      id: genUUID(),
-      name: levelName,
-      grid: parsed.grid,
-      shipStart: shipStart,
-      startPlasma: plasmaAmt,
-      created: now2,
-      modified: now2,
-      savedAt: parsed.savedAt || new Date().toLocaleString()
-    };
-    setSavedLevels(function (prev) {
-      var levels = prev.concat([entry]);
-      persistLevels(levels);
-      return levels;
-    });
-    setShowImport(false);
-    setImportText("");
-    setImportError("");
-  }
-  function handleBuilderBack() {
-    if (builderDirty) {
-      setShowBackWarn(true);
-      return;
-    }
-    loadSavedLevels();
-    setScreen("mylevels");
-  }
   function backToMyLevels() {
     setCustomLevelMode(false);
     customGridRef.current = null;
@@ -7213,64 +6741,6 @@ function CosmicDriftGame() {
     setGameState("playing");
     loadSavedLevels();
     setScreen("mylevels");
-  }
-  function handlePlayNow() {
-    if (builderDirty || !editingLevelId) {
-      saveAndPlay();
-      return;
-    }
-    playBuilderLevel();
-  }
-  function playBuilderLevel() {
-    var levelData = {
-      id: editingLevelId,
-      name: builderLevelName || "Custom Level",
-      grid: builderGrid.slice(),
-      shipStart: builderShipStart,
-      startPlasma: builderPlasma
-    };
-    playCustomLevel(levelData);
-  }
-  function saveAndPlay() {
-    // Save first, then play
-    var levelId = editingLevelId || genUUID();
-    var now = Date.now();
-    var name = builderLevelName || "Untitled Level";
-    var nowStr = new Date().toLocaleString();
-    var entry = {
-      id: levelId,
-      name: name,
-      grid: builderGrid.slice(),
-      shipStart: builderShipStart,
-      startPlasma: builderPlasma,
-      created: now,
-      modified: now,
-      savedAt: nowStr
-    };
-    if (!validateBuilderGrid(builderGrid)) {
-      setBuilderWarn("Level has no destructible blocks and cannot be won.");
-      return;
-    }
-    setSavedLevels(function (prev) {
-      var levels = prev.slice();
-      var found = false;
-      for (var i = 0; i < levels.length; i++) {
-        if (levels[i].id === levelId) {
-          entry.created = levels[i].created || now;
-          levels[i] = entry;
-          found = true;
-          break;
-        }
-      }
-      if (!found) levels.push(entry);
-      persistLevels(levels);
-      return levels;
-    });
-    setEditingLevelId(levelId);
-    setBuilderLevelName(name);
-    setBuilderDirty(false);
-    // Now play
-    playCustomLevel(entry);
   }
   var shipX = getColCenter(shipCol);
   var hasInventory = invDrones > 0 || invLightnings > 0 || invCrossShots > 0 || invAngleBounces > 0 || invHammers > 0;
@@ -8415,10 +7885,7 @@ function CosmicDriftGame() {
       fontWeight: 600
     }
   }, "Next: ", FIXED_LEVELS[getNextSigLevel(level)].name), gameModeRef.current === "highlights" && !getNextSigLevel(level) && /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      openBuilder();
-      setScreen("builder");
-    },
+    onClick: navigateToWorkshop,
     style: {
       padding: "8px 20px",
       borderRadius: 6,
@@ -8430,7 +7897,7 @@ function CosmicDriftGame() {
       cursor: "pointer",
       letterSpacing: 0.5
     }
-  }, "Build Your Own Level"), !customLevelMode && gameModeRef.current === "campaign" && /*#__PURE__*/React.createElement("div", {
+  }, "Open Workshop"), !customLevelMode && gameModeRef.current === "campaign" && /*#__PURE__*/React.createElement("div", {
     onClick: function () {
       saveGame();
     },
@@ -8487,7 +7954,9 @@ function CosmicDriftGame() {
       boxShadow: PNLS
     }
   }, "Replay"), /*#__PURE__*/React.createElement("div", {
-    onClick: editCustomLevel,
+    onClick: function () {
+      navigateToWorkshop();
+    },
     style: {
       padding: "10px 20px",
       borderRadius: 6,
@@ -8679,7 +8148,9 @@ function CosmicDriftGame() {
       boxShadow: PNLS
     }
   }, "Retry"), /*#__PURE__*/React.createElement("div", {
-    onClick: editCustomLevel,
+    onClick: function () {
+      navigateToWorkshop();
+    },
     style: {
       padding: "12px 20px",
       borderRadius: 6,
@@ -9166,34 +8637,6 @@ function CosmicDriftGame() {
     }
   }, /*#__PURE__*/React.createElement("div", {
     onClick: function () {
-      openBuilder();
-    },
-    style: {
-      padding: "8px 16px",
-      borderRadius: 5,
-      background: "linear-gradient(180deg, #3d3d4a, #2a2a35)",
-      border: "1px solid rgba(80,200,255,0.25)",
-      color: "rgba(128,221,255,0.7)",
-      fontSize: 11,
-      fontWeight: 700,
-      letterSpacing: 1.5,
-      cursor: "pointer",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)",
-      textTransform: "uppercase",
-      display: "flex",
-      alignItems: "center",
-      gap: 6
-    }
-  }, /*#__PURE__*/React.createElement("svg", {
-    width: "12",
-    height: "12",
-    viewBox: "0 0 16 16"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M2 11.5V14h2.5l7.4-7.4-2.5-2.5L2 11.5zM14.7 5.1c.3-.3.3-.7 0-1L13 2.3c-.3-.3-.7-.3-1 0l-1.2 1.2 2.5 2.5 1.4-1.4z",
-    fill: "currentColor",
-    opacity: "0.8"
-  })), "Builder"), /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
       loadSavedLevels();
       setScreen("mylevels");
     },
@@ -9241,7 +8684,64 @@ function CosmicDriftGame() {
     rx: "0.5",
     fill: "currentColor",
     opacity: "0.4"
-  })), "My Levels")), /*#__PURE__*/React.createElement("div", {
+  })), "My Levels"), /*#__PURE__*/React.createElement("div", {
+    onClick: navigateToWorkshop,
+    style: {
+      padding: "8px 16px",
+      borderRadius: 5,
+      background: "linear-gradient(180deg, #1a3a4a, #0f2a38)",
+      border: "2px solid rgba(80,200,255,0.3)",
+      color: "#80ddff",
+      fontSize: 11,
+      fontWeight: 700,
+      letterSpacing: 1.5,
+      cursor: "pointer",
+      boxShadow: "0 0 8px rgba(80,200,255,0.25), 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)",
+      textTransform: "uppercase",
+      display: "flex",
+      alignItems: "center",
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "12",
+    height: "12",
+    viewBox: "0 0 16 16"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "2",
+    y: "2",
+    width: "5",
+    height: "5",
+    rx: "1",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "1.5"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "9",
+    y: "2",
+    width: "5",
+    height: "5",
+    rx: "1",
+    fill: "currentColor",
+    opacity: "0.4"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "2",
+    y: "9",
+    width: "5",
+    height: "5",
+    rx: "1",
+    fill: "currentColor",
+    opacity: "0.4"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "9",
+    y: "9",
+    width: "5",
+    height: "5",
+    rx: "1",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "1.5",
+    strokeDasharray: "1.5 1.5"
+  })), "Workshop")), /*#__PURE__*/React.createElement("div", {
     onClick: function () {
       setLegendOpen(true);
     },
@@ -9725,1149 +9225,7 @@ function CosmicDriftGame() {
       fontSize: 10,
       fontWeight: 600
     }
-  }, "Don't show this again"))))), screen === "builder" && /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "fixed",
-      inset: 0,
-      zIndex: 400,
-      background: "#0b0c1a",
-      display: "flex",
-      flexDirection: "column",
-      fontFamily: "'Quicksand',sans-serif",
-      overflow: "hidden"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "absolute",
-      inset: 0,
-      overflow: "hidden",
-      pointerEvents: "none"
-    }
-  }, /*#__PURE__*/React.createElement(Stars, null)), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 5,
-      padding: "6px 8px",
-      background: PNL,
-      borderBottom: PNLB,
-      boxShadow: "0 3px 6px rgba(0,0,0,0.4)",
-      position: "relative",
-      zIndex: 2
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    onClick: handleBuilderBack,
-    style: {
-      padding: "6px 8px",
-      borderRadius: 4,
-      background: PNL,
-      border: PNLB,
-      color: "rgba(200,210,220,0.8)",
-      fontSize: 10,
-      fontWeight: 700,
-      letterSpacing: 1,
-      cursor: "pointer",
-      textTransform: "uppercase",
-      boxShadow: "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)"
-    }
-  }, "My Levels"), /*#__PURE__*/React.createElement("div", {
-    onClick: handleBuilderSave,
-    style: {
-      padding: "6px 10px",
-      borderRadius: 4,
-      background: "linear-gradient(180deg, #2a5a3a, #1a3a28)",
-      border: "2px solid rgba(80,200,100,0.4)",
-      color: "#80dd90",
-      fontSize: 10,
-      fontWeight: 700,
-      letterSpacing: 1,
-      cursor: "pointer",
-      textTransform: "uppercase",
-      boxShadow: "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)"
-    }
-  }, "Save"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1,
-      background: SCRN,
-      border: SCRNB,
-      borderRadius: 4,
-      padding: "4px 8px",
-      boxShadow: SCRNS
-    }
-  }, /*#__PURE__*/React.createElement("input", {
-    value: builderLevelName,
-    onChange: function (e) {
-      setBuilderLevelName(e.target.value);
-      setBuilderDirty(true);
-    },
-    placeholder: "Level name...",
-    style: {
-      width: "100%",
-      background: "transparent",
-      border: "none",
-      outline: "none",
-      color: "#b0c8d8",
-      fontSize: 16,
-      fontWeight: 600,
-      fontFamily: "'Quicksand',sans-serif",
-      letterSpacing: 0.5
-    }
-  })), /*#__PURE__*/React.createElement("div", {
-    onClick: handlePlayNow,
-    style: {
-      padding: "6px 10px",
-      borderRadius: 4,
-      background: "linear-gradient(180deg, #3a3a6a, #2a2a4a)",
-      border: "2px solid rgba(160,140,255,0.5)",
-      color: "#c8b8ff",
-      fontSize: 9,
-      fontWeight: 700,
-      letterSpacing: 0.5,
-      cursor: "pointer",
-      textTransform: "uppercase",
-      boxShadow: "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)",
-      whiteSpace: "nowrap"
-    }
-  }, "Save & Play"), /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      setBuilderTourStep(0);
-    },
-    style: {
-      width: 28,
-      height: 28,
-      borderRadius: 4,
-      background: PNL,
-      border: PNLB,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      cursor: "pointer",
-      boxShadow: "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)"
-    }
-  }, /*#__PURE__*/React.createElement("svg", {
-    width: "12",
-    height: "12",
-    viewBox: "0 0 16 16"
-  }, /*#__PURE__*/React.createElement("circle", {
-    cx: "8",
-    cy: "8",
-    r: "7",
-    fill: "none",
-    stroke: "rgba(180,200,220,0.5)",
-    strokeWidth: "1.5"
-  }), /*#__PURE__*/React.createElement("text", {
-    x: "8",
-    y: "12",
-    textAnchor: "middle",
-    fill: "rgba(180,200,220,0.5)",
-    fontSize: "10",
-    fontWeight: "700"
-  }, "?")))), builderWarn && /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "6px 12px",
-      textAlign: "center",
-      fontSize: 12,
-      fontWeight: 600,
-      color: builderWarn === "Saved!" ? "#80dd90" : "#ff8866",
-      background: builderWarn === "Saved!" ? "rgba(80,200,100,0.1)" : "rgba(255,80,60,0.1)",
-      zIndex: 2,
-      position: "relative"
-    }
-  }, builderWarn), /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: "10px 10px 0",
-      position: "relative",
-      zIndex: 1,
-      overflow: "hidden"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    ref: builderGridRef,
-    onClick: handleBuilderGridClick,
-    onTouchStart: handleBuilderGridTS,
-    onTouchMove: handleBuilderGridTM,
-    onTouchEnd: handleBuilderGridTE,
-    onMouseDown: handleBuilderGridMD,
-    onMouseMove: handleBuilderGridMM,
-    onMouseUp: handleBuilderGridMU,
-    onMouseLeave: function () {
-      if (builderDragRef.current) {
-        builderDragRef.current = null;
-        setTimeout(function () {
-          builderTouchUsedRef.current = false;
-        }, 100);
-      }
-    },
-    style: {
-      display: "grid",
-      gridTemplateColumns: "repeat(" + COLS + ", 1fr)",
-      gap: GAP,
-      width: "100%",
-      maxWidth: 380,
-      aspectRatio: COLS + "/" + ROWS,
-      userSelect: "none",
-      WebkitUserSelect: "none"
-    }
-  }, builderGrid.map(function (cell, idx) {
-    return /*#__PURE__*/React.createElement("div", {
-      key: idx,
-      style: {
-        aspectRatio: "1",
-        borderRadius: 6,
-        background: cell > 0 ? "transparent" : "rgba(30,30,50,0.6)",
-        border: cell > 0 ? eraserActive ? "1px solid rgba(255,80,80,0.25)" : "none" : "1px dashed rgba(80,100,140,0.3)",
-        cursor: selectedBlockType !== null || eraserActive ? "pointer" : "default",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative",
-        pointerEvents: "none"
-      }
-    }, cell > 0 && /*#__PURE__*/React.createElement(BlockContent, {
-      type: cell,
-      size: 40,
-      shieldLevel: cell === 10 ? 2 : 0
-    }), cell === 0 && /*#__PURE__*/React.createElement("div", {
-      style: {
-        width: 6,
-        height: 6,
-        borderRadius: "50%",
-        background: "rgba(80,100,140,0.15)"
-      }
-    }));
-  })), /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: "100%",
-      maxWidth: 380,
-      height: 50,
-      position: "relative",
-      marginTop: 4
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "absolute",
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: 2,
-      background: "rgba(140,160,180,0.06)"
-    }
-  }), [0, 1, 2, 3, 4, 5, 6, 7].map(function (c) {
-    var isSelected = c === builderShipStart;
-    return /*#__PURE__*/React.createElement("div", {
-      key: c,
-      onClick: function () {
-        setBuilderShipStart(c);
-        setBuilderDirty(true);
-      },
-      style: {
-        position: "absolute",
-        left: c / COLS * 100 + "%",
-        width: 100 / COLS + "%",
-        top: 0,
-        bottom: 0,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        cursor: "pointer"
-      }
-    }, isSelected && /*#__PURE__*/React.createElement("svg", {
-      viewBox: "0 0 36 40",
-      width: "28",
-      height: "32"
-    }, /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("linearGradient", {
-      id: "bsg",
-      x1: "0",
-      y1: "0",
-      x2: "0",
-      y2: "1"
-    }, /*#__PURE__*/React.createElement("stop", {
-      offset: "0%",
-      stopColor: "#ffd0ff"
-    }), /*#__PURE__*/React.createElement("stop", {
-      offset: "100%",
-      stopColor: "#cc70cc"
-    }))), /*#__PURE__*/React.createElement("path", {
-      d: "M18 0L4 32L12 27L18 40L24 27L32 32Z",
-      fill: "url(#bsg)"
-    })), !isSelected && /*#__PURE__*/React.createElement("div", {
-      style: {
-        width: 8,
-        height: 8,
-        borderRadius: "50%",
-        background: "rgba(255,168,255,0.15)",
-        border: "1px solid rgba(255,168,255,0.1)"
-      }
-    }));
-  })), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 10,
-      marginTop: 6,
-      marginBottom: 2
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      var n = Math.max(1, builderPlasma - 1);
-      setBuilderPlasma(n);
-      setBuilderDirty(true);
-    },
-    style: {
-      width: 28,
-      height: 28,
-      borderRadius: 4,
-      background: PNL,
-      border: PNLB,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      cursor: "pointer",
-      color: "#b0c8d8",
-      fontSize: 16,
-      fontWeight: 700
-    }
-  }, "-"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 6
-    }
-  }, /*#__PURE__*/React.createElement(PlasmaContainer, {
-    current: builderPlasma,
-    max: 20
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: "rgba(180,200,220,0.5)",
-      fontSize: 10,
-      fontWeight: 700,
-      textTransform: "uppercase",
-      letterSpacing: 0.5
-    }
-  }, "Plasma")), /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      var n = Math.min(20, builderPlasma + 1);
-      setBuilderPlasma(n);
-      setBuilderDirty(true);
-    },
-    style: {
-      width: 28,
-      height: 28,
-      borderRadius: 4,
-      background: PNL,
-      border: PNLB,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      cursor: "pointer",
-      color: "#b0c8d8",
-      fontSize: 16,
-      fontWeight: 700
-    }
-  }, "+"))), crateSubPanelOpen && /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "relative",
-      zIndex: 3,
-      background: "linear-gradient(180deg, #1a1a2e, #151528)",
-      borderTop: "2px solid rgba(212,168,67,0.3)",
-      padding: "8px 8px 6px",
-      boxShadow: "0 -2px 8px rgba(0,0,0,0.3)"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 6
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: "rgba(212,168,67,0.7)",
-      fontSize: 9,
-      fontWeight: 700,
-      letterSpacing: 1.5,
-      textTransform: "uppercase"
-    }
-  }, "Crate Reward"), /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      setCrateSubPanelOpen(false);
-    },
-    style: {
-      color: "rgba(180,200,220,0.4)",
-      fontSize: 14,
-      fontWeight: 700,
-      cursor: "pointer",
-      padding: "0 4px"
-    }
-  }, "\u2715")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 4,
-      justifyContent: "center"
-    }
-  }, CRATE_VARIANTS.map(function (cv) {
-    var isActive2 = selectedCrateType === cv.type;
-    return /*#__PURE__*/React.createElement("div", {
-      key: cv.type,
-      onClick: function () {
-        setSelectedCrateType(cv.type);
-        setSelectedBlockType(cv.type);
-        setEraserActive(false);
-        setCrateSubPanelOpen(false);
-      },
-      style: {
-        flex: 1,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 3,
-        padding: "5px 2px 4px",
-        borderRadius: 4,
-        background: isActive2 ? "rgba(100,80,30,0.5)" : "rgba(30,30,50,0.6)",
-        border: isActive2 ? "2px solid rgba(212,168,67,0.6)" : "1px solid rgba(80,80,100,0.3)",
-        cursor: "pointer"
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        width: 28,
-        height: 28
-      }
-    }, /*#__PURE__*/React.createElement(BlockContent, {
-      type: cv.type,
-      size: 28,
-      shieldLevel: 0
-    })), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 7,
-        fontWeight: 700,
-        color: isActive2 ? "rgba(212,168,67,0.9)" : "rgba(180,200,220,0.4)",
-        textTransform: "uppercase",
-        letterSpacing: 0.3,
-        textAlign: "center",
-        lineHeight: 1.2
-      }
-    }, cv.name));
-  }))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "relative",
-      zIndex: 2,
-      background: PNL,
-      borderTop: "3px solid #505058",
-      padding: "8px 6px 10px",
-      boxShadow: "0 -3px 8px rgba(0,0,0,0.3)"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 3,
-      flexWrap: "wrap",
-      justifyContent: "center"
-    }
-  }, [1, 2, 3, 5, 9, 6, 7, 8, 10, 17].map(function (t) {
-    if (t === 9) {
-      var isCrateActive = isCrate(selectedBlockType);
-      return /*#__PURE__*/React.createElement("div", {
-        key: t,
-        onClick: function () {
-          if (isCrateActive && !crateSubPanelOpen) {
-            setCrateSubPanelOpen(true);
-          } else if (crateSubPanelOpen) {
-            return;
-          } else {
-            setSelectedBlockType(selectedCrateType);
-            setEraserActive(false);
-            setCrateSubPanelOpen(true);
-          }
-        },
-        style: {
-          width: "18%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 2,
-          padding: "5px 2px 4px",
-          borderRadius: crateSubPanelOpen ? "0 0 4px 4px" : 4,
-          background: crateSubPanelOpen ? "rgba(100,80,30,0.35)" : isCrateActive ? "rgba(40,100,120,0.4)" : PNL,
-          border: crateSubPanelOpen ? "2px solid rgba(212,168,67,0.4)" : isCrateActive ? "2px solid rgba(80,200,255,0.5)" : PNLB,
-          borderTop: crateSubPanelOpen ? "2px solid rgba(212,168,67,0.15)" : undefined,
-          cursor: "pointer",
-          boxShadow: crateSubPanelOpen ? "inset 0 0 10px rgba(212,168,67,0.15), 0 0 6px rgba(212,168,67,0.15)" : isCrateActive ? "inset 0 0 10px rgba(80,200,255,0.15), 0 0 8px rgba(80,200,255,0.2)" : "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)"
-        }
-      }, /*#__PURE__*/React.createElement("div", {
-        style: {
-          width: 28,
-          height: 28
-        }
-      }, /*#__PURE__*/React.createElement(BlockContent, {
-        type: selectedCrateType,
-        size: 28,
-        shieldLevel: 0
-      })), /*#__PURE__*/React.createElement("div", {
-        style: {
-          fontSize: 7,
-          fontWeight: 700,
-          color: crateSubPanelOpen ? "rgba(212,168,67,0.8)" : isCrateActive ? "#80ddff" : "rgba(180,200,220,0.5)",
-          textTransform: "uppercase",
-          letterSpacing: 0.3,
-          textAlign: "center",
-          lineHeight: 1.2
-        }
-      }, crateSubPanelOpen ? "OPEN" : isCrateActive ? "ACTIVE" : "Crate"));
-    }
-    if (t === 17) {
-      var ufoOnBoard = builderGrid.indexOf(17) >= 0;
-      var isUfoActive = selectedBlockType === 17;
-      if (ufoOnBoard && !isUfoActive) {
-        return /*#__PURE__*/React.createElement("div", {
-          key: t,
-          onClick: function () {
-            setBuilderWarn("Only one UFO allowed. Remove it from the board to place in a new location.");
-            setTimeout(function () {
-              setBuilderWarn(null);
-            }, 4000);
-          },
-          style: {
-            width: "18%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 2,
-            padding: "5px 2px 4px",
-            borderRadius: 4,
-            background: "rgba(30,30,40,0.6)",
-            border: "1px solid rgba(80,80,100,0.2)",
-            cursor: "pointer",
-            opacity: 0.4
-          }
-        }, /*#__PURE__*/React.createElement("div", {
-          style: {
-            width: 28,
-            height: 28
-          }
-        }, /*#__PURE__*/React.createElement(BlockContent, {
-          type: 17,
-          size: 28
-        })), /*#__PURE__*/React.createElement("div", {
-          style: {
-            fontSize: 7,
-            fontWeight: 700,
-            color: "rgba(140,140,160,0.4)",
-            textTransform: "uppercase",
-            letterSpacing: 0.3,
-            textAlign: "center",
-            lineHeight: 1.2
-          }
-        }, "UFO"));
-      }
-    }
-    var isActive = selectedBlockType === t;
-    return /*#__PURE__*/React.createElement("div", {
-      key: t,
-      onClick: function () {
-        setSelectedBlockType(isActive ? null : t);
-        setEraserActive(false);
-        setCrateSubPanelOpen(false);
-      },
-      style: {
-        width: "18%",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 2,
-        padding: "5px 2px 4px",
-        borderRadius: 4,
-        background: isActive ? "rgba(40,100,120,0.4)" : PNL,
-        border: isActive ? "2px solid rgba(80,200,255,0.5)" : PNLB,
-        cursor: "pointer",
-        boxShadow: isActive ? "inset 0 0 10px rgba(80,200,255,0.15), 0 0 8px rgba(80,200,255,0.2)" : "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)"
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        width: 28,
-        height: 28
-      }
-    }, /*#__PURE__*/React.createElement(BlockContent, {
-      type: t,
-      size: 28,
-      shieldLevel: t === 10 ? 2 : 0
-    })), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 7,
-        fontWeight: 700,
-        color: isActive ? "#80ddff" : "rgba(180,200,220,0.5)",
-        textTransform: "uppercase",
-        letterSpacing: 0.3,
-        textAlign: "center",
-        lineHeight: 1.2
-      }
-    }, isActive ? "ACTIVE" : BLOCK_LABELS[t]));
-  })), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 6,
-      justifyContent: "center",
-      marginTop: 6
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      setEraserActive(!eraserActive);
-      setSelectedBlockType(null);
-      setCrateSubPanelOpen(false);
-    },
-    style: {
-      padding: "6px 14px",
-      borderRadius: 4,
-      background: eraserActive ? "rgba(120,40,40,0.5)" : PNL,
-      border: eraserActive ? "2px solid rgba(255,100,80,0.5)" : PNLB,
-      cursor: "pointer",
-      color: eraserActive ? "#ff9977" : "rgba(200,210,220,0.5)",
-      fontSize: 10,
-      fontWeight: 700,
-      letterSpacing: 1,
-      textTransform: "uppercase",
-      display: "flex",
-      alignItems: "center",
-      gap: 5,
-      boxShadow: eraserActive ? "inset 0 0 10px rgba(255,80,60,0.15), 0 0 6px rgba(255,80,60,0.2)" : "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)"
-    }
-  }, /*#__PURE__*/React.createElement("svg", {
-    width: "14",
-    height: "14",
-    viewBox: "0 0 24 24"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M20 5.5L8.5 17H4l-1-1 8-8L18.5 1l1.5 1.5L12 10",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: "2",
-    strokeLinecap: "round",
-    strokeLinejoin: "round"
-  }), /*#__PURE__*/React.createElement("line", {
-    x1: "4",
-    y1: "20",
-    x2: "20",
-    y2: "20",
-    stroke: "currentColor",
-    strokeWidth: "1.5"
-  })), eraserActive ? "ERASING" : "Eraser"), /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      setSelectedBlockType(null);
-      setEraserActive(false);
-      setCrateSubPanelOpen(false);
-    },
-    style: {
-      padding: "6px 14px",
-      borderRadius: 4,
-      background: selectedBlockType !== null || eraserActive ? "rgba(80,30,30,0.4)" : PNL,
-      border: selectedBlockType !== null || eraserActive ? "2px solid rgba(255,80,80,0.3)" : PNLB,
-      cursor: "pointer",
-      color: selectedBlockType !== null || eraserActive ? "rgba(255,120,120,0.7)" : "rgba(140,160,180,0.25)",
-      fontSize: 10,
-      fontWeight: 700,
-      letterSpacing: 1,
-      textTransform: "uppercase",
-      display: "flex",
-      alignItems: "center",
-      gap: 5
-    }
-  }, /*#__PURE__*/React.createElement("svg", {
-    width: "12",
-    height: "12",
-    viewBox: "0 0 24 24"
-  }, /*#__PURE__*/React.createElement("line", {
-    x1: "6",
-    y1: "6",
-    x2: "18",
-    y2: "18",
-    stroke: "currentColor",
-    strokeWidth: "2.5",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("line", {
-    x1: "18",
-    y1: "6",
-    x2: "6",
-    y2: "18",
-    stroke: "currentColor",
-    strokeWidth: "2.5",
-    strokeLinecap: "round"
-  })), "Deselect"), /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      setBuilderGrid(new Array(COLS * ROWS).fill(0));
-      setBuilderDirty(true);
-    },
-    style: {
-      padding: "6px 14px",
-      borderRadius: 4,
-      background: PNL,
-      border: PNLB,
-      cursor: "pointer",
-      color: "rgba(200,210,220,0.5)",
-      fontSize: 10,
-      fontWeight: 700,
-      letterSpacing: 1,
-      textTransform: "uppercase"
-    }
-  }, "Clear All"))), builderTourStep != null && /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      setBuilderTourStep(null);
-      builderTourSeenRef.current = true;
-      try {
-        window.storage.set("cosmic_drift_builder_tour", "seen");
-      } catch (e) {}
-    },
-    style: {
-      position: "fixed",
-      inset: 0,
-      zIndex: 500,
-      background: "rgba(5,5,20,0.75)",
-      backdropFilter: "blur(3px)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    onClick: function (e) {
-      e.stopPropagation();
-    },
-    style: {
-      background: "linear-gradient(170deg,#151040,#1a0a2e)",
-      border: "1px solid rgba(80,200,255,0.25)",
-      borderRadius: 16,
-      padding: "22px 24px",
-      textAlign: "center",
-      maxWidth: 290,
-      width: "85%",
-      animation: "introFadeIn 0.25s ease-out"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "center",
-      gap: 6,
-      marginBottom: 14
-    }
-  }, BUILDER_TOUR_STEPS.map(function (s, si) {
-    return /*#__PURE__*/React.createElement("div", {
-      key: si,
-      style: {
-        width: 8,
-        height: 8,
-        borderRadius: "50%",
-        background: si === builderTourStep ? "#50c8ff" : si < builderTourStep ? "rgba(80,200,255,0.35)" : "rgba(80,200,255,0.12)",
-        transition: "background 0.2s"
-      }
-    });
-  })), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "center",
-      marginBottom: 12
-    }
-  }, builderTourStep === 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "grid",
-      gridTemplateColumns: "repeat(4, 1fr)",
-      gap: 3,
-      width: 140
-    }
-  }, [1, 0, 2, 0, 0, 7, 0, 3, 0, 1, 0, 1].map(function (t, i) {
-    return /*#__PURE__*/React.createElement("div", {
-      key: i,
-      style: {
-        width: 30,
-        height: 30,
-        borderRadius: 4,
-        background: t > 0 ? BLOCK_COLORS[t] ? BLOCK_COLORS[t].bg : "#888" : "rgba(30,30,50,0.6)",
-        border: t > 0 ? "1px solid " + (BLOCK_COLORS[t] ? BLOCK_COLORS[t].border : "#666") : "1px dashed rgba(80,100,140,0.3)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center"
-      }
-    }, t === 0 && /*#__PURE__*/React.createElement("div", {
-      style: {
-        width: 4,
-        height: 4,
-        borderRadius: "50%",
-        background: "rgba(80,100,140,0.2)"
-      }
-    }));
-  })), builderTourStep === 1 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 4
-    }
-  }, [1, 2, 3, 6, 8, 9].map(function (t) {
-    return /*#__PURE__*/React.createElement("div", {
-      key: t,
-      style: {
-        width: 34,
-        height: 34,
-        borderRadius: 5,
-        background: t === 2 ? "rgba(40,100,120,0.4)" : BLOCK_COLORS[t] ? BLOCK_COLORS[t].bg : "#888",
-        border: t === 2 ? "2px solid rgba(80,200,255,0.6)" : "2px solid " + (BLOCK_COLORS[t] ? BLOCK_COLORS[t].border : "#666"),
-        boxShadow: t === 2 ? "inset 0 0 10px rgba(80,200,255,0.2), 0 0 8px rgba(80,200,255,0.3)" : "none",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center"
-      }
-    }, t === 2 && /*#__PURE__*/React.createElement(CrossShotIcon, {
-      size: 18
-    }));
-  })), builderTourStep === 2 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 8
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: 36,
-      height: 36,
-      borderRadius: 5,
-      background: BLOCK_COLORS[9].bg,
-      border: "2px solid rgba(80,200,255,0.5)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      boxShadow: "inset 0 0 8px rgba(80,200,255,0.15)"
-    }
-  }, /*#__PURE__*/React.createElement(TreasureCrateIcon, {
-    size: 24
-  })), /*#__PURE__*/React.createElement("svg", {
-    width: "16",
-    height: "16",
-    viewBox: "0 0 24 24"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M9 6l6 6-6 6",
-    fill: "none",
-    stroke: "rgba(80,200,255,0.5)",
-    strokeWidth: "2.5",
-    strokeLinecap: "round",
-    strokeLinejoin: "round"
-  })), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 3
-    }
-  }, CRATE_VARIANTS.map(function (cv) {
-    return /*#__PURE__*/React.createElement("div", {
-      key: cv.type,
-      style: {
-        width: 28,
-        height: 28,
-        borderRadius: 4,
-        background: BLOCK_COLORS[cv.type].bg,
-        border: "1px solid " + BLOCK_COLORS[cv.type].border
-      }
-    });
-  }))), builderTourStep === 3 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "relative",
-      width: 136,
-      height: 50
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "absolute",
-      left: 8,
-      bottom: 20
-    }
-  }, /*#__PURE__*/React.createElement("svg", {
-    viewBox: "0 0 36 40",
-    width: "20",
-    height: "24",
-    style: {
-      filter: "drop-shadow(0 0 8px rgba(255,168,255,0.5))"
-    }
-  }, /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("linearGradient", {
-    id: "tourShipG",
-    x1: "0",
-    y1: "0",
-    x2: "0",
-    y2: "1"
-  }, /*#__PURE__*/React.createElement("stop", {
-    offset: "0%",
-    stopColor: "#ffd0ff"
-  }), /*#__PURE__*/React.createElement("stop", {
-    offset: "100%",
-    stopColor: "#cc70cc"
-  }))), /*#__PURE__*/React.createElement("path", {
-    d: "M18 0L4 32L12 27L18 40L24 27L32 32Z",
-    fill: "url(#tourShipG)"
-  }))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "absolute",
-      bottom: 0,
-      display: "flex",
-      gap: 6
-    }
-  }, [0, 1, 2, 3, 4, 5, 6, 7].map(function (c) {
-    return /*#__PURE__*/React.createElement("div", {
-      key: c,
-      style: {
-        width: 10,
-        height: 10,
-        borderRadius: "50%",
-        background: c === 1 ? "rgba(255,168,255,0.6)" : "rgba(255,168,255,0.15)",
-        border: c === 1 ? "2px solid rgba(255,168,255,0.8)" : "1px solid rgba(255,168,255,0.1)"
-      }
-    });
-  }))), builderTourStep === 4 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 8
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: 26,
-      height: 26,
-      borderRadius: 4,
-      background: PNL,
-      border: PNLB,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      color: "#b0c8d8",
-      fontSize: 16,
-      fontWeight: 700
-    }
-  }, "-"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: 36,
-      height: 28,
-      background: "linear-gradient(180deg, #1a3a4a, #0a2030)",
-      border: "2px solid rgba(80,200,255,0.3)",
-      borderRadius: 4,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center"
-    }
-  }, /*#__PURE__*/React.createElement("svg", {
-    width: "18",
-    height: "18",
-    viewBox: "0 0 24 24"
-  }, /*#__PURE__*/React.createElement("polygon", {
-    points: "12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5",
-    fill: "none",
-    stroke: "rgba(80,200,255,0.6)",
-    strokeWidth: "1.5"
-  }), /*#__PURE__*/React.createElement("text", {
-    x: "12",
-    y: "15",
-    textAnchor: "middle",
-    fill: "#50c8ff",
-    fontSize: "8",
-    fontWeight: "700"
-  }, "10"))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: 26,
-      height: 26,
-      borderRadius: 4,
-      background: PNL,
-      border: PNLB,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      color: "#b0c8d8",
-      fontSize: 16,
-      fontWeight: 700
-    }
-  }, "+")), builderTourStep === 5 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 8,
-      alignItems: "center"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "5px 12px",
-      borderRadius: 4,
-      background: "linear-gradient(180deg, #2a5a3a, #1a3a28)",
-      border: "2px solid rgba(80,200,100,0.4)",
-      color: "#80dd90",
-      fontSize: 10,
-      fontWeight: 700,
-      letterSpacing: 0.5
-    }
-  }, "SAVE"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "5px 10px",
-      borderRadius: 4,
-      background: "linear-gradient(180deg, #3a3a6a, #2a2a4a)",
-      border: "2px solid rgba(160,140,255,0.5)",
-      color: "#c8b8ff",
-      fontSize: 9,
-      fontWeight: 700,
-      letterSpacing: 0.3,
-      whiteSpace: "nowrap"
-    }
-  }, "SAVE & PLAY"))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: "#80ddff",
-      fontSize: 15,
-      fontWeight: 700,
-      marginBottom: 6,
-      letterSpacing: 0.5
-    }
-  }, BUILDER_TOUR_STEPS[builderTourStep].title), /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: "rgba(180,200,220,0.7)",
-      fontSize: 13,
-      lineHeight: 1.5,
-      marginBottom: 18
-    }
-  }, BUILDER_TOUR_STEPS[builderTourStep].desc), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 10,
-      justifyContent: "center",
-      alignItems: "center"
-    }
-  }, builderTourStep > 0 && /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      setBuilderTourStep(builderTourStep - 1);
-    },
-    style: {
-      padding: "6px 16px",
-      borderRadius: 16,
-      border: "1px solid rgba(80,200,255,0.2)",
-      color: "rgba(180,200,220,0.4)",
-      fontSize: 11,
-      fontWeight: 600,
-      cursor: "pointer"
-    }
-  }, "Back"), /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      if (builderTourStep < BUILDER_TOUR_STEPS.length - 1) {
-        setBuilderTourStep(builderTourStep + 1);
-      } else {
-        setBuilderTourStep(null);
-        builderTourSeenRef.current = true;
-        try {
-          window.storage.set("cosmic_drift_builder_tour", "seen");
-        } catch (e) {}
-      }
-    },
-    style: {
-      padding: "8px 24px",
-      borderRadius: 16,
-      background: "linear-gradient(135deg,#2a4a6a,#1a3a5a)",
-      border: "2px solid rgba(80,200,255,0.4)",
-      color: "#80ddff",
-      fontSize: 13,
-      fontWeight: 700,
-      cursor: "pointer",
-      letterSpacing: 0.5
-    }
-  }, builderTourStep < BUILDER_TOUR_STEPS.length - 1 ? "Next" : "Got It!")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginTop: 12
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: 40
-    }
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: "rgba(180,200,220,0.25)",
-      fontSize: 10
-    }
-  }, builderTourStep + 1 + " of " + BUILDER_TOUR_STEPS.length), builderTourStep < BUILDER_TOUR_STEPS.length - 1 ? /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      setBuilderTourStep(null);
-      builderTourSeenRef.current = true;
-      try {
-        window.storage.set("cosmic_drift_builder_tour", "seen");
-      } catch (e) {}
-    },
-    style: {
-      color: "rgba(180,200,220,0.3)",
-      fontSize: 10,
-      fontWeight: 600,
-      cursor: "pointer"
-    }
-  }, "Skip") : /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: 40
-    }
-  })))), showBackWarn && /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "fixed",
-      inset: 0,
-      zIndex: 500,
-      background: "rgba(5,5,20,0.7)",
-      backdropFilter: "blur(4px)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "linear-gradient(170deg,#151040,#1a0a2e)",
-      border: "1px solid rgba(120,80,255,0.3)",
-      borderRadius: 16,
-      padding: "20px 24px",
-      textAlign: "center",
-      maxWidth: 280,
-      animation: "introFadeIn 0.25s ease-out"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: "#c8b8ff",
-      fontSize: 15,
-      fontWeight: 700,
-      marginBottom: 8
-    }
-  }, "Unsaved Changes"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: "rgba(200,184,255,0.5)",
-      fontSize: 12,
-      marginBottom: 16
-    }
-  }, "You have unsaved changes. Leave anyway?"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 12,
-      justifyContent: "center"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      setShowBackWarn(false);
-    },
-    style: {
-      padding: "8px 20px",
-      borderRadius: 16,
-      border: "1px solid rgba(120,80,255,0.3)",
-      color: "#c8b8ff",
-      fontSize: 12,
-      fontWeight: 600,
-      cursor: "pointer"
-    }
-  }, "Stay"), /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      setShowBackWarn(false);
-      loadSavedLevels();
-      setScreen("mylevels");
-    },
-    style: {
-      padding: "8px 20px",
-      borderRadius: 16,
-      background: "rgba(255,60,60,0.3)",
-      border: "1px solid rgba(255,80,80,0.35)",
-      color: "#ff8866",
-      fontSize: 12,
-      fontWeight: 700,
-      cursor: "pointer"
-    }
-  }, "Leave"))))), screen === "mylevels" && /*#__PURE__*/React.createElement("div", {
+  }, "Don't show this again"))))), screen === "mylevels" && /*#__PURE__*/React.createElement("div", {
     style: {
       position: "fixed",
       inset: 0,
@@ -10926,92 +9284,21 @@ function CosmicDriftGame() {
       textAlign: "center"
     }
   }, "My Levels"), /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      setShowImport(true);
-      setImportText("");
-      setImportError("");
-    },
+    onClick: navigateToWorkshop,
     style: {
       padding: "6px 10px",
       borderRadius: 4,
-      background: "linear-gradient(180deg, #3d3d4a, #2a2a35)",
-      border: "1px solid rgba(200,184,255,0.3)",
-      color: "#c8b8ff",
-      fontSize: 10,
-      fontWeight: 700,
-      letterSpacing: 1,
-      cursor: "pointer",
-      textTransform: "uppercase"
-    }
-  }, "Import"), savedLevels.length > 0 && /*#__PURE__*/React.createElement("div", {
-    onClick: exportAllLevels,
-    style: {
-      padding: "6px 6px",
-      borderRadius: 4,
-      background: "linear-gradient(180deg, #3d3d4a, #2a2a35)",
-      border: "1px solid rgba(200,184,255,0.2)",
-      color: "rgba(200,184,255,0.6)",
-      fontSize: 9,
-      fontWeight: 700,
-      letterSpacing: 0.5,
-      cursor: "pointer",
-      textTransform: "uppercase",
-      whiteSpace: "nowrap"
-    }
-  }, "Exp All"), /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      openBuilder();
-    },
-    style: {
-      padding: "6px 10px",
-      borderRadius: 4,
-      background: "linear-gradient(180deg, #3d3d4a, #2a2a35)",
+      background: "linear-gradient(180deg, #1a3a4a, #0f2a38)",
       border: "2px solid rgba(80,200,255,0.3)",
       color: "#80ddff",
       fontSize: 10,
       fontWeight: 700,
       letterSpacing: 1,
       cursor: "pointer",
-      textTransform: "uppercase"
-    }
-  }, "+ New")), !levelsLoading && savedLevels.length > 1 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 4,
-      padding: "6px 10px 2px",
-      position: "relative",
-      zIndex: 1
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: "rgba(180,200,220,0.3)",
-      fontSize: 9,
-      fontWeight: 700,
-      letterSpacing: 0.5,
       textTransform: "uppercase",
-      paddingTop: 4,
-      marginRight: 2
+      boxShadow: "0 0 8px rgba(80,200,255,0.25), 0 2px 4px rgba(0,0,0,0.3)"
     }
-  }, "Sort:"), [["date_new", "Newest"], ["date_old", "Oldest"], ["name", "Name"]].map(function (opt) {
-    var active = sortMode === opt[0];
-    return /*#__PURE__*/React.createElement("div", {
-      key: opt[0],
-      onClick: function () {
-        setSortMode(opt[0]);
-      },
-      style: {
-        padding: "3px 8px",
-        borderRadius: 3,
-        background: active ? "rgba(80,200,255,0.12)" : "transparent",
-        border: active ? "1px solid rgba(80,200,255,0.3)" : "1px solid transparent",
-        color: active ? "#80ddff" : "rgba(180,200,220,0.3)",
-        fontSize: 9,
-        fontWeight: 700,
-        cursor: "pointer",
-        letterSpacing: 0.5
-      }
-    }, opt[1]);
-  })), /*#__PURE__*/React.createElement("div", {
+  }, "Workshop")), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
       overflowY: "auto",
@@ -11040,9 +9327,25 @@ function CosmicDriftGame() {
   }, "No saved levels yet"), /*#__PURE__*/React.createElement("div", {
     style: {
       color: "rgba(180,200,220,0.2)",
-      fontSize: 12
+      fontSize: 12,
+      marginBottom: 16
     }
-  }, "Build a new level or tap Import to paste a level code.")), !levelsLoading && savedLevels.slice().sort(function (a, b) {
+  }, "Create levels in the Workshop"), /*#__PURE__*/React.createElement("div", {
+    onClick: navigateToWorkshop,
+    style: {
+      display: "inline-block",
+      padding: "10px 24px",
+      borderRadius: 6,
+      background: "linear-gradient(180deg, #1a3a4a, #0f2a38)",
+      border: "2px solid rgba(80,200,255,0.3)",
+      color: "#80ddff",
+      fontSize: 12,
+      fontWeight: 700,
+      cursor: "pointer",
+      letterSpacing: 1,
+      boxShadow: "0 0 8px rgba(80,200,255,0.25)"
+    }
+  }, "Open Workshop")), !levelsLoading && savedLevels.slice().sort(function (a, b) {
     if (sortMode === "name") return (a.name || "").localeCompare(b.name || "");
     if (sortMode === "date_old") return (a.modified || 0) - (b.modified || 0);
     return (b.modified || 0) - (a.modified || 0);
@@ -11057,76 +9360,7 @@ function CosmicDriftGame() {
         padding: "10px 12px",
         marginBottom: 8
       }
-    }, renamingId === lv.id ? /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        gap: 6,
-        marginBottom: 8,
-        alignItems: "center"
-      }
-    }, /*#__PURE__*/React.createElement("input", {
-      value: renamingName,
-      onChange: function (e) {
-        setRenamingName(e.target.value);
-      },
-      style: {
-        flex: 1,
-        padding: "4px 8px",
-        borderRadius: 4,
-        background: SCRN,
-        border: SCRNB,
-        color: "#b0c8d8",
-        fontSize: 16,
-        fontFamily: "'Quicksand',sans-serif",
-        outline: "none"
-      }
-    }), /*#__PURE__*/React.createElement("div", {
-      onClick: function () {
-        renameLevel(lv.id, renamingName);
-      },
-      onTouchEnd: function (e) {
-        e.preventDefault();
-        document.activeElement && document.activeElement.blur();
-        renameLevel(lv.id, renamingName);
-      },
-      style: {
-        padding: "4px 8px",
-        borderRadius: 4,
-        background: "rgba(80,200,100,0.2)",
-        border: "1px solid rgba(80,200,100,0.4)",
-        cursor: "pointer",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center"
-      }
-    }, /*#__PURE__*/React.createElement("svg", {
-      width: "14",
-      height: "14",
-      viewBox: "0 0 24 24"
-    }, /*#__PURE__*/React.createElement("path", {
-      d: "M5 13l4 4L19 7",
-      fill: "none",
-      stroke: "#80dd90",
-      strokeWidth: "2.5",
-      strokeLinecap: "round",
-      strokeLinejoin: "round"
-    }))), /*#__PURE__*/React.createElement("div", {
-      onClick: function () {
-        setRenamingId(null);
-      },
-      style: {
-        padding: "4px 8px",
-        borderRadius: 4,
-        border: "1px solid rgba(120,80,255,0.3)",
-        color: "#c8b8ff",
-        fontSize: 12,
-        fontWeight: 700,
-        cursor: "pointer",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center"
-      }
-    }, "X")) : /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement("div", {
       style: {
         marginBottom: 8
       }
@@ -11144,15 +9378,14 @@ function CosmicDriftGame() {
     }, dateStr)), /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
-        gap: 6,
-        flexWrap: "wrap"
+        gap: 6
       }
     }, /*#__PURE__*/React.createElement("div", {
       onClick: function () {
         playCustomLevel(lv);
       },
       style: {
-        padding: "5px 12px",
+        padding: "5px 16px",
         borderRadius: 4,
         background: "linear-gradient(180deg, #2a5a3a, #1a3a28)",
         border: "1px solid rgba(80,200,100,0.4)",
@@ -11162,466 +9395,8 @@ function CosmicDriftGame() {
         cursor: "pointer",
         letterSpacing: 0.5
       }
-    }, "PLAY"), /*#__PURE__*/React.createElement("div", {
-      onClick: function () {
-        openBuilder(lv);
-      },
-      style: {
-        padding: "5px 12px",
-        borderRadius: 4,
-        background: PNL,
-        border: "1px solid rgba(80,200,255,0.3)",
-        color: "#80ddff",
-        fontSize: 10,
-        fontWeight: 700,
-        cursor: "pointer",
-        letterSpacing: 0.5
-      }
-    }, "EDIT"), /*#__PURE__*/React.createElement("div", {
-      onClick: function () {
-        setRenamingId(lv.id);
-        setRenamingName(lv.name || "");
-      },
-      style: {
-        padding: "5px 10px",
-        borderRadius: 4,
-        background: PNL,
-        border: PNLB,
-        color: "rgba(200,210,220,0.6)",
-        fontSize: 10,
-        fontWeight: 700,
-        cursor: "pointer",
-        letterSpacing: 0.5
-      }
-    }, "RENAME"), /*#__PURE__*/React.createElement("div", {
-      onClick: function () {
-        exportLevel(lv);
-      },
-      style: {
-        padding: "5px 10px",
-        borderRadius: 4,
-        background: PNL,
-        border: "1px solid rgba(200,184,255,0.3)",
-        color: "#c8b8ff",
-        fontSize: 10,
-        fontWeight: 700,
-        cursor: "pointer",
-        letterSpacing: 0.5
-      }
-    }, "EXPORT"), /*#__PURE__*/React.createElement("div", {
-      onClick: function () {
-        setDeletingId(lv.id);
-      },
-      style: {
-        padding: "5px 10px",
-        borderRadius: 4,
-        background: "rgba(80,20,20,0.4)",
-        border: "1px solid rgba(255,80,80,0.3)",
-        color: "#ff8866",
-        fontSize: 10,
-        fontWeight: 700,
-        cursor: "pointer",
-        letterSpacing: 0.5
-      }
-    }, "DELETE")));
-  })), deletingId && /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "fixed",
-      inset: 0,
-      zIndex: 500,
-      background: "rgba(5,5,20,0.7)",
-      backdropFilter: "blur(4px)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "linear-gradient(170deg,#151040,#1a0a2e)",
-      border: "1px solid rgba(255,80,80,0.3)",
-      borderRadius: 16,
-      padding: "20px 24px",
-      textAlign: "center",
-      maxWidth: 260,
-      animation: "introFadeIn 0.25s ease-out"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: "#ff8866",
-      fontSize: 15,
-      fontWeight: 700,
-      marginBottom: 8
-    }
-  }, "Delete Level?"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: "rgba(200,184,255,0.45)",
-      fontSize: 12,
-      marginBottom: 16
-    }
-  }, "This cannot be undone."), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 12,
-      justifyContent: "center"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      setDeletingId(null);
-    },
-    style: {
-      padding: "8px 20px",
-      borderRadius: 16,
-      border: "1px solid rgba(120,80,255,0.3)",
-      color: "#c8b8ff",
-      fontSize: 12,
-      fontWeight: 600,
-      cursor: "pointer"
-    }
-  }, "Cancel"), /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      deleteLevel(deletingId);
-    },
-    style: {
-      padding: "8px 20px",
-      borderRadius: 16,
-      background: "rgba(255,60,60,0.3)",
-      border: "1px solid rgba(255,80,80,0.4)",
-      color: "#ff6644",
-      fontSize: 12,
-      fontWeight: 700,
-      cursor: "pointer"
-    }
-  }, "Delete")))), exportId && /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "fixed",
-      inset: 0,
-      zIndex: 500,
-      background: "rgba(5,5,20,0.7)",
-      backdropFilter: "blur(4px)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "linear-gradient(170deg,#151040,#1a0a2e)",
-      border: "1px solid rgba(200,184,255,0.3)",
-      borderRadius: 16,
-      padding: "20px 24px",
-      textAlign: "center",
-      maxWidth: 320,
-      animation: "introFadeIn 0.25s ease-out"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: "#c8b8ff",
-      fontSize: 15,
-      fontWeight: 700,
-      marginBottom: 8
-    }
-  }, "Export Level"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: "rgba(200,184,255,0.4)",
-      fontSize: 11,
-      marginBottom: 12
-    }
-  }, "Copy this code to share your level:"), /*#__PURE__*/React.createElement("textarea", {
-    readOnly: true,
-    value: exportText,
-    style: {
-      width: "100%",
-      height: 80,
-      padding: 8,
-      borderRadius: 6,
-      background: SCRN,
-      border: SCRNB,
-      color: "#80ddff",
-      fontSize: 16,
-      fontFamily: "monospace",
-      resize: "none",
-      outline: "none",
-      boxSizing: "border-box"
-    },
-    onClick: function (e) {
-      e.target.select();
-    }
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 12,
-      justifyContent: "center",
-      marginTop: 12
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      setExportId(null);
-    },
-    style: {
-      padding: "8px 20px",
-      borderRadius: 16,
-      border: "1px solid rgba(120,80,255,0.3)",
-      color: "#c8b8ff",
-      fontSize: 12,
-      fontWeight: 600,
-      cursor: "pointer"
-    }
-  }, "Close"), /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(exportText).then(function () {
-          setCopied(true);
-          setTimeout(function () {
-            setCopied(false);
-          }, 2000);
-        });
-      } else {
-        var ta = document.createElement("textarea");
-        ta.value = exportText;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-        setCopied(true);
-        setTimeout(function () {
-          setCopied(false);
-        }, 2000);
-      }
-    },
-    style: {
-      padding: "8px 20px",
-      borderRadius: 16,
-      background: copied ? "rgba(80,200,100,0.3)" : "linear-gradient(135deg,#7b5ea7,#9f7fd0)",
-      border: copied ? "1px solid rgba(80,200,100,0.5)" : "none",
-      color: copied ? "#80dd90" : "#fff",
-      fontSize: 12,
-      fontWeight: 700,
-      cursor: "pointer"
-    }
-  }, copied ? "Copied!" : "Copy")))), showImport && /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "fixed",
-      inset: 0,
-      zIndex: 500,
-      background: "rgba(5,5,20,0.7)",
-      backdropFilter: "blur(4px)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center"
-    },
-    onClick: function (e) {
-      e.stopPropagation();
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    onClick: function (e) {
-      e.stopPropagation();
-    },
-    style: {
-      background: "linear-gradient(170deg,#151040,#1a0a2e)",
-      border: "1px solid rgba(80,200,255,0.3)",
-      borderRadius: 16,
-      padding: "20px 24px",
-      textAlign: "center",
-      maxWidth: 320,
-      width: "90%",
-      animation: "introFadeIn 0.25s ease-out"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: "#80ddff",
-      fontSize: 15,
-      fontWeight: 700,
-      marginBottom: 8
-    }
-  }, "Import Level"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: "rgba(180,200,220,0.4)",
-      fontSize: 11,
-      marginBottom: 12
-    }
-  }, "Paste an exported level code:"), /*#__PURE__*/React.createElement("textarea", {
-    value: importText,
-    onChange: function (e) {
-      setImportText(e.target.value);
-      setImportError("");
-    },
-    placeholder: "{\"name\":\"...\",\"grid\":[...],\"ship\":3}",
-    style: {
-      width: "100%",
-      height: 90,
-      padding: 8,
-      borderRadius: 6,
-      background: SCRN,
-      border: importError ? "2px solid rgba(255,80,60,0.5)" : SCRNB,
-      color: "#b0c8d8",
-      fontSize: 16,
-      fontFamily: "monospace",
-      resize: "none",
-      outline: "none",
-      boxSizing: "border-box"
-    }
-  }), importError && /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: "#ff8866",
-      fontSize: 11,
-      marginTop: 6,
-      fontWeight: 600
-    }
-  }, importError), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 12,
-      justifyContent: "center",
-      marginTop: 12
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      setShowImport(false);
-      setImportText("");
-      setImportError("");
-    },
-    onTouchEnd: function (e) {
-      e.preventDefault();
-      setShowImport(false);
-      setImportText("");
-      setImportError("");
-    },
-    style: {
-      padding: "8px 20px",
-      borderRadius: 16,
-      border: "1px solid rgba(120,80,255,0.3)",
-      color: "#c8b8ff",
-      fontSize: 12,
-      fontWeight: 600,
-      cursor: "pointer"
-    }
-  }, "Cancel"), /*#__PURE__*/React.createElement("div", {
-    onClick: handleImport,
-    onTouchEnd: function (e) {
-      e.preventDefault();
-      document.activeElement && document.activeElement.blur();
-      handleImport();
-    },
-    style: {
-      padding: "8px 20px",
-      borderRadius: 16,
-      background: "linear-gradient(135deg,#2a5a6a,#1a3a4a)",
-      border: "1px solid rgba(80,200,255,0.4)",
-      color: "#80ddff",
-      fontSize: 12,
-      fontWeight: 700,
-      cursor: "pointer"
-    }
-  }, "Import")))), showExportAll && /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "fixed",
-      inset: 0,
-      zIndex: 500,
-      background: "rgba(5,5,20,0.7)",
-      backdropFilter: "blur(4px)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    onClick: function (e) {
-      e.stopPropagation();
-    },
-    style: {
-      background: "linear-gradient(170deg,#151040,#1a0a2e)",
-      border: "1px solid rgba(200,184,255,0.3)",
-      borderRadius: 16,
-      padding: "20px 24px",
-      textAlign: "center",
-      maxWidth: 340,
-      width: "90%",
-      animation: "introFadeIn 0.25s ease-out"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: "#c8b8ff",
-      fontSize: 15,
-      fontWeight: 700,
-      marginBottom: 8
-    }
-  }, "Export All Levels"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: "rgba(200,184,255,0.4)",
-      fontSize: 11,
-      marginBottom: 12
-    }
-  }, savedLevels.length, " level", savedLevels.length !== 1 ? "s" : "", " - copy to share or back up:"), /*#__PURE__*/React.createElement("textarea", {
-    readOnly: true,
-    value: exportAllText,
-    style: {
-      width: "100%",
-      height: 100,
-      padding: 8,
-      borderRadius: 6,
-      background: SCRN,
-      border: SCRNB,
-      color: "#80ddff",
-      fontSize: 16,
-      fontFamily: "monospace",
-      resize: "none",
-      outline: "none",
-      boxSizing: "border-box"
-    },
-    onClick: function (e) {
-      e.target.select();
-    }
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 12,
-      justifyContent: "center",
-      marginTop: 12
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      setShowExportAll(false);
-    },
-    style: {
-      padding: "8px 20px",
-      borderRadius: 16,
-      border: "1px solid rgba(120,80,255,0.3)",
-      color: "#c8b8ff",
-      fontSize: 12,
-      fontWeight: 600,
-      cursor: "pointer"
-    }
-  }, "Close"), /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(exportAllText).then(function () {
-          setCopied(true);
-          setTimeout(function () {
-            setCopied(false);
-          }, 2000);
-        });
-      } else {
-        var ta = document.createElement("textarea");
-        ta.value = exportAllText;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-        setCopied(true);
-        setTimeout(function () {
-          setCopied(false);
-        }, 2000);
-      }
-    },
-    style: {
-      padding: "8px 20px",
-      borderRadius: 16,
-      background: copied ? "rgba(80,200,100,0.3)" : "linear-gradient(135deg,#7b5ea7,#9f7fd0)",
-      border: copied ? "1px solid rgba(80,200,100,0.5)" : "none",
-      color: copied ? "#80dd90" : "#fff",
-      fontSize: 12,
-      fontWeight: 700,
-      cursor: "pointer"
-    }
-  }, copied ? "Copied!" : "Copy All"))))), /*#__PURE__*/React.createElement(ConfirmOverlay, {
+    }, "PLAY")));
+  }))), /*#__PURE__*/React.createElement(ConfirmOverlay, {
     open: confirmOpen,
     onCancel: function () {
       setConfirmOpen(false);
@@ -12171,13 +9946,7 @@ function CosmicDriftGame() {
         pa = getLevelPlasma(level);
         ln = "Level " + level;
       }
-      openBuilder({
-        grid: gd,
-        shipStart: ss,
-        startPlasma: pa,
-        name: ln,
-        id: null
-      });
+      navigateToWorkshop();
     },
     style: {
       display: "flex",
@@ -12196,10 +9965,10 @@ function CosmicDriftGame() {
   }, /*#__PURE__*/React.createElement("path", {
     d: "M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z",
     fill: "rgba(200,210,220,0.5)"
-  })), "Open in Builder"), customLevelMode && /*#__PURE__*/React.createElement("div", {
+  })), "Open in Workshop"), customLevelMode && /*#__PURE__*/React.createElement("div", {
     onClick: function () {
       setGameMenuOpen(false);
-      editCustomLevel();
+      navigateToWorkshop();
     },
     style: {
       display: "flex",
@@ -13026,9 +10795,12 @@ function CosmicDriftGame() {
     }, s.winPath ? "WIN:" + s.winPath + " cd=" + s.cd + " pff=" + s.pff + " rm=" + (s.rm != null ? s.rm : "?") : "#" + (si + 1) + " err=" + Math.round(s.arriveT - s.fireT - s.dur) + "ms cb=" + Math.round(s.hitT - s.arriveT) + "ms");
   })))));
 }
+
+// Mount
 var root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(React.createElement(CosmicDriftGame));
-var ls = document.getElementById("loading-screen"); if (ls) ls.remove();
+root.render(React.createElement(isCrate, null));
+var ls = document.getElementById("loading-screen");
+if (ls) ls.style.display = "none";
 </script>
 </body>
 </html>

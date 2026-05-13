@@ -1,0 +1,5602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Cosmic Workshop</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #0b0c1a; }
+#root { width: 100%; height: 100%; }
+#loading-screen { position: fixed; inset: 0; background: #0b0c1a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; font-family: "Quicksand", sans-serif; }
+#loading-screen .title { font-size: 11px; font-weight: 700; letter-spacing: 4px; color: rgba(180,200,220,0.3); text-transform: uppercase; margin-bottom: 8px; }
+#loading-screen .main { font-size: 24px; font-weight: 700; letter-spacing: 3px; color: #80ddff; text-transform: uppercase; text-shadow: 0 0 20px rgba(80,200,255,0.3); }
+#loading-screen .dots { margin-top: 20px; display: flex; gap: 8px; }
+#loading-screen .dot { width: 6px; height: 6px; border-radius: 50%; background: #80ddff; opacity: 0.3; animation: loadPulse 1.2s ease-in-out infinite; }
+#loading-screen .dot:nth-child(2) { animation-delay: 0.2s; }
+#loading-screen .dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes loadPulse { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.3); } }
+@font-face { font-family: "Quicksand"; font-display: swap; src: local("Quicksand"); }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="loading-screen">
+  <div class="title">COSMIC DRIFT</div>
+  <div class="main">Loading...</div>
+  <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+</div>
+<div id="root"></div>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script>
+var useState = React.useState;
+var useRef = React.useRef;
+var useCallback = React.useCallback;
+var useEffect = React.useEffect;
+var memo = React.memo;
+
+// window.storage shim using localStorage
+if (!window.storage) {
+  window.storage = {
+    get: function(key) {
+      return new Promise(function(resolve, reject) {
+        try {
+          var val = localStorage.getItem("csd_" + key);
+          if (val !== null) resolve({ key: key, value: val });
+          else reject(new Error("Key not found"));
+        } catch(e) { reject(e); }
+      });
+    },
+    set: function(key, value) {
+      return new Promise(function(resolve, reject) {
+        try {
+          localStorage.setItem("csd_" + key, value);
+          resolve({ key: key, value: value });
+        } catch(e) { reject(e); }
+      });
+    },
+    delete: function(key) {
+      return new Promise(function(resolve) {
+        localStorage.removeItem("csd_" + key);
+        resolve({ key: key, deleted: true });
+      });
+    },
+    list: function(prefix) {
+      return new Promise(function(resolve) {
+        var keys = [];
+        for (var i = 0; i < localStorage.length; i++) {
+          var k = localStorage.key(i);
+          if (k.indexOf("csd_") === 0) {
+            var realKey = k.substring(4);
+            if (!prefix || realKey.indexOf(prefix) === 0) keys.push(realKey);
+          }
+        }
+        resolve({ keys: keys });
+      });
+    }
+  };
+}
+</script>
+<script>
+/* ============================================================
+   COSMIC WORKSHOP v2.0
+   Creative suite for Cosmic Drift: Level Builder + Block Designer
+   Shares storage with the game via window.storage.
+   Created by Dan Medwin and Claude (Opus 4.6), 2026
+   ============================================================ */
+
+var WORKSHOP_VERSION = "v2.0";
+
+// ═══════════════════════════════════════════════════════════════
+// SHARED CONSTANTS (duplicated from game for independence)
+// ═══════════════════════════════════════════════════════════════
+
+var COLS = 8,
+  ROWS = 6,
+  GAP = 5,
+  BOARD_PAD = 10,
+  START_PLASMA = 10;
+var BLOCK_COLORS = {
+  1: {
+    bg: "linear-gradient(135deg,#7b5ea7,#9f7fd0)",
+    border: "#6b4e97",
+    shadow: "0 0 10px rgba(159,127,208,0.4)",
+    particle: "#9f7fd0"
+  },
+  2: {
+    bg: "linear-gradient(135deg,#e0457b,#ff6b9d)",
+    border: "#c03868",
+    shadow: "0 0 12px rgba(224,69,123,0.5)",
+    particle: "#ff6b9d"
+  },
+  3: {
+    bg: "linear-gradient(135deg,#9a7020,#b8862a)",
+    border: "#7a5a18",
+    shadow: "0 0 10px rgba(180,130,40,0.5)",
+    particle: "#b8862a"
+  },
+  4: {
+    bg: "linear-gradient(135deg,#2090a0,#30c0d0)",
+    border: "#1a7888",
+    shadow: "0 0 12px rgba(48,192,208,0.4)",
+    particle: "#30c0d0"
+  },
+  5: {
+    bg: "linear-gradient(135deg,#3060b0,#4080d8)",
+    border: "#2850a0",
+    shadow: "0 0 12px rgba(80,200,255,0.4)",
+    particle: "#4080d8"
+  },
+  6: {
+    bg: "linear-gradient(135deg,#8844cc,#aa66ee)",
+    border: "#6633aa",
+    shadow: "0 0 12px rgba(136,68,204,0.5)",
+    particle: "#aa66ee"
+  },
+  7: {
+    bg: "#888",
+    border: "#666",
+    shadow: "none",
+    particle: "#888"
+  },
+  8: {
+    bg: "linear-gradient(135deg,#2a8a2a,#40b840)",
+    border: "#1a6a1a",
+    shadow: "0 0 10px rgba(64,184,64,0.4)",
+    particle: "#40b840"
+  },
+  9: {
+    bg: "linear-gradient(135deg,#b8862a,#d4a843)",
+    border: "#9a7020",
+    shadow: "0 0 12px rgba(212,168,67,0.5)",
+    particle: "#d4a843"
+  },
+  10: {
+    bg: "linear-gradient(135deg,#4060a0,#5080c0)",
+    border: "#3050a0",
+    shadow: "0 0 12px rgba(80,128,220,0.5)",
+    particle: "#5080c0"
+  },
+  11: {
+    bg: "linear-gradient(135deg,#b8862a,#d4a843)",
+    border: "#9a7020",
+    shadow: "0 0 12px rgba(212,168,67,0.5)",
+    particle: "#d4a843"
+  },
+  12: {
+    bg: "linear-gradient(135deg,#b8862a,#d4a843)",
+    border: "#9a7020",
+    shadow: "0 0 12px rgba(212,168,67,0.5)",
+    particle: "#d4a843"
+  },
+  13: {
+    bg: "linear-gradient(135deg,#b8862a,#d4a843)",
+    border: "#9a7020",
+    shadow: "0 0 12px rgba(212,168,67,0.5)",
+    particle: "#d4a843"
+  },
+  14: {
+    bg: "linear-gradient(135deg,#b8862a,#d4a843)",
+    border: "#9a7020",
+    shadow: "0 0 12px rgba(212,168,67,0.5)",
+    particle: "#d4a843"
+  },
+  15: {
+    bg: "linear-gradient(135deg,#b8862a,#d4a843)",
+    border: "#9a7020",
+    shadow: "0 0 12px rgba(212,168,67,0.5)",
+    particle: "#d4a843"
+  },
+  16: {
+    bg: "linear-gradient(135deg,#b8862a,#d4a843)",
+    border: "#9a7020",
+    shadow: "0 0 12px rgba(212,168,67,0.5)",
+    particle: "#d4a843"
+  }
+};
+var BLOCK_LABELS = {
+  1: "Standard",
+  2: "Cross Shot",
+  3: "Lightning",
+  4: "Extra Core",
+  5: "Plasma Cell",
+  6: "Drone Strike",
+  7: "Indestructible",
+  8: "Acid Barrel",
+  9: "Treasure Crate",
+  10: "Force Field",
+  11: "Drone Crate",
+  12: "Lightning Crate",
+  13: "Cross Crate",
+  14: "Split Crate",
+  15: "Hammer Crate",
+  16: "Core Crate",
+  17: "UFO"
+};
+var BLOCK_DESC = {
+  1: "1 pt. Destroyed by any hit.",
+  2: "Fires plasma in 4 directions. +3 pts.",
+  3: "Lightning upward through the column. +3 pts.",
+  4: "Adds an extra reactor core. +2 pts.",
+  5: "Recharges plasma (+3). +2 pts.",
+  6: "Drone targets densest 3x3 area. +5 pts.",
+  7: "Cannot be destroyed. Blocks plasma and lightning.",
+  8: "Ooze melts down the column. No points. Drains plasma if ship is below.",
+  9: "Contains one random power-up for your inventory.",
+  10: "Protected by an energy shield. Takes 3 hits to destroy. +5 pts.",
+  11: "Contains a Drone power-up.",
+  12: "Contains a Lightning power-up.",
+  13: "Contains a Cross Shot power-up.",
+  14: "Contains a Split power-up.",
+  15: "Contains a Smash power-up.",
+  16: "Contains a Reactor Core.",
+  17: "Warps every 2 plasma shots. Drops EMP that drains 25% plasma in 3 columns."
+};
+var WIN_EXEMPT = {
+  7: true,
+  8: true,
+  9: true,
+  11: true,
+  12: true,
+  13: true,
+  14: true,
+  15: true,
+  16: true,
+  17: true
+};
+function isCrate(t) {
+  return t === 9 || t >= 11 && t <= 16;
+}
+var CRATE_VARIANTS = [{
+  type: 9,
+  name: "Random",
+  color: "rgba(212,168,67,0.8)"
+}, {
+  type: 11,
+  name: "Drone",
+  color: "rgba(136,68,204,0.8)"
+}, {
+  type: 12,
+  name: "Zap",
+  color: "rgba(180,130,40,0.8)"
+}, {
+  type: 13,
+  name: "Cross",
+  color: "rgba(224,69,123,0.8)"
+}, {
+  type: 14,
+  name: "Split",
+  color: "rgba(80,200,255,0.8)"
+}, {
+  type: 15,
+  name: "Hammer",
+  color: "rgba(160,160,180,0.8)"
+}, {
+  type: 16,
+  name: "Core",
+  color: "rgba(80,200,255,0.8)"
+}];
+var BUILDER_TOUR_STEPS = [{
+  title: "The Grid",
+  desc: "Select a block type from the palette, then tap or drag across cells to place them. Tap a filled cell with the same block type to remove it."
+}, {
+  title: "Block Palette",
+  desc: "Choose from 10 block types. The selected type highlights in blue. Tap it again to deselect."
+}, {
+  title: "Crate Variants",
+  desc: "Tap the Crate icon in the palette to pick a reward type: Random, Drone, Lightning, Cross, Split, or Hammer."
+}, {
+  title: "Ship Position",
+  desc: "Tap one of the eight columns below the grid to set where the player's ship starts."
+}, {
+  title: "Starting Plasma",
+  desc: "Use the +/- buttons to set how much plasma the player starts with (1 to 20)."
+}, {
+  title: "Save & Play",
+  desc: "Name your level, then Save it. Your levels are always in My Levels. Open the game to play them."
+}];
+
+// ── Style constants (match game HUD) ──
+var PNL = "linear-gradient(180deg, #3d3d4a 0%, #2a2a35 100%)";
+var PNLB = "2px solid #505058";
+var PNLS = "inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -2px 4px rgba(0,0,0,0.4), 0 2px 3px rgba(0,0,0,0.3)";
+var SCRN = "linear-gradient(180deg, #0a0a14 0%, #12121e 100%)";
+var SCRNB = "2px solid #3a3a45";
+var SCRNS = "inset 0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.05)";
+
+// ── Animation CSS (subset needed for Workshop) ──
+var ANIM_CSS = "@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@400;600;700&display=swap');\n@keyframes starDrift{0%{transform:translateY(-50%)}100%{transform:translateY(0)}}\n@keyframes introFadeIn{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}\n@keyframes pulse{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}\n@keyframes ufoWarpOut{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}\n@keyframes ufoWarpIn{0%{transform:scale(0.05);opacity:0}60%{transform:scale(1.08);opacity:0.9}100%{transform:scale(1);opacity:1}}\n@keyframes ufoLightSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}\n@keyframes splashFloat{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}\n@keyframes splashGlow{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}\n* { box-sizing: border-box; }\ninput[type=range] { -webkit-appearance: none; appearance: none; background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; outline: none; }\ninput[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }\ninput[type=range]::-moz-range-thumb { width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }";
+
+// ═══════════════════════════════════════════════════════════════
+// SHARED VISUAL COMPONENTS
+// ═══════════════════════════════════════════════════════════════
+
+function Stars() {
+  var items = [];
+  for (var h = 0; h < 2; h++) {
+    for (var i = 0; i < 50; i++) items.push(React.createElement("div", {
+      key: h + "_" + i,
+      style: {
+        position: "absolute",
+        width: i % 7 === 0 ? 3 : i % 4 === 0 ? 2 : 1,
+        height: i % 7 === 0 ? 3 : i % 4 === 0 ? 2 : 1,
+        borderRadius: "50%",
+        background: i % 9 === 0 ? "#ffa8ff" : i % 6 === 0 ? "#a8c8ff" : "rgba(255,255,255,0.5)",
+        left: (i * 37 + 13) % 100 + "%",
+        top: (i * 53 + 7) % 100 / 2 + h * 50 + "%",
+        opacity: 0.2 + i % 5 * 0.15
+      }
+    }));
+  }
+  return React.createElement("div", {
+    style: {
+      position: "absolute",
+      inset: 0,
+      overflow: "hidden",
+      pointerEvents: "none",
+      zIndex: 0
+    }
+  }, React.createElement("div", {
+    style: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      top: 0,
+      height: "200%",
+      animation: "starDrift 40s linear infinite"
+    }
+  }, items));
+}
+function CoreIcon(props) {
+  var s = props.size,
+    mode = props.mode || "lit";
+  var isLit = mode === "lit" || mode === "extra";
+  return React.createElement("svg", {
+    width: s,
+    height: s,
+    viewBox: "0 0 24 24"
+  }, React.createElement("defs", null, React.createElement("linearGradient", {
+    id: "cgLit",
+    x1: "0",
+    y1: "0",
+    x2: "1",
+    y2: "1"
+  }, React.createElement("stop", {
+    offset: "0%",
+    stopColor: "#30c0d0"
+  }), React.createElement("stop", {
+    offset: "100%",
+    stopColor: "#2090a0"
+  }))), React.createElement("polygon", {
+    points: "12,2 21,7 21,17 12,22 3,17 3,7",
+    fill: isLit ? "url(#cgLit)" : "none",
+    stroke: isLit ? "#50e8f0" : "rgba(80,200,255,0.2)",
+    strokeWidth: "1.5"
+  }), isLit && React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "4",
+    fill: "rgba(255,255,255,0.8)"
+  }));
+}
+function CrossShotIcon(props) {
+  return React.createElement("svg", {
+    width: props.size,
+    height: props.size,
+    viewBox: "0 0 24 24"
+  }, React.createElement("line", {
+    x1: "12",
+    y1: "2",
+    x2: "12",
+    y2: "22",
+    stroke: "#fff",
+    strokeWidth: "3",
+    strokeLinecap: "round"
+  }), React.createElement("line", {
+    x1: "2",
+    y1: "12",
+    x2: "22",
+    y2: "12",
+    stroke: "#fff",
+    strokeWidth: "3",
+    strokeLinecap: "round"
+  }), React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "3",
+    fill: "#fff",
+    opacity: "0.6"
+  }));
+}
+function LightningIcon(props) {
+  return React.createElement("svg", {
+    width: props.size,
+    height: props.size,
+    viewBox: "0 0 24 24"
+  }, React.createElement("path", {
+    d: "M13 2L4 14h6l-2 8 9-12h-6l2-8z",
+    fill: "#ffe066",
+    stroke: "#d4a830",
+    strokeWidth: "0.5"
+  }));
+}
+function PlasmaIcon(props) {
+  var g = "pg" + props.size;
+  return React.createElement("svg", {
+    width: props.size,
+    height: props.size,
+    viewBox: "0 0 24 24"
+  }, React.createElement("defs", null, React.createElement("radialGradient", {
+    id: g
+  }, React.createElement("stop", {
+    offset: "0%",
+    stopColor: "#fff",
+    stopOpacity: "0.9"
+  }), React.createElement("stop", {
+    offset: "30%",
+    stopColor: "#80ddff",
+    stopOpacity: "0.8"
+  }), React.createElement("stop", {
+    offset: "60%",
+    stopColor: "#50c8ff",
+    stopOpacity: "0.6"
+  }), React.createElement("stop", {
+    offset: "100%",
+    stopColor: "#2060ff",
+    stopOpacity: "0"
+  }))), React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "10",
+    fill: "url(#" + g + ")"
+  }), React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "5",
+    fill: "rgba(255,255,255,0.7)"
+  }));
+}
+function DroneIcon(props) {
+  var s = props.size;
+  return React.createElement("svg", {
+    width: s,
+    height: s,
+    viewBox: "0 0 24 24"
+  }, React.createElement("path", {
+    d: "M12 6L8 10h3v4H8l4 4 4-4h-3v-4h3z",
+    fill: "#e8e8ff",
+    stroke: "rgba(255,255,255,0.6)",
+    strokeWidth: "0.5"
+  }), React.createElement("line", {
+    x1: "5",
+    y1: "8",
+    x2: "8",
+    y2: "10",
+    stroke: "#d0d0ff",
+    strokeWidth: "1.5",
+    strokeLinecap: "round"
+  }), React.createElement("line", {
+    x1: "19",
+    y1: "8",
+    x2: "16",
+    y2: "10",
+    stroke: "#d0d0ff",
+    strokeWidth: "1.5",
+    strokeLinecap: "round"
+  }), React.createElement("circle", {
+    cx: "5",
+    cy: "7.5",
+    r: "1.5",
+    fill: "#80ffee",
+    opacity: "0.9"
+  }), React.createElement("circle", {
+    cx: "19",
+    cy: "7.5",
+    r: "1.5",
+    fill: "#80ffee",
+    opacity: "0.9"
+  }));
+}
+function AcidBarrelIcon(props) {
+  var s = props.size;
+  return React.createElement("svg", {
+    width: s,
+    height: s,
+    viewBox: "0 0 24 24"
+  }, React.createElement("rect", {
+    x: "6",
+    y: "3",
+    width: "12",
+    height: "18",
+    rx: "3",
+    fill: "#0a3a0a",
+    stroke: "#40b840",
+    strokeWidth: "1.2"
+  }), React.createElement("rect", {
+    x: "7",
+    y: "5",
+    width: "10",
+    height: "3",
+    rx: "1",
+    fill: "#40b840",
+    opacity: "0.4"
+  }), React.createElement("rect", {
+    x: "7",
+    y: "16",
+    width: "10",
+    height: "3",
+    rx: "1",
+    fill: "#40b840",
+    opacity: "0.4"
+  }), React.createElement("line", {
+    x1: "6",
+    y1: "10",
+    x2: "18",
+    y2: "10",
+    stroke: "#40b840",
+    strokeWidth: "0.5",
+    opacity: "0.5"
+  }), React.createElement("line", {
+    x1: "6",
+    y1: "14",
+    x2: "18",
+    y2: "14",
+    stroke: "#40b840",
+    strokeWidth: "0.5",
+    opacity: "0.5"
+  }), React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "2.5",
+    fill: "#80ff80",
+    opacity: "0.7"
+  }), React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "1",
+    fill: "#fff",
+    opacity: "0.9"
+  }), React.createElement("rect", {
+    x: "5",
+    y: "2.5",
+    width: "14",
+    height: "1",
+    rx: "0.5",
+    fill: "#50cc50",
+    opacity: "0.6"
+  }), React.createElement("rect", {
+    x: "5",
+    y: "20.5",
+    width: "14",
+    height: "1",
+    rx: "0.5",
+    fill: "#50cc50",
+    opacity: "0.6"
+  }));
+}
+function TreasureCrateIcon(props) {
+  var s = props.size;
+  return React.createElement("svg", {
+    width: s,
+    height: s,
+    viewBox: "0 0 24 24"
+  }, React.createElement("rect", {
+    x: "2",
+    y: "7",
+    width: "20",
+    height: "14",
+    rx: "1",
+    fill: "#4a4a5a",
+    stroke: "#707088",
+    strokeWidth: "1"
+  }), React.createElement("rect", {
+    x: "2",
+    y: "7",
+    width: "20",
+    height: "4",
+    fill: "#5a5a6a",
+    rx: "1"
+  }), React.createElement("line", {
+    x1: "2",
+    y1: "11",
+    x2: "22",
+    y2: "11",
+    stroke: "#707088",
+    strokeWidth: "0.8"
+  }), React.createElement("rect", {
+    x: "4",
+    y: "8.5",
+    width: "3",
+    height: "2",
+    rx: "0.5",
+    fill: "#606070",
+    stroke: "#808098",
+    strokeWidth: "0.3"
+  }), React.createElement("rect", {
+    x: "17",
+    y: "8.5",
+    width: "3",
+    height: "2",
+    rx: "0.5",
+    fill: "#606070",
+    stroke: "#808098",
+    strokeWidth: "0.3"
+  }), React.createElement("rect", {
+    x: "9",
+    y: "13",
+    width: "6",
+    height: "4",
+    rx: "1",
+    fill: "#2a2a3a",
+    stroke: "#ffe066",
+    strokeWidth: "0.8"
+  }), React.createElement("circle", {
+    cx: "12",
+    cy: "15",
+    r: "1.2",
+    fill: "#ffe066",
+    opacity: "0.9"
+  }), React.createElement("line", {
+    x1: "4",
+    y1: "17",
+    x2: "8",
+    y2: "17",
+    stroke: "#606070",
+    strokeWidth: "0.5"
+  }), React.createElement("line", {
+    x1: "16",
+    y1: "17",
+    x2: "20",
+    y2: "17",
+    stroke: "#606070",
+    strokeWidth: "0.5"
+  }), React.createElement("rect", {
+    x: "4",
+    y: "13",
+    width: "3",
+    height: "1",
+    rx: "0.3",
+    fill: "#606070",
+    opacity: "0.5"
+  }), React.createElement("rect", {
+    x: "17",
+    y: "13",
+    width: "3",
+    height: "1",
+    rx: "0.3",
+    fill: "#606070",
+    opacity: "0.5"
+  }));
+}
+function DiamondPlateBlock(props) {
+  var ps = Math.max(8, props.size * 0.22),
+    h = ps / 2;
+  return React.createElement("div", {
+    style: {
+      width: props.size,
+      height: props.size,
+      borderRadius: 6,
+      overflow: "hidden",
+      border: "2px solid #555",
+      position: "relative",
+      boxSizing: "border-box"
+    }
+  }, React.createElement("svg", {
+    width: props.size,
+    height: props.size,
+    style: {
+      position: "absolute",
+      top: -2,
+      left: -2
+    }
+  }, React.createElement("defs", null, React.createElement("pattern", {
+    id: "dpat",
+    x: "0",
+    y: "0",
+    width: ps,
+    height: ps,
+    patternUnits: "userSpaceOnUse"
+  }, React.createElement("rect", {
+    width: ps,
+    height: ps,
+    fill: "#707580"
+  }), React.createElement("path", {
+    d: "M" + h + " 1L" + (ps - 1) + " " + h + "L" + h + " " + (ps - 1) + "L1 " + h + "Z",
+    fill: "#888a90",
+    stroke: "#606368",
+    strokeWidth: "0.5"
+  }))), React.createElement("rect", {
+    width: props.size,
+    height: props.size,
+    fill: "url(#dpat)"
+  })));
+}
+function UFOBlockSvg(props) {
+  var size = props.size || 48;
+  var animPhase = props.animPhase || "idle";
+  var hx = 70,
+    hy = 80;
+  var dRx = 22,
+    dRy = 23,
+    dY = hy - 16;
+  var gStyle = {};
+  if (animPhase === "warpOut") {
+    gStyle = {
+      animation: "ufoWarpOut 0.5s ease-in forwards",
+      transformOrigin: hx + "px " + hy + "px"
+    };
+  } else if (animPhase === "warpIn") {
+    gStyle = {
+      animation: "ufoWarpIn 0.6s ease-out forwards",
+      transformOrigin: hx + "px " + hy + "px"
+    };
+  }
+  var stealthColors = ["#4488ff", "#2266cc", "#99ccff"];
+  var lights = [];
+  for (var li = 0; li < 3; li++) {
+    var la = li / 3 * Math.PI * 2;
+    lights.push({
+      x: hx + 45 * Math.cos(la),
+      y: hy + 8.12 * Math.sin(la),
+      c: stealthColors[li]
+    });
+  }
+  return React.createElement("svg", {
+    viewBox: "20 25 100 100",
+    width: size,
+    height: size,
+    style: {
+      display: "block",
+      overflow: "visible"
+    }
+  }, React.createElement("defs", null, React.createElement("radialGradient", {
+    id: "ufo-h",
+    cx: "50%",
+    cy: "26%"
+  }, React.createElement("stop", {
+    offset: "0%",
+    stopColor: "#e09050"
+  }), React.createElement("stop", {
+    offset: "55%",
+    stopColor: "#b86020"
+  }), React.createElement("stop", {
+    offset: "100%",
+    stopColor: "#602010"
+  })), React.createElement("radialGradient", {
+    id: "ufo-d",
+    cx: "33%",
+    cy: "25%"
+  }, React.createElement("stop", {
+    offset: "0%",
+    stopColor: "#ffffff",
+    stopOpacity: "0.92"
+  }), React.createElement("stop", {
+    offset: "38%",
+    stopColor: "#44ffee",
+    stopOpacity: "0.55"
+  }), React.createElement("stop", {
+    offset: "100%",
+    stopColor: "#602010",
+    stopOpacity: "0.22"
+  })), React.createElement("clipPath", {
+    id: "ufo-dc"
+  }, React.createElement("rect", {
+    x: hx - dRx - 3,
+    y: 0,
+    width: dRx * 2 + 6,
+    height: hy
+  }))), React.createElement("g", {
+    style: gStyle
+  }, React.createElement("ellipse", {
+    cx: hx,
+    cy: hy,
+    rx: 48,
+    ry: 14,
+    fill: "url(#ufo-h)"
+  }), React.createElement("g", {
+    style: {
+      animation: "ufoLightSpin 8s linear infinite",
+      transformOrigin: hx + "px " + hy + "px"
+    }
+  }, lights.map(function (lp, li2) {
+    return React.createElement("circle", {
+      key: li2,
+      cx: lp.x,
+      cy: lp.y,
+      r: "3.5",
+      fill: lp.c,
+      style: {
+        animation: "pulse " + (1.8 + li2 * 0.4) + "s ease-in-out infinite"
+      }
+    });
+  })), React.createElement("ellipse", {
+    cx: hx,
+    cy: hy - 1,
+    rx: 46.5,
+    ry: 10,
+    fill: "url(#ufo-h)"
+  }), React.createElement("ellipse", {
+    cx: hx,
+    cy: dY,
+    rx: dRx,
+    ry: dRy,
+    fill: "url(#ufo-d)",
+    clipPath: "url(#ufo-dc)"
+  }), React.createElement("ellipse", {
+    cx: hx - dRx * 0.22,
+    cy: dY - dRy * 0.28,
+    rx: dRx * 0.27,
+    ry: dRy * 0.22,
+    fill: "white",
+    opacity: "0.25",
+    transform: "rotate(-20," + (hx - dRx * 0.22) + "," + (dY - dRy * 0.28) + ")",
+    clipPath: "url(#ufo-dc)"
+  })));
+}
+function BlockContent(props) {
+  var type = props.type,
+    size = props.size,
+    is = Math.max(18, size * 0.55),
+    sl = props.shieldLevel || 0;
+  if (type === 17) return React.createElement(UFOBlockSvg, {
+    size: size,
+    animPhase: props.animPhase
+  });
+  if (type === 7) return React.createElement(DiamondPlateBlock, {
+    size: size
+  });
+  var bc = BLOCK_COLORS[type];
+  if (!bc) return null;
+  var iconEl = null;
+  if (type === 2) iconEl = React.createElement(CrossShotIcon, {
+    size: is
+  });else if (type === 3) iconEl = React.createElement(LightningIcon, {
+    size: is
+  });else if (type === 4) iconEl = React.createElement(CoreIcon, {
+    size: is,
+    mode: "lit"
+  });else if (type === 5) iconEl = React.createElement(PlasmaIcon, {
+    size: is
+  });else if (type === 6) iconEl = React.createElement(DroneIcon, {
+    size: Math.max(24, size * 0.8)
+  });else if (type === 8) iconEl = React.createElement(AcidBarrelIcon, {
+    size: Math.max(22, size * 0.75)
+  });else if (type === 9) iconEl = React.createElement(TreasureCrateIcon, {
+    size: Math.max(24, size * 0.8)
+  });else if (isCrate(type) && type !== 9) {
+    var cvMatch = null;
+    for (var ci = 0; ci < CRATE_VARIANTS.length; ci++) {
+      if (CRATE_VARIANTS[ci].type === type) {
+        cvMatch = CRATE_VARIANTS[ci];
+        break;
+      }
+    }
+    var badgeIcon = null;
+    if (type === 11) badgeIcon = React.createElement(DroneIcon, {
+      size: Math.max(7, size * 0.18)
+    });else if (type === 12) badgeIcon = React.createElement(LightningIcon, {
+      size: Math.max(7, size * 0.2)
+    });else if (type === 13) badgeIcon = React.createElement(CrossShotIcon, {
+      size: Math.max(7, size * 0.18)
+    });else if (type === 14) badgeIcon = React.createElement("svg", {
+      width: Math.max(7, size * 0.18),
+      height: Math.max(7, size * 0.18),
+      viewBox: "0 0 24 24"
+    }, React.createElement("path", {
+      d: "M4 20L12 4",
+      stroke: "#80ddff",
+      strokeWidth: "3",
+      strokeLinecap: "round"
+    }), React.createElement("path", {
+      d: "M12 4L20 20",
+      stroke: "#80ddff",
+      strokeWidth: "3",
+      strokeLinecap: "round"
+    }));else if (type === 15) badgeIcon = React.createElement("svg", {
+      width: Math.max(7, size * 0.18),
+      height: Math.max(7, size * 0.18),
+      viewBox: "0 0 24 24"
+    }, React.createElement("rect", {
+      x: "6",
+      y: "2",
+      width: "12",
+      height: "8",
+      rx: "2",
+      fill: "#7a7a88"
+    }), React.createElement("rect", {
+      x: "10",
+      y: "8",
+      width: "4",
+      height: "12",
+      rx: "1",
+      fill: "#9a9aaa"
+    }));else if (type === 16) badgeIcon = React.createElement(CoreIcon, {
+      size: Math.max(7, size * 0.2),
+      mode: "lit"
+    });
+    iconEl = React.createElement("div", {
+      style: {
+        position: "relative",
+        width: Math.max(24, size * 0.8),
+        height: Math.max(24, size * 0.8)
+      }
+    }, React.createElement(TreasureCrateIcon, {
+      size: Math.max(24, size * 0.8)
+    }), React.createElement("div", {
+      style: {
+        position: "absolute",
+        bottom: -2,
+        right: -2,
+        width: Math.max(10, size * 0.3),
+        height: Math.max(10, size * 0.3),
+        borderRadius: "50%",
+        background: "rgba(10,10,20,0.8)",
+        border: "1px solid " + (cvMatch ? cvMatch.color : "rgba(255,255,255,0.3)"),
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }
+    }, badgeIcon));
+  } else if (type === 10 && sl > 0) {
+    iconEl = React.createElement("svg", {
+      width: is,
+      height: is,
+      viewBox: "0 0 24 24"
+    }, React.createElement("rect", {
+      x: "3",
+      y: "8",
+      width: "18",
+      height: "12",
+      rx: "1.5",
+      fill: "#2a3a5a",
+      stroke: "rgba(130,180,255,0.6)",
+      strokeWidth: "1"
+    }), React.createElement("rect", {
+      x: "3",
+      y: "8",
+      width: "18",
+      height: "4",
+      fill: "#3a4a6a",
+      rx: "1.5"
+    }), React.createElement("line", {
+      x1: "3",
+      y1: "12",
+      x2: "21",
+      y2: "12",
+      stroke: "rgba(130,180,255,0.4)",
+      strokeWidth: "0.8"
+    }), React.createElement("rect", {
+      x: "9",
+      y: "13",
+      width: "6",
+      height: "4",
+      rx: "1",
+      fill: "rgba(130,180,255,0.15)",
+      stroke: "rgba(130,180,255,0.5)",
+      strokeWidth: "0.7"
+    }), React.createElement("circle", {
+      cx: "12",
+      cy: "15",
+      r: "1",
+      fill: "rgba(180,220,255,0.8)"
+    }), React.createElement("rect", {
+      x: "5",
+      y: "9",
+      width: "3",
+      height: "2",
+      rx: "0.5",
+      fill: "rgba(130,180,255,0.2)"
+    }), React.createElement("rect", {
+      x: "16",
+      y: "9",
+      width: "3",
+      height: "2",
+      rx: "0.5",
+      fill: "rgba(130,180,255,0.2)"
+    }));
+  } else if (type === 10 && sl === 0) {
+    iconEl = React.createElement("svg", {
+      width: is,
+      height: is,
+      viewBox: "0 0 24 24"
+    }, React.createElement("rect", {
+      x: "3",
+      y: "12",
+      width: "18",
+      height: "9",
+      rx: "1.5",
+      fill: "#2a3a5a",
+      stroke: "rgba(130,180,255,0.4)",
+      strokeWidth: "1"
+    }), React.createElement("line", {
+      x1: "3",
+      y1: "15",
+      x2: "21",
+      y2: "15",
+      stroke: "rgba(130,180,255,0.3)",
+      strokeWidth: "0.5"
+    }), React.createElement("path", {
+      d: "M4 12 L4 7 Q12 3 20 7 L20 12",
+      fill: "none",
+      stroke: "rgba(130,180,255,0.5)",
+      strokeWidth: "1"
+    }), React.createElement("rect", {
+      x: "9",
+      y: "16",
+      width: "6",
+      height: "3",
+      rx: "1",
+      fill: "rgba(130,180,255,0.1)",
+      stroke: "rgba(130,180,255,0.3)",
+      strokeWidth: "0.5"
+    }));
+  }
+  var blockEl = React.createElement("div", {
+    style: {
+      width: size,
+      height: size,
+      background: bc.bg,
+      border: "2px solid " + bc.border,
+      borderRadius: 6,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      boxShadow: bc.shadow,
+      boxSizing: "border-box",
+      position: "relative"
+    }
+  }, iconEl);
+  if (type === 10 && sl > 0) {
+    return React.createElement("div", {
+      style: {
+        position: "relative"
+      }
+    }, blockEl, React.createElement("div", {
+      style: {
+        position: "absolute",
+        inset: sl === 2 ? -4 : -2,
+        borderRadius: 10,
+        border: sl === 2 ? "2px solid rgba(130,180,255,0.7)" : "1px solid rgba(130,180,255,0.35)",
+        boxShadow: sl === 2 ? "0 0 16px rgba(130,180,255,0.5), 0 0 30px rgba(130,180,255,0.25), inset 0 0 10px rgba(130,180,255,0.3)" : "0 0 8px rgba(130,180,255,0.2), inset 0 0 4px rgba(130,180,255,0.1)",
+        pointerEvents: "none",
+        transition: "all 0.3s"
+      }
+    }));
+  }
+  return blockEl;
+}
+function PlasmaContainer(props) {
+  var pct = Math.min(1, Math.max(0, props.current / props.max));
+  var glowColor = pct > 0.5 ? "rgba(48,192,208,0.5)" : pct > 0.25 ? "rgba(255,170,50,0.4)" : "rgba(255,68,85,0.4)";
+  var glowSize = Math.round(4 + pct * 8);
+  var fillH = 18 * pct;
+  return React.createElement("div", {
+    style: {
+      filter: "drop-shadow(0 0 " + glowSize + "px " + glowColor + ")",
+      transition: "filter 0.5s"
+    }
+  }, React.createElement("svg", {
+    width: "32",
+    height: "28",
+    viewBox: "0 0 32 28"
+  }, React.createElement("defs", null, React.createElement("clipPath", {
+    id: "hexClipW"
+  }, React.createElement("polygon", {
+    points: "16,1 29,7.5 29,20.5 16,27 3,20.5 3,7.5"
+  }))), React.createElement("polygon", {
+    points: "16,1 29,7.5 29,20.5 16,27 3,20.5 3,7.5",
+    fill: "rgba(48,192,208,0.06)",
+    stroke: "rgba(48,192,208," + (0.25 + pct * 0.35) + ")",
+    strokeWidth: "1.2"
+  }), React.createElement("rect", {
+    x: "3",
+    y: 25 - fillH,
+    width: "26",
+    height: fillH + 2,
+    fill: "#30c0d0",
+    opacity: 0.3 + pct * 0.3,
+    clipPath: "url(#hexClipW)",
+    style: {
+      transition: "y 0.6s ease-in-out, height 0.6s ease-in-out, opacity 0.6s"
+    }
+  }), React.createElement("text", {
+    x: "16",
+    y: "17.5",
+    textAnchor: "middle",
+    fill: "#fff",
+    fontSize: "10",
+    fontWeight: "700",
+    fontFamily: "Quicksand,sans-serif"
+  }, props.current)));
+}
+
+// ── Shared top bar component ──
+function WorkshopTopBar(props) {
+  return React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 6,
+      padding: "8px 10px",
+      background: PNL,
+      borderBottom: PNLB,
+      boxShadow: "0 3px 6px rgba(0,0,0,0.4)",
+      position: "relative",
+      zIndex: 2
+    }
+  }, React.createElement("div", {
+    onClick: props.onBack,
+    style: {
+      padding: "6px 10px",
+      borderRadius: 4,
+      background: PNL,
+      border: PNLB,
+      color: "rgba(200,210,220,0.8)",
+      fontSize: 10,
+      fontWeight: 700,
+      letterSpacing: 1,
+      cursor: "pointer",
+      textTransform: "uppercase",
+      boxShadow: "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)",
+      display: "flex",
+      alignItems: "center",
+      gap: 4
+    }
+  }, React.createElement("svg", {
+    width: "8",
+    height: "8",
+    viewBox: "0 0 24 24"
+  }, React.createElement("path", {
+    d: "M15 18l-6-6 6-6",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "3",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  })), " " + (props.backLabel || "Back")), React.createElement("div", {
+    style: {
+      flex: 1,
+      fontSize: 14,
+      fontWeight: 700,
+      color: props.color || "#80ddff",
+      letterSpacing: 2,
+      textTransform: "uppercase",
+      textAlign: "center",
+      fontFamily: props.fontFamily || "'Quicksand',sans-serif"
+    }
+  }, props.title), props.rightContent || React.createElement("div", {
+    style: {
+      width: 52
+    }
+  }));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BLOCK DESIGNER PANEL
+// (Integrated from BlockDesigner v4.5 with back navigation)
+// ═══════════════════════════════════════════════════════════════
+
+// ── Shape Definitions (SVG) ──
+function squarePath() {
+  return "M 4,4 L 96,4 L 96,96 L 4,96 Z";
+}
+function circlePath() {
+  return null;
+}
+function octagonPath() {
+  return "M 30,4 L 70,4 L 96,30 L 96,70 L 70,96 L 30,96 L 4,70 L 4,30 Z";
+}
+function asteroidPath() {
+  return "M 50,3 L 62,8 L 78,5 L 85,18 L 97,28 L 92,42 L 98,58 L 88,68 L 90,82 L 76,88 L 65,97 L 50,90 L 35,97 L 24,88 L 10,82 L 12,68 L 2,58 L 8,42 L 3,28 L 15,18 L 22,5 L 38,8 Z";
+}
+function starPath() {
+  var points = [];
+  for (var i = 0; i < 10; i++) {
+    var angle = Math.PI / 2 * -1 + Math.PI / 5 * i;
+    var r = i % 2 === 0 ? 48 : 20;
+    points.push((50 + r * Math.cos(angle)).toFixed(1) + "," + (50 + r * Math.sin(angle)).toFixed(1));
+  }
+  return "M " + points.join(" L ") + " Z";
+}
+function hexagonPath() {
+  var points = [];
+  for (var i = 0; i < 6; i++) {
+    var angle = Math.PI / 3 * i - Math.PI / 6;
+    points.push((50 + 48 * Math.cos(angle)).toFixed(1) + "," + (50 + 48 * Math.sin(angle)).toFixed(1));
+  }
+  return "M " + points.join(" L ") + " Z";
+}
+function crossShapePath() {
+  return "M 34,4 L 66,4 L 66,34 L 96,34 L 96,66 L 66,66 L 66,96 L 34,96 L 34,66 L 4,66 L 4,34 L 34,34 Z";
+}
+function shieldPath() {
+  return "M 50,4 L 92,20 L 88,60 Q 80,85 50,97 Q 20,85 12,60 L 8,20 Z";
+}
+var SHAPES = [{
+  id: "square",
+  label: "Square",
+  icon: "\u25A0"
+}, {
+  id: "circle",
+  label: "Circle",
+  icon: "\u25CF"
+}, {
+  id: "octagon",
+  label: "Octagon",
+  icon: "\u2B23"
+}, {
+  id: "hexagon",
+  label: "Hexagon",
+  icon: "\u2B21"
+}, {
+  id: "star",
+  label: "Star",
+  icon: "\u2605"
+}, {
+  id: "asteroid",
+  label: "Asteroid",
+  icon: "\u2604"
+}, {
+  id: "cross_shape",
+  label: "Cross",
+  icon: "\u271A"
+}, {
+  id: "shield",
+  label: "Shield",
+  icon: "\u26CA"
+}];
+function getShapePath(shapeId) {
+  switch (shapeId) {
+    case "square":
+      return squarePath();
+    case "circle":
+      return circlePath();
+    case "octagon":
+      return octagonPath();
+    case "hexagon":
+      return hexagonPath();
+    case "star":
+      return starPath();
+    case "asteroid":
+      return asteroidPath();
+    case "cross_shape":
+      return crossShapePath();
+    case "shield":
+      return shieldPath();
+    default:
+      return squarePath();
+  }
+}
+var PATTERNS = [{
+  id: "none",
+  label: "None"
+}, {
+  id: "dots",
+  label: "Dots"
+}, {
+  id: "lines",
+  label: "Lines"
+}, {
+  id: "crosshatch",
+  label: "Crosshatch"
+}, {
+  id: "chevrons",
+  label: "Chevrons"
+}, {
+  id: "waves",
+  label: "Waves"
+}, {
+  id: "circles",
+  label: "Circles"
+}, {
+  id: "squares",
+  label: "Squares"
+}];
+var PATTERN_CAPS = {
+  dots: {
+    lineWidth: false,
+    filled: false
+  },
+  lines: {
+    lineWidth: true,
+    filled: false
+  },
+  crosshatch: {
+    lineWidth: true,
+    filled: false
+  },
+  chevrons: {
+    lineWidth: true,
+    filled: false
+  },
+  waves: {
+    lineWidth: true,
+    filled: false
+  },
+  circles: {
+    lineWidth: true,
+    filled: true
+  },
+  squares: {
+    lineWidth: true,
+    filled: true
+  }
+};
+var CORNER_SHAPES = {
+  square: true
+};
+var BD_ICONS = [{
+  id: "none",
+  label: "None",
+  path: null
+}, {
+  id: "cross",
+  label: "Cross",
+  path: "M 44,28 L 50,14 L 56,28 L 52,28 L 52,48 L 72,48 L 72,44 L 86,50 L 72,56 L 72,52 L 52,52 L 52,72 L 56,72 L 50,86 L 44,72 L 48,72 L 48,52 L 28,52 L 28,56 L 14,50 L 28,44 L 28,48 L 48,48 L 48,28 Z"
+}, {
+  id: "bolt",
+  label: "Bolt",
+  path: "M 55,15 L 30,52 L 46,52 L 38,85 L 72,42 L 54,42 Z"
+}, {
+  id: "dot",
+  label: "Dot",
+  path: "M 50,28 A 22,22 0 1,1 49.99,28 Z"
+}, {
+  id: "drone_ic",
+  label: "Drone",
+  fillRule: "nonzero",
+  path: "M 62,34 L 62,66 A 12,12 0 1,1 38,66 L 38,34 A 12,12 0 1,1 62,34 Z M 42.5,35.0 L 39.5,39.0 L 18.5,24.0 L 21.5,20.0 Z M 21,32 A 10,10 0 1,1 21.01,32 Z M 60.5,39.0 L 57.5,35.0 L 78.5,20.0 L 81.5,24.0 Z M 79,32 A 10,10 0 1,1 79.01,32 Z M 39.6,60.9 L 42.4,65.1 L 21.4,79.1 L 18.6,74.9 Z M 21,84 A 10,10 0 1,1 21.01,84 Z M 57.6,65.1 L 60.4,60.9 L 81.4,74.9 L 78.6,79.1 Z M 79,84 A 10,10 0 1,1 79.01,84 Z"
+}, {
+  id: "barrel",
+  label: "Barrel",
+  path: "M 35,22 Q 50,14 65,22 L 65,78 Q 50,86 35,78 Z M 36,32 L 64,32 L 64,35 L 36,35 Z M 36,65 L 64,65 L 64,68 L 36,68 Z M 46,46 A 5,5 0 1,1 46.01,46 Z"
+}, {
+  id: "crate_ic",
+  label: "Crate",
+  path: "M 22,24 L 78,24 L 78,78 L 22,78 Z M 22,38 L 78,38 L 78,42 L 22,42 Z M 40,48 L 60,48 L 60,66 L 40,66 Z M 48,55 A 3,3 0 1,0 52,55 A 3,3 0 1,0 48,55 Z"
+}, {
+  id: "console_open",
+  label: "Open",
+  path: "M 22,44 L 78,44 L 78,80 L 22,80 Z M 28,38 L 72,38 L 68,22 L 32,22 Z M 38,52 L 62,52 L 62,68 L 38,68 Z M 47,58 A 4,4 0 1,0 53,58 A 4,4 0 1,0 47,58 Z"
+}, {
+  id: "skull",
+  label: "Skull",
+  path: "M 50,18 Q 78,18 78,45 Q 78,60 68,68 L 70,82 L 58,78 L 55,82 L 50,78 L 45,82 L 42,78 L 30,82 L 32,68 Q 22,60 22,45 Q 22,18 50,18 Z M 38,42 A 6,6 0 1,1 37.99,42 Z M 62,42 A 6,6 0 1,1 61.99,42 Z"
+}, {
+  id: "flame",
+  label: "Flame",
+  path: "M 50,15 Q 65,30 65,45 Q 72,35 72,50 Q 72,68 60,78 Q 55,82 50,84 Q 45,82 40,78 Q 28,68 28,50 Q 28,35 35,45 Q 35,30 50,15 Z"
+}, {
+  id: "shield_ic",
+  label: "Shield",
+  path: "M 50,18 L 78,30 L 75,58 Q 68,76 50,85 Q 32,76 25,58 L 22,30 Z"
+}, {
+  id: "gear",
+  label: "Gear",
+  path: "M 50,10 L 61,24 L 78,22 L 76,39 L 90,50 L 76,61 L 78,78 L 61,76 L 50,90 L 39,76 L 22,78 L 24,61 L 10,50 L 24,39 L 22,22 L 39,24 Z M 50,38 A 12,12 0 1,0 50.01,38 Z"
+}, {
+  id: "ring",
+  label: "Ring",
+  path: "M 50,24 A 26,26 0 1,1 49.99,24 Z M 50,36 A 14,14 0 1,0 50.01,36 Z"
+}];
+var BD_BLOCK_TYPES = [{
+  id: "regular",
+  label: "Regular"
+}, {
+  id: "cross_shot",
+  label: "Cross Shot"
+}, {
+  id: "lightning",
+  label: "Lightning"
+}, {
+  id: "plasma",
+  label: "Plasma"
+}, {
+  id: "crate",
+  label: "Crate"
+}, {
+  id: "drone",
+  label: "Drone"
+}, {
+  id: "indestructible",
+  label: "Indestructible"
+}, {
+  id: "acid_barrel",
+  label: "Acid Barrel"
+}, {
+  id: "force_field",
+  label: "Force Field"
+}];
+var BD_COLOR_PRESETS = ["#ff4444", "#ff8800", "#ffcc00", "#44dd44", "#00cccc", "#4488ff", "#8844ff", "#ff44cc", "#ffffff", "#aaaaaa", "#555555", "#222222"];
+function bdDefaultDesign() {
+  return {
+    name: "",
+    shape: "square",
+    shapeRotation: 0,
+    cornerRadius: 0,
+    color: "#4488ff",
+    borderColor: "#88bbff",
+    borderWidth: 2,
+    glowEnabled: false,
+    glowColor: "#88bbff",
+    glowIntensity: 6,
+    pattern: "none",
+    patternColor: "#ffffff",
+    patternOpacity: 0.3,
+    patternScale: 1,
+    patternRotation: 0,
+    patternFilled: false,
+    patternLineWidth: 1.5,
+    icon: "none",
+    iconColor: "#ffffff",
+    iconOpacity: 0.8,
+    iconGlow: false,
+    iconGlowColor: "#ffffff",
+    iconGlowIntensity: 6,
+    assignedTo: "",
+    phases: null
+  };
+}
+var PHASE_PROPS = ["glowEnabled", "glowColor", "glowIntensity", "borderColor", "borderWidth", "icon", "iconColor", "iconOpacity", "iconGlow", "iconGlowColor", "iconGlowIntensity"];
+function getDesignForPhase(design, phase) {
+  if (!phase || phase === 1 || !design.phases) return design;
+  var phaseOverrides = design.phases[phase];
+  if (!phaseOverrides) return design;
+  var merged = {};
+  Object.keys(design).forEach(function (k) {
+    merged[k] = design[k];
+  });
+  Object.keys(phaseOverrides).forEach(function (k) {
+    merged[k] = phaseOverrides[k];
+  });
+  return merged;
+}
+function bdDefaultPhases() {
+  return {
+    2: {
+      glowEnabled: false,
+      borderWidth: 1,
+      borderColor: "rgba(130,180,255,0.35)"
+    },
+    3: {
+      glowEnabled: false,
+      borderWidth: 0,
+      borderColor: "transparent",
+      icon: "console_open"
+    }
+  };
+}
+var BD_STORAGE_KEY = "cosmic-drift-block-designs";
+function bdLoadDesigns() {
+  return window.storage.get(BD_STORAGE_KEY).then(function (result) {
+    return result ? JSON.parse(result.value) : [];
+  }).catch(function () {
+    return [];
+  });
+}
+function bdSaveDesigns(designs) {
+  return window.storage.set(BD_STORAGE_KEY, JSON.stringify(designs)).catch(function (e) {
+    console.error("Save failed:", e);
+  });
+}
+var BD_FACTORY_PRESETS = [{
+  id: "factory_regular",
+  name: "Regular",
+  assignedTo: "regular",
+  isFactory: true,
+  shape: "square",
+  shapeRotation: 0,
+  cornerRadius: 6,
+  color: "#7b5ea7",
+  borderColor: "#6b4e97",
+  borderWidth: 2,
+  glowEnabled: true,
+  glowColor: "#9f7fd0",
+  glowIntensity: 4,
+  pattern: "none",
+  patternColor: "#fff",
+  patternOpacity: 0.3,
+  patternScale: 1,
+  patternRotation: 0,
+  patternFilled: false,
+  patternLineWidth: 1.5,
+  icon: "none",
+  iconColor: "#fff",
+  iconOpacity: 0.8,
+  iconGlow: false,
+  iconGlowColor: "#fff",
+  iconGlowIntensity: 4
+}, {
+  id: "factory_cross_shot",
+  name: "Cross Shot",
+  assignedTo: "cross_shot",
+  isFactory: true,
+  shape: "square",
+  shapeRotation: 0,
+  cornerRadius: 6,
+  color: "#e0457b",
+  borderColor: "#c03868",
+  borderWidth: 2,
+  glowEnabled: true,
+  glowColor: "#ff6b9d",
+  glowIntensity: 4,
+  pattern: "none",
+  patternColor: "#fff",
+  patternOpacity: 0.3,
+  patternScale: 1,
+  patternRotation: 0,
+  patternFilled: false,
+  patternLineWidth: 1.5,
+  icon: "cross",
+  iconColor: "#ffffff",
+  iconOpacity: 0.85,
+  iconGlow: false,
+  iconGlowColor: "#fff",
+  iconGlowIntensity: 4
+}, {
+  id: "factory_lightning",
+  name: "Lightning",
+  assignedTo: "lightning",
+  isFactory: true,
+  shape: "square",
+  shapeRotation: 0,
+  cornerRadius: 6,
+  color: "#9a7020",
+  borderColor: "#7a5a18",
+  borderWidth: 2,
+  glowEnabled: true,
+  glowColor: "#b8862a",
+  glowIntensity: 4,
+  pattern: "none",
+  patternColor: "#fff",
+  patternOpacity: 0.3,
+  patternScale: 1,
+  patternRotation: 0,
+  patternFilled: false,
+  patternLineWidth: 1.5,
+  icon: "bolt",
+  iconColor: "#ffe066",
+  iconOpacity: 0.9,
+  iconGlow: false,
+  iconGlowColor: "#ffe066",
+  iconGlowIntensity: 4
+}, {
+  id: "factory_plasma",
+  name: "Plasma",
+  assignedTo: "plasma",
+  isFactory: true,
+  shape: "square",
+  shapeRotation: 0,
+  cornerRadius: 6,
+  color: "#3060b0",
+  borderColor: "#2850a0",
+  borderWidth: 2,
+  glowEnabled: true,
+  glowColor: "#4080d8",
+  glowIntensity: 4,
+  pattern: "none",
+  patternColor: "#fff",
+  patternOpacity: 0.3,
+  patternScale: 1,
+  patternRotation: 0,
+  patternFilled: false,
+  patternLineWidth: 1.5,
+  icon: "dot",
+  iconColor: "#80ddff",
+  iconOpacity: 0.85,
+  iconGlow: true,
+  iconGlowColor: "#50c8ff",
+  iconGlowIntensity: 5
+}, {
+  id: "factory_crate",
+  name: "Crate",
+  assignedTo: "crate",
+  isFactory: true,
+  shape: "square",
+  shapeRotation: 0,
+  cornerRadius: 6,
+  color: "#b8862a",
+  borderColor: "#9a7020",
+  borderWidth: 2,
+  glowEnabled: true,
+  glowColor: "#d4a843",
+  glowIntensity: 4,
+  pattern: "none",
+  patternColor: "#fff",
+  patternOpacity: 0.3,
+  patternScale: 1,
+  patternRotation: 0,
+  patternFilled: false,
+  patternLineWidth: 1.5,
+  icon: "crate_ic",
+  iconColor: "#4a4a5a",
+  iconOpacity: 0.75,
+  iconGlow: false,
+  iconGlowColor: "#fff",
+  iconGlowIntensity: 4
+}, {
+  id: "factory_drone",
+  name: "Drone",
+  assignedTo: "drone",
+  isFactory: true,
+  shape: "square",
+  shapeRotation: 0,
+  cornerRadius: 6,
+  color: "#8844cc",
+  borderColor: "#6633aa",
+  borderWidth: 2,
+  glowEnabled: true,
+  glowColor: "#aa66ee",
+  glowIntensity: 4,
+  pattern: "none",
+  patternColor: "#fff",
+  patternOpacity: 0.3,
+  patternScale: 1,
+  patternRotation: 0,
+  patternFilled: false,
+  patternLineWidth: 1.5,
+  icon: "drone_ic",
+  iconColor: "#e8e8ff",
+  iconOpacity: 0.75,
+  iconGlow: false,
+  iconGlowColor: "#80ffee",
+  iconGlowIntensity: 3
+}, {
+  id: "factory_indestructible",
+  name: "Indestructible",
+  assignedTo: "indestructible",
+  isFactory: true,
+  shape: "square",
+  shapeRotation: 0,
+  cornerRadius: 6,
+  color: "#707580",
+  borderColor: "#555555",
+  borderWidth: 3,
+  glowEnabled: false,
+  glowColor: "#888",
+  glowIntensity: 4,
+  pattern: "squares",
+  patternColor: "#323232",
+  patternOpacity: 0.8,
+  patternScale: 2.6,
+  patternRotation: 45,
+  patternFilled: true,
+  patternLineWidth: 2,
+  icon: "none",
+  iconColor: "#fff",
+  iconOpacity: 0.8,
+  iconGlow: false,
+  iconGlowColor: "#fff",
+  iconGlowIntensity: 4
+}, {
+  id: "factory_acid_barrel",
+  name: "Acid Barrel",
+  assignedTo: "acid_barrel",
+  isFactory: true,
+  shape: "square",
+  shapeRotation: 0,
+  cornerRadius: 6,
+  color: "#2a8a2a",
+  borderColor: "#1a6a1a",
+  borderWidth: 2,
+  glowEnabled: true,
+  glowColor: "#40b840",
+  glowIntensity: 4,
+  pattern: "none",
+  patternColor: "#fff",
+  patternOpacity: 0.3,
+  patternScale: 1,
+  patternRotation: 0,
+  patternFilled: false,
+  patternLineWidth: 1.5,
+  icon: "barrel",
+  iconColor: "#80ff80",
+  iconOpacity: 0.75,
+  iconGlow: false,
+  iconGlowColor: "#80ff80",
+  iconGlowIntensity: 3
+}, {
+  id: "factory_force_field",
+  name: "Force Field",
+  assignedTo: "force_field",
+  isFactory: true,
+  shape: "square",
+  shapeRotation: 0,
+  cornerRadius: 6,
+  color: "#4060a0",
+  borderColor: "#3050a0",
+  borderWidth: 2,
+  glowEnabled: true,
+  glowColor: "#82b4ff",
+  glowIntensity: 5,
+  pattern: "none",
+  patternColor: "#fff",
+  patternOpacity: 0.3,
+  patternScale: 1,
+  patternRotation: 0,
+  patternFilled: false,
+  patternLineWidth: 1.5,
+  icon: "crate_ic",
+  iconColor: "#82b4ff",
+  iconOpacity: 0.75,
+  iconGlow: false,
+  iconGlowColor: "#82b4ff",
+  iconGlowIntensity: 4,
+  phases: {
+    2: {
+      glowEnabled: false,
+      borderWidth: 1,
+      borderColor: "rgba(130,180,255,0.35)"
+    },
+    3: {
+      glowEnabled: false,
+      borderWidth: 0,
+      borderColor: "transparent",
+      icon: "console_open"
+    }
+  }
+}];
+
+// ── SVG Pattern renderer ──
+function PatternDef(props) {
+  var id = props.id,
+    patternId = props.patternId,
+    color = props.color,
+    opacity = props.opacity,
+    scale = props.scale,
+    rotation = props.rotation,
+    filled = props.filled,
+    lineWidth = props.lineWidth;
+  if (patternId === "none") return null;
+  var sz = 10,
+    half = 5,
+    strokeW = lineWidth,
+    fill = filled ? color : "none",
+    stroke = color,
+    inner = null;
+  switch (patternId) {
+    case "dots":
+      inner = React.createElement("circle", {
+        cx: half,
+        cy: half,
+        r: 2,
+        fill: color,
+        stroke: "none",
+        opacity: opacity
+      });
+      break;
+    case "lines":
+      inner = React.createElement("line", {
+        x1: 0,
+        y1: half,
+        x2: sz,
+        y2: half,
+        stroke: stroke,
+        strokeWidth: strokeW,
+        opacity: opacity
+      });
+      break;
+    case "crosshatch":
+      inner = React.createElement("g", {
+        opacity: opacity
+      }, React.createElement("line", {
+        x1: 0,
+        y1: 0,
+        x2: sz,
+        y2: sz,
+        stroke: stroke,
+        strokeWidth: strokeW
+      }), React.createElement("line", {
+        x1: sz,
+        y1: 0,
+        x2: 0,
+        y2: sz,
+        stroke: stroke,
+        strokeWidth: strokeW
+      }));
+      break;
+    case "chevrons":
+      inner = React.createElement("polyline", {
+        points: "0," + half + " " + half + ",0 " + sz + "," + half,
+        fill: "none",
+        stroke: stroke,
+        strokeWidth: strokeW,
+        opacity: opacity
+      });
+      break;
+    case "waves":
+      inner = React.createElement("path", {
+        d: "M 0,5 Q 2.5,2 5,5 Q 7.5,8 10,5",
+        fill: "none",
+        stroke: stroke,
+        strokeWidth: strokeW,
+        opacity: opacity
+      });
+      break;
+    case "circles":
+      inner = React.createElement("circle", {
+        cx: half,
+        cy: half,
+        r: 3.5,
+        fill: fill,
+        stroke: stroke,
+        strokeWidth: strokeW,
+        opacity: opacity
+      });
+      break;
+    case "squares":
+      var sqSz = 3.5,
+        sqOff = (sz - sqSz) / 2;
+      inner = React.createElement("rect", {
+        x: sqOff,
+        y: sqOff,
+        width: sqSz,
+        height: sqSz,
+        fill: fill,
+        stroke: stroke,
+        strokeWidth: strokeW,
+        opacity: opacity
+      });
+      break;
+    default:
+      return null;
+  }
+  var transform = "translate(50 50) scale(" + scale + ") rotate(" + rotation + ") translate(-50 -50)";
+  return React.createElement("pattern", {
+    id: id,
+    patternUnits: "userSpaceOnUse",
+    width: sz,
+    height: sz,
+    patternTransform: transform
+  }, inner);
+}
+
+// ── SVG Block Preview (for designed blocks) ──
+function BDBlockPreview(props) {
+  var design = props.design,
+    size = props.size || 120;
+  var shapePath = getShapePath(design.shape);
+  var isCircle = design.shape === "circle";
+  var isSquare = design.shape === "square";
+  var patId = "preview-pattern-" + design.pattern + "-" + size;
+  var hasRotation = design.shapeRotation && design.shapeRotation !== 0;
+  var hasCorners = CORNER_SHAPES[design.shape] && design.cornerRadius > 0;
+  var cr = design.cornerRadius || 0;
+  var glowStyle = {};
+  if (design.glowEnabled) {
+    glowStyle.filter = "drop-shadow(0 0 " + design.glowIntensity + "px " + design.glowColor + ")";
+  }
+  var shapeElement;
+  if (isCircle) {
+    shapeElement = React.createElement("circle", {
+      cx: 50,
+      cy: 50,
+      r: 46,
+      fill: design.color,
+      stroke: design.borderColor,
+      strokeWidth: design.borderWidth * 2
+    });
+  } else if (isSquare && hasCorners) {
+    shapeElement = React.createElement("rect", {
+      x: 4,
+      y: 4,
+      width: 92,
+      height: 92,
+      rx: cr,
+      ry: cr,
+      fill: design.color,
+      stroke: design.borderColor,
+      strokeWidth: design.borderWidth * 2
+    });
+  } else {
+    shapeElement = React.createElement("path", {
+      d: shapePath,
+      fill: design.color,
+      stroke: design.borderColor,
+      strokeWidth: design.borderWidth * 2,
+      strokeLinejoin: "round"
+    });
+  }
+  var patternOverlay = null;
+  if (design.pattern !== "none") {
+    if (isCircle) {
+      patternOverlay = React.createElement("circle", {
+        cx: 50,
+        cy: 50,
+        r: 46,
+        fill: "url(#" + patId + ")",
+        stroke: "none"
+      });
+    } else if (isSquare && hasCorners) {
+      patternOverlay = React.createElement("rect", {
+        x: 4,
+        y: 4,
+        width: 92,
+        height: 92,
+        rx: cr,
+        ry: cr,
+        fill: "url(#" + patId + ")",
+        stroke: "none"
+      });
+    } else {
+      patternOverlay = React.createElement("path", {
+        d: shapePath,
+        fill: "url(#" + patId + ")",
+        stroke: "none"
+      });
+    }
+  }
+  var iconElement = null,
+    iconGlowFilter = null,
+    iconGlowPath = null;
+  var iconDef = null;
+  for (var ii = 0; ii < BD_ICONS.length; ii++) {
+    if (BD_ICONS[ii].id === design.icon) {
+      iconDef = BD_ICONS[ii];
+      break;
+    }
+  }
+  if (iconDef && iconDef.path) {
+    if (design.iconGlow) {
+      var glowFilterId = "icon-glow-" + size;
+      iconGlowFilter = React.createElement("filter", {
+        id: glowFilterId
+      }, React.createElement("feGaussianBlur", {
+        stdDeviation: design.iconGlowIntensity || 4,
+        result: "blur"
+      }), React.createElement("feMerge", null, React.createElement("feMergeNode", {
+        "in": "blur"
+      }), React.createElement("feMergeNode", {
+        "in": "SourceGraphic"
+      })));
+      iconGlowPath = React.createElement("path", {
+        d: iconDef.path,
+        fill: design.iconGlowColor || design.iconColor,
+        fillRule: iconDef.fillRule || "evenodd",
+        opacity: Math.min(1, (design.iconOpacity || 0.8) + 0.15),
+        stroke: "none",
+        filter: "url(#" + glowFilterId + ")"
+      });
+    }
+    iconElement = React.createElement(React.Fragment, null, iconGlowPath, React.createElement("path", {
+      d: iconDef.path,
+      fill: design.iconColor,
+      fillRule: iconDef.fillRule || "evenodd",
+      opacity: design.iconOpacity,
+      stroke: "none"
+    }));
+  }
+  var groupProps = {};
+  if (hasRotation) {
+    groupProps.transform = "rotate(" + design.shapeRotation + " 50 50)";
+  }
+  return React.createElement("div", {
+    style: Object.assign({
+      width: size,
+      height: size,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center"
+    }, glowStyle)
+  }, React.createElement("svg", {
+    viewBox: "0 0 100 100",
+    width: size,
+    height: size,
+    xmlns: "http://www.w3.org/2000/svg"
+  }, React.createElement("defs", null, React.createElement(PatternDef, {
+    id: patId,
+    patternId: design.pattern,
+    color: design.patternColor,
+    opacity: design.patternOpacity,
+    scale: design.patternScale,
+    rotation: design.patternRotation,
+    filled: design.patternFilled,
+    lineWidth: design.patternLineWidth
+  }), iconGlowFilter), React.createElement("g", groupProps, shapeElement, patternOverlay, iconElement)));
+}
+
+// ── BD UI Sub-Components ──
+function HudIcon(props) {
+  var type = props.type,
+    color = props.color || "#889";
+  var paths = {
+    shape: React.createElement("path", {
+      d: "M 10,2 L 18,6 L 18,14 L 10,18 L 2,14 L 2,6 Z",
+      fill: "none",
+      stroke: color,
+      strokeWidth: 1.5,
+      strokeLinejoin: "round"
+    }),
+    color: React.createElement("circle", {
+      cx: 10,
+      cy: 10,
+      r: 7,
+      fill: color,
+      opacity: 0.9
+    }),
+    border: React.createElement("rect", {
+      x: 3,
+      y: 3,
+      width: 14,
+      height: 14,
+      rx: 2,
+      fill: "none",
+      stroke: color,
+      strokeWidth: 2.5
+    }),
+    pattern: React.createElement("g", {
+      fill: color,
+      opacity: 0.85
+    }, React.createElement("circle", {
+      cx: 5,
+      cy: 5,
+      r: 1.8
+    }), React.createElement("circle", {
+      cx: 10,
+      cy: 5,
+      r: 1.8
+    }), React.createElement("circle", {
+      cx: 15,
+      cy: 5,
+      r: 1.8
+    }), React.createElement("circle", {
+      cx: 5,
+      cy: 10,
+      r: 1.8
+    }), React.createElement("circle", {
+      cx: 10,
+      cy: 10,
+      r: 1.8
+    }), React.createElement("circle", {
+      cx: 15,
+      cy: 10,
+      r: 1.8
+    }), React.createElement("circle", {
+      cx: 5,
+      cy: 15,
+      r: 1.8
+    }), React.createElement("circle", {
+      cx: 10,
+      cy: 15,
+      r: 1.8
+    }), React.createElement("circle", {
+      cx: 15,
+      cy: 15,
+      r: 1.8
+    })),
+    icon: React.createElement("path", {
+      d: "M 10,2 L 12.5,7.5 L 18,8 L 14,12 L 15,18 L 10,15 L 5,18 L 6,12 L 2,8 L 7.5,7.5 Z",
+      fill: color,
+      opacity: 0.85
+    })
+  };
+  return React.createElement("svg", {
+    viewBox: "0 0 20 20",
+    width: 22,
+    height: 22
+  }, paths[type] || null);
+}
+var HUD_TABS = [{
+  id: "shape",
+  label: "Shape",
+  iconType: "shape"
+}, {
+  id: "color",
+  label: "Color",
+  iconType: "color"
+}, {
+  id: "border",
+  label: "Border",
+  iconType: "border"
+}, {
+  id: "pattern",
+  label: "Pattern",
+  iconType: "pattern"
+}, {
+  id: "icon",
+  label: "Icon",
+  iconType: "icon"
+}];
+function BDHudTabBar(props) {
+  var active = props.active,
+    onSelect = props.onSelect;
+  return React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 4,
+      marginBottom: 8
+    }
+  }, HUD_TABS.map(function (tab) {
+    var selected = tab.id === active;
+    return React.createElement("button", {
+      key: tab.id,
+      onClick: function () {
+        onSelect(tab.id);
+      },
+      style: {
+        flex: 1,
+        padding: "10px 2px 8px",
+        borderRadius: 8,
+        border: selected ? "1px solid rgba(68,136,255,0.5)" : "1px solid rgba(255,255,255,0.06)",
+        background: selected ? "rgba(68,136,255,0.15)" : "rgba(255,255,255,0.02)",
+        color: selected ? "#88bbff" : "#667",
+        fontSize: 10,
+        fontFamily: "'Exo 2', sans-serif",
+        fontWeight: 600,
+        cursor: "pointer",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 4,
+        WebkitTapHighlightColor: "transparent",
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+        transition: "all 0.15s ease"
+      }
+    }, React.createElement(HudIcon, {
+      type: tab.iconType,
+      color: selected ? "#88bbff" : "#556"
+    }), React.createElement("span", null, tab.label));
+  }));
+}
+function BDColorPicker(props) {
+  var value = props.value,
+    onChange = props.onChange,
+    label = props.label,
+    presets = props.presets;
+  return React.createElement("div", {
+    style: {
+      marginBottom: 12
+    }
+  }, label && React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: "#889",
+      marginBottom: 6,
+      fontFamily: "'Exo 2', sans-serif"
+    }
+  }, label), React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      flexWrap: "wrap"
+    }
+  }, React.createElement("input", {
+    type: "color",
+    value: value,
+    onChange: function (e) {
+      onChange(e.target.value);
+    },
+    style: {
+      width: 44,
+      height: 44,
+      border: "2px solid rgba(255,255,255,0.15)",
+      borderRadius: 8,
+      background: "none",
+      cursor: "pointer",
+      padding: 2,
+      fontSize: 16
+    }
+  }), presets && React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 4,
+      flexWrap: "wrap",
+      flex: 1
+    }
+  }, presets.map(function (c) {
+    return React.createElement("button", {
+      key: c,
+      onClick: function () {
+        onChange(c);
+      },
+      style: {
+        width: 28,
+        height: 28,
+        borderRadius: 6,
+        background: c,
+        border: value === c ? "2px solid #fff" : "2px solid rgba(255,255,255,0.1)",
+        cursor: "pointer",
+        padding: 0,
+        WebkitTapHighlightColor: "transparent"
+      }
+    });
+  }))));
+}
+function BDSlider(props) {
+  var value = props.value,
+    onChange = props.onChange,
+    min = props.min,
+    max = props.max,
+    step = props.step || 1,
+    label = props.label,
+    displayValue = props.displayValue;
+  return React.createElement("div", {
+    style: {
+      marginBottom: 12
+    }
+  }, React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      fontSize: 13,
+      color: "#889",
+      marginBottom: 4,
+      fontFamily: "'Exo 2', sans-serif"
+    }
+  }, React.createElement("span", null, label), React.createElement("span", {
+    style: {
+      color: "#bbc"
+    }
+  }, displayValue != null ? displayValue : value)), React.createElement("input", {
+    type: "range",
+    min: min,
+    max: max,
+    step: step,
+    value: value,
+    onChange: function (e) {
+      onChange(parseFloat(e.target.value));
+    },
+    style: {
+      width: "100%",
+      fontSize: 16
+    }
+  }));
+}
+function BDToggle(props) {
+  var value = props.value,
+    onChange = props.onChange,
+    label = props.label;
+  return React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 12
+    }
+  }, React.createElement("span", {
+    style: {
+      fontSize: 13,
+      color: "#889",
+      fontFamily: "'Exo 2', sans-serif"
+    }
+  }, label), React.createElement("button", {
+    onClick: function () {
+      onChange(!value);
+    },
+    style: {
+      width: 48,
+      height: 28,
+      borderRadius: 14,
+      border: "none",
+      background: value ? "#4488ff" : "rgba(255,255,255,0.15)",
+      position: "relative",
+      cursor: "pointer",
+      transition: "background 0.2s",
+      WebkitTapHighlightColor: "transparent",
+      padding: 0
+    }
+  }, React.createElement("div", {
+    style: {
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+      background: "#fff",
+      position: "absolute",
+      top: 3,
+      left: value ? 23 : 3,
+      transition: "left 0.2s"
+    }
+  })));
+}
+function BDOptionGrid(props) {
+  var options = props.options,
+    value = props.value,
+    onChange = props.onChange,
+    columns = props.columns || 4;
+  return React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "repeat(" + columns + ", 1fr)",
+      gap: 6,
+      marginBottom: 12
+    }
+  }, options.map(function (opt) {
+    var selected = opt.id === value;
+    return React.createElement("button", {
+      key: opt.id,
+      onClick: function () {
+        onChange(opt.id);
+      },
+      style: {
+        padding: "10px 4px",
+        borderRadius: 8,
+        border: selected ? "2px solid #4488ff" : "2px solid rgba(255,255,255,0.06)",
+        background: selected ? "rgba(68,136,255,0.12)" : "rgba(255,255,255,0.02)",
+        color: selected ? "#88bbff" : "#778",
+        fontSize: 12,
+        fontFamily: "'Exo 2', sans-serif",
+        cursor: "pointer",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 2,
+        WebkitTapHighlightColor: "transparent"
+      }
+    }, opt.icon && React.createElement("span", {
+      style: {
+        fontSize: 20
+      }
+    }, opt.icon), React.createElement("span", null, opt.label));
+  }));
+}
+function BDHeaderBtn(props) {
+  var bg = props.accent ? "linear-gradient(135deg, #4488ff, #44ddcc)" : props.active ? "rgba(68,136,255,0.2)" : "rgba(255,255,255,0.06)";
+  var clr = props.accent ? "#fff" : props.active ? "#88bbff" : "#889";
+  var brd = props.accent ? "none" : props.active ? "1px solid rgba(68,136,255,0.4)" : "1px solid rgba(255,255,255,0.08)";
+  return React.createElement("button", {
+    onClick: props.onClick,
+    style: {
+      padding: "8px 14px",
+      borderRadius: 8,
+      border: brd,
+      background: bg,
+      color: clr,
+      fontSize: 12,
+      fontFamily: "'Exo 2', sans-serif",
+      fontWeight: 600,
+      cursor: "pointer",
+      WebkitTapHighlightColor: "transparent",
+      letterSpacing: 0.5,
+      textTransform: "uppercase",
+      whiteSpace: "nowrap"
+    }
+  }, props.label);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SHARED UI STYLES
+// ═══════════════════════════════════════════════════════════════
+
+// Unified button style for list cards
+var BTN_BASE = {
+  borderRadius: 4,
+  fontSize: 10,
+  fontWeight: 700,
+  cursor: "pointer",
+  letterSpacing: 0.5,
+  textTransform: "uppercase",
+  fontFamily: "'Quicksand',sans-serif"
+};
+var BTN_EDIT = Object.assign({}, BTN_BASE, {
+  padding: "5px 12px",
+  background: PNL,
+  border: "1px solid rgba(80,200,255,0.3)",
+  color: "#80ddff"
+});
+var BTN_RENAME = Object.assign({}, BTN_BASE, {
+  padding: "5px 10px",
+  background: PNL,
+  border: PNLB,
+  color: "rgba(200,210,220,0.6)"
+});
+var BTN_EXPORT = Object.assign({}, BTN_BASE, {
+  padding: "5px 10px",
+  background: PNL,
+  border: "1px solid rgba(200,184,255,0.3)",
+  color: "#c8b8ff"
+});
+var BTN_DELETE = Object.assign({}, BTN_BASE, {
+  padding: "5px 10px",
+  background: "rgba(80,20,20,0.4)",
+  border: "1px solid rgba(255,80,80,0.3)",
+  color: "#ff8866"
+});
+var BTN_TOPBAR = Object.assign({}, BTN_BASE, {
+  padding: "6px 8px",
+  borderRadius: 4,
+  background: PNL,
+  border: PNLB,
+  color: "rgba(200,210,220,0.8)",
+  fontSize: 9,
+  letterSpacing: 1,
+  boxShadow: "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)"
+});
+var BTN_TOPBAR_ACCENT = Object.assign({}, BTN_TOPBAR, {
+  border: "2px solid rgba(80,200,255,0.3)",
+  color: "#80ddff"
+});
+var BTN_TOPBAR_PURPLE = Object.assign({}, BTN_TOPBAR, {
+  border: "1px solid rgba(200,184,255,0.3)",
+  color: "#c8b8ff"
+});
+var BTN_SAVE = Object.assign({}, BTN_TOPBAR, {
+  background: "linear-gradient(180deg, #2a5a3a, #1a3a28)",
+  border: "2px solid rgba(80,200,100,0.4)",
+  color: "#80dd90"
+});
+
+// Unified card style for list items
+var CARD_STYLE = {
+  background: "rgba(20,20,35,0.6)",
+  border: "1px solid rgba(60,60,80,0.4)",
+  borderRadius: 8,
+  padding: "10px 12px",
+  marginBottom: 8
+};
+
+// Overlay background
+var OVERLAY_BG = {
+  position: "fixed",
+  inset: 0,
+  zIndex: 500,
+  background: "rgba(5,5,20,0.7)",
+  backdropFilter: "blur(4px)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center"
+};
+var OVERLAY_BOX = {
+  background: "linear-gradient(170deg,#151040,#1a0a2e)",
+  borderRadius: 16,
+  padding: "20px 24px",
+  textAlign: "center",
+  maxWidth: 300,
+  animation: "introFadeIn 0.25s ease-out"
+};
+
+// ═══════════════════════════════════════════════════════════════
+// STORAGE KEYS
+// ═══════════════════════════════════════════════════════════════
+
+var LEVEL_STORAGE_KEY = "cosmic_drift_levels";
+var SAMPLE_LEVEL = {
+  id: "sample_001",
+  name: "First Contact",
+  grid: [0, 0, 7, 0, 0, 7, 0, 0, 1, 2, 1, 0, 0, 1, 2, 1, 1, 1, 5, 1, 1, 5, 1, 1, 0, 1, 1, 3, 3, 1, 1, 0, 0, 0, 1, 9, 9, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0],
+  shipStart: 3,
+  startPlasma: 10,
+  created: 1717200000000,
+  modified: 1717200000000,
+  savedAt: "Sample Level",
+  isSample: true
+};
+
+// ═══════════════════════════════════════════════════════════════
+// MAIN WORKSHOP COMPONENT
+// ═══════════════════════════════════════════════════════════════
+
+function CosmicWorkshop() {
+  // ── Screen state ──
+  var _scr = useState("splash"),
+    screen = _scr[0],
+    setScreen = _scr[1];
+
+  // ══ BLOCK DESIGNER STATE ══
+  var _bdDesign = useState(function () {
+      return bdDefaultDesign();
+    }),
+    bdDesign = _bdDesign[0],
+    setBdDesign = _bdDesign[1];
+  var _bdSaved = useState([]),
+    bdSaved = _bdSaved[0],
+    setBdSaved = _bdSaved[1];
+  var _bdEditId = useState(null),
+    bdEditId = _bdEditId[0],
+    setBdEditId = _bdEditId[1];
+  var _bdActivePanel = useState(null),
+    bdActivePanel = _bdActivePanel[0],
+    setBdActivePanel = _bdActivePanel[1];
+  var _bdPhase = useState(1),
+    bdPhase = _bdPhase[0],
+    setBdPhase = _bdPhase[1];
+  var _bdLoaded = useState(false),
+    bdLoaded = _bdLoaded[0],
+    setBdLoaded = _bdLoaded[1];
+  var _bdSavedTab = useState("custom"),
+    bdSavedTab = _bdSavedTab[0],
+    setBdSavedTab = _bdSavedTab[1];
+  var _bdView = useState("list"),
+    bdCurrentView = _bdView[0],
+    setBdCurrentView = _bdView[1];
+  var _bdStatus = useState(""),
+    bdSaveStatus = _bdStatus[0],
+    setBdSaveStatus = _bdStatus[1];
+  var _bdDirty = useState(false),
+    bdDirty = _bdDirty[0],
+    setBdDirty = _bdDirty[1];
+  var _bdSortMode = useState("date_new"),
+    bdSortMode = _bdSortMode[0],
+    setBdSortMode = _bdSortMode[1];
+  var _bdRenamingId = useState(null),
+    bdRenamingId = _bdRenamingId[0],
+    setBdRenamingId = _bdRenamingId[1];
+  var _bdRenamingName = useState(""),
+    bdRenamingName = _bdRenamingName[0],
+    setBdRenamingName = _bdRenamingName[1];
+  var _bdDeletingId = useState(null),
+    bdDeletingId = _bdDeletingId[0],
+    setBdDeletingId = _bdDeletingId[1];
+  var _bdExportId = useState(null),
+    bdExportId = _bdExportId[0],
+    setBdExportId = _bdExportId[1];
+  var _bdExportText = useState(""),
+    bdExportText = _bdExportText[0],
+    setBdExportText = _bdExportText[1];
+  var _bdCopied = useState(false),
+    bdCopied = _bdCopied[0],
+    setBdCopied = _bdCopied[1];
+  var _bdShowExportAll = useState(false),
+    bdShowExportAll = _bdShowExportAll[0],
+    setBdShowExportAll = _bdShowExportAll[1];
+  var _bdExportAllText = useState(""),
+    bdExportAllText = _bdExportAllText[0],
+    setBdExportAllText = _bdExportAllText[1];
+  var _bdShowImport = useState(false),
+    bdShowImport = _bdShowImport[0],
+    setBdShowImport = _bdShowImport[1];
+  var _bdImportText = useState(""),
+    bdImportText = _bdImportText[0],
+    setBdImportText = _bdImportText[1];
+  var _bdImportError = useState(""),
+    bdImportError = _bdImportError[0],
+    setBdImportError = _bdImportError[1];
+  var _bdBackWarn = useState(false),
+    bdShowBackWarn = _bdBackWarn[0],
+    setBdShowBackWarn = _bdBackWarn[1];
+  var bdScrollRef = useRef(null);
+
+  // ══ LEVEL BUILDER STATE ══
+  var _lbScreen = useState("list"),
+    lbScreen = _lbScreen[0],
+    setLbScreen = _lbScreen[1];
+  var _bg = useState(function () {
+      return new Array(COLS * ROWS).fill(0);
+    }),
+    builderGrid = _bg[0],
+    setBuilderGrid = _bg[1];
+  var _bss = useState(3),
+    builderShipStart = _bss[0],
+    setBuilderShipStart = _bss[1];
+  var _sbt = useState(null),
+    selectedBlockType = _sbt[0],
+    setSelectedBlockType = _sbt[1];
+  var _cratePanel = useState(false),
+    crateSubPanelOpen = _cratePanel[0],
+    setCrateSubPanelOpen = _cratePanel[1];
+  var _crateType = useState(9),
+    selectedCrateType = _crateType[0],
+    setSelectedCrateType = _crateType[1];
+  var _eli = useState(null),
+    editingLevelId = _eli[0],
+    setEditingLevelId = _eli[1];
+  var _bln = useState(""),
+    builderLevelName = _bln[0],
+    setBuilderLevelName = _bln[1];
+  var _bdr = useState(false),
+    builderDirty = _bdr[0],
+    setBuilderDirty = _bdr[1];
+  var _bwarn = useState(null),
+    builderWarn = _bwarn[0],
+    setBuilderWarn = _bwarn[1];
+  var _erase = useState(false),
+    eraserActive = _erase[0],
+    setEraserActive = _erase[1];
+  var _bplasma = useState(START_PLASMA),
+    builderPlasma = _bplasma[0],
+    setBuilderPlasma = _bplasma[1];
+  var builderDragRef = useRef(null);
+  var builderTouchUsedRef = useRef(false);
+  var _btour = useState(null),
+    builderTourStep = _btour[0],
+    setBuilderTourStep = _btour[1];
+  var builderTourSeenRef = useRef(false);
+  var builderGridRef = useRef(null);
+
+  // ── My Levels state ──
+  var _slvls = useState([]),
+    savedLevels = _slvls[0],
+    setSavedLevels = _slvls[1];
+  var _sload = useState(false),
+    levelsLoading = _sload[0],
+    setLevelsLoading = _sload[1];
+  var _renid = useState(null),
+    renamingId = _renid[0],
+    setRenamingId = _renid[1];
+  var _renn = useState(""),
+    renamingName = _renn[0],
+    setRenamingName = _renn[1];
+  var _delid = useState(null),
+    deletingId = _delid[0],
+    setDeletingId = _delid[1];
+  var _expid = useState(null),
+    exportId = _expid[0],
+    setExportId = _expid[1];
+  var _exptext = useState(""),
+    exportText = _exptext[0],
+    setExportText = _exptext[1];
+  var _copied = useState(false),
+    copied = _copied[0],
+    setCopied = _copied[1];
+  var _expAll = useState(false),
+    showExportAll = _expAll[0],
+    setShowExportAll = _expAll[1];
+  var _expAllText = useState(""),
+    exportAllText = _expAllText[0],
+    setExportAllText = _expAllText[1];
+  var _sortMode = useState("date_new"),
+    sortMode = _sortMode[0],
+    setSortMode = _sortMode[1];
+  var _showImp = useState(false),
+    showImport = _showImp[0],
+    setShowImport = _showImp[1];
+  var _impText = useState(""),
+    importText = _impText[0],
+    setImportText = _impText[1];
+  var _impErr = useState(""),
+    importError = _impErr[0],
+    setImportError = _impErr[1];
+  var _backWarn = useState(false),
+    showBackWarn = _backWarn[0],
+    setShowBackWarn = _backWarn[1];
+  var savingRef = useRef(false);
+  var storageWorking = useRef(true);
+
+  // ── Load on mount ──
+  useEffect(function () {
+    loadSavedLevels();
+    if (window.storage && window.storage.get) {
+      window.storage.get("cosmic_drift_builder_tour").then(function (r) {
+        if (r && r.value === "seen") builderTourSeenRef.current = true;
+      }).catch(function () {});
+    }
+    bdLoadDesigns().then(function (designs) {
+      setBdSaved(designs);
+      setBdLoaded(true);
+    });
+  }, []);
+  useEffect(function () {
+    if (bdDesign.assignedTo === "force_field" && !bdDesign.phases) {
+      setBdDesign(function (prev) {
+        return Object.assign({}, prev, {
+          phases: bdDefaultPhases()
+        });
+      });
+    }
+    if (bdDesign.assignedTo !== "force_field") {
+      setBdPhase(1);
+    }
+  }, [bdDesign.assignedTo]);
+  var bdDisplayDesign = getDesignForPhase(bdDesign, bdPhase);
+
+  // ═══════════════════════════════════════
+  // SHARED UTILITIES
+  // ═══════════════════════════════════════
+
+  function genUUID() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
+  }
+  function copyToClipboard(text, setCopiedFn) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        setCopiedFn(true);
+        setTimeout(function () {
+          setCopiedFn(false);
+        }, 2000);
+      });
+    } else {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      setCopiedFn(true);
+      setTimeout(function () {
+        setCopiedFn(false);
+      }, 2000);
+    }
+  }
+
+  // ═══════════════════════════════════════
+  // LEVEL BUILDER FUNCTIONS
+  // ═══════════════════════════════════════
+
+  function persistLevels(levels) {
+    if (!window.storage || !window.storage.set) return;
+    try {
+      window.storage.set(LEVEL_STORAGE_KEY, JSON.stringify(levels), false).then(function () {
+        storageWorking.current = true;
+      }).catch(function () {
+        storageWorking.current = false;
+      });
+    } catch (e) {
+      storageWorking.current = false;
+    }
+  }
+  function loadSavedLevels() {
+    setLevelsLoading(true);
+    if (!window.storage || !window.storage.get) {
+      setSavedLevels([SAMPLE_LEVEL]);
+      setLevelsLoading(false);
+      return;
+    }
+    window.storage.get(LEVEL_STORAGE_KEY).then(function (r) {
+      if (r && r.value) {
+        var levels = JSON.parse(r.value);
+        levels.sort(function (a, b) {
+          return (b.modified || 0) - (a.modified || 0);
+        });
+        if (levels.length === 0) {
+          levels = [SAMPLE_LEVEL];
+          persistLevels(levels);
+        }
+        setSavedLevels(levels);
+        storageWorking.current = true;
+      } else {
+        var seed = [SAMPLE_LEVEL];
+        setSavedLevels(seed);
+        persistLevels(seed);
+      }
+      setLevelsLoading(false);
+    }).catch(function () {
+      storageWorking.current = false;
+      setSavedLevels([SAMPLE_LEVEL]);
+      setLevelsLoading(false);
+    });
+  }
+  function openBuilder(levelData) {
+    if (levelData) {
+      setBuilderGrid(levelData.grid.slice());
+      setBuilderShipStart(levelData.shipStart != null ? levelData.shipStart : 3);
+      setEditingLevelId(levelData.id || null);
+      setBuilderLevelName(levelData.name || "");
+      setBuilderPlasma(levelData.startPlasma || START_PLASMA);
+    } else {
+      setBuilderGrid(new Array(COLS * ROWS).fill(0));
+      setBuilderShipStart(3);
+      setEditingLevelId(null);
+      setBuilderLevelName("");
+      setBuilderPlasma(START_PLASMA);
+    }
+    setSelectedBlockType(null);
+    setEraserActive(false);
+    setBuilderDirty(false);
+    setBuilderWarn(null);
+    if (!builderTourSeenRef.current) {
+      setBuilderTourStep(0);
+    }
+    setLbScreen("editor");
+  }
+  function builderCellAction(idx) {
+    setCrateSubPanelOpen(false);
+    if (selectedBlockType === 17 && builderGrid.indexOf(17) >= 0 && builderGrid[idx] !== 17) {
+      setBuilderWarn("Only one UFO allowed. Remove it from the board to place in a new location.");
+      setTimeout(function () {
+        setBuilderWarn(null);
+      }, 3000);
+      return;
+    }
+    setBuilderGrid(function (prev) {
+      var g = prev.slice();
+      if (eraserActive) {
+        g[idx] = 0;
+      } else if (selectedBlockType !== null) {
+        if (g[idx] === selectedBlockType) {
+          g[idx] = 0;
+        } else {
+          g[idx] = selectedBlockType;
+        }
+      } else {
+        if (g[idx] > 0) g[idx] = 0;else return prev;
+      }
+      return g;
+    });
+    setBuilderDirty(true);
+  }
+  function getBuilderIdxFromTouch(touch) {
+    if (!builderGridRef.current) return -1;
+    var r = builderGridRef.current.getBoundingClientRect();
+    var x = touch.clientX - r.left,
+      y = touch.clientY - r.top;
+    var col = Math.floor(x / (r.width / COLS));
+    var row = Math.floor(y / (r.height / ROWS));
+    if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return -1;
+    return row * COLS + col;
+  }
+  function handleBuilderGridTS(e) {
+    e.preventDefault();
+    builderTouchUsedRef.current = true;
+    var t = e.touches[0];
+    var canDrag = selectedBlockType !== null || eraserActive;
+    builderDragRef.current = {
+      lastIdx: -1,
+      active: canDrag
+    };
+    var idx = getBuilderIdxFromTouch(t);
+    if (idx >= 0) {
+      builderCellAction(idx);
+      builderDragRef.current.lastIdx = idx;
+    }
+  }
+  function handleBuilderGridTM(e) {
+    e.preventDefault();
+    if (!builderDragRef.current || !builderDragRef.current.active) return;
+    var t = e.touches[0];
+    var idx = getBuilderIdxFromTouch(t);
+    if (idx >= 0 && idx !== builderDragRef.current.lastIdx) {
+      setBuilderGrid(function (prev) {
+        var g = prev.slice();
+        if (eraserActive) {
+          g[idx] = 0;
+        } else if (selectedBlockType !== null && g[idx] !== selectedBlockType) {
+          if (selectedBlockType === 17 && g.indexOf(17) >= 0) return prev;
+          g[idx] = selectedBlockType;
+        }
+        return g;
+      });
+      setBuilderDirty(true);
+      builderDragRef.current.lastIdx = idx;
+    }
+  }
+  function handleBuilderGridTE(e) {
+    e.preventDefault();
+    builderDragRef.current = null;
+    setTimeout(function () {
+      builderTouchUsedRef.current = false;
+    }, 300);
+  }
+  function handleBuilderGridMD(e) {
+    if (builderTouchUsedRef.current) return;
+    builderTouchUsedRef.current = true;
+    var canDrag = selectedBlockType !== null || eraserActive;
+    builderDragRef.current = {
+      lastIdx: -1,
+      active: canDrag
+    };
+    var idx = getBuilderIdxFromTouch(e);
+    if (idx >= 0) {
+      builderCellAction(idx);
+      builderDragRef.current.lastIdx = idx;
+    }
+  }
+  function handleBuilderGridMM(e) {
+    if (!builderDragRef.current || !builderDragRef.current.active) return;
+    var idx = getBuilderIdxFromTouch(e);
+    if (idx >= 0 && idx !== builderDragRef.current.lastIdx) {
+      setBuilderGrid(function (prev) {
+        var g = prev.slice();
+        if (eraserActive) {
+          g[idx] = 0;
+        } else if (selectedBlockType !== null && g[idx] !== selectedBlockType) {
+          if (selectedBlockType === 17 && g.indexOf(17) >= 0) return prev;
+          g[idx] = selectedBlockType;
+        }
+        return g;
+      });
+      setBuilderDirty(true);
+      builderDragRef.current.lastIdx = idx;
+    }
+  }
+  function handleBuilderGridMU() {
+    builderDragRef.current = null;
+    setTimeout(function () {
+      builderTouchUsedRef.current = false;
+    }, 100);
+  }
+  function handleBuilderGridClick(e) {
+    if (builderTouchUsedRef.current) return;
+    if (!builderGridRef.current) return;
+    var r = builderGridRef.current.getBoundingClientRect();
+    var x = e.clientX - r.left,
+      y = e.clientY - r.top;
+    var col = Math.floor(x / (r.width / COLS));
+    var row = Math.floor(y / (r.height / ROWS));
+    if (col >= 0 && col < COLS && row >= 0 && row < ROWS) {
+      builderCellAction(row * COLS + col);
+    }
+  }
+  function validateBuilderGrid(g) {
+    var hasDestructible = false;
+    for (var i = 0; i < g.length; i++) {
+      if (g[i] > 0 && !WIN_EXEMPT[g[i]]) {
+        hasDestructible = true;
+        break;
+      }
+    }
+    return hasDestructible;
+  }
+  function doSaveLevel(id, name) {
+    if (savingRef.current) return;
+    savingRef.current = true;
+    var levelId = id || genUUID();
+    var now = Date.now();
+    var nowStr = new Date().toLocaleString();
+    var entry = {
+      id: levelId,
+      name: name || "Untitled Level",
+      grid: builderGrid.slice(),
+      shipStart: builderShipStart,
+      startPlasma: builderPlasma,
+      created: now,
+      modified: now,
+      savedAt: nowStr
+    };
+    setSavedLevels(function (prev) {
+      var levels = prev.slice();
+      var found = false;
+      for (var i = 0; i < levels.length; i++) {
+        if (levels[i].id === levelId) {
+          entry.created = levels[i].created || now;
+          levels[i] = entry;
+          found = true;
+          break;
+        }
+      }
+      if (!found) levels.push(entry);
+      persistLevels(levels);
+      return levels;
+    });
+    savingRef.current = false;
+    setEditingLevelId(levelId);
+    setBuilderLevelName(entry.name);
+    setBuilderDirty(false);
+    setBuilderWarn("Saved!" + (storageWorking.current ? "" : " (session only - use Export to keep)"));
+    setTimeout(function () {
+      setBuilderWarn(null);
+    }, storageWorking.current ? 2000 : 4000);
+  }
+  function handleBuilderSave() {
+    if (!validateBuilderGrid(builderGrid)) {
+      setBuilderWarn("Level has no destructible blocks and cannot be won.");
+      return;
+    }
+    if (editingLevelId) {
+      doSaveLevel(editingLevelId, builderLevelName || "Untitled Level");
+    } else {
+      doSaveLevel(null, builderLevelName || "Untitled Level");
+    }
+  }
+  function handleBuilderBack() {
+    if (builderDirty) {
+      setShowBackWarn(true);
+      return;
+    }
+    loadSavedLevels();
+    setLbScreen("list");
+  }
+  function deleteLevel(id) {
+    setSavedLevels(function (prev) {
+      var levels = prev.filter(function (l) {
+        return l.id !== id;
+      });
+      persistLevels(levels);
+      return levels;
+    });
+    setDeletingId(null);
+  }
+  function renameLevel(id, newName) {
+    setSavedLevels(function (prev) {
+      var levels = prev.map(function (l) {
+        return l.id === id ? Object.assign({}, l, {
+          name: newName,
+          modified: Date.now()
+        }) : l;
+      });
+      persistLevels(levels);
+      return levels;
+    });
+    setRenamingId(null);
+  }
+  function exportLevel(levelData) {
+    var out = JSON.stringify({
+      name: levelData.name || "Untitled",
+      grid: levelData.grid,
+      ship: levelData.shipStart != null ? levelData.shipStart : 3,
+      plasma: levelData.startPlasma || START_PLASMA,
+      savedAt: levelData.savedAt || new Date().toLocaleString()
+    });
+    setExportText(out);
+    setExportId(levelData.id);
+    setCopied(false);
+  }
+  function exportAllLevels() {
+    var arr = savedLevels.map(function (lv) {
+      return {
+        name: lv.name || "Untitled",
+        grid: lv.grid,
+        ship: lv.shipStart != null ? lv.shipStart : 3,
+        plasma: lv.startPlasma || START_PLASMA,
+        savedAt: lv.savedAt || new Date().toLocaleString()
+      };
+    });
+    setExportAllText(JSON.stringify(arr));
+    setShowExportAll(true);
+    setCopied(false);
+  }
+  function validateLevelData(parsed) {
+    if (!parsed.grid || !Array.isArray(parsed.grid)) return "Missing or invalid grid data";
+    if (parsed.grid.length !== COLS * ROWS) return "Grid must have " + COLS * ROWS + " cells (got " + parsed.grid.length + ")";
+    for (var i = 0; i < parsed.grid.length; i++) {
+      var v = parsed.grid[i];
+      if (typeof v !== "number" || v < 0 || v > 17 || v !== Math.floor(v)) return "Invalid block type at position " + i;
+    }
+    return null;
+  }
+  function handleImport() {
+    var text = importText.trim();
+    if (!text) {
+      setImportError("Paste a level code first");
+      return;
+    }
+    var parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch (e) {
+      setImportError("Invalid format - not valid JSON");
+      return;
+    }
+    if (Array.isArray(parsed)) {
+      if (parsed.length === 0) {
+        setImportError("Empty array - no levels to import");
+        return;
+      }
+      var newEntries = [];
+      for (var a = 0; a < parsed.length; a++) {
+        var err = validateLevelData(parsed[a]);
+        if (err) {
+          setImportError("Level " + (a + 1) + ": " + err);
+          return;
+        }
+        var now = Date.now();
+        newEntries.push({
+          id: genUUID(),
+          name: parsed[a].name || "Imported " + (a + 1),
+          grid: parsed[a].grid,
+          shipStart: typeof parsed[a].ship === "number" ? Math.max(0, Math.min(COLS - 1, Math.floor(parsed[a].ship))) : 3,
+          startPlasma: typeof parsed[a].plasma === "number" ? parsed[a].plasma : START_PLASMA,
+          created: now,
+          modified: now,
+          savedAt: parsed[a].savedAt || new Date().toLocaleString()
+        });
+      }
+      setSavedLevels(function (prev) {
+        var levels = prev.concat(newEntries);
+        persistLevels(levels);
+        return levels;
+      });
+      setShowImport(false);
+      setImportText("");
+      setImportError("");
+      return;
+    }
+    var err2 = validateLevelData(parsed);
+    if (err2) {
+      setImportError(err2);
+      return;
+    }
+    var now2 = Date.now();
+    var entry = {
+      id: genUUID(),
+      name: parsed.name || "Imported Level",
+      grid: parsed.grid,
+      shipStart: typeof parsed.ship === "number" ? Math.max(0, Math.min(COLS - 1, Math.floor(parsed.ship))) : 3,
+      startPlasma: typeof parsed.plasma === "number" ? parsed.plasma : START_PLASMA,
+      created: now2,
+      modified: now2,
+      savedAt: parsed.savedAt || new Date().toLocaleString()
+    };
+    setSavedLevels(function (prev) {
+      var levels = prev.concat([entry]);
+      persistLevels(levels);
+      return levels;
+    });
+    setShowImport(false);
+    setImportText("");
+    setImportError("");
+  }
+
+  // ═══════════════════════════════════════
+  // BLOCK DESIGNER FUNCTIONS
+  // ═══════════════════════════════════════
+
+  function bdUpdateDesign(key, value) {
+    setBdDesign(function (prev) {
+      var next = {};
+      Object.keys(prev).forEach(function (k) {
+        next[k] = prev[k];
+      });
+      if (bdPhase > 1 && PHASE_PROPS.indexOf(key) >= 0 && next.phases) {
+        var newPhases = {};
+        Object.keys(next.phases).forEach(function (p) {
+          newPhases[p] = {};
+          Object.keys(next.phases[p]).forEach(function (pk) {
+            newPhases[p][pk] = next.phases[p][pk];
+          });
+        });
+        if (!newPhases[bdPhase]) newPhases[bdPhase] = {};
+        newPhases[bdPhase][key] = value;
+        next.phases = newPhases;
+      } else {
+        next[key] = value;
+      }
+      return next;
+    });
+    setBdDirty(true);
+  }
+  function bdTogglePanel(key) {
+    setBdActivePanel(function (prev) {
+      return prev === key ? null : key;
+    });
+  }
+  function bdSaveCurrentDesign() {
+    var saveName = bdDesign.name.trim() || "Unnamed Design";
+    var newDesign = {};
+    Object.keys(bdDesign).forEach(function (k) {
+      newDesign[k] = bdDesign[k];
+    });
+    newDesign.name = saveName;
+    newDesign.id = bdEditId || genUUID();
+    newDesign.createdAt = newDesign.createdAt || new Date().toISOString();
+    newDesign.modifiedAt = new Date().toISOString();
+    setBdSaved(function (prev) {
+      var list = prev.slice();
+      var found = false;
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].id === newDesign.id) {
+          list[i] = newDesign;
+          found = true;
+          break;
+        }
+      }
+      if (!found) list.push(newDesign);
+      bdSaveDesigns(list);
+      return list;
+    });
+    setBdEditId(newDesign.id);
+    setBdDesign(function (prev) {
+      return Object.assign({}, prev, {
+        name: saveName
+      });
+    });
+    setBdDirty(false);
+    setBdSaveStatus("Saved!");
+    setTimeout(function () {
+      setBdSaveStatus("");
+    }, 2000);
+  }
+  function bdDeleteDesign(id) {
+    setBdSaved(function (prev) {
+      var list = prev.filter(function (d) {
+        return d.id !== id;
+      });
+      bdSaveDesigns(list);
+      return list;
+    });
+    if (bdEditId === id) setBdEditId(null);
+    setBdDeletingId(null);
+  }
+  function bdRenameDesign(id, newName) {
+    setBdSaved(function (prev) {
+      var list = prev.map(function (d) {
+        return d.id === id ? Object.assign({}, d, {
+          name: newName,
+          modifiedAt: new Date().toISOString()
+        }) : d;
+      });
+      bdSaveDesigns(list);
+      return list;
+    });
+    setBdRenamingId(null);
+  }
+  function bdOpenEditor(design) {
+    if (design) {
+      var loaded = {};
+      Object.keys(design).forEach(function (k) {
+        loaded[k] = design[k];
+      });
+      setBdDesign(loaded);
+      setBdEditId(design.id || null);
+    } else {
+      setBdDesign(bdDefaultDesign());
+      setBdEditId(null);
+    }
+    setBdPhase(1);
+    setBdDirty(false);
+    setBdSaveStatus("");
+    setBdActivePanel("shape");
+    setBdCurrentView("editor");
+    if (bdScrollRef.current) {
+      bdScrollRef.current.scrollTop = 0;
+    }
+  }
+  function bdCopyPreset(preset) {
+    var copy = {};
+    Object.keys(preset).forEach(function (k) {
+      copy[k] = preset[k];
+    });
+    copy.isFactory = false;
+    copy.id = null;
+    copy.name = preset.name + " (custom)";
+    setBdDesign(copy);
+    setBdEditId(null);
+    setBdDirty(true);
+    setBdPhase(1);
+    setBdActivePanel("shape");
+    setBdCurrentView("editor");
+  }
+  function bdHandleBack() {
+    if (bdDirty) {
+      setBdShowBackWarn(true);
+      return;
+    }
+    setBdCurrentView("list");
+  }
+  function bdExportDesign(design) {
+    var out = {};
+    Object.keys(design).forEach(function (k) {
+      if (k !== "isFactory") out[k] = design[k];
+    });
+    setBdExportText(JSON.stringify(out));
+    setBdExportId(design.id);
+    setBdCopied(false);
+  }
+  function bdExportAllDesigns() {
+    var arr = bdSaved.map(function (d) {
+      var out = {};
+      Object.keys(d).forEach(function (k) {
+        out[k] = d[k];
+      });
+      return out;
+    });
+    setBdExportAllText(JSON.stringify(arr));
+    setBdShowExportAll(true);
+    setBdCopied(false);
+  }
+  function bdValidateDesignImport(parsed) {
+    if (typeof parsed !== "object" || parsed === null) return "Invalid design data";
+    if (!parsed.shape || typeof parsed.color !== "string") return "Missing required fields (shape, color)";
+    return null;
+  }
+  function bdHandleImport() {
+    var text = bdImportText.trim();
+    if (!text) {
+      setBdImportError("Paste a design code first");
+      return;
+    }
+    var parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch (e) {
+      setBdImportError("Invalid format - not valid JSON");
+      return;
+    }
+    if (Array.isArray(parsed)) {
+      if (parsed.length === 0) {
+        setBdImportError("Empty array - no designs to import");
+        return;
+      }
+      var newEntries = [];
+      for (var a = 0; a < parsed.length; a++) {
+        var err = bdValidateDesignImport(parsed[a]);
+        if (err) {
+          setBdImportError("Design " + (a + 1) + ": " + err);
+          return;
+        }
+        var entry = Object.assign({}, bdDefaultDesign(), parsed[a]);
+        entry.id = genUUID();
+        entry.isFactory = false;
+        entry.modifiedAt = new Date().toISOString();
+        newEntries.push(entry);
+      }
+      setBdSaved(function (prev) {
+        var list = prev.concat(newEntries);
+        bdSaveDesigns(list);
+        return list;
+      });
+      setBdShowImport(false);
+      setBdImportText("");
+      setBdImportError("");
+      return;
+    }
+    var err2 = bdValidateDesignImport(parsed);
+    if (err2) {
+      setBdImportError(err2);
+      return;
+    }
+    var entry2 = Object.assign({}, bdDefaultDesign(), parsed);
+    entry2.id = genUUID();
+    entry2.isFactory = false;
+    entry2.modifiedAt = new Date().toISOString();
+    setBdSaved(function (prev) {
+      var list = prev.concat([entry2]);
+      bdSaveDesigns(list);
+      return list;
+    });
+    setBdShowImport(false);
+    setBdImportText("");
+    setBdImportError("");
+  }
+
+  // ═══════════════════════════════════════
+  // SHARED OVERLAY RENDERERS
+  // ═══════════════════════════════════════
+
+  function renderDeleteOverlay(title, onCancel, onConfirm) {
+    return React.createElement("div", {
+      style: OVERLAY_BG
+    }, React.createElement("div", {
+      style: Object.assign({}, OVERLAY_BOX, {
+        border: "1px solid rgba(255,80,80,0.3)"
+      })
+    }, React.createElement("div", {
+      style: {
+        color: "#ff8866",
+        fontSize: 15,
+        fontWeight: 700,
+        marginBottom: 8,
+        fontFamily: "'Quicksand',sans-serif"
+      }
+    }, title), React.createElement("div", {
+      style: {
+        color: "rgba(200,184,255,0.45)",
+        fontSize: 12,
+        marginBottom: 16
+      }
+    }, "This cannot be undone."), React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 12,
+        justifyContent: "center"
+      }
+    }, React.createElement("div", {
+      onClick: onCancel,
+      style: {
+        padding: "8px 20px",
+        borderRadius: 16,
+        border: "1px solid rgba(120,80,255,0.3)",
+        color: "#c8b8ff",
+        fontSize: 12,
+        fontWeight: 600,
+        cursor: "pointer"
+      }
+    }, "Cancel"), React.createElement("div", {
+      onClick: onConfirm,
+      style: {
+        padding: "8px 20px",
+        borderRadius: 16,
+        background: "rgba(255,60,60,0.3)",
+        border: "1px solid rgba(255,80,80,0.4)",
+        color: "#ff6644",
+        fontSize: 12,
+        fontWeight: 700,
+        cursor: "pointer"
+      }
+    }, "Delete"))));
+  }
+  function renderExportOverlay(title, text, isCopied, onCopy, onClose) {
+    return React.createElement("div", {
+      style: OVERLAY_BG
+    }, React.createElement("div", {
+      style: Object.assign({}, OVERLAY_BOX, {
+        border: "1px solid rgba(200,184,255,0.3)",
+        maxWidth: 340,
+        width: "90%"
+      })
+    }, React.createElement("div", {
+      style: {
+        color: "#c8b8ff",
+        fontSize: 15,
+        fontWeight: 700,
+        marginBottom: 8,
+        fontFamily: "'Quicksand',sans-serif"
+      }
+    }, title), React.createElement("div", {
+      style: {
+        color: "rgba(200,184,255,0.4)",
+        fontSize: 11,
+        marginBottom: 12
+      }
+    }, "Copy this code to share:"), React.createElement("textarea", {
+      readOnly: true,
+      value: text,
+      style: {
+        width: "100%",
+        height: 80,
+        padding: 8,
+        borderRadius: 6,
+        background: SCRN,
+        border: SCRNB,
+        color: "#80ddff",
+        fontSize: 16,
+        fontFamily: "monospace",
+        resize: "none",
+        outline: "none",
+        boxSizing: "border-box"
+      },
+      onClick: function (e) {
+        e.target.select();
+      }
+    }), React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 12,
+        justifyContent: "center",
+        marginTop: 12
+      }
+    }, React.createElement("div", {
+      onClick: onClose,
+      style: {
+        padding: "8px 20px",
+        borderRadius: 16,
+        border: "1px solid rgba(120,80,255,0.3)",
+        color: "#c8b8ff",
+        fontSize: 12,
+        fontWeight: 600,
+        cursor: "pointer"
+      }
+    }, "Close"), React.createElement("div", {
+      onClick: onCopy,
+      style: {
+        padding: "8px 20px",
+        borderRadius: 16,
+        background: isCopied ? "rgba(80,200,100,0.3)" : "linear-gradient(135deg,#7b5ea7,#9f7fd0)",
+        border: isCopied ? "1px solid rgba(80,200,100,0.5)" : "none",
+        color: isCopied ? "#80dd90" : "#fff",
+        fontSize: 12,
+        fontWeight: 700,
+        cursor: "pointer"
+      }
+    }, isCopied ? "Copied!" : "Copy"))));
+  }
+  function renderImportOverlay(title, text, setText, error, setError, onImport, onClose) {
+    return React.createElement("div", {
+      style: OVERLAY_BG,
+      onClick: function (e) {
+        e.stopPropagation();
+      }
+    }, React.createElement("div", {
+      onClick: function (e) {
+        e.stopPropagation();
+      },
+      style: Object.assign({}, OVERLAY_BOX, {
+        border: "1px solid rgba(80,200,255,0.3)",
+        maxWidth: 320,
+        width: "90%"
+      })
+    }, React.createElement("div", {
+      style: {
+        color: "#80ddff",
+        fontSize: 15,
+        fontWeight: 700,
+        marginBottom: 8,
+        fontFamily: "'Quicksand',sans-serif"
+      }
+    }, title), React.createElement("div", {
+      style: {
+        color: "rgba(180,200,220,0.4)",
+        fontSize: 11,
+        marginBottom: 12
+      }
+    }, "Paste an exported code:"), React.createElement("textarea", {
+      value: text,
+      onChange: function (e) {
+        setText(e.target.value);
+        setError("");
+      },
+      placeholder: "Paste JSON here...",
+      style: {
+        width: "100%",
+        height: 90,
+        padding: 8,
+        borderRadius: 6,
+        background: SCRN,
+        border: error ? "2px solid rgba(255,80,60,0.5)" : SCRNB,
+        color: "#b0c8d8",
+        fontSize: 16,
+        fontFamily: "monospace",
+        resize: "none",
+        outline: "none",
+        boxSizing: "border-box"
+      }
+    }), error && React.createElement("div", {
+      style: {
+        color: "#ff8866",
+        fontSize: 11,
+        marginTop: 6,
+        fontWeight: 600
+      }
+    }, error), React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 12,
+        justifyContent: "center",
+        marginTop: 12
+      }
+    }, React.createElement("div", {
+      onClick: onClose,
+      style: {
+        padding: "8px 20px",
+        borderRadius: 16,
+        border: "1px solid rgba(120,80,255,0.3)",
+        color: "#c8b8ff",
+        fontSize: 12,
+        fontWeight: 600,
+        cursor: "pointer"
+      }
+    }, "Cancel"), React.createElement("div", {
+      onClick: onImport,
+      style: {
+        padding: "8px 20px",
+        borderRadius: 16,
+        background: "linear-gradient(135deg,#2a5a6a,#1a3a4a)",
+        border: "1px solid rgba(80,200,255,0.4)",
+        color: "#80ddff",
+        fontSize: 12,
+        fontWeight: 700,
+        cursor: "pointer"
+      }
+    }, "Import"))));
+  }
+  function renderBackWarnOverlay(onStay, onLeave) {
+    return React.createElement("div", {
+      style: OVERLAY_BG
+    }, React.createElement("div", {
+      style: Object.assign({}, OVERLAY_BOX, {
+        border: "1px solid rgba(120,80,255,0.3)",
+        maxWidth: 280
+      })
+    }, React.createElement("div", {
+      style: {
+        color: "#c8b8ff",
+        fontSize: 15,
+        fontWeight: 700,
+        marginBottom: 8,
+        fontFamily: "'Quicksand',sans-serif"
+      }
+    }, "Unsaved Changes"), React.createElement("div", {
+      style: {
+        color: "rgba(200,184,255,0.5)",
+        fontSize: 12,
+        marginBottom: 16
+      }
+    }, "You have unsaved changes. Leave anyway?"), React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 12,
+        justifyContent: "center"
+      }
+    }, React.createElement("div", {
+      onClick: onStay,
+      style: {
+        padding: "8px 20px",
+        borderRadius: 16,
+        border: "1px solid rgba(120,80,255,0.3)",
+        color: "#c8b8ff",
+        fontSize: 12,
+        fontWeight: 600,
+        cursor: "pointer"
+      }
+    }, "Stay"), React.createElement("div", {
+      onClick: onLeave,
+      style: {
+        padding: "8px 20px",
+        borderRadius: 16,
+        background: "rgba(255,60,60,0.3)",
+        border: "1px solid rgba(255,80,80,0.35)",
+        color: "#ff8866",
+        fontSize: 12,
+        fontWeight: 700,
+        cursor: "pointer"
+      }
+    }, "Leave"))));
+  }
+  function renderSortBar(currentSort, onSort) {
+    return React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 4,
+        padding: "6px 10px 2px",
+        position: "relative",
+        zIndex: 1
+      }
+    }, React.createElement("div", {
+      style: {
+        color: "rgba(180,200,220,0.3)",
+        fontSize: 9,
+        fontWeight: 700,
+        letterSpacing: 0.5,
+        textTransform: "uppercase",
+        paddingTop: 4,
+        marginRight: 2
+      }
+    }, "Sort:"), [["date_new", "Newest"], ["date_old", "Oldest"], ["name", "Name"]].map(function (opt) {
+      var active = currentSort === opt[0];
+      return React.createElement("div", {
+        key: opt[0],
+        onClick: function () {
+          onSort(opt[0]);
+        },
+        style: {
+          padding: "3px 8px",
+          borderRadius: 3,
+          background: active ? "rgba(80,200,255,0.12)" : "transparent",
+          border: active ? "1px solid rgba(80,200,255,0.3)" : "1px solid transparent",
+          color: active ? "#80ddff" : "rgba(180,200,220,0.3)",
+          fontSize: 9,
+          fontWeight: 700,
+          cursor: "pointer",
+          letterSpacing: 0.5
+        }
+      }, opt[1]);
+    }));
+  }
+  function sortItems(items, mode, dateKey) {
+    return items.slice().sort(function (a, b) {
+      if (mode === "name") return (a.name || "").localeCompare(b.name || "");
+      if (mode === "date_old") return ((a[dateKey] ? new Date(a[dateKey]).getTime() : 0) || 0) - ((b[dateKey] ? new Date(b[dateKey]).getTime() : 0) || 0);
+      return ((b[dateKey] ? new Date(b[dateKey]).getTime() : 0) || 0) - ((a[dateKey] ? new Date(a[dateKey]).getTime() : 0) || 0);
+    });
+  }
+
+  // ═══════════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════════
+
+  return React.createElement("div", {
+    style: {
+      position: "fixed",
+      inset: 0,
+      background: "#0b0c1a",
+      fontFamily: "'Quicksand',sans-serif",
+      overflow: "hidden"
+    }
+  }, React.createElement("style", null, ANIM_CSS), React.createElement("div", {
+    style: {
+      position: "absolute",
+      inset: 0,
+      overflow: "hidden",
+      pointerEvents: "none"
+    }
+  }, React.createElement(Stars, null)),
+  // ═══ SPLASH SCREEN ═══
+  screen === "splash" && React.createElement("div", {
+    style: {
+      position: "relative",
+      zIndex: 1,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      height: "100%",
+      padding: 24
+    }
+  }, React.createElement("div", {
+    style: {
+      textAlign: "center",
+      marginBottom: 40
+    }
+  }, React.createElement("div", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      letterSpacing: 4,
+      color: "rgba(180,200,220,0.3)",
+      textTransform: "uppercase",
+      marginBottom: 8
+    }
+  }, "COSMIC DRIFT"), React.createElement("div", {
+    style: {
+      fontSize: 28,
+      fontWeight: 700,
+      letterSpacing: 3,
+      color: "#80ddff",
+      textTransform: "uppercase",
+      textShadow: "0 0 20px rgba(80,200,255,0.3)"
+    }
+  }, "WORKSHOP"), React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "rgba(180,200,220,0.2)",
+      marginTop: 8,
+      letterSpacing: 1
+    }
+  }, WORKSHOP_VERSION)), React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 16,
+      width: "100%",
+      maxWidth: 320
+    }
+  },
+  // Level Builder card
+  React.createElement("div", {
+    onClick: function () {
+      loadSavedLevels();
+      setScreen("builder");
+      setLbScreen("list");
+    },
+    style: {
+      background: "linear-gradient(135deg, rgba(80,200,255,0.08), rgba(80,200,255,0.02))",
+      border: "1px solid rgba(80,200,255,0.2)",
+      borderRadius: 12,
+      padding: "20px 20px",
+      cursor: "pointer"
+    }
+  }, React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 14
+    }
+  }, React.createElement("div", {
+    style: {
+      width: 48,
+      height: 48,
+      borderRadius: 10,
+      background: "rgba(80,200,255,0.1)",
+      border: "1px solid rgba(80,200,255,0.2)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0
+    }
+  }, React.createElement("svg", {
+    width: "24",
+    height: "24",
+    viewBox: "0 0 24 24"
+  }, React.createElement("rect", {
+    x: "3",
+    y: "3",
+    width: "7",
+    height: "7",
+    rx: "1",
+    fill: "none",
+    stroke: "#80ddff",
+    strokeWidth: "1.5"
+  }), React.createElement("rect", {
+    x: "14",
+    y: "3",
+    width: "7",
+    height: "7",
+    rx: "1",
+    fill: "#80ddff",
+    opacity: "0.4"
+  }), React.createElement("rect", {
+    x: "3",
+    y: "14",
+    width: "7",
+    height: "7",
+    rx: "1",
+    fill: "#80ddff",
+    opacity: "0.4"
+  }), React.createElement("rect", {
+    x: "14",
+    y: "14",
+    width: "7",
+    height: "7",
+    rx: "1",
+    fill: "none",
+    stroke: "#80ddff",
+    strokeWidth: "1.5",
+    strokeDasharray: "2 2"
+  }))), React.createElement("div", null, React.createElement("div", {
+    style: {
+      color: "#80ddff",
+      fontSize: 16,
+      fontWeight: 700,
+      letterSpacing: 1
+    }
+  }, "Level Builder"), React.createElement("div", {
+    style: {
+      color: "rgba(180,200,220,0.35)",
+      fontSize: 11,
+      marginTop: 3
+    }
+  }, savedLevels.length > 0 ? savedLevels.length + " saved level" + (savedLevels.length !== 1 ? "s" : "") : "Design custom levels")))),
+  // Block Designer card
+  React.createElement("div", {
+    onClick: function () {
+      setScreen("designer");
+      setBdCurrentView("list");
+    },
+    style: {
+      background: "linear-gradient(135deg, rgba(200,184,255,0.08), rgba(200,184,255,0.02))",
+      border: "1px solid rgba(200,184,255,0.2)",
+      borderRadius: 12,
+      padding: "20px 20px",
+      cursor: "pointer"
+    }
+  }, React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 14
+    }
+  }, React.createElement("div", {
+    style: {
+      width: 48,
+      height: 48,
+      borderRadius: 10,
+      background: "rgba(200,184,255,0.1)",
+      border: "1px solid rgba(200,184,255,0.2)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0
+    }
+  }, React.createElement("svg", {
+    width: "24",
+    height: "24",
+    viewBox: "0 0 24 24"
+  }, React.createElement("rect", {
+    x: "4",
+    y: "4",
+    width: "16",
+    height: "16",
+    rx: "3",
+    fill: "none",
+    stroke: "#c8b8ff",
+    strokeWidth: "1.5"
+  }), React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "4",
+    fill: "#c8b8ff",
+    opacity: "0.4"
+  }), React.createElement("path", {
+    d: "M8 4v16M16 4v16M4 8h16M4 16h16",
+    stroke: "#c8b8ff",
+    strokeWidth: "0.5",
+    opacity: "0.2"
+  }))), React.createElement("div", null, React.createElement("div", {
+    style: {
+      color: "#c8b8ff",
+      fontSize: 16,
+      fontWeight: 700,
+      letterSpacing: 1
+    }
+  }, "Block Designer"), React.createElement("div", {
+    style: {
+      color: "rgba(180,200,220,0.35)",
+      fontSize: 11,
+      marginTop: 3
+    }
+  }, bdSaved.length > 0 ? bdSaved.length + " saved design" + (bdSaved.length !== 1 ? "s" : "") : "Create custom block skins")))),
+  // Coming soon
+  React.createElement("div", {
+    style: {
+      background: "rgba(255,255,255,0.02)",
+      border: "1px solid rgba(255,255,255,0.06)",
+      borderRadius: 12,
+      padding: "16px 20px",
+      opacity: 0.4
+    }
+  }, React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 14
+    }
+  }, React.createElement("div", {
+    style: {
+      width: 48,
+      height: 48,
+      borderRadius: 10,
+      background: "rgba(255,255,255,0.03)",
+      border: "1px solid rgba(255,255,255,0.06)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0
+    }
+  }, React.createElement("svg", {
+    width: "24",
+    height: "24",
+    viewBox: "0 0 24 24"
+  }, React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "8",
+    fill: "none",
+    stroke: "rgba(180,200,220,0.3)",
+    strokeWidth: "1.5",
+    strokeDasharray: "3 3"
+  }), React.createElement("text", {
+    x: "12",
+    y: "16",
+    textAnchor: "middle",
+    fill: "rgba(180,200,220,0.3)",
+    fontSize: "12",
+    fontWeight: "700"
+  }, "?"))), React.createElement("div", null, React.createElement("div", {
+    style: {
+      color: "rgba(180,200,220,0.4)",
+      fontSize: 14,
+      fontWeight: 700,
+      letterSpacing: 1
+    }
+  }, "More Coming Soon"), React.createElement("div", {
+    style: {
+      color: "rgba(180,200,220,0.2)",
+      fontSize: 11,
+      marginTop: 3
+    }
+  }, "VFX designer, sound mixer..."))))), React.createElement("div", {
+    style: {
+      position: "absolute",
+      bottom: 16,
+      color: "rgba(180,200,220,0.15)",
+      fontSize: 9,
+      letterSpacing: 1
+    }
+  }, "Created by Dan Medwin and Claude")),
+  // ═══ LEVEL BUILDER ═══
+  screen === "builder" && React.createElement("div", {
+    style: {
+      position: "relative",
+      zIndex: 1,
+      display: "flex",
+      flexDirection: "column",
+      height: "100%"
+    }
+  },
+  // ── MY LEVELS LIST ──
+  lbScreen === "list" && React.createElement(React.Fragment, null, React.createElement(WorkshopTopBar, {
+    onBack: function () {
+      setScreen("splash");
+    },
+    backLabel: "Workshop",
+    title: "My Levels",
+    color: "#80ddff",
+    rightContent: React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 4
+      }
+    }, React.createElement("div", {
+      onClick: function () {
+        setShowImport(true);
+        setImportText("");
+        setImportError("");
+      },
+      style: BTN_TOPBAR_PURPLE
+    }, "Import"), savedLevels.length > 0 && React.createElement("div", {
+      onClick: exportAllLevels,
+      style: Object.assign({}, BTN_TOPBAR, {
+        color: "rgba(200,184,255,0.6)",
+        fontSize: 8
+      })
+    }, "Exp All"), React.createElement("div", {
+      onClick: function () {
+        openBuilder();
+      },
+      style: Object.assign({}, BTN_TOPBAR_ACCENT, {
+        background: "linear-gradient(180deg, #1a3a4a, #0f2a38)",
+        boxShadow: "0 0 8px rgba(80,200,255,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)"
+      })
+    }, "+ New"))
+  }), savedLevels.length > 1 && renderSortBar(sortMode, setSortMode), React.createElement("div", {
+    style: {
+      flex: 1,
+      overflowY: "auto",
+      padding: "6px 10px 20px",
+      position: "relative",
+      zIndex: 1
+    }
+  }, levelsLoading && React.createElement("div", {
+    style: {
+      textAlign: "center",
+      padding: 40,
+      color: "rgba(180,200,220,0.4)",
+      fontSize: 14
+    }
+  }, "Loading..."), !levelsLoading && savedLevels.length === 0 && React.createElement("div", {
+    style: {
+      textAlign: "center",
+      padding: 40
+    }
+  }, React.createElement("div", {
+    style: {
+      color: "rgba(180,200,220,0.3)",
+      fontSize: 14,
+      marginBottom: 8
+    }
+  }, "No saved levels yet"), React.createElement("div", {
+    style: {
+      color: "rgba(180,200,220,0.2)",
+      fontSize: 12
+    }
+  }, "Build a new level or tap Import to paste a level code.")), !levelsLoading && sortItems(savedLevels, sortMode, "modified").map(function (lv) {
+    var dateStr = lv.savedAt || (lv.modified ? new Date(lv.modified).toLocaleString() : "");
+    return React.createElement("div", {
+      key: lv.id,
+      style: CARD_STYLE
+    }, renamingId === lv.id ? React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 6,
+        marginBottom: 8,
+        alignItems: "center"
+      }
+    }, React.createElement("input", {
+      value: renamingName,
+      onChange: function (e) {
+        setRenamingName(e.target.value);
+      },
+      style: {
+        flex: 1,
+        padding: "4px 8px",
+        borderRadius: 4,
+        background: SCRN,
+        border: SCRNB,
+        color: "#b0c8d8",
+        fontSize: 16,
+        fontFamily: "'Quicksand',sans-serif",
+        outline: "none"
+      }
+    }), React.createElement("div", {
+      onClick: function () {
+        renameLevel(lv.id, renamingName);
+      },
+      style: {
+        padding: "4px 8px",
+        borderRadius: 4,
+        background: "rgba(80,200,100,0.2)",
+        border: "1px solid rgba(80,200,100,0.4)",
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }
+    }, React.createElement("svg", {
+      width: "14",
+      height: "14",
+      viewBox: "0 0 24 24"
+    }, React.createElement("path", {
+      d: "M5 13l4 4L19 7",
+      fill: "none",
+      stroke: "#80dd90",
+      strokeWidth: "2.5",
+      strokeLinecap: "round",
+      strokeLinejoin: "round"
+    }))), React.createElement("div", {
+      onClick: function () {
+        setRenamingId(null);
+      },
+      style: {
+        padding: "4px 8px",
+        borderRadius: 4,
+        border: "1px solid rgba(120,80,255,0.3)",
+        color: "#c8b8ff",
+        fontSize: 12,
+        fontWeight: 700,
+        cursor: "pointer"
+      }
+    }, "X")) : React.createElement("div", {
+      style: {
+        marginBottom: 8
+      }
+    }, React.createElement("div", {
+      style: {
+        color: "#b0c8d8",
+        fontSize: 14,
+        fontWeight: 700
+      }
+    }, lv.name || "Untitled"), React.createElement("div", {
+      style: {
+        color: "rgba(180,200,220,0.3)",
+        fontSize: 10
+      }
+    }, dateStr)), React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 6,
+        flexWrap: "wrap"
+      }
+    }, React.createElement("div", {
+      onClick: function () {
+        openBuilder(lv);
+      },
+      style: BTN_EDIT
+    }, "EDIT"), React.createElement("div", {
+      onClick: function () {
+        setRenamingId(lv.id);
+        setRenamingName(lv.name || "");
+      },
+      style: BTN_RENAME
+    }, "RENAME"), React.createElement("div", {
+      onClick: function () {
+        exportLevel(lv);
+      },
+      style: BTN_EXPORT
+    }, "EXPORT"), React.createElement("div", {
+      onClick: function () {
+        setDeletingId(lv.id);
+      },
+      style: BTN_DELETE
+    }, "DELETE")));
+  })), deletingId && renderDeleteOverlay("Delete Level?", function () {
+    setDeletingId(null);
+  }, function () {
+    deleteLevel(deletingId);
+  }), exportId && renderExportOverlay("Export Level", exportText, copied, function () {
+    copyToClipboard(exportText, setCopied);
+  }, function () {
+    setExportId(null);
+  }), showImport && renderImportOverlay("Import Level", importText, setImportText, importError, setImportError, handleImport, function () {
+    setShowImport(false);
+    setImportText("");
+    setImportError("");
+  }), showExportAll && renderExportOverlay("Export All Levels (" + savedLevels.length + ")", exportAllText, copied, function () {
+    copyToClipboard(exportAllText, setCopied);
+  }, function () {
+    setShowExportAll(false);
+  })),
+  // ── BUILDER EDITOR ──
+  lbScreen === "editor" && React.createElement(React.Fragment, null, React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 5,
+      padding: "6px 8px",
+      background: PNL,
+      borderBottom: PNLB,
+      boxShadow: "0 3px 6px rgba(0,0,0,0.4)",
+      position: "relative",
+      zIndex: 2
+    }
+  }, React.createElement("div", {
+    onClick: handleBuilderBack,
+    style: Object.assign({}, BTN_TOPBAR, {
+      display: "flex",
+      alignItems: "center",
+      gap: 3
+    })
+  }, React.createElement("svg", {
+    width: "8",
+    height: "8",
+    viewBox: "0 0 24 24"
+  }, React.createElement("path", {
+    d: "M15 18l-6-6 6-6",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "3",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  })), "My Levels"), React.createElement("div", {
+    onClick: handleBuilderSave,
+    style: BTN_SAVE
+  }, "Save"), React.createElement("div", {
+    style: {
+      flex: 1,
+      background: SCRN,
+      border: SCRNB,
+      borderRadius: 4,
+      padding: "4px 8px",
+      boxShadow: SCRNS
+    }
+  }, React.createElement("input", {
+    value: builderLevelName,
+    onChange: function (e) {
+      setBuilderLevelName(e.target.value);
+      setBuilderDirty(true);
+    },
+    placeholder: "Level name...",
+    style: {
+      width: "100%",
+      background: "transparent",
+      border: "none",
+      outline: "none",
+      color: "#b0c8d8",
+      fontSize: 16,
+      fontWeight: 600,
+      fontFamily: "'Quicksand',sans-serif",
+      letterSpacing: 0.5
+    }
+  })), React.createElement("div", {
+    onClick: function () {
+      setBuilderTourStep(0);
+    },
+    style: {
+      width: 28,
+      height: 28,
+      borderRadius: 4,
+      background: PNL,
+      border: PNLB,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      cursor: "pointer",
+      boxShadow: "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)"
+    }
+  }, React.createElement("svg", {
+    width: "12",
+    height: "12",
+    viewBox: "0 0 16 16"
+  }, React.createElement("circle", {
+    cx: "8",
+    cy: "8",
+    r: "7",
+    fill: "none",
+    stroke: "rgba(180,200,220,0.5)",
+    strokeWidth: "1.5"
+  }), React.createElement("text", {
+    x: "8",
+    y: "12",
+    textAnchor: "middle",
+    fill: "rgba(180,200,220,0.5)",
+    fontSize: "10",
+    fontWeight: "700"
+  }, "?")))), builderWarn && React.createElement("div", {
+    style: {
+      padding: "6px 12px",
+      textAlign: "center",
+      fontSize: 12,
+      fontWeight: 600,
+      color: builderWarn.indexOf("Saved") === 0 ? "#80dd90" : "#ff8866",
+      background: builderWarn.indexOf("Saved") === 0 ? "rgba(80,200,100,0.1)" : "rgba(255,80,60,0.1)",
+      zIndex: 2,
+      position: "relative"
+    }
+  }, builderWarn), React.createElement("div", {
+    style: {
+      flex: 1,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "10px 10px 0",
+      position: "relative",
+      zIndex: 1,
+      overflow: "hidden"
+    }
+  }, React.createElement("div", {
+    ref: builderGridRef,
+    onClick: handleBuilderGridClick,
+    onTouchStart: handleBuilderGridTS,
+    onTouchMove: handleBuilderGridTM,
+    onTouchEnd: handleBuilderGridTE,
+    onMouseDown: handleBuilderGridMD,
+    onMouseMove: handleBuilderGridMM,
+    onMouseUp: handleBuilderGridMU,
+    onMouseLeave: function () {
+      if (builderDragRef.current) {
+        builderDragRef.current = null;
+        setTimeout(function () {
+          builderTouchUsedRef.current = false;
+        }, 100);
+      }
+    },
+    style: {
+      display: "grid",
+      gridTemplateColumns: "repeat(" + COLS + ", 1fr)",
+      gap: GAP,
+      width: "100%",
+      maxWidth: 380,
+      aspectRatio: COLS + "/" + ROWS,
+      userSelect: "none",
+      WebkitUserSelect: "none"
+    }
+  }, builderGrid.map(function (cell, idx) {
+    return React.createElement("div", {
+      key: idx,
+      style: {
+        aspectRatio: "1",
+        borderRadius: 6,
+        background: cell > 0 ? "transparent" : "rgba(30,30,50,0.6)",
+        border: cell > 0 ? eraserActive ? "1px solid rgba(255,80,80,0.25)" : "none" : "1px dashed rgba(80,100,140,0.3)",
+        cursor: selectedBlockType !== null || eraserActive ? "pointer" : "default",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        position: "relative",
+        pointerEvents: "none"
+      }
+    }, cell > 0 && React.createElement(BlockContent, {
+      type: cell,
+      size: 40,
+      shieldLevel: cell === 10 ? 2 : 0
+    }), cell === 0 && React.createElement("div", {
+      style: {
+        width: 6,
+        height: 6,
+        borderRadius: "50%",
+        background: "rgba(80,100,140,0.15)"
+      }
+    }));
+  })), React.createElement("div", {
+    style: {
+      width: "100%",
+      maxWidth: 380,
+      height: 50,
+      position: "relative",
+      marginTop: 4
+    }
+  }, React.createElement("div", {
+    style: {
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: 2,
+      background: "rgba(140,160,180,0.06)"
+    }
+  }), [0, 1, 2, 3, 4, 5, 6, 7].map(function (c) {
+    var isSelected = c === builderShipStart;
+    return React.createElement("div", {
+      key: c,
+      onClick: function () {
+        setBuilderShipStart(c);
+        setBuilderDirty(true);
+      },
+      style: {
+        position: "absolute",
+        left: c / COLS * 100 + "%",
+        width: 100 / COLS + "%",
+        top: 0,
+        bottom: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        cursor: "pointer"
+      }
+    }, isSelected ? React.createElement("svg", {
+      viewBox: "0 0 36 40",
+      width: "28",
+      height: "32"
+    }, React.createElement("defs", null, React.createElement("linearGradient", {
+      id: "bsg",
+      x1: "0",
+      y1: "0",
+      x2: "0",
+      y2: "1"
+    }, React.createElement("stop", {
+      offset: "0%",
+      stopColor: "#ffd0ff"
+    }), React.createElement("stop", {
+      offset: "100%",
+      stopColor: "#cc70cc"
+    }))), React.createElement("path", {
+      d: "M18 0L4 32L12 27L18 40L24 27L32 32Z",
+      fill: "url(#bsg)"
+    })) : React.createElement("div", {
+      style: {
+        width: 8,
+        height: 8,
+        borderRadius: "50%",
+        background: "rgba(255,168,255,0.15)",
+        border: "1px solid rgba(255,168,255,0.1)"
+      }
+    }));
+  })), React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 10,
+      marginTop: 6,
+      marginBottom: 2
+    }
+  }, React.createElement("div", {
+    onClick: function () {
+      var n = Math.max(1, builderPlasma - 1);
+      setBuilderPlasma(n);
+      setBuilderDirty(true);
+    },
+    style: {
+      width: 28,
+      height: 28,
+      borderRadius: 4,
+      background: PNL,
+      border: PNLB,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      cursor: "pointer",
+      color: "#b0c8d8",
+      fontSize: 16,
+      fontWeight: 700
+    }
+  }, "-"), React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 6
+    }
+  }, React.createElement(PlasmaContainer, {
+    current: builderPlasma,
+    max: 20
+  }), React.createElement("div", {
+    style: {
+      color: "rgba(180,200,220,0.5)",
+      fontSize: 10,
+      fontWeight: 700,
+      textTransform: "uppercase",
+      letterSpacing: 0.5
+    }
+  }, "Plasma")), React.createElement("div", {
+    onClick: function () {
+      var n = Math.min(20, builderPlasma + 1);
+      setBuilderPlasma(n);
+      setBuilderDirty(true);
+    },
+    style: {
+      width: 28,
+      height: 28,
+      borderRadius: 4,
+      background: PNL,
+      border: PNLB,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      cursor: "pointer",
+      color: "#b0c8d8",
+      fontSize: 16,
+      fontWeight: 700
+    }
+  }, "+"))), crateSubPanelOpen && React.createElement("div", {
+    style: {
+      position: "relative",
+      zIndex: 3,
+      background: "linear-gradient(180deg, #1a1a2e, #151528)",
+      borderTop: "2px solid rgba(212,168,67,0.3)",
+      padding: "8px 8px 6px",
+      boxShadow: "0 -2px 8px rgba(0,0,0,0.3)"
+    }
+  }, React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 6
+    }
+  }, React.createElement("div", {
+    style: {
+      color: "rgba(212,168,67,0.7)",
+      fontSize: 9,
+      fontWeight: 700,
+      letterSpacing: 1.5,
+      textTransform: "uppercase"
+    }
+  }, "Crate Reward"), React.createElement("div", {
+    onClick: function () {
+      setCrateSubPanelOpen(false);
+    },
+    style: {
+      color: "rgba(180,200,220,0.4)",
+      fontSize: 14,
+      fontWeight: 700,
+      cursor: "pointer",
+      padding: "0 4px"
+    }
+  }, "\u2715")), React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 4,
+      justifyContent: "center"
+    }
+  }, CRATE_VARIANTS.map(function (cv) {
+    var isActive2 = selectedCrateType === cv.type;
+    return React.createElement("div", {
+      key: cv.type,
+      onClick: function () {
+        setSelectedCrateType(cv.type);
+        setSelectedBlockType(cv.type);
+        setEraserActive(false);
+        setCrateSubPanelOpen(false);
+      },
+      style: {
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 3,
+        padding: "5px 2px 4px",
+        borderRadius: 4,
+        background: isActive2 ? "rgba(100,80,30,0.5)" : "rgba(30,30,50,0.6)",
+        border: isActive2 ? "2px solid rgba(212,168,67,0.6)" : "1px solid rgba(80,80,100,0.3)",
+        cursor: "pointer"
+      }
+    }, React.createElement("div", {
+      style: {
+        width: 28,
+        height: 28
+      }
+    }, React.createElement(BlockContent, {
+      type: cv.type,
+      size: 28,
+      shieldLevel: 0
+    })), React.createElement("div", {
+      style: {
+        fontSize: 7,
+        fontWeight: 700,
+        color: isActive2 ? "rgba(212,168,67,0.9)" : "rgba(180,200,220,0.4)",
+        textTransform: "uppercase",
+        letterSpacing: 0.3,
+        textAlign: "center",
+        lineHeight: 1.2
+      }
+    }, cv.name));
+  }))), React.createElement("div", {
+    style: {
+      position: "relative",
+      zIndex: 2,
+      background: PNL,
+      borderTop: "3px solid #505058",
+      padding: "8px 6px 10px",
+      boxShadow: "0 -3px 8px rgba(0,0,0,0.3)"
+    }
+  }, React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 3,
+      flexWrap: "wrap",
+      justifyContent: "center"
+    }
+  }, [1, 2, 3, 5, 9, 6, 7, 8, 10, 17].map(function (t) {
+    if (t === 9) {
+      var isCrateActive = isCrate(selectedBlockType);
+      return React.createElement("div", {
+        key: t,
+        onClick: function () {
+          if (isCrateActive && !crateSubPanelOpen) {
+            setCrateSubPanelOpen(true);
+          } else if (crateSubPanelOpen) {
+            return;
+          } else {
+            setSelectedBlockType(selectedCrateType);
+            setEraserActive(false);
+            setCrateSubPanelOpen(true);
+          }
+        },
+        style: {
+          width: "18%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 2,
+          padding: "5px 2px 4px",
+          borderRadius: crateSubPanelOpen ? "0 0 4px 4px" : 4,
+          background: crateSubPanelOpen ? "rgba(100,80,30,0.35)" : isCrateActive ? "rgba(40,100,120,0.4)" : PNL,
+          border: crateSubPanelOpen ? "2px solid rgba(212,168,67,0.4)" : isCrateActive ? "2px solid rgba(80,200,255,0.5)" : PNLB,
+          cursor: "pointer",
+          boxShadow: crateSubPanelOpen ? "inset 0 0 10px rgba(212,168,67,0.15), 0 0 6px rgba(212,168,67,0.15)" : isCrateActive ? "inset 0 0 10px rgba(80,200,255,0.15), 0 0 8px rgba(80,200,255,0.2)" : "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)"
+        }
+      }, React.createElement("div", {
+        style: {
+          width: 28,
+          height: 28
+        }
+      }, React.createElement(BlockContent, {
+        type: selectedCrateType,
+        size: 28,
+        shieldLevel: 0
+      })), React.createElement("div", {
+        style: {
+          fontSize: 7,
+          fontWeight: 700,
+          color: crateSubPanelOpen ? "rgba(212,168,67,0.8)" : isCrateActive ? "#80ddff" : "rgba(180,200,220,0.5)",
+          textTransform: "uppercase",
+          letterSpacing: 0.3,
+          textAlign: "center",
+          lineHeight: 1.2
+        }
+      }, crateSubPanelOpen ? "OPEN" : isCrateActive ? "ACTIVE" : "Crate"));
+    }
+    if (t === 17) {
+      var ufoOnBoard = builderGrid.indexOf(17) >= 0;
+      var isUfoActive = selectedBlockType === 17;
+      if (ufoOnBoard && !isUfoActive) {
+        return React.createElement("div", {
+          key: t,
+          onClick: function () {
+            setBuilderWarn("Only one UFO allowed. Remove it from the board to place in a new location.");
+            setTimeout(function () {
+              setBuilderWarn(null);
+            }, 4000);
+          },
+          style: {
+            width: "18%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 2,
+            padding: "5px 2px 4px",
+            borderRadius: 4,
+            background: "rgba(30,30,40,0.6)",
+            border: "1px solid rgba(80,80,100,0.2)",
+            cursor: "pointer",
+            opacity: 0.4
+          }
+        }, React.createElement("div", {
+          style: {
+            width: 28,
+            height: 28
+          }
+        }, React.createElement(BlockContent, {
+          type: 17,
+          size: 28
+        })), React.createElement("div", {
+          style: {
+            fontSize: 7,
+            fontWeight: 700,
+            color: "rgba(140,140,160,0.4)",
+            textTransform: "uppercase",
+            letterSpacing: 0.3,
+            textAlign: "center",
+            lineHeight: 1.2
+          }
+        }, "UFO"));
+      }
+    }
+    var isActive = selectedBlockType === t;
+    return React.createElement("div", {
+      key: t,
+      onClick: function () {
+        setSelectedBlockType(isActive ? null : t);
+        setEraserActive(false);
+        setCrateSubPanelOpen(false);
+      },
+      style: {
+        width: "18%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 2,
+        padding: "5px 2px 4px",
+        borderRadius: 4,
+        background: isActive ? "rgba(40,100,120,0.4)" : PNL,
+        border: isActive ? "2px solid rgba(80,200,255,0.5)" : PNLB,
+        cursor: "pointer",
+        boxShadow: isActive ? "inset 0 0 10px rgba(80,200,255,0.15), 0 0 8px rgba(80,200,255,0.2)" : "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)"
+      }
+    }, React.createElement("div", {
+      style: {
+        width: 28,
+        height: 28
+      }
+    }, React.createElement(BlockContent, {
+      type: t,
+      size: 28,
+      shieldLevel: t === 10 ? 2 : 0
+    })), React.createElement("div", {
+      style: {
+        fontSize: 7,
+        fontWeight: 700,
+        color: isActive ? "#80ddff" : "rgba(180,200,220,0.5)",
+        textTransform: "uppercase",
+        letterSpacing: 0.3,
+        textAlign: "center",
+        lineHeight: 1.2
+      }
+    }, isActive ? "ACTIVE" : BLOCK_LABELS[t]));
+  })), React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 6,
+      justifyContent: "center",
+      marginTop: 6
+    }
+  }, React.createElement("div", {
+    onClick: function () {
+      setEraserActive(!eraserActive);
+      setSelectedBlockType(null);
+      setCrateSubPanelOpen(false);
+    },
+    style: {
+      padding: "6px 14px",
+      borderRadius: 4,
+      background: eraserActive ? "rgba(120,40,40,0.5)" : PNL,
+      border: eraserActive ? "2px solid rgba(255,100,80,0.5)" : PNLB,
+      cursor: "pointer",
+      color: eraserActive ? "#ff9977" : "rgba(200,210,220,0.5)",
+      fontSize: 10,
+      fontWeight: 700,
+      letterSpacing: 1,
+      textTransform: "uppercase",
+      display: "flex",
+      alignItems: "center",
+      gap: 5,
+      boxShadow: eraserActive ? "inset 0 0 10px rgba(255,80,60,0.15), 0 0 6px rgba(255,80,60,0.2)" : "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)"
+    }
+  }, React.createElement("svg", {
+    width: "14",
+    height: "14",
+    viewBox: "0 0 24 24"
+  }, React.createElement("path", {
+    d: "M20 5.5L8.5 17H4l-1-1 8-8L18.5 1l1.5 1.5L12 10",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }), React.createElement("line", {
+    x1: "4",
+    y1: "20",
+    x2: "20",
+    y2: "20",
+    stroke: "currentColor",
+    strokeWidth: "1.5"
+  })), eraserActive ? "ERASING" : "Eraser"), React.createElement("div", {
+    onClick: function () {
+      setSelectedBlockType(null);
+      setEraserActive(false);
+      setCrateSubPanelOpen(false);
+    },
+    style: {
+      padding: "6px 14px",
+      borderRadius: 4,
+      background: selectedBlockType !== null || eraserActive ? "rgba(80,30,30,0.4)" : PNL,
+      border: selectedBlockType !== null || eraserActive ? "2px solid rgba(255,80,80,0.3)" : PNLB,
+      cursor: "pointer",
+      color: selectedBlockType !== null || eraserActive ? "rgba(255,120,120,0.7)" : "rgba(140,160,180,0.25)",
+      fontSize: 10,
+      fontWeight: 700,
+      letterSpacing: 1,
+      textTransform: "uppercase",
+      display: "flex",
+      alignItems: "center",
+      gap: 5
+    }
+  }, React.createElement("svg", {
+    width: "12",
+    height: "12",
+    viewBox: "0 0 24 24"
+  }, React.createElement("line", {
+    x1: "6",
+    y1: "6",
+    x2: "18",
+    y2: "18",
+    stroke: "currentColor",
+    strokeWidth: "2.5",
+    strokeLinecap: "round"
+  }), React.createElement("line", {
+    x1: "18",
+    y1: "6",
+    x2: "6",
+    y2: "18",
+    stroke: "currentColor",
+    strokeWidth: "2.5",
+    strokeLinecap: "round"
+  })), "Deselect"), React.createElement("div", {
+    onClick: function () {
+      setBuilderGrid(new Array(COLS * ROWS).fill(0));
+      setBuilderDirty(true);
+    },
+    style: {
+      padding: "6px 14px",
+      borderRadius: 4,
+      background: PNL,
+      border: PNLB,
+      cursor: "pointer",
+      color: "rgba(200,210,220,0.5)",
+      fontSize: 10,
+      fontWeight: 700,
+      letterSpacing: 1,
+      textTransform: "uppercase"
+    }
+  }, "Clear All"))), builderTourStep != null && React.createElement("div", {
+    onClick: function () {
+      setBuilderTourStep(null);
+      builderTourSeenRef.current = true;
+      try {
+        window.storage.set("cosmic_drift_builder_tour", "seen");
+      } catch (e) {}
+    },
+    style: {
+      position: "fixed",
+      inset: 0,
+      zIndex: 500,
+      background: "rgba(5,5,20,0.75)",
+      backdropFilter: "blur(3px)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center"
+    }
+  }, React.createElement("div", {
+    onClick: function (e) {
+      e.stopPropagation();
+    },
+    style: Object.assign({}, OVERLAY_BOX, {
+      border: "1px solid rgba(80,200,255,0.25)",
+      maxWidth: 290,
+      width: "85%"
+    })
+  }, React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "center",
+      gap: 6,
+      marginBottom: 14
+    }
+  }, BUILDER_TOUR_STEPS.map(function (s, si) {
+    return React.createElement("div", {
+      key: si,
+      style: {
+        width: 8,
+        height: 8,
+        borderRadius: "50%",
+        background: si === builderTourStep ? "#50c8ff" : si < builderTourStep ? "rgba(80,200,255,0.35)" : "rgba(80,200,255,0.12)",
+        transition: "background 0.2s"
+      }
+    });
+  })), React.createElement("div", {
+    style: {
+      color: "#80ddff",
+      fontSize: 15,
+      fontWeight: 700,
+      marginBottom: 6,
+      letterSpacing: 0.5
+    }
+  }, BUILDER_TOUR_STEPS[builderTourStep].title), React.createElement("div", {
+    style: {
+      color: "rgba(180,200,220,0.7)",
+      fontSize: 13,
+      lineHeight: 1.5,
+      marginBottom: 18
+    }
+  }, BUILDER_TOUR_STEPS[builderTourStep].desc), React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10,
+      justifyContent: "center",
+      alignItems: "center"
+    }
+  }, builderTourStep > 0 && React.createElement("div", {
+    onClick: function () {
+      setBuilderTourStep(builderTourStep - 1);
+    },
+    style: {
+      padding: "6px 16px",
+      borderRadius: 16,
+      border: "1px solid rgba(80,200,255,0.2)",
+      color: "rgba(180,200,220,0.4)",
+      fontSize: 11,
+      fontWeight: 600,
+      cursor: "pointer"
+    }
+  }, "Back"), React.createElement("div", {
+    onClick: function () {
+      if (builderTourStep < BUILDER_TOUR_STEPS.length - 1) {
+        setBuilderTourStep(builderTourStep + 1);
+      } else {
+        setBuilderTourStep(null);
+        builderTourSeenRef.current = true;
+        try {
+          window.storage.set("cosmic_drift_builder_tour", "seen");
+        } catch (e) {}
+      }
+    },
+    style: {
+      padding: "8px 24px",
+      borderRadius: 16,
+      background: "linear-gradient(135deg,#2a4a6a,#1a3a5a)",
+      border: "2px solid rgba(80,200,255,0.4)",
+      color: "#80ddff",
+      fontSize: 13,
+      fontWeight: 700,
+      cursor: "pointer",
+      letterSpacing: 0.5
+    }
+  }, builderTourStep < BUILDER_TOUR_STEPS.length - 1 ? "Next" : "Got It!")), React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginTop: 12
+    }
+  }, React.createElement("div", {
+    style: {
+      width: 40
+    }
+  }), React.createElement("div", {
+    style: {
+      color: "rgba(180,200,220,0.25)",
+      fontSize: 10
+    }
+  }, builderTourStep + 1 + " of " + BUILDER_TOUR_STEPS.length), builderTourStep < BUILDER_TOUR_STEPS.length - 1 ? React.createElement("div", {
+    onClick: function () {
+      setBuilderTourStep(null);
+      builderTourSeenRef.current = true;
+      try {
+        window.storage.set("cosmic_drift_builder_tour", "seen");
+      } catch (e) {}
+    },
+    style: {
+      color: "rgba(180,200,220,0.3)",
+      fontSize: 10,
+      fontWeight: 600,
+      cursor: "pointer"
+    }
+  }, "Skip") : React.createElement("div", {
+    style: {
+      width: 40
+    }
+  })))), showBackWarn && renderBackWarnOverlay(function () {
+    setShowBackWarn(false);
+  }, function () {
+    setShowBackWarn(false);
+    loadSavedLevels();
+    setLbScreen("list");
+  }))),
+  // ═══ BLOCK DESIGNER ═══
+  screen === "designer" && React.createElement("div", {
+    style: {
+      position: "relative",
+      zIndex: 1,
+      display: "flex",
+      flexDirection: "column",
+      height: "100%"
+    }
+  },
+  // ── MY DESIGNS LIST ──
+  bdCurrentView === "list" && React.createElement(React.Fragment, null, React.createElement(WorkshopTopBar, {
+    onBack: function () {
+      setScreen("splash");
+    },
+    backLabel: "Workshop",
+    title: "My Blocks",
+    color: "#c8b8ff",
+    rightContent: React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 4
+      }
+    }, React.createElement("div", {
+      onClick: function () {
+        setBdShowImport(true);
+        setBdImportText("");
+        setBdImportError("");
+      },
+      style: BTN_TOPBAR_PURPLE
+    }, "Import"), bdSaved.length > 0 && React.createElement("div", {
+      onClick: bdExportAllDesigns,
+      style: Object.assign({}, BTN_TOPBAR, {
+        color: "rgba(200,184,255,0.6)",
+        fontSize: 8
+      })
+    }, "Exp All"), React.createElement("div", {
+      onClick: function () {
+        bdOpenEditor(null);
+      },
+      style: Object.assign({}, BTN_TOPBAR_ACCENT, {
+        background: "linear-gradient(180deg, #1a3a4a, #0f2a38)",
+        boxShadow: "0 0 8px rgba(80,200,255,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)"
+      })
+    }, "+ New"))
+  }),
+  // Tabs: My Designs / Game Blocks
+  React.createElement("div", {
+    style: {
+      display: "flex",
+      margin: "0 10px",
+      borderBottom: "1px solid rgba(60,60,80,0.3)",
+      position: "relative",
+      zIndex: 1
+    }
+  }, [["custom", "My Designs (" + bdSaved.length + ")"], ["factory", "Game Blocks"]].map(function (tab) {
+    var active = bdSavedTab === tab[0];
+    return React.createElement("div", {
+      key: tab[0],
+      onClick: function () {
+        setBdSavedTab(tab[0]);
+      },
+      style: {
+        flex: 1,
+        textAlign: "center",
+        padding: "10px 0 8px",
+        color: active ? "#c8b8ff" : "rgba(180,200,220,0.3)",
+        fontSize: 12,
+        fontWeight: active ? 700 : 600,
+        cursor: "pointer",
+        borderBottom: active ? "2px solid #c8b8ff" : "2px solid transparent",
+        letterSpacing: 0.5
+      }
+    }, tab[1]);
+  })), bdSavedTab === "custom" && bdSaved.length > 1 && renderSortBar(bdSortMode, setBdSortMode), React.createElement("div", {
+    style: {
+      flex: 1,
+      overflowY: "auto",
+      padding: "6px 10px 20px",
+      position: "relative",
+      zIndex: 1
+    }
+  },
+  // My Designs tab
+  bdSavedTab === "custom" && bdSaved.length === 0 && React.createElement("div", {
+    style: {
+      textAlign: "center",
+      padding: 40
+    }
+  }, React.createElement("div", {
+    style: {
+      color: "rgba(180,200,220,0.3)",
+      fontSize: 14,
+      marginBottom: 8
+    }
+  }, "No saved designs yet"), React.createElement("div", {
+    style: {
+      color: "rgba(180,200,220,0.2)",
+      fontSize: 12
+    }
+  }, "Create a new design or copy a Game Block to start.")), bdSavedTab === "custom" && sortItems(bdSaved, bdSortMode, "modifiedAt").map(function (saved) {
+    var bt = null;
+    for (var bi = 0; bi < BD_BLOCK_TYPES.length; bi++) {
+      if (BD_BLOCK_TYPES[bi].id === saved.assignedTo) {
+        bt = BD_BLOCK_TYPES[bi];
+        break;
+      }
+    }
+    var dateStr = saved.modifiedAt ? new Date(saved.modifiedAt).toLocaleString() : saved.createdAt ? new Date(saved.createdAt).toLocaleString() : "";
+    return React.createElement("div", {
+      key: saved.id,
+      style: CARD_STYLE
+    }, bdRenamingId === saved.id ? React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 6,
+        marginBottom: 8,
+        alignItems: "center"
+      }
+    }, React.createElement("input", {
+      value: bdRenamingName,
+      onChange: function (e) {
+        setBdRenamingName(e.target.value);
+      },
+      style: {
+        flex: 1,
+        padding: "4px 8px",
+        borderRadius: 4,
+        background: SCRN,
+        border: SCRNB,
+        color: "#b0c8d8",
+        fontSize: 16,
+        fontFamily: "'Quicksand',sans-serif",
+        outline: "none"
+      }
+    }), React.createElement("div", {
+      onClick: function () {
+        bdRenameDesign(saved.id, bdRenamingName);
+      },
+      style: {
+        padding: "4px 8px",
+        borderRadius: 4,
+        background: "rgba(80,200,100,0.2)",
+        border: "1px solid rgba(80,200,100,0.4)",
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }
+    }, React.createElement("svg", {
+      width: "14",
+      height: "14",
+      viewBox: "0 0 24 24"
+    }, React.createElement("path", {
+      d: "M5 13l4 4L19 7",
+      fill: "none",
+      stroke: "#80dd90",
+      strokeWidth: "2.5",
+      strokeLinecap: "round",
+      strokeLinejoin: "round"
+    }))), React.createElement("div", {
+      onClick: function () {
+        setBdRenamingId(null);
+      },
+      style: {
+        padding: "4px 8px",
+        borderRadius: 4,
+        border: "1px solid rgba(120,80,255,0.3)",
+        color: "#c8b8ff",
+        fontSize: 12,
+        fontWeight: 700,
+        cursor: "pointer"
+      }
+    }, "X")) : React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 10,
+        marginBottom: 8,
+        alignItems: "center"
+      }
+    }, React.createElement(BDBlockPreview, {
+      design: saved,
+      size: 38
+    }), React.createElement("div", {
+      style: {
+        flex: 1,
+        minWidth: 0
+      }
+    }, React.createElement("div", {
+      style: {
+        color: "#b0c8d8",
+        fontSize: 14,
+        fontWeight: 700
+      }
+    }, saved.name || "Unnamed"), React.createElement("div", {
+      style: {
+        color: "rgba(180,200,220,0.3)",
+        fontSize: 10
+      }
+    }, (bt ? bt.label + " \u00B7 " : "") + saved.shape + (saved.pattern !== "none" ? " \u00B7 " + saved.pattern : "") + (dateStr ? " \u00B7 " + dateStr : "")))), React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 6,
+        flexWrap: "wrap"
+      }
+    }, React.createElement("div", {
+      onClick: function () {
+        bdOpenEditor(saved);
+      },
+      style: BTN_EDIT
+    }, "EDIT"), React.createElement("div", {
+      onClick: function () {
+        setBdRenamingId(saved.id);
+        setBdRenamingName(saved.name || "");
+      },
+      style: BTN_RENAME
+    }, "RENAME"), React.createElement("div", {
+      onClick: function () {
+        bdExportDesign(saved);
+      },
+      style: BTN_EXPORT
+    }, "EXPORT"), React.createElement("div", {
+      onClick: function () {
+        setBdDeletingId(saved.id);
+      },
+      style: BTN_DELETE
+    }, "DELETE")));
+  }),
+  // Game Blocks tab
+  bdSavedTab === "factory" && BD_FACTORY_PRESETS.map(function (preset) {
+    return React.createElement("div", {
+      key: preset.id,
+      style: Object.assign({}, CARD_STYLE, {
+        display: "flex",
+        alignItems: "center",
+        gap: 10
+      })
+    }, React.createElement(BDBlockPreview, {
+      design: preset,
+      size: 38
+    }), React.createElement("div", {
+      style: {
+        flex: 1,
+        minWidth: 0
+      }
+    }, React.createElement("div", {
+      style: {
+        color: "#b0c8d8",
+        fontSize: 14,
+        fontWeight: 700
+      }
+    }, preset.name)), React.createElement("div", {
+      onClick: function () {
+        bdCopyPreset(preset);
+      },
+      style: BTN_EDIT
+    }, "COPY"));
+  })), bdDeletingId && renderDeleteOverlay("Delete Design?", function () {
+    setBdDeletingId(null);
+  }, function () {
+    bdDeleteDesign(bdDeletingId);
+  }), bdExportId && renderExportOverlay("Export Design", bdExportText, bdCopied, function () {
+    copyToClipboard(bdExportText, setBdCopied);
+  }, function () {
+    setBdExportId(null);
+  }), bdShowImport && renderImportOverlay("Import Design", bdImportText, setBdImportText, bdImportError, setBdImportError, bdHandleImport, function () {
+    setBdShowImport(false);
+    setBdImportText("");
+    setBdImportError("");
+  }), bdShowExportAll && renderExportOverlay("Export All Designs (" + bdSaved.length + ")", bdExportAllText, bdCopied, function () {
+    copyToClipboard(bdExportAllText, setBdCopied);
+  }, function () {
+    setBdShowExportAll(false);
+  })),
+  // ── DESIGN EDITOR ──
+  bdCurrentView === "editor" && React.createElement(React.Fragment, null, React.createElement(WorkshopTopBar, {
+    onBack: bdHandleBack,
+    backLabel: "My Blocks",
+    title: "Block Designer",
+    color: "#c8b8ff",
+    fontFamily: "'Exo 2', sans-serif",
+    rightContent: React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 4,
+        alignItems: "center"
+      }
+    }, React.createElement("div", {
+      onClick: bdSaveCurrentDesign,
+      style: BTN_SAVE
+    }, "Save"), React.createElement("div", {
+      style: {
+        marginLeft: 4
+      }
+    }, React.createElement(BDBlockPreview, {
+      design: bdDisplayDesign,
+      size: 36
+    })))
+  }), bdSaveStatus && React.createElement("div", {
+    style: {
+      padding: "6px 12px",
+      textAlign: "center",
+      fontSize: 12,
+      fontWeight: 600,
+      color: "#80dd90",
+      background: "rgba(80,200,100,0.1)",
+      zIndex: 2,
+      position: "relative"
+    }
+  }, bdSaveStatus), React.createElement("div", {
+    ref: bdScrollRef,
+    style: {
+      flex: 1,
+      overflowY: "auto",
+      fontFamily: "'Exo 2', sans-serif"
+    }
+  },
+  // Preview area with 3x3 grid + main preview
+  React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: "12px 16px 8px",
+      gap: 16
+    }
+  }, React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "repeat(3, 1fr)",
+      gap: 2,
+      opacity: 0.5
+    }
+  }, Array.from({
+    length: 9
+  }).map(function (_, i) {
+    return React.createElement("div", {
+      key: i
+    }, React.createElement(BDBlockPreview, {
+      design: bdDisplayDesign,
+      size: 26
+    }));
+  })), React.createElement("div", {
+    style: {
+      background: "radial-gradient(circle, rgba(30,40,60,0.8) 0%, rgba(10,14,26,0.9) 100%)",
+      borderRadius: 14,
+      padding: 14,
+      border: "1px solid rgba(255,255,255,0.06)"
+    }
+  }, React.createElement(BDBlockPreview, {
+    design: bdDisplayDesign,
+    size: 96
+  }))),
+  // Name + Block Type
+  React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      padding: "0 14px 8px"
+    }
+  }, React.createElement("div", {
+    style: {
+      flex: 2
+    }
+  }, React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "#445",
+      marginBottom: 4,
+      textTransform: "uppercase",
+      letterSpacing: 0.5
+    }
+  }, "Name"), React.createElement("input", {
+    value: bdDesign.name,
+    onChange: function (e) {
+      bdUpdateDesign("name", e.target.value);
+    },
+    placeholder: "Unnamed Design",
+    style: {
+      width: "100%",
+      padding: "8px 10px",
+      borderRadius: 8,
+      border: "1px solid rgba(255,255,255,0.1)",
+      background: "rgba(0,0,0,0.3)",
+      color: "#e0e0e0",
+      fontSize: 16,
+      fontFamily: "'Exo 2', sans-serif",
+      outline: "none",
+      boxSizing: "border-box"
+    }
+  })), React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, React.createElement("div", {
+    style: {
+      fontSize: 10,
+      color: "#445",
+      marginBottom: 4,
+      textTransform: "uppercase",
+      letterSpacing: 0.5
+    }
+  }, "Block"), React.createElement("select", {
+    value: bdDesign.assignedTo,
+    onChange: function (e) {
+      bdUpdateDesign("assignedTo", e.target.value);
+    },
+    style: {
+      width: "100%",
+      padding: "8px 4px",
+      borderRadius: 8,
+      border: "1px solid rgba(255,255,255,0.1)",
+      background: "rgba(0,0,0,0.3)",
+      color: "#e0e0e0",
+      fontSize: 16,
+      fontFamily: "'Exo 2', sans-serif",
+      outline: "none",
+      boxSizing: "border-box"
+    }
+  }, React.createElement("option", {
+    value: ""
+  }, "None"), BD_BLOCK_TYPES.map(function (bt) {
+    return React.createElement("option", {
+      key: bt.id,
+      value: bt.id
+    }, bt.label);
+  })))),
+  // Phase picker (force field only)
+  bdDesign.assignedTo === "force_field" && React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 6,
+      padding: "0 14px",
+      marginBottom: 8
+    }
+  }, [1, 2, 3].map(function (p) {
+    var sel = bdPhase === p;
+    var labels = {
+      1: "Phase 1: Full Shield",
+      2: "Phase 2: Weakened",
+      3: "Phase 3: Depleted"
+    };
+    return React.createElement("button", {
+      key: p,
+      onClick: function () {
+        setBdPhase(p);
+      },
+      style: {
+        flex: 1,
+        padding: "10px 4px",
+        borderRadius: 8,
+        border: sel ? "1px solid rgba(68,136,255,0.5)" : "1px solid rgba(255,255,255,0.06)",
+        background: sel ? "rgba(68,136,255,0.15)" : "rgba(255,255,255,0.02)",
+        color: sel ? "#88bbff" : "#556",
+        fontSize: 11,
+        fontFamily: "'Exo 2', sans-serif",
+        fontWeight: 600,
+        cursor: "pointer",
+        WebkitTapHighlightColor: "transparent",
+        textAlign: "center"
+      }
+    }, labels[p]);
+  })),
+  // Controls area
+  React.createElement("div", {
+    style: {
+      padding: "0 12px 100px"
+    }
+  }, React.createElement(BDHudTabBar, {
+    active: bdActivePanel,
+    onSelect: bdTogglePanel
+  }), bdActivePanel && React.createElement("div", {
+    style: {
+      borderRadius: 10,
+      background: "rgba(255,255,255,0.03)",
+      border: "1px solid rgba(68,136,255,0.15)",
+      padding: "16px",
+      marginTop: 2
+    }
+  }, bdActivePanel === "shape" && React.createElement(React.Fragment, null, React.createElement(BDOptionGrid, {
+    options: SHAPES,
+    value: bdDesign.shape,
+    onChange: function (v) {
+      bdUpdateDesign("shape", v);
+    },
+    columns: 4
+  }), React.createElement(BDSlider, {
+    label: "Rotation",
+    value: bdDesign.shapeRotation,
+    onChange: function (v) {
+      bdUpdateDesign("shapeRotation", v);
+    },
+    min: 0,
+    max: 360,
+    step: 5,
+    displayValue: bdDesign.shapeRotation + "\u00b0"
+  }), CORNER_SHAPES[bdDesign.shape] && React.createElement(BDSlider, {
+    label: "Corner Radius",
+    value: bdDesign.cornerRadius,
+    onChange: function (v) {
+      bdUpdateDesign("cornerRadius", v);
+    },
+    min: 0,
+    max: 46,
+    step: 1
+  })), bdActivePanel === "color" && React.createElement(BDColorPicker, {
+    value: bdDesign.color,
+    onChange: function (v) {
+      bdUpdateDesign("color", v);
+    },
+    presets: BD_COLOR_PRESETS
+  }), bdActivePanel === "border" && React.createElement(React.Fragment, null, React.createElement(BDColorPicker, {
+    value: bdDisplayDesign.borderColor,
+    onChange: function (v) {
+      bdUpdateDesign("borderColor", v);
+    },
+    label: "Color",
+    presets: BD_COLOR_PRESETS
+  }), React.createElement(BDSlider, {
+    label: "Thickness",
+    value: bdDisplayDesign.borderWidth,
+    onChange: function (v) {
+      bdUpdateDesign("borderWidth", v);
+    },
+    min: 0,
+    max: 8,
+    step: 0.5
+  }), React.createElement(BDToggle, {
+    label: "Glow",
+    value: bdDisplayDesign.glowEnabled,
+    onChange: function (v) {
+      bdUpdateDesign("glowEnabled", v);
+    }
+  }), bdDisplayDesign.glowEnabled && React.createElement(React.Fragment, null, React.createElement(BDColorPicker, {
+    value: bdDisplayDesign.glowColor,
+    onChange: function (v) {
+      bdUpdateDesign("glowColor", v);
+    },
+    label: "Glow Color"
+  }), React.createElement(BDSlider, {
+    label: "Intensity",
+    value: bdDisplayDesign.glowIntensity,
+    onChange: function (v) {
+      bdUpdateDesign("glowIntensity", v);
+    },
+    min: 2,
+    max: 20,
+    step: 1
+  }))), bdActivePanel === "pattern" && React.createElement(React.Fragment, null, React.createElement(BDOptionGrid, {
+    options: PATTERNS,
+    value: bdDesign.pattern,
+    onChange: function (v) {
+      bdUpdateDesign("pattern", v);
+    },
+    columns: 4
+  }), bdDesign.pattern !== "none" && function () {
+    var caps = PATTERN_CAPS[bdDesign.pattern] || {};
+    return React.createElement(React.Fragment, null, React.createElement(BDColorPicker, {
+      value: bdDesign.patternColor,
+      onChange: function (v) {
+        bdUpdateDesign("patternColor", v);
+      },
+      label: "Color"
+    }), React.createElement(BDSlider, {
+      label: "Opacity",
+      value: bdDesign.patternOpacity,
+      onChange: function (v) {
+        bdUpdateDesign("patternOpacity", v);
+      },
+      min: 0.1,
+      max: 1,
+      step: 0.05,
+      displayValue: Math.round(bdDesign.patternOpacity * 100) + "%"
+    }), React.createElement(BDSlider, {
+      label: "Scale",
+      value: bdDesign.patternScale,
+      onChange: function (v) {
+        bdUpdateDesign("patternScale", v);
+      },
+      min: 0.3,
+      max: 3,
+      step: 0.1,
+      displayValue: bdDesign.patternScale.toFixed(1) + "x"
+    }), React.createElement(BDSlider, {
+      label: "Rotation",
+      value: bdDesign.patternRotation,
+      onChange: function (v) {
+        bdUpdateDesign("patternRotation", v);
+      },
+      min: 0,
+      max: 360,
+      step: 5,
+      displayValue: bdDesign.patternRotation + "\u00b0"
+    }), caps.lineWidth && React.createElement(BDSlider, {
+      label: "Line Width",
+      value: bdDesign.patternLineWidth,
+      onChange: function (v) {
+        bdUpdateDesign("patternLineWidth", v);
+      },
+      min: 0.5,
+      max: 4,
+      step: 0.25
+    }), caps.filled && React.createElement(BDToggle, {
+      label: "Filled",
+      value: bdDesign.patternFilled,
+      onChange: function (v) {
+        bdUpdateDesign("patternFilled", v);
+      }
+    }));
+  }()), bdActivePanel === "icon" && React.createElement(React.Fragment, null, React.createElement(BDOptionGrid, {
+    options: BD_ICONS.map(function (ic) {
+      return {
+        id: ic.id,
+        label: ic.label
+      };
+    }),
+    value: bdDisplayDesign.icon,
+    onChange: function (v) {
+      bdUpdateDesign("icon", v);
+    },
+    columns: 4
+  }), bdDisplayDesign.icon !== "none" && React.createElement(React.Fragment, null, React.createElement(BDColorPicker, {
+    value: bdDisplayDesign.iconColor,
+    onChange: function (v) {
+      bdUpdateDesign("iconColor", v);
+    },
+    label: "Color"
+  }), React.createElement(BDSlider, {
+    label: "Opacity",
+    value: bdDisplayDesign.iconOpacity,
+    onChange: function (v) {
+      bdUpdateDesign("iconOpacity", v);
+    },
+    min: 0.1,
+    max: 1,
+    step: 0.05,
+    displayValue: Math.round(bdDisplayDesign.iconOpacity * 100) + "%"
+  }), React.createElement(BDToggle, {
+    label: "Icon Glow",
+    value: bdDisplayDesign.iconGlow,
+    onChange: function (v) {
+      bdUpdateDesign("iconGlow", v);
+    }
+  }), bdDisplayDesign.iconGlow && React.createElement(React.Fragment, null, React.createElement(BDColorPicker, {
+    value: bdDisplayDesign.iconGlowColor,
+    onChange: function (v) {
+      bdUpdateDesign("iconGlowColor", v);
+    },
+    label: "Glow Color"
+  }), React.createElement(BDSlider, {
+    label: "Glow Spread",
+    value: bdDisplayDesign.iconGlowIntensity,
+    onChange: function (v) {
+      bdUpdateDesign("iconGlowIntensity", v);
+    },
+    min: 1,
+    max: 12,
+    step: 0.5
+  }))))))), bdShowBackWarn && renderBackWarnOverlay(function () {
+    setBdShowBackWarn(false);
+  }, function () {
+    setBdShowBackWarn(false);
+    setBdCurrentView("list");
+  }))));
+}
+
+// Mount
+var root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(React.createElement(isCrate, null));
+var ls = document.getElementById("loading-screen");
+if (ls) ls.style.display = "none";
+</script>
+</body>
+</html>
