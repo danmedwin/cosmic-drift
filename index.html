@@ -2654,6 +2654,11 @@ function BDBlockPreview(props) {
       opacity: design.iconOpacity,
       stroke: "none"
     }));
+    if (design.iconRotation) {
+      iconElement = React.createElement("g", {
+        transform: "rotate(" + design.iconRotation + " 50 50)"
+      }, iconElement);
+    }
   }
   var groupProps = {};
   if (hasRotation) {

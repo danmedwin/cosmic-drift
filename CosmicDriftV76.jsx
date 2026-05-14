@@ -703,6 +703,7 @@ function BDBlockPreview(props) {
       iconGlowPath = React.createElement("path", { d: iconDef.path, fill: design.iconGlowColor || design.iconColor, fillRule: iconDef.fillRule || "evenodd", opacity: Math.min(1, (design.iconOpacity || 0.8) + 0.15), stroke: "none", filter: "url(#" + glowFilterId + ")" });
     }
     iconElement = React.createElement(React.Fragment, null, iconGlowPath, React.createElement("path", { d: iconDef.path, fill: design.iconColor, fillRule: iconDef.fillRule || "evenodd", opacity: design.iconOpacity, stroke: "none" }));
+    if (design.iconRotation) { iconElement = React.createElement("g", { transform: "rotate(" + design.iconRotation + " 50 50)" }, iconElement); }
   }
   var groupProps = {};
   if (hasRotation) { groupProps.transform = "rotate(" + design.shapeRotation + " 50 50)"; }

@@ -288,7 +288,7 @@ function bdDefaultDesign() {
     glowEnabled: false, glowColor: "#88bbff", glowIntensity: 6,
     pattern: "none", patternColor: "#ffffff", patternOpacity: 0.3,
     patternScale: 1, patternRotation: 0, patternFilled: false, patternLineWidth: 1.5,
-    icon: "none", iconColor: "#ffffff", iconOpacity: 0.8,
+    icon: "none", iconColor: "#ffffff", iconOpacity: 0.8, iconRotation: 0,
     iconGlow: false, iconGlowColor: "#ffffff", iconGlowIntensity: 6,
     assignedTo: "", phases: null,
   };
@@ -434,6 +434,7 @@ function BDBlockPreview(props) {
       iconGlowPath = React.createElement("path", { d: iconDef.path, fill: design.iconGlowColor || design.iconColor, fillRule: iconDef.fillRule || "evenodd", opacity: Math.min(1, (design.iconOpacity || 0.8) + 0.15), stroke: "none", filter: "url(#" + glowFilterId + ")" });
     }
     iconElement = React.createElement(React.Fragment, null, iconGlowPath, React.createElement("path", { d: iconDef.path, fill: design.iconColor, fillRule: iconDef.fillRule || "evenodd", opacity: design.iconOpacity, stroke: "none" }));
+    if (design.iconRotation) { iconElement = React.createElement("g", { transform: "rotate(" + design.iconRotation + " 50 50)" }, iconElement); }
   }
   var groupProps = {};
   if (hasRotation) { groupProps.transform = "rotate(" + design.shapeRotation + " 50 50)"; }
@@ -1406,6 +1407,7 @@ export default function CosmicWorkshop() {
                 bdDisplayDesign.icon !== "none" && React.createElement(React.Fragment, null,
                   React.createElement(BDColorPicker, { value: bdDisplayDesign.iconColor, onChange: function(v) { bdUpdateDesign("iconColor", v); }, label: "Color" }),
                   React.createElement(BDSlider, { label: "Opacity", value: bdDisplayDesign.iconOpacity, onChange: function(v) { bdUpdateDesign("iconOpacity", v); }, min: 0.1, max: 1, step: 0.05, displayValue: Math.round(bdDisplayDesign.iconOpacity * 100) + "%" }),
+                  React.createElement(BDSlider, { label: "Rotation", value: bdDisplayDesign.iconRotation || 0, onChange: function(v) { bdUpdateDesign("iconRotation", v); }, min: 0, max: 360, step: 5, displayValue: (bdDisplayDesign.iconRotation || 0) + "°" }),
                   React.createElement(BDToggle, { label: "Icon Glow", value: bdDisplayDesign.iconGlow, onChange: function(v) { bdUpdateDesign("iconGlow", v); } }),
                   bdDisplayDesign.iconGlow && React.createElement(React.Fragment, null,
                     React.createElement(BDColorPicker, { value: bdDisplayDesign.iconGlowColor, onChange: function(v) { bdUpdateDesign("iconGlowColor", v); }, label: "Glow Color" }),

@@ -1433,6 +1433,7 @@ function bdDefaultDesign() {
     icon: "none",
     iconColor: "#ffffff",
     iconOpacity: 0.8,
+    iconRotation: 0,
     iconGlow: false,
     iconGlowColor: "#ffffff",
     iconGlowIntensity: 6,
@@ -2049,6 +2050,11 @@ function BDBlockPreview(props) {
       opacity: design.iconOpacity,
       stroke: "none"
     }));
+    if (design.iconRotation) {
+      iconElement = React.createElement("g", {
+        transform: "rotate(" + design.iconRotation + " 50 50)"
+      }, iconElement);
+    }
   }
   var groupProps = {};
   if (hasRotation) {
@@ -5869,6 +5875,16 @@ function CosmicWorkshop() {
     max: 1,
     step: 0.05,
     displayValue: Math.round(bdDisplayDesign.iconOpacity * 100) + "%"
+  }), React.createElement(BDSlider, {
+    label: "Rotation",
+    value: bdDisplayDesign.iconRotation || 0,
+    onChange: function (v) {
+      bdUpdateDesign("iconRotation", v);
+    },
+    min: 0,
+    max: 360,
+    step: 5,
+    displayValue: (bdDisplayDesign.iconRotation || 0) + "°"
   }), React.createElement(BDToggle, {
     label: "Icon Glow",
     value: bdDisplayDesign.iconGlow,
