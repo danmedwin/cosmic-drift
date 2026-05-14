@@ -824,6 +824,14 @@ export default function CosmicWorkshop() {
     else { doSaveLevel(null, builderLevelName || "Untitled Level"); }
   }
 
+  function handleBuilderSaveAndPlay() {
+    if (!validateBuilderGrid(builderGrid)) { setBuilderWarn("Level has no destructible blocks and cannot be won."); return; }
+    var levelId = editingLevelId || genUUID();
+    doSaveLevel(levelId, builderLevelName || "Untitled Level");
+    // Brief delay so the level is persisted to storage before the game loads it.
+    setTimeout(function() { navigateToGame(levelId); }, 60);
+  }
+
   function handleBuilderBack() { if (builderDirty) { setShowBackWarn(true); return; } loadSavedLevels(); setLbScreen("list"); }
 
   function deleteLevel(id) { setSavedLevels(function(prev) { var levels = prev.filter(function(l) { return l.id !== id; }); persistLevels(levels); return levels; }); setDeletingId(null); }
@@ -1096,6 +1104,14 @@ export default function CosmicWorkshop() {
         React.createElement("div", { style: { fontSize: 28, fontWeight: 700, letterSpacing: 3, color: "#80ddff", textTransform: "uppercase", textShadow: "0 0 20px rgba(80,200,255,0.3)" } }, "WORKSHOP"),
         React.createElement("div", { style: { fontSize: 10, color: "rgba(180,200,220,0.2)", marginTop: 8, letterSpacing: 1 } }, WORKSHOP_VERSION)),
       React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 16, width: "100%", maxWidth: 320 } },
+        // Play card
+        React.createElement("div", { onClick: function() { navigateToGame(); }, style: { background: "linear-gradient(135deg, rgba(80,220,120,0.1), rgba(80,220,120,0.02))", border: "1px solid rgba(80,220,120,0.3)", borderRadius: 12, padding: "20px 20px", cursor: "pointer" } },
+          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 14 } },
+            React.createElement("div", { style: { width: 48, height: 48, borderRadius: 10, background: "rgba(80,220,120,0.1)", border: "1px solid rgba(80,220,120,0.25)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } },
+              React.createElement("svg", { width: "24", height: "24", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M7 4 L20 12 L7 20 Z", fill: "#80dd90" }))),
+            React.createElement("div", null,
+              React.createElement("div", { style: { color: "#80dd90", fontSize: 16, fontWeight: 700, letterSpacing: 1 } }, "Play Cosmic Drift"),
+              React.createElement("div", { style: { color: "rgba(180,200,220,0.35)", fontSize: 11, marginTop: 3 } }, "Jump into the game")))),
         // Level Builder card
         React.createElement("div", { onClick: function() { loadSavedLevels(); setScreen("builder"); setLbScreen("list"); }, style: { background: "linear-gradient(135deg, rgba(80,200,255,0.08), rgba(80,200,255,0.02))", border: "1px solid rgba(80,200,255,0.2)", borderRadius: 12, padding: "20px 20px", cursor: "pointer" } },
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 14 } },
@@ -1165,6 +1181,7 @@ export default function CosmicWorkshop() {
         React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 5, padding: "6px 8px", background: PNL, borderBottom: PNLB, boxShadow: "0 3px 6px rgba(0,0,0,0.4)", position: "relative", zIndex: 2 } },
           React.createElement("div", { onClick: handleBuilderBack, style: Object.assign({}, BTN_TOPBAR, { display: "flex", alignItems: "center", gap: 3 }) }, React.createElement("svg", { width: "8", height: "8", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M15 18l-6-6 6-6", fill: "none", stroke: "currentColor", strokeWidth: "3", strokeLinecap: "round", strokeLinejoin: "round" })), "My Levels"),
           React.createElement("div", { onClick: handleBuilderSave, style: BTN_SAVE }, "Save"),
+          React.createElement("div", { onClick: handleBuilderSaveAndPlay, style: Object.assign({}, BTN_SAVE, { display: "flex", alignItems: "center", gap: 3 }) }, React.createElement("svg", { width: "8", height: "8", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M5 3 L20 12 L5 21 Z", fill: "currentColor" })), "Save & Play"),
           React.createElement("div", { style: { flex: 1, background: SCRN, border: SCRNB, borderRadius: 4, padding: "4px 8px", boxShadow: SCRNS } },
             React.createElement("input", { value: builderLevelName, onChange: function(e) { setBuilderLevelName(e.target.value); setBuilderDirty(true); }, placeholder: "Level name...", style: { width: "100%", background: "transparent", border: "none", outline: "none", color: "#b0c8d8", fontSize: 16, fontWeight: 600, fontFamily: "'Quicksand',sans-serif", letterSpacing: 0.5 } })),
           React.createElement("div", { onClick: function() { setBuilderTourStep(0); }, style: { width: 28, height: 28, borderRadius: 4, background: PNL, border: PNLB, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" } }, React.createElement("svg", { width: "12", height: "12", viewBox: "0 0 16 16" }, React.createElement("circle", { cx: "8", cy: "8", r: "7", fill: "none", stroke: "rgba(180,200,220,0.5)", strokeWidth: "1.5" }), React.createElement("text", { x: "8", y: "12", textAnchor: "middle", fill: "rgba(180,200,220,0.5)", fontSize: "10", fontWeight: "700" }, "?")))),
