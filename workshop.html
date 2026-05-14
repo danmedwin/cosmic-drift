@@ -501,6 +501,19 @@ function BDDroneIcon(props) {
     fillRule: "nonzero"
   }));
 }
+// Block Designer cross icon (cross path), used for the Cross Crate corner badge.
+function BDCrossIcon(props) {
+  var s = props.size,
+    c = props.color || "#ffffff";
+  return React.createElement("svg", {
+    width: s,
+    height: s,
+    viewBox: "0 0 100 100"
+  }, React.createElement("path", {
+    d: "M 44,28 L 50,14 L 56,28 L 52,28 L 52,48 L 72,48 L 72,44 L 86,50 L 72,56 L 72,52 L 52,52 L 52,72 L 56,72 L 50,86 L 44,72 L 48,72 L 48,52 L 28,52 L 28,56 L 14,50 L 28,44 L 28,48 L 48,48 L 48,28 Z",
+    fill: c
+  }));
+}
 function AcidBarrelIcon(props) {
   var s = props.size;
   return React.createElement("svg", {
@@ -847,7 +860,7 @@ function crateBadgeIcon(type, baseSize) {
   if (type === 12) return React.createElement(LightningIcon, {
     size: sz
   });
-  if (type === 13) return React.createElement(CrossShotIcon, {
+  if (type === 13) return React.createElement(BDCrossIcon, {
     size: sz
   });
   if (type === 14) return React.createElement("svg", {

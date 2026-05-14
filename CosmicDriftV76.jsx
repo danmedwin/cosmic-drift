@@ -775,7 +775,7 @@ function crateBadgeIcon(type, baseSize) {
   var sz = Math.max(9, baseSize * (type === 12 || type === 16 ? 0.26 : 0.24));
   if (type === 11) return <BDDroneIcon size={sz} />;
   if (type === 12) return <LightningIcon size={sz} />;
-  if (type === 13) return <CrossShotIcon size={sz} />;
+  if (type === 13) return <BDCrossIcon size={sz} />;
   if (type === 14) return <svg width={sz} height={sz} viewBox="0 0 24 24"><path d="M4 20L12 4" stroke="#80ddff" strokeWidth="3" strokeLinecap="round" /><path d="M12 4L20 20" stroke="#80ddff" strokeWidth="3" strokeLinecap="round" /></svg>;
   if (type === 15) return <svg width={sz} height={sz} viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="8" rx="2" fill="#7a7a88" /><rect x="10" y="8" width="4" height="12" rx="1" fill="#9a9aaa" /></svg>;
   if (type === 16) return <CoreIcon size={sz} mode="lit" />;
