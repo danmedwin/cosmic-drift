@@ -2835,21 +2835,9 @@ function crateBadgeIcon(type, baseSize) {
   if (type === 13) return /*#__PURE__*/React.createElement(BDCrossIcon, {
     size: sz
   });
-  if (type === 14) return /*#__PURE__*/React.createElement("svg", {
-    width: sz,
-    height: sz,
-    viewBox: "0 0 24 24"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M4 20L12 4",
-    stroke: "#80ddff",
-    strokeWidth: "3",
-    strokeLinecap: "round"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M12 4L20 20",
-    stroke: "#80ddff",
-    strokeWidth: "3",
-    strokeLinecap: "round"
-  }));
+  if (type === 14) return /*#__PURE__*/React.createElement(SplitIcon, {
+    size: sz
+  });
   if (type === 15) return /*#__PURE__*/React.createElement("svg", {
     width: sz,
     height: sz,
@@ -3308,7 +3296,7 @@ function LegendOverlay(props) {
     name: "Drone",
     desc: "Deploy to target. 3x3 blast centered on tapped block.",
     icon: function () {
-      return /*#__PURE__*/React.createElement(DroneIcon, {
+      return /*#__PURE__*/React.createElement(BDDroneIcon, {
         size: 28
       });
     }
@@ -3324,7 +3312,7 @@ function LegendOverlay(props) {
     name: "Cross-Shot",
     desc: "Destroys tapped block and fires plasma in 4 directions.",
     icon: function () {
-      return /*#__PURE__*/React.createElement(CrossShotIcon, {
+      return /*#__PURE__*/React.createElement(BDCrossIcon, {
         size: 26
       });
     }
@@ -3332,27 +3320,9 @@ function LegendOverlay(props) {
     name: "Split",
     desc: "Tap a column or position ship and tap ship to fire. Two diagonal bouncing shots that reflect off walls.",
     icon: function () {
-      return /*#__PURE__*/React.createElement("svg", {
-        width: "26",
-        height: "26",
-        viewBox: "0 0 24 24"
-      }, /*#__PURE__*/React.createElement("path", {
-        d: "M4 20L12 4",
-        stroke: "#80ddff",
-        strokeWidth: "2.5",
-        strokeLinecap: "round"
-      }), /*#__PURE__*/React.createElement("path", {
-        d: "M12 4L20 20",
-        stroke: "#80ddff",
-        strokeWidth: "2.5",
-        strokeLinecap: "round",
-        strokeDasharray: "3 2"
-      }), /*#__PURE__*/React.createElement("circle", {
-        cx: "12",
-        cy: "4",
-        r: "2.5",
-        fill: "#50c8ff"
-      }));
+      return /*#__PURE__*/React.createElement(SplitIcon, {
+        size: 26
+      });
     }
   }, {
     name: "Smash",
@@ -8082,7 +8052,7 @@ function CosmicDriftGame() {
       }
     }, v.icon === "drone" ? /*#__PURE__*/React.createElement(BDDroneIcon, {
       size: 20
-    }) : v.icon === "crossshot" ? /*#__PURE__*/React.createElement(CrossShotIcon, {
+    }) : v.icon === "crossshot" ? /*#__PURE__*/React.createElement(BDCrossIcon, {
       size: 20
     }) : /*#__PURE__*/React.createElement(LightningIcon, {
       size: 20
@@ -9197,27 +9167,15 @@ function CosmicDriftGame() {
       borderRadius: 12,
       border: "1px solid rgba(80,200,255,0.2)"
     }
-  }, introCard.key === "drone" && /*#__PURE__*/React.createElement(DroneIcon, {
+  }, introCard.key === "drone" && /*#__PURE__*/React.createElement(BDDroneIcon, {
     size: 32
   }), introCard.key === "lightning" && /*#__PURE__*/React.createElement(LightningIcon, {
     size: 28
-  }), introCard.key === "crossshot" && /*#__PURE__*/React.createElement(CrossShotIcon, {
+  }), introCard.key === "crossshot" && /*#__PURE__*/React.createElement(BDCrossIcon, {
     size: 28
-  }), introCard.key === "anglebounce" && /*#__PURE__*/React.createElement("svg", {
-    width: "28",
-    height: "28",
-    viewBox: "0 0 24 24"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M12 20L4 12l4-4 4 4 4-4 4 4z",
-    fill: "#ff9944",
-    stroke: "#cc7733",
-    strokeWidth: "1"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "12",
-    cy: "8",
-    r: "3",
-    fill: "#ffcc44"
-  })), introCard.key === "hammer" && /*#__PURE__*/React.createElement("svg", {
+  }), introCard.key === "anglebounce" && /*#__PURE__*/React.createElement(SplitIcon, {
+    size: 28
+  }), introCard.key === "hammer" && /*#__PURE__*/React.createElement("svg", {
     width: "28",
     height: "28",
     viewBox: "0 0 24 24"
@@ -10532,11 +10490,11 @@ function CosmicDriftGame() {
       borderRadius: 10,
       border: "1px solid rgba(80,200,255,0.25)"
     }
-  }, convertOffer === "drone" && /*#__PURE__*/React.createElement(DroneIcon, {
+  }, convertOffer === "drone" && /*#__PURE__*/React.createElement(BDDroneIcon, {
     size: 28
   }), convertOffer === "lightning" && /*#__PURE__*/React.createElement(LightningIcon, {
     size: 24
-  }), convertOffer === "crossshot" && /*#__PURE__*/React.createElement(CrossShotIcon, {
+  }), convertOffer === "crossshot" && /*#__PURE__*/React.createElement(BDCrossIcon, {
     size: 24
   }), convertOffer === "anglebounce" && /*#__PURE__*/React.createElement(SplitIcon, {
     size: 24

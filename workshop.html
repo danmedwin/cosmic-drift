@@ -514,6 +514,42 @@ function BDCrossIcon(props) {
     fill: c
   }));
 }
+// Shared Split (angle-bounce) icon, used for the Split Crate corner badge.
+function SplitIcon(props) {
+  var s = props.size;
+  return React.createElement("svg", {
+    width: s,
+    height: s,
+    viewBox: "0 0 24 24"
+  }, React.createElement("path", {
+    d: "M4 4L12 20",
+    stroke: "#80ddff",
+    strokeWidth: "2.5",
+    strokeLinecap: "round"
+  }), React.createElement("path", {
+    d: "M12 20L20 4",
+    stroke: "#80ddff",
+    strokeWidth: "2.5",
+    strokeLinecap: "round",
+    strokeDasharray: "3 2"
+  }), React.createElement("circle", {
+    cx: "12",
+    cy: "20",
+    r: "3.5",
+    fill: "#80ddff",
+    opacity: "0.5"
+  }), React.createElement("circle", {
+    cx: "4",
+    cy: "4",
+    r: "3",
+    fill: "#50c8ff"
+  }), React.createElement("circle", {
+    cx: "20",
+    cy: "4",
+    r: "3",
+    fill: "#50c8ff"
+  }));
+}
 function AcidBarrelIcon(props) {
   var s = props.size;
   return React.createElement("svg", {
@@ -863,21 +899,9 @@ function crateBadgeIcon(type, baseSize) {
   if (type === 13) return React.createElement(BDCrossIcon, {
     size: sz
   });
-  if (type === 14) return React.createElement("svg", {
-    width: sz,
-    height: sz,
-    viewBox: "0 0 24 24"
-  }, React.createElement("path", {
-    d: "M4 20L12 4",
-    stroke: "#80ddff",
-    strokeWidth: "3",
-    strokeLinecap: "round"
-  }), React.createElement("path", {
-    d: "M12 4L20 20",
-    stroke: "#80ddff",
-    strokeWidth: "3",
-    strokeLinecap: "round"
-  }));
+  if (type === 14) return React.createElement(SplitIcon, {
+    size: sz
+  });
   if (type === 15) return React.createElement("svg", {
     width: sz,
     height: sz,
