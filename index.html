@@ -1681,6 +1681,50 @@ function BDDroneIcon(props) {
     fillRule: "nonzero"
   }));
 }
+// Block Designer cross icon (cross path), used for the Cross-Shot inventory slot.
+function BDCrossIcon(props) {
+  var s = props.size,
+    c = props.color || "#ffffff";
+  return /*#__PURE__*/React.createElement("svg", {
+    width: s,
+    height: s,
+    viewBox: "0 0 100 100"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M 44,28 L 50,14 L 56,28 L 52,28 L 52,48 L 72,48 L 72,44 L 86,50 L 72,56 L 72,52 L 52,52 L 52,72 L 56,72 L 50,86 L 44,72 L 48,72 L 48,52 L 28,52 L 28,56 L 14,50 L 28,44 L 28,48 L 48,48 L 48,28 Z",
+    fill: c
+  }));
+}
+// Shared Split (angle-bounce) icon, used for the inventory slot and the Convert Reactor Core card.
+function SplitIcon(props) {
+  var s = props.size;
+  return /*#__PURE__*/React.createElement("svg", {
+    width: s,
+    height: s,
+    viewBox: "0 0 24 24"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M4 20L12 4",
+    stroke: "#80ddff",
+    strokeWidth: "2.5",
+    strokeLinecap: "round"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M12 4L20 20",
+    stroke: "#80ddff",
+    strokeWidth: "2.5",
+    strokeLinecap: "round",
+    strokeDasharray: "3 2"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "4",
+    r: "2.5",
+    fill: "#50c8ff"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "4",
+    cy: "20",
+    r: "2",
+    fill: "#80ddff",
+    opacity: "0.5"
+  }));
+}
 function AcidBarrelIcon(props) {
   var s = props.size;
   return /*#__PURE__*/React.createElement("svg", {
@@ -4244,7 +4288,7 @@ function InventoryBar(props) {
     label: "Cross",
     count: invCrossShots,
     icon: function () {
-      return /*#__PURE__*/React.createElement(CrossShotIcon, {
+      return /*#__PURE__*/React.createElement(BDCrossIcon, {
         size: 22
       });
     }
@@ -4253,33 +4297,9 @@ function InventoryBar(props) {
     label: "Split",
     count: invAngleBounces,
     icon: function () {
-      return /*#__PURE__*/React.createElement("svg", {
-        width: "22",
-        height: "22",
-        viewBox: "0 0 24 24"
-      }, /*#__PURE__*/React.createElement("path", {
-        d: "M4 20L12 4",
-        stroke: "#80ddff",
-        strokeWidth: "2.5",
-        strokeLinecap: "round"
-      }), /*#__PURE__*/React.createElement("path", {
-        d: "M12 4L20 20",
-        stroke: "#80ddff",
-        strokeWidth: "2.5",
-        strokeLinecap: "round",
-        strokeDasharray: "3 2"
-      }), /*#__PURE__*/React.createElement("circle", {
-        cx: "12",
-        cy: "4",
-        r: "2.5",
-        fill: "#50c8ff"
-      }), /*#__PURE__*/React.createElement("circle", {
-        cx: "4",
-        cy: "20",
-        r: "2",
-        fill: "#80ddff",
-        opacity: "0.5"
-      }));
+      return /*#__PURE__*/React.createElement(SplitIcon, {
+        size: 22
+      });
     }
   }, {
     key: "hammer",
@@ -10513,21 +10533,9 @@ function CosmicDriftGame() {
     size: 24
   }), convertOffer === "crossshot" && /*#__PURE__*/React.createElement(CrossShotIcon, {
     size: 24
-  }), convertOffer === "anglebounce" && /*#__PURE__*/React.createElement("svg", {
-    width: "24",
-    height: "24",
-    viewBox: "0 0 24 24"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M12 20L4 12l4-4 4 4 4-4 4 4z",
-    fill: "#ff9944",
-    stroke: "#cc7733",
-    strokeWidth: "1"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "12",
-    cy: "8",
-    r: "3",
-    fill: "#ffcc44"
-  })), convertOffer === "hammer" && /*#__PURE__*/React.createElement("svg", {
+  }), convertOffer === "anglebounce" && /*#__PURE__*/React.createElement(SplitIcon, {
+    size: 24
+  }), convertOffer === "hammer" && /*#__PURE__*/React.createElement("svg", {
     width: "24",
     height: "24",
     viewBox: "0 0 24 24"
