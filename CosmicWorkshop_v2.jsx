@@ -293,7 +293,7 @@ function bdDefaultDesign() {
     patternScale: 1, patternRotation: 0, patternFilled: false, patternLineWidth: 1.5,
     icon: "none", iconColor: "#ffffff", iconOpacity: 0.8, iconRotation: 0,
     iconGlow: false, iconGlowColor: "#ffffff", iconGlowIntensity: 6,
-    assignedTo: "", phases: null,
+    assignedTo: "regular", phases: null,
   };
 }
 
@@ -713,8 +713,7 @@ export default function CosmicWorkshop() {
   }, [bdDesign.assignedTo]);
 
   var bdDisplayDesign = getDesignForPhase(bdDesign, bdPhase);
-  var bdCanSetActive = !!(bdEditId && !bdDirty && bdDesign.assignedTo);
-  var bdIsActive = bdCanSetActive && bdActiveMap[bdDesign.assignedTo] === bdEditId;
+  var bdIsActive = !!(bdEditId && !bdDirty && bdDesign.assignedTo && bdActiveMap[bdDesign.assignedTo] === bdEditId);
 
   // ═══════════════════════════════════════
   // SHARED UTILITIES
@@ -1363,7 +1362,11 @@ export default function CosmicWorkshop() {
         React.createElement(WorkshopTopBar, { onBack: bdHandleBack, backLabel: "My Blocks", title: "Block Designer", color: "#c8b8ff", fontFamily: "'Exo 2', sans-serif",
           rightContent: React.createElement("div", { style: { display: "flex", gap: 4, alignItems: "center" } },
             React.createElement("div", { onClick: bdSaveCurrentDesign, style: BTN_SAVE }, "Save"),
-            React.createElement("div", { onClick: function() { if (bdCanSetActive) bdToggleActive({ id: bdEditId, assignedTo: bdDesign.assignedTo }); }, style: Object.assign({}, BTN_TOPBAR, { opacity: bdCanSetActive ? 1 : 0.4, color: bdIsActive ? "#80dd90" : "rgba(200,210,220,0.7)", border: bdIsActive ? "2px solid rgba(80,200,100,0.5)" : PNLB }) }, bdIsActive ? "★ Active" : "Set Active"),
+            React.createElement("div", { onClick: function() {
+              if (!bdDesign.assignedTo) { setBdSaveStatus("Choose a Block type first"); setTimeout(function() { setBdSaveStatus(""); }, 2500); return; }
+              if (!bdEditId || bdDirty) { setBdSaveStatus("Save the design first"); setTimeout(function() { setBdSaveStatus(""); }, 2500); return; }
+              bdToggleActive({ id: bdEditId, assignedTo: bdDesign.assignedTo });
+            }, style: Object.assign({}, BTN_TOPBAR, { color: bdIsActive ? "#80dd90" : "rgba(200,210,220,0.7)", border: bdIsActive ? "2px solid rgba(80,200,100,0.5)" : PNLB }) }, bdIsActive ? "★ Active" : "Set Active"),
             React.createElement("div", { style: { marginLeft: 4 } }, React.createElement(BDBlockPreview, { design: bdDisplayDesign, size: 36 }))) }),
         bdSaveStatus && React.createElement("div", { style: { padding: "6px 12px", textAlign: "center", fontSize: 12, fontWeight: 600, color: "#80dd90", background: "rgba(80,200,100,0.1)", zIndex: 2, position: "relative" } }, bdSaveStatus),
         React.createElement("div", { ref: bdScrollRef, style: { flex: 1, overflowY: "auto", fontFamily: "'Exo 2', sans-serif" } },

@@ -1457,7 +1457,7 @@ function bdDefaultDesign() {
     iconGlow: false,
     iconGlowColor: "#ffffff",
     iconGlowIntensity: 6,
-    assignedTo: "",
+    assignedTo: "regular",
     phases: null
   };
 }
@@ -2854,8 +2854,7 @@ function CosmicWorkshop() {
     }
   }, [bdDesign.assignedTo]);
   var bdDisplayDesign = getDesignForPhase(bdDesign, bdPhase);
-  var bdCanSetActive = !!(bdEditId && !bdDirty && bdDesign.assignedTo);
-  var bdIsActive = bdCanSetActive && bdActiveMap[bdDesign.assignedTo] === bdEditId;
+  var bdIsActive = !!(bdEditId && !bdDirty && bdDesign.assignedTo && bdActiveMap[bdDesign.assignedTo] === bdEditId);
 
   // ═══════════════════════════════════════
   // SHARED UTILITIES
@@ -5561,13 +5560,26 @@ function CosmicWorkshop() {
       style: BTN_SAVE
     }, "Save"), React.createElement("div", {
       onClick: function () {
-        if (bdCanSetActive) bdToggleActive({
+        if (!bdDesign.assignedTo) {
+          setBdSaveStatus("Choose a Block type first");
+          setTimeout(function () {
+            setBdSaveStatus("");
+          }, 2500);
+          return;
+        }
+        if (!bdEditId || bdDirty) {
+          setBdSaveStatus("Save the design first");
+          setTimeout(function () {
+            setBdSaveStatus("");
+          }, 2500);
+          return;
+        }
+        bdToggleActive({
           id: bdEditId,
           assignedTo: bdDesign.assignedTo
         });
       },
       style: Object.assign({}, BTN_TOPBAR, {
-        opacity: bdCanSetActive ? 1 : 0.4,
         color: bdIsActive ? "#80dd90" : "rgba(200,210,220,0.7)",
         border: bdIsActive ? "2px solid rgba(80,200,100,0.5)" : PNLB
       })
