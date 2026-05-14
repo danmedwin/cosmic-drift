@@ -19,6 +19,9 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0b0c1a; }
 #loading-screen .dot:nth-child(3) { animation-delay: 0.4s; }
 @keyframes loadPulse { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.3); } }
 @font-face { font-family: "Quicksand"; font-display: swap; src: local("Quicksand"); }
+#error-display { position: fixed; inset: 0; background: #0b0c1a; color: #ff8866; font-family: monospace; padding: 20px; overflow: auto; z-index: 99999; display: none; }
+#error-display h2 { color: #ff4444; margin-bottom: 10px; font-family: sans-serif; }
+#error-display pre { white-space: pre-wrap; word-break: break-all; font-size: 13px; line-height: 1.6; color: #ffaa88; }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@400;600;700&display=swap" rel="stylesheet">
@@ -29,9 +32,14 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #0b0c1a; }
   <div class="main">Loading...</div>
   <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
 </div>
+<div id="error-display"><h2>Runtime Error</h2><pre id="error-text"></pre></div>
 <div id="root"></div>
+<script>window.onerror=function(m,s,l,c,e){document.getElementById("error-display").style.display="block";document.getElementById("error-text").textContent=m+"\n\nSource: "+s+"\nLine: "+l+", Col: "+c+"\n\n"+(e&&e.stack?e.stack:"");document.getElementById("loading-screen").style.display="none";return true;};</script>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script>
+if (!window.React) { document.getElementById("error-display").style.display="block"; document.getElementById("error-text").textContent="React failed to load from CDN"; document.getElementById("loading-screen").style.display="none"; }
+</script>
 <script>
 var useState = React.useState;
 var useRef = React.useRef;
@@ -82,6 +90,7 @@ if (!window.storage) {
 }
 </script>
 <script>
+try {
 /* ============================================================
    COSMIC WORKSHOP v2.0
    Creative suite for Cosmic Drift: Level Builder + Block Designer
@@ -5592,11 +5601,33 @@ function CosmicWorkshop() {
   }))));
 }
 
-// Mount
+// Mount with error boundary
+var ErrorBoundary = (function() {
+  function EB(props) { this.state = { hasError: false, error: null }; }
+  EB.prototype = Object.create(React.Component.prototype);
+  EB.prototype.constructor = EB;
+  EB.getDerivedStateFromError = function(error) { return { hasError: true, error: error }; };
+  EB.prototype.componentDidCatch = function(error, info) {
+    document.getElementById("error-display").style.display = "block";
+    document.getElementById("error-text").textContent = error.message + "\n\n" + (error.stack || "") + "\n\nComponent Stack: " + (info && info.componentStack ? info.componentStack : "N/A");
+    document.getElementById("loading-screen").style.display = "none";
+  };
+  EB.prototype.render = function() {
+    if (this.state.hasError) return null;
+    return this.props.children;
+  };
+  return EB;
+})();
+
 var root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(React.createElement(isCrate, null));
+root.render(React.createElement(ErrorBoundary, null, React.createElement(isCrate, null)));
 var ls = document.getElementById("loading-screen");
 if (ls) ls.style.display = "none";
+} catch(e) {
+  document.getElementById("error-display").style.display = "block";
+  document.getElementById("error-text").textContent = "Init Error: " + e.message + "\n\n" + (e.stack || "");
+  document.getElementById("loading-screen").style.display = "none";
+}
 </script>
 </body>
 </html>
