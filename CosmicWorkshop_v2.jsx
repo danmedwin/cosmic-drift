@@ -346,16 +346,25 @@ function bdSaveActive(map) {
 // and 17 (UFO) are not designable. Crate variants 11-16 resolve to "crate".
 var BLOCK_TYPE_TO_BD = { 1: "regular", 2: "cross_shot", 3: "lightning", 5: "plasma", 6: "drone", 7: "indestructible", 8: "acid_barrel", 9: "crate", 10: "force_field" };
 
+// Resolves the design for a numeric block type: the active custom design if
+// one is set, otherwise the factory preset for that type. Returns null only
+// for types with no design-system equivalent (4 Extra Core, 17 UFO), which
+// keep their bespoke hardcoded rendering.
 function bdResolveActiveDesign(blockType, activeMap, savedDesigns) {
   var bdId = BLOCK_TYPE_TO_BD[blockType];
   if (!bdId && blockType >= 11 && blockType <= 16) bdId = "crate";
   if (!bdId) return null;
   var designId = activeMap[bdId];
-  if (!designId) return null;
-  for (var i = 0; i < savedDesigns.length; i++) {
-    if (savedDesigns[i].id === designId) {
-      return savedDesigns[i].assignedTo === bdId ? savedDesigns[i] : null;
+  if (designId) {
+    for (var i = 0; i < savedDesigns.length; i++) {
+      if (savedDesigns[i].id === designId) {
+        if (savedDesigns[i].assignedTo === bdId) return savedDesigns[i];
+        break;
+      }
     }
+  }
+  for (var j = 0; j < BD_FACTORY_PRESETS.length; j++) {
+    if (BD_FACTORY_PRESETS[j].assignedTo === bdId) return BD_FACTORY_PRESETS[j];
   }
   return null;
 }
