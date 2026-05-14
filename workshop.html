@@ -825,7 +825,7 @@ function UFOBlockSvg(props) {
 
 // Corner power-icon badge for crate variant blocks (types 11-16).
 function crateBadgeIcon(type, baseSize) {
-  var sz = Math.max(7, baseSize * (type === 12 || type === 16 ? 0.2 : 0.18));
+  var sz = Math.max(9, baseSize * (type === 12 || type === 16 ? 0.26 : 0.24));
   if (type === 11) return React.createElement(DroneIcon, {
     size: sz
   });
@@ -3315,7 +3315,7 @@ function CosmicWorkshop() {
       shieldLevel: shieldLevel || 0
     });
     if (type >= 11 && type <= 16) {
-      var badgeBox = Math.max(10, size * 0.3);
+      var badgeBox = Math.max(11, size * 0.34);
       var cvColor = null;
       for (var ci = 0; ci < CRATE_VARIANTS.length; ci++) {
         if (CRATE_VARIANTS[ci].type === type) {

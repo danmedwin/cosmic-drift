@@ -611,6 +611,17 @@ function getShapePath(shapeId) {
 
 var CORNER_SHAPES = { square: true };
 
+// Merges a design's per-phase overrides (force field shield states) over its base.
+function getDesignForPhase(design, phase) {
+  if (!phase || phase === 1 || !design.phases) return design;
+  var phaseOverrides = design.phases[phase];
+  if (!phaseOverrides) return design;
+  var merged = {};
+  Object.keys(design).forEach(function (k) { merged[k] = design[k]; });
+  Object.keys(phaseOverrides).forEach(function (k) { merged[k] = phaseOverrides[k]; });
+  return merged;
+}
+
 var BD_ICONS = [
   { id: "none", label: "None", path: null },
   { id: "cross", label: "Cross", path: "M 44,28 L 50,14 L 56,28 L 52,28 L 52,48 L 72,48 L 72,44 L 86,50 L 72,56 L 72,52 L 52,52 L 52,72 L 56,72 L 50,86 L 44,72 L 48,72 L 48,52 L 28,52 L 28,56 L 14,50 L 28,44 L 28,48 L 48,48 L 48,28 Z" },
@@ -747,7 +758,7 @@ var GAME_ACTIVE_BLOCKS = {};
 
 // Corner power-icon badge for crate variant blocks (types 11-16).
 function crateBadgeIcon(type, baseSize) {
-  var sz = Math.max(7, baseSize * (type === 12 || type === 16 ? 0.2 : 0.18));
+  var sz = Math.max(9, baseSize * (type === 12 || type === 16 ? 0.26 : 0.24));
   if (type === 11) return <DroneIcon size={sz} />;
   if (type === 12) return <LightningIcon size={sz} />;
   if (type === 13) return <CrossShotIcon size={sz} />;
@@ -763,12 +774,15 @@ function DesignBlock(props) {
   var design = props.design, type = props.type, size = props.size, sl = props.shieldLevel || 0;
   var inner;
   if (type >= 11 && type <= 16) {
-    var badgeBox = Math.max(10, size * 0.3);
+    var badgeBox = Math.max(11, size * 0.34);
     var cv = CRATE_VARIANTS.filter(function (c) { return c.type === type; })[0];
     inner = <div style={{ position: "relative", width: size, height: size }}>
       <BDBlockPreview design={design} size={size} />
       <div style={{ position: "absolute", bottom: -2, right: -2, width: badgeBox, height: badgeBox, borderRadius: "50%", background: "rgba(10,10,20,0.85)", border: "1px solid " + (cv ? cv.color : "rgba(255,255,255,0.3)"), display: "flex", alignItems: "center", justifyContent: "center" }}>{crateBadgeIcon(type, size)}</div>
     </div>;
+  } else if (type === 10) {
+    // Force field shield level 2/1/0 maps to design phase 1/2/3.
+    inner = <BDBlockPreview design={getDesignForPhase(design, 3 - sl)} size={size} />;
   } else {
     inner = <BDBlockPreview design={design} size={size} />;
   }
