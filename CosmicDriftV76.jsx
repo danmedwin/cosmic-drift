@@ -685,12 +685,17 @@ function BDBlockPreview(props) {
   var cr = design.cornerRadius || 0;
   var glowStyle = {};
   if (design.glowEnabled) { glowStyle.filter = "drop-shadow(0 0 " + design.glowIntensity + "px " + design.glowColor + ")"; }
-  var shapeElement;
-  if (isCircle) { shapeElement = React.createElement("circle", { cx: 50, cy: 50, r: 46, fill: design.color, stroke: design.borderColor, strokeWidth: design.borderWidth * 2 }); }
-  else if (isSquare && hasCorners) { shapeElement = React.createElement("rect", { x: 4, y: 4, width: 92, height: 92, rx: cr, ry: cr, fill: design.color, stroke: design.borderColor, strokeWidth: design.borderWidth * 2 }); }
-  else { shapeElement = React.createElement("path", { d: shapePath, fill: design.color, stroke: design.borderColor, strokeWidth: design.borderWidth * 2, strokeLinejoin: "round" }); }
+  var fillOp = design.fillOpacity != null ? design.fillOpacity : 1;
+  var borderOp = design.borderOpacity != null ? design.borderOpacity : 1;
+  var isNone = design.shape === "none";
+  var shapeElement = null;
+  if (!isNone) {
+    if (isCircle) { shapeElement = React.createElement("circle", { cx: 50, cy: 50, r: 46, fill: design.color, fillOpacity: fillOp, stroke: design.borderColor, strokeOpacity: borderOp, strokeWidth: design.borderWidth * 2 }); }
+    else if (isSquare && hasCorners) { shapeElement = React.createElement("rect", { x: 4, y: 4, width: 92, height: 92, rx: cr, ry: cr, fill: design.color, fillOpacity: fillOp, stroke: design.borderColor, strokeOpacity: borderOp, strokeWidth: design.borderWidth * 2 }); }
+    else { shapeElement = React.createElement("path", { d: shapePath, fill: design.color, fillOpacity: fillOp, stroke: design.borderColor, strokeOpacity: borderOp, strokeWidth: design.borderWidth * 2, strokeLinejoin: "round" }); }
+  }
   var patternOverlay = null;
-  if (design.pattern !== "none") {
+  if (!isNone && design.pattern !== "none") {
     if (isCircle) { patternOverlay = React.createElement("circle", { cx: 50, cy: 50, r: 46, fill: "url(#" + patId + ")", stroke: "none" }); }
     else if (isSquare && hasCorners) { patternOverlay = React.createElement("rect", { x: 4, y: 4, width: 92, height: 92, rx: cr, ry: cr, fill: "url(#" + patId + ")", stroke: "none" }); }
     else { patternOverlay = React.createElement("path", { d: shapePath, fill: "url(#" + patId + ")", stroke: "none" }); }

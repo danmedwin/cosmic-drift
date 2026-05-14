@@ -1243,6 +1243,10 @@ var SHAPES = [{
   id: "shield",
   label: "Shield",
   icon: "\u26CA"
+}, {
+  id: "none",
+  label: "None",
+  icon: "\u2205"
 }];
 function getShapePath(shapeId) {
   switch (shapeId) {
@@ -1420,6 +1424,8 @@ function bdDefaultDesign() {
     color: "#4488ff",
     borderColor: "#88bbff",
     borderWidth: 2,
+    fillOpacity: 1,
+    borderOpacity: 1,
     glowEnabled: false,
     glowColor: "#88bbff",
     glowIntensity: 6,
@@ -1951,39 +1957,50 @@ function BDBlockPreview(props) {
   if (design.glowEnabled) {
     glowStyle.filter = "drop-shadow(0 0 " + design.glowIntensity + "px " + design.glowColor + ")";
   }
-  var shapeElement;
-  if (isCircle) {
-    shapeElement = React.createElement("circle", {
-      cx: 50,
-      cy: 50,
-      r: 46,
-      fill: design.color,
-      stroke: design.borderColor,
-      strokeWidth: design.borderWidth * 2
-    });
-  } else if (isSquare && hasCorners) {
-    shapeElement = React.createElement("rect", {
-      x: 4,
-      y: 4,
-      width: 92,
-      height: 92,
-      rx: cr,
-      ry: cr,
-      fill: design.color,
-      stroke: design.borderColor,
-      strokeWidth: design.borderWidth * 2
-    });
-  } else {
-    shapeElement = React.createElement("path", {
-      d: shapePath,
-      fill: design.color,
-      stroke: design.borderColor,
-      strokeWidth: design.borderWidth * 2,
-      strokeLinejoin: "round"
-    });
+  var fillOp = design.fillOpacity != null ? design.fillOpacity : 1;
+  var borderOp = design.borderOpacity != null ? design.borderOpacity : 1;
+  var isNone = design.shape === "none";
+  var shapeElement = null;
+  if (!isNone) {
+    if (isCircle) {
+      shapeElement = React.createElement("circle", {
+        cx: 50,
+        cy: 50,
+        r: 46,
+        fill: design.color,
+        fillOpacity: fillOp,
+        stroke: design.borderColor,
+        strokeOpacity: borderOp,
+        strokeWidth: design.borderWidth * 2
+      });
+    } else if (isSquare && hasCorners) {
+      shapeElement = React.createElement("rect", {
+        x: 4,
+        y: 4,
+        width: 92,
+        height: 92,
+        rx: cr,
+        ry: cr,
+        fill: design.color,
+        fillOpacity: fillOp,
+        stroke: design.borderColor,
+        strokeOpacity: borderOp,
+        strokeWidth: design.borderWidth * 2
+      });
+    } else {
+      shapeElement = React.createElement("path", {
+        d: shapePath,
+        fill: design.color,
+        fillOpacity: fillOp,
+        stroke: design.borderColor,
+        strokeOpacity: borderOp,
+        strokeWidth: design.borderWidth * 2,
+        strokeLinejoin: "round"
+      });
+    }
   }
   var patternOverlay = null;
-  if (design.pattern !== "none") {
+  if (!isNone && design.pattern !== "none") {
     if (isCircle) {
       patternOverlay = React.createElement("circle", {
         cx: 50,
@@ -5755,13 +5772,23 @@ function CosmicWorkshop() {
     min: 0,
     max: 46,
     step: 1
-  })), bdActivePanel === "color" && React.createElement(BDColorPicker, {
+  })), bdActivePanel === "color" && React.createElement(React.Fragment, null, React.createElement(BDColorPicker, {
     value: bdDesign.color,
     onChange: function (v) {
       bdUpdateDesign("color", v);
     },
     presets: BD_COLOR_PRESETS
-  }), bdActivePanel === "border" && React.createElement(React.Fragment, null, React.createElement(BDColorPicker, {
+  }), React.createElement(BDSlider, {
+    label: "Fill Opacity",
+    value: bdDesign.fillOpacity != null ? bdDesign.fillOpacity : 1,
+    onChange: function (v) {
+      bdUpdateDesign("fillOpacity", v);
+    },
+    min: 0,
+    max: 1,
+    step: 0.05,
+    displayValue: Math.round((bdDesign.fillOpacity != null ? bdDesign.fillOpacity : 1) * 100) + "%"
+  })), bdActivePanel === "border" && React.createElement(React.Fragment, null, React.createElement(BDColorPicker, {
     value: bdDisplayDesign.borderColor,
     onChange: function (v) {
       bdUpdateDesign("borderColor", v);
@@ -5777,6 +5804,16 @@ function CosmicWorkshop() {
     min: 0,
     max: 8,
     step: 0.5
+  }), React.createElement(BDSlider, {
+    label: "Border Opacity",
+    value: bdDisplayDesign.borderOpacity != null ? bdDisplayDesign.borderOpacity : 1,
+    onChange: function (v) {
+      bdUpdateDesign("borderOpacity", v);
+    },
+    min: 0,
+    max: 1,
+    step: 0.05,
+    displayValue: Math.round((bdDisplayDesign.borderOpacity != null ? bdDisplayDesign.borderOpacity : 1) * 100) + "%"
   }), React.createElement(BDToggle, {
     label: "Glow",
     value: bdDisplayDesign.glowEnabled,

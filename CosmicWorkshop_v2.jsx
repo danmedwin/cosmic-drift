@@ -211,6 +211,7 @@ var SHAPES = [
   { id: "asteroid", label: "Asteroid", icon: "\u2604" },
   { id: "cross_shape", label: "Cross", icon: "\u271A" },
   { id: "shield", label: "Shield", icon: "\u26CA" },
+  { id: "none", label: "None", icon: "\u2205" },
 ];
 
 function getShapePath(shapeId) {
@@ -284,7 +285,7 @@ var BD_COLOR_PRESETS = [
 function bdDefaultDesign() {
   return {
     name: "", shape: "square", shapeRotation: 0, cornerRadius: 0,
-    color: "#4488ff", borderColor: "#88bbff", borderWidth: 2,
+    color: "#4488ff", borderColor: "#88bbff", borderWidth: 2, fillOpacity: 1, borderOpacity: 1,
     glowEnabled: false, glowColor: "#88bbff", glowIntensity: 6,
     pattern: "none", patternColor: "#ffffff", patternOpacity: 0.3,
     patternScale: 1, patternRotation: 0, patternFilled: false, patternLineWidth: 1.5,
@@ -414,12 +415,17 @@ function BDBlockPreview(props) {
   var cr = design.cornerRadius || 0;
   var glowStyle = {};
   if (design.glowEnabled) { glowStyle.filter = "drop-shadow(0 0 " + design.glowIntensity + "px " + design.glowColor + ")"; }
-  var shapeElement;
-  if (isCircle) { shapeElement = React.createElement("circle", { cx: 50, cy: 50, r: 46, fill: design.color, stroke: design.borderColor, strokeWidth: design.borderWidth * 2 }); }
-  else if (isSquare && hasCorners) { shapeElement = React.createElement("rect", { x: 4, y: 4, width: 92, height: 92, rx: cr, ry: cr, fill: design.color, stroke: design.borderColor, strokeWidth: design.borderWidth * 2 }); }
-  else { shapeElement = React.createElement("path", { d: shapePath, fill: design.color, stroke: design.borderColor, strokeWidth: design.borderWidth * 2, strokeLinejoin: "round" }); }
+  var fillOp = design.fillOpacity != null ? design.fillOpacity : 1;
+  var borderOp = design.borderOpacity != null ? design.borderOpacity : 1;
+  var isNone = design.shape === "none";
+  var shapeElement = null;
+  if (!isNone) {
+    if (isCircle) { shapeElement = React.createElement("circle", { cx: 50, cy: 50, r: 46, fill: design.color, fillOpacity: fillOp, stroke: design.borderColor, strokeOpacity: borderOp, strokeWidth: design.borderWidth * 2 }); }
+    else if (isSquare && hasCorners) { shapeElement = React.createElement("rect", { x: 4, y: 4, width: 92, height: 92, rx: cr, ry: cr, fill: design.color, fillOpacity: fillOp, stroke: design.borderColor, strokeOpacity: borderOp, strokeWidth: design.borderWidth * 2 }); }
+    else { shapeElement = React.createElement("path", { d: shapePath, fill: design.color, fillOpacity: fillOp, stroke: design.borderColor, strokeOpacity: borderOp, strokeWidth: design.borderWidth * 2, strokeLinejoin: "round" }); }
+  }
   var patternOverlay = null;
-  if (design.pattern !== "none") {
+  if (!isNone && design.pattern !== "none") {
     if (isCircle) { patternOverlay = React.createElement("circle", { cx: 50, cy: 50, r: 46, fill: "url(#" + patId + ")", stroke: "none" }); }
     else if (isSquare && hasCorners) { patternOverlay = React.createElement("rect", { x: 4, y: 4, width: 92, height: 92, rx: cr, ry: cr, fill: "url(#" + patId + ")", stroke: "none" }); }
     else { patternOverlay = React.createElement("path", { d: shapePath, fill: "url(#" + patId + ")", stroke: "none" }); }
@@ -1392,10 +1398,13 @@ export default function CosmicWorkshop() {
                 React.createElement(BDOptionGrid, { options: SHAPES, value: bdDesign.shape, onChange: function(v) { bdUpdateDesign("shape", v); }, columns: 4 }),
                 React.createElement(BDSlider, { label: "Rotation", value: bdDesign.shapeRotation, onChange: function(v) { bdUpdateDesign("shapeRotation", v); }, min: 0, max: 360, step: 5, displayValue: bdDesign.shapeRotation + "\u00b0" }),
                 CORNER_SHAPES[bdDesign.shape] && React.createElement(BDSlider, { label: "Corner Radius", value: bdDesign.cornerRadius, onChange: function(v) { bdUpdateDesign("cornerRadius", v); }, min: 0, max: 46, step: 1 })),
-              bdActivePanel === "color" && React.createElement(BDColorPicker, { value: bdDesign.color, onChange: function(v) { bdUpdateDesign("color", v); }, presets: BD_COLOR_PRESETS }),
+              bdActivePanel === "color" && React.createElement(React.Fragment, null,
+                React.createElement(BDColorPicker, { value: bdDesign.color, onChange: function(v) { bdUpdateDesign("color", v); }, presets: BD_COLOR_PRESETS }),
+                React.createElement(BDSlider, { label: "Fill Opacity", value: bdDesign.fillOpacity != null ? bdDesign.fillOpacity : 1, onChange: function(v) { bdUpdateDesign("fillOpacity", v); }, min: 0, max: 1, step: 0.05, displayValue: Math.round((bdDesign.fillOpacity != null ? bdDesign.fillOpacity : 1) * 100) + "%" })),
               bdActivePanel === "border" && React.createElement(React.Fragment, null,
                 React.createElement(BDColorPicker, { value: bdDisplayDesign.borderColor, onChange: function(v) { bdUpdateDesign("borderColor", v); }, label: "Color", presets: BD_COLOR_PRESETS }),
                 React.createElement(BDSlider, { label: "Thickness", value: bdDisplayDesign.borderWidth, onChange: function(v) { bdUpdateDesign("borderWidth", v); }, min: 0, max: 8, step: 0.5 }),
+                React.createElement(BDSlider, { label: "Border Opacity", value: bdDisplayDesign.borderOpacity != null ? bdDisplayDesign.borderOpacity : 1, onChange: function(v) { bdUpdateDesign("borderOpacity", v); }, min: 0, max: 1, step: 0.05, displayValue: Math.round((bdDisplayDesign.borderOpacity != null ? bdDisplayDesign.borderOpacity : 1) * 100) + "%" }),
                 React.createElement(BDToggle, { label: "Glow", value: bdDisplayDesign.glowEnabled, onChange: function(v) { bdUpdateDesign("glowEnabled", v); } }),
                 bdDisplayDesign.glowEnabled && React.createElement(React.Fragment, null,
                   React.createElement(BDColorPicker, { value: bdDisplayDesign.glowColor, onChange: function(v) { bdUpdateDesign("glowColor", v); }, label: "Glow Color" }),
