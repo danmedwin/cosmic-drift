@@ -1095,10 +1095,12 @@ export default function CosmicWorkshop() {
           React.createElement("div", { onClick: onLeave, style: { padding: "8px 20px", borderRadius: 16, background: "rgba(255,60,60,0.3)", border: "1px solid rgba(255,80,80,0.35)", color: "#ff8866", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "Leave"))));
   }
 
-  function renderSortBar(currentSort, onSort) {
+  function renderSortBar(currentSort, onSort, extraOpts) {
+    var opts = [["date_new", "Newest"], ["date_old", "Oldest"], ["name", "Name"]];
+    if (extraOpts) opts = opts.concat(extraOpts);
     return React.createElement("div", { style: { display: "flex", gap: 4, padding: "6px 10px 2px", position: "relative", zIndex: 1 } },
       React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 9, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", paddingTop: 4, marginRight: 2 } }, "Sort:"),
-      [["date_new", "Newest"], ["date_old", "Oldest"], ["name", "Name"]].map(function(opt) {
+      opts.map(function(opt) {
         var active = currentSort === opt[0];
         return React.createElement("div", { key: opt[0], onClick: function() { onSort(opt[0]); }, style: { padding: "3px 8px", borderRadius: 3, background: active ? "rgba(80,200,255,0.12)" : "transparent", border: active ? "1px solid rgba(80,200,255,0.3)" : "1px solid transparent", color: active ? "#80ddff" : "rgba(180,200,220,0.3)", fontSize: 9, fontWeight: 700, cursor: "pointer", letterSpacing: 0.5 } }, opt[1]);
       }));
@@ -1107,6 +1109,14 @@ export default function CosmicWorkshop() {
   function sortItems(items, mode, dateKey) {
     return items.slice().sort(function(a, b) {
       if (mode === "name") return (a.name || "").localeCompare(b.name || "");
+      if (mode === "type") {
+        var order = {};
+        for (var ti = 0; ti < BD_BLOCK_TYPES.length; ti++) { order[BD_BLOCK_TYPES[ti].id] = ti; }
+        var ao = order[a.assignedTo] != null ? order[a.assignedTo] : 99;
+        var bo = order[b.assignedTo] != null ? order[b.assignedTo] : 99;
+        if (ao !== bo) return ao - bo;
+        return (a.name || "").localeCompare(b.name || "");
+      }
       if (mode === "date_old") return ((a[dateKey] ? new Date(a[dateKey]).getTime() : 0) || 0) - ((b[dateKey] ? new Date(b[dateKey]).getTime() : 0) || 0);
       return ((b[dateKey] ? new Date(b[dateKey]).getTime() : 0) || 0) - ((a[dateKey] ? new Date(a[dateKey]).getTime() : 0) || 0);
     });
@@ -1301,7 +1311,7 @@ export default function CosmicWorkshop() {
             var active = bdSavedTab === tab[0];
             return React.createElement("div", { key: tab[0], onClick: function() { setBdSavedTab(tab[0]); }, style: { flex: 1, textAlign: "center", padding: "10px 0 8px", color: active ? "#c8b8ff" : "rgba(180,200,220,0.3)", fontSize: 12, fontWeight: active ? 700 : 600, cursor: "pointer", borderBottom: active ? "2px solid #c8b8ff" : "2px solid transparent", letterSpacing: 0.5 } }, tab[1]);
           })),
-        bdSavedTab === "custom" && bdSaved.length > 1 && renderSortBar(bdSortMode, setBdSortMode),
+        bdSavedTab === "custom" && bdSaved.length > 1 && renderSortBar(bdSortMode, setBdSortMode, [["type", "Type"]]),
         React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "6px 10px 20px", position: "relative", zIndex: 1 } },
           // My Designs tab
           bdSavedTab === "custom" && bdSaved.length === 0 && React.createElement("div", { style: { textAlign: "center", padding: 40 } },

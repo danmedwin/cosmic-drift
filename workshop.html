@@ -3840,7 +3840,9 @@ function CosmicWorkshop() {
       }
     }, "Leave"))));
   }
-  function renderSortBar(currentSort, onSort) {
+  function renderSortBar(currentSort, onSort, extraOpts) {
+    var opts = [["date_new", "Newest"], ["date_old", "Oldest"], ["name", "Name"]];
+    if (extraOpts) opts = opts.concat(extraOpts);
     return React.createElement("div", {
       style: {
         display: "flex",
@@ -3859,7 +3861,7 @@ function CosmicWorkshop() {
         paddingTop: 4,
         marginRight: 2
       }
-    }, "Sort:"), [["date_new", "Newest"], ["date_old", "Oldest"], ["name", "Name"]].map(function (opt) {
+    }, "Sort:"), opts.map(function (opt) {
       var active = currentSort === opt[0];
       return React.createElement("div", {
         key: opt[0],
@@ -3883,6 +3885,16 @@ function CosmicWorkshop() {
   function sortItems(items, mode, dateKey) {
     return items.slice().sort(function (a, b) {
       if (mode === "name") return (a.name || "").localeCompare(b.name || "");
+      if (mode === "type") {
+        var order = {};
+        for (var ti = 0; ti < BD_BLOCK_TYPES.length; ti++) {
+          order[BD_BLOCK_TYPES[ti].id] = ti;
+        }
+        var ao = order[a.assignedTo] != null ? order[a.assignedTo] : 99;
+        var bo = order[b.assignedTo] != null ? order[b.assignedTo] : 99;
+        if (ao !== bo) return ao - bo;
+        return (a.name || "").localeCompare(b.name || "");
+      }
       if (mode === "date_old") return ((a[dateKey] ? new Date(a[dateKey]).getTime() : 0) || 0) - ((b[dateKey] ? new Date(b[dateKey]).getTime() : 0) || 0);
       return ((b[dateKey] ? new Date(b[dateKey]).getTime() : 0) || 0) - ((a[dateKey] ? new Date(a[dateKey]).getTime() : 0) || 0);
     });
@@ -5295,7 +5307,7 @@ function CosmicWorkshop() {
         letterSpacing: 0.5
       }
     }, tab[1]);
-  })), bdSavedTab === "custom" && bdSaved.length > 1 && renderSortBar(bdSortMode, setBdSortMode), React.createElement("div", {
+  })), bdSavedTab === "custom" && bdSaved.length > 1 && renderSortBar(bdSortMode, setBdSortMode, [["type", "Type"]]), React.createElement("div", {
     style: {
       flex: 1,
       overflowY: "auto",
