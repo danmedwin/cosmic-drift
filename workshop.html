@@ -2405,6 +2405,30 @@ var BTN_SAVE = Object.assign({}, BTN_TOPBAR, {
   border: "2px solid rgba(80,200,100,0.4)",
   color: "#80dd90"
 });
+var BTN_PLAY = Object.assign({}, BTN_BASE, {
+  padding: "5px 12px",
+  background: "linear-gradient(180deg, #2a5a3a, #1a3a28)",
+  border: "1px solid rgba(80,200,100,0.45)",
+  color: "#80dd90"
+});
+
+// Navigate to the game, optionally auto-playing a custom level by id.
+// Hosted detection matches cosmicdriftapp.com (and localhost); the Claude
+// artifact sandbox has no real origin, so there we just inform the user.
+function navigateToGame(levelId) {
+  var url = "index.html";
+  if (levelId != null) url = url + "?play=" + encodeURIComponent(levelId);
+  try {
+    var h = window.location.hostname;
+    if (h === "localhost" || h === "127.0.0.1" || h.indexOf("cosmicdriftapp.com") >= 0) {
+      window.location.href = url;
+    } else {
+      alert("Play is available at your hosted site: cosmicdriftapp.com");
+    }
+  } catch (e) {
+    alert("Play is available at your hosted site: cosmicdriftapp.com");
+  }
+}
 
 // Unified card style for list items
 var CARD_STYLE = {
@@ -4086,6 +4110,11 @@ function CosmicWorkshop() {
         flexWrap: "wrap"
       }
     }, React.createElement("div", {
+      onClick: function () {
+        navigateToGame(lv.id);
+      },
+      style: BTN_PLAY
+    }, "PLAY"), React.createElement("div", {
       onClick: function () {
         openBuilder(lv);
       },

@@ -484,6 +484,25 @@ var BTN_TOPBAR = Object.assign({}, BTN_BASE, { padding: "6px 8px", borderRadius:
 var BTN_TOPBAR_ACCENT = Object.assign({}, BTN_TOPBAR, { border: "2px solid rgba(80,200,255,0.3)", color: "#80ddff" });
 var BTN_TOPBAR_PURPLE = Object.assign({}, BTN_TOPBAR, { border: "1px solid rgba(200,184,255,0.3)", color: "#c8b8ff" });
 var BTN_SAVE = Object.assign({}, BTN_TOPBAR, { background: "linear-gradient(180deg, #2a5a3a, #1a3a28)", border: "2px solid rgba(80,200,100,0.4)", color: "#80dd90" });
+var BTN_PLAY = Object.assign({}, BTN_BASE, { padding: "5px 12px", background: "linear-gradient(180deg, #2a5a3a, #1a3a28)", border: "1px solid rgba(80,200,100,0.45)", color: "#80dd90" });
+
+// Navigate to the game, optionally auto-playing a custom level by id.
+// Hosted detection matches cosmicdriftapp.com (and localhost); the Claude
+// artifact sandbox has no real origin, so there we just inform the user.
+function navigateToGame(levelId) {
+  var url = "index.html";
+  if (levelId != null) url = url + "?play=" + encodeURIComponent(levelId);
+  try {
+    var h = window.location.hostname;
+    if (h === "localhost" || h === "127.0.0.1" || h.indexOf("cosmicdriftapp.com") >= 0) {
+      window.location.href = url;
+    } else {
+      alert("Play is available at your hosted site: cosmicdriftapp.com");
+    }
+  } catch (e) {
+    alert("Play is available at your hosted site: cosmicdriftapp.com");
+  }
+}
 
 // Unified card style for list items
 var CARD_STYLE = { background: "rgba(20,20,35,0.6)", border: "1px solid rgba(60,60,80,0.4)", borderRadius: 8, padding: "10px 12px", marginBottom: 8 };
@@ -1042,6 +1061,7 @@ export default function CosmicWorkshop() {
                 React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, lv.name || "Untitled"),
                 React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 10 } }, dateStr)),
               React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } },
+                React.createElement("div", { onClick: function() { navigateToGame(lv.id); }, style: BTN_PLAY }, "PLAY"),
                 React.createElement("div", { onClick: function() { openBuilder(lv); }, style: BTN_EDIT }, "EDIT"),
                 React.createElement("div", { onClick: function() { setRenamingId(lv.id); setRenamingName(lv.name || ""); }, style: BTN_RENAME }, "RENAME"),
                 React.createElement("div", { onClick: function() { exportLevel(lv); }, style: BTN_EXPORT }, "EXPORT"),

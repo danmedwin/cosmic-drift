@@ -4319,6 +4319,29 @@ function CosmicDriftGame() {
       }).catch(function () {});
     } catch (e) {}
   }, []);
+  // ?play=levelId deep link: auto-load and start a custom level (used by Workshop "Play" buttons).
+  useEffect(function () {
+    try {
+      var playId = new URLSearchParams(window.location.search).get("play");
+      if (!playId) return;
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+      if (!window.storage || !window.storage.get) return;
+      window.storage.get("cosmic_drift_levels").then(function (r) {
+        if (!r || !r.value) return;
+        var levels = JSON.parse(r.value);
+        var lv = null;
+        for (var i = 0; i < levels.length; i++) {
+          if (String(levels[i].id) === String(playId)) {
+            lv = levels[i];
+            break;
+          }
+        }
+        if (lv && lv.grid) playCustomLevel(lv);
+      }).catch(function () {});
+    } catch (e) {}
+  }, []);
   function toggleSfxMute() {
     var nv = !_sfxMuteRef.current;
     if (nv) {
@@ -6672,7 +6695,8 @@ function CosmicDriftGame() {
     var workshopUrl = "workshop.html";
     if (editId) workshopUrl = workshopUrl + "?edit=" + editId;
     try {
-      if (window.location.hostname === "localhost" || window.location.hostname.indexOf("techrabbi") >= 0) {
+      var h = window.location.hostname;
+      if (h === "localhost" || h === "127.0.0.1" || h.indexOf("cosmicdriftapp.com") >= 0) {
         window.location.href = workshopUrl;
       } else {
         alert("Workshop is available at your hosted site: /workshop.html");

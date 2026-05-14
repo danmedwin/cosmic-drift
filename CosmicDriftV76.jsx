@@ -1069,6 +1069,26 @@ export default function CosmicDriftGame() {
   useEffect(function () { try { window.storage.get("cosmic_drift_save").then(function (r) { if (r && r.value) { var sd = JSON.parse(r.value); saveDataRef.current = sd; setHasSaveGame(true); setSaveGameInfo({ level: sd.level, score: sd.score, savedAt: sd.savedAt, gameMode: sd.gameMode, difficulty: sd.difficulty || "regular" }); } }).catch(function () {}); } catch (e) {} }, []);
   useEffect(function () { try { window.storage.get("cosmic_drift_sfx_mute").then(function (r) { if (r && r.value === "true") { setSfxMute(true); _sfxMuteRef.current = true; } }).catch(function () {}); } catch (e) {} }, []);
   useEffect(function () { try { window.storage.get("cosmic_drift_music_mute").then(function (r) { if (r && r.value === "true") { setMusicMute(true); _musicMuteRef.current = true; } }).catch(function () {}); } catch (e) {} }, []);
+  // ?play=levelId deep link: auto-load and start a custom level (used by Workshop "Play" buttons).
+  useEffect(function () {
+    try {
+      var playId = new URLSearchParams(window.location.search).get("play");
+      if (!playId) return;
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+      if (!window.storage || !window.storage.get) return;
+      window.storage.get("cosmic_drift_levels").then(function (r) {
+        if (!r || !r.value) return;
+        var levels = JSON.parse(r.value);
+        var lv = null;
+        for (var i = 0; i < levels.length; i++) {
+          if (String(levels[i].id) === String(playId)) { lv = levels[i]; break; }
+        }
+        if (lv && lv.grid) playCustomLevel(lv);
+      }).catch(function () {});
+    } catch (e) {}
+  }, []);
   function toggleSfxMute() {
     var nv = !_sfxMuteRef.current;
     if (nv) { playSound("plasmaWarning"); }
@@ -1711,7 +1731,8 @@ function logUfo(msg) {
     var workshopUrl = "workshop.html";
     if (editId) workshopUrl = workshopUrl + "?edit=" + editId;
     try {
-      if (window.location.hostname === "localhost" || window.location.hostname.indexOf("techrabbi") >= 0) {
+      var h = window.location.hostname;
+      if (h === "localhost" || h === "127.0.0.1" || h.indexOf("cosmicdriftapp.com") >= 0) {
         window.location.href = workshopUrl;
       } else {
         alert("Workshop is available at your hosted site: /workshop.html");
