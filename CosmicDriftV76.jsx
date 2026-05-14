@@ -413,13 +413,9 @@ function getTutorialText(lvl, phase, reminder) {
   }
   return null;
 }
+// Tutorial steps still show and advance, but never block input - the player
+// can follow the prompts or just play freely.
 function getTutorialAllow(lvl, phase) {
-  if (lvl === 1) {
-    if (phase === 0) return { shipTap: true, drag: false, warp: false, gridTap: false };
-    if (phase === 1) return { shipTap: true, drag: true, warp: false, gridTap: false };
-    if (phase === 2 || phase === 3) return { shipTap: true, drag: true, warp: true, gridTap: false };
-    return { shipTap: true, drag: true, warp: true, gridTap: true };
-  }
   return { shipTap: true, drag: true, warp: true, gridTap: true };
 }
 
