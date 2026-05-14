@@ -2002,6 +2002,815 @@ function UFOBlockSvg(props) {
     clipPath: "url(#ufo-dc)"
   })));
 }
+// ═══════════════════════════════════════════════════════════════
+// BLOCK DESIGN SYSTEM (shared with Cosmic Workshop via storage)
+// Renders blocks from Block Designer designs. Ported from the Workshop;
+// the game only reads designs, never writes them.
+// ═══════════════════════════════════════════════════════════════
+
+function squarePath() {
+  return "M 4,4 L 96,4 L 96,96 L 4,96 Z";
+}
+function circlePath() {
+  return null;
+}
+function octagonPath() {
+  return "M 30,4 L 70,4 L 96,30 L 96,70 L 70,96 L 30,96 L 4,70 L 4,30 Z";
+}
+function asteroidPath() {
+  return "M 50,3 L 62,8 L 78,5 L 85,18 L 97,28 L 92,42 L 98,58 L 88,68 L 90,82 L 76,88 L 65,97 L 50,90 L 35,97 L 24,88 L 10,82 L 12,68 L 2,58 L 8,42 L 3,28 L 15,18 L 22,5 L 38,8 Z";
+}
+function starPath() {
+  var points = [];
+  for (var i = 0; i < 10; i++) {
+    var angle = Math.PI / 2 * -1 + Math.PI / 5 * i;
+    var r = i % 2 === 0 ? 48 : 20;
+    points.push((50 + r * Math.cos(angle)).toFixed(1) + "," + (50 + r * Math.sin(angle)).toFixed(1));
+  }
+  return "M " + points.join(" L ") + " Z";
+}
+function hexagonPath() {
+  var points = [];
+  for (var i = 0; i < 6; i++) {
+    var angle = Math.PI / 3 * i - Math.PI / 6;
+    points.push((50 + 48 * Math.cos(angle)).toFixed(1) + "," + (50 + 48 * Math.sin(angle)).toFixed(1));
+  }
+  return "M " + points.join(" L ") + " Z";
+}
+function crossShapePath() {
+  return "M 34,4 L 66,4 L 66,34 L 96,34 L 96,66 L 66,66 L 66,96 L 34,96 L 34,66 L 4,66 L 4,34 L 34,34 Z";
+}
+function shieldPath() {
+  return "M 50,4 L 92,20 L 88,60 Q 80,85 50,97 Q 20,85 12,60 L 8,20 Z";
+}
+function getShapePath(shapeId) {
+  switch (shapeId) {
+    case "square":
+      return squarePath();
+    case "circle":
+      return circlePath();
+    case "octagon":
+      return octagonPath();
+    case "hexagon":
+      return hexagonPath();
+    case "star":
+      return starPath();
+    case "asteroid":
+      return asteroidPath();
+    case "cross_shape":
+      return crossShapePath();
+    case "shield":
+      return shieldPath();
+    default:
+      return squarePath();
+  }
+}
+var CORNER_SHAPES = {
+  square: true
+};
+var BD_ICONS = [{
+  id: "none",
+  label: "None",
+  path: null
+}, {
+  id: "cross",
+  label: "Cross",
+  path: "M 44,28 L 50,14 L 56,28 L 52,28 L 52,48 L 72,48 L 72,44 L 86,50 L 72,56 L 72,52 L 52,52 L 52,72 L 56,72 L 50,86 L 44,72 L 48,72 L 48,52 L 28,52 L 28,56 L 14,50 L 28,44 L 28,48 L 48,48 L 48,28 Z"
+}, {
+  id: "bolt",
+  label: "Bolt",
+  path: "M 55,15 L 30,52 L 46,52 L 38,85 L 72,42 L 54,42 Z"
+}, {
+  id: "dot",
+  label: "Dot",
+  path: "M 50,28 A 22,22 0 1,1 49.99,28 Z"
+}, {
+  id: "drone_ic",
+  label: "Drone",
+  fillRule: "nonzero",
+  path: "M 62,34 L 62,66 A 12,12 0 1,1 38,66 L 38,34 A 12,12 0 1,1 62,34 Z M 42.5,35.0 L 39.5,39.0 L 18.5,24.0 L 21.5,20.0 Z M 21,32 A 10,10 0 1,1 21.01,32 Z M 60.5,39.0 L 57.5,35.0 L 78.5,20.0 L 81.5,24.0 Z M 79,32 A 10,10 0 1,1 79.01,32 Z M 39.6,60.9 L 42.4,65.1 L 21.4,79.1 L 18.6,74.9 Z M 21,84 A 10,10 0 1,1 21.01,84 Z M 57.6,65.1 L 60.4,60.9 L 81.4,74.9 L 78.6,79.1 Z M 79,84 A 10,10 0 1,1 79.01,84 Z"
+}, {
+  id: "barrel",
+  label: "Barrel",
+  path: "M 35,22 Q 50,14 65,22 L 65,78 Q 50,86 35,78 Z M 36,32 L 64,32 L 64,35 L 36,35 Z M 36,65 L 64,65 L 64,68 L 36,68 Z M 46,46 A 5,5 0 1,1 46.01,46 Z"
+}, {
+  id: "crate_ic",
+  label: "Crate",
+  path: "M 22,24 L 78,24 L 78,78 L 22,78 Z M 22,38 L 78,38 L 78,42 L 22,42 Z M 40,48 L 60,48 L 60,66 L 40,66 Z M 48,55 A 3,3 0 1,0 52,55 A 3,3 0 1,0 48,55 Z"
+}, {
+  id: "console_open",
+  label: "Open",
+  path: "M 22,44 L 78,44 L 78,80 L 22,80 Z M 28,38 L 72,38 L 68,22 L 32,22 Z M 38,52 L 62,52 L 62,68 L 38,68 Z M 47,58 A 4,4 0 1,0 53,58 A 4,4 0 1,0 47,58 Z"
+}, {
+  id: "skull",
+  label: "Skull",
+  path: "M 50,18 Q 78,18 78,45 Q 78,60 68,68 L 70,82 L 58,78 L 55,82 L 50,78 L 45,82 L 42,78 L 30,82 L 32,68 Q 22,60 22,45 Q 22,18 50,18 Z M 38,42 A 6,6 0 1,1 37.99,42 Z M 62,42 A 6,6 0 1,1 61.99,42 Z"
+}, {
+  id: "flame",
+  label: "Flame",
+  path: "M 50,15 Q 65,30 65,45 Q 72,35 72,50 Q 72,68 60,78 Q 55,82 50,84 Q 45,82 40,78 Q 28,68 28,50 Q 28,35 35,45 Q 35,30 50,15 Z"
+}, {
+  id: "shield_ic",
+  label: "Shield",
+  path: "M 50,18 L 78,30 L 75,58 Q 68,76 50,85 Q 32,76 25,58 L 22,30 Z"
+}, {
+  id: "gear",
+  label: "Gear",
+  path: "M 50,10 L 61,24 L 78,22 L 76,39 L 90,50 L 76,61 L 78,78 L 61,76 L 50,90 L 39,76 L 22,78 L 24,61 L 10,50 L 24,39 L 22,22 L 39,24 Z M 50,38 A 12,12 0 1,0 50.01,38 Z"
+}, {
+  id: "ring",
+  label: "Ring",
+  path: "M 50,24 A 26,26 0 1,1 49.99,24 Z M 50,36 A 14,14 0 1,0 50.01,36 Z"
+}];
+var BD_FACTORY_PRESETS = [{
+  id: "factory_regular",
+  name: "Regular",
+  assignedTo: "regular",
+  isFactory: true,
+  shape: "square",
+  shapeRotation: 0,
+  cornerRadius: 6,
+  color: "#7b5ea7",
+  borderColor: "#6b4e97",
+  borderWidth: 2,
+  glowEnabled: true,
+  glowColor: "#9f7fd0",
+  glowIntensity: 4,
+  pattern: "none",
+  patternColor: "#fff",
+  patternOpacity: 0.3,
+  patternScale: 1,
+  patternRotation: 0,
+  patternFilled: false,
+  patternLineWidth: 1.5,
+  icon: "none",
+  iconColor: "#fff",
+  iconOpacity: 0.8,
+  iconGlow: false,
+  iconGlowColor: "#fff",
+  iconGlowIntensity: 4
+}, {
+  id: "factory_cross_shot",
+  name: "Cross Shot",
+  assignedTo: "cross_shot",
+  isFactory: true,
+  shape: "square",
+  shapeRotation: 0,
+  cornerRadius: 6,
+  color: "#e0457b",
+  borderColor: "#c03868",
+  borderWidth: 2,
+  glowEnabled: true,
+  glowColor: "#ff6b9d",
+  glowIntensity: 4,
+  pattern: "none",
+  patternColor: "#fff",
+  patternOpacity: 0.3,
+  patternScale: 1,
+  patternRotation: 0,
+  patternFilled: false,
+  patternLineWidth: 1.5,
+  icon: "cross",
+  iconColor: "#ffffff",
+  iconOpacity: 0.85,
+  iconGlow: false,
+  iconGlowColor: "#fff",
+  iconGlowIntensity: 4
+}, {
+  id: "factory_lightning",
+  name: "Lightning",
+  assignedTo: "lightning",
+  isFactory: true,
+  shape: "square",
+  shapeRotation: 0,
+  cornerRadius: 6,
+  color: "#9a7020",
+  borderColor: "#7a5a18",
+  borderWidth: 2,
+  glowEnabled: true,
+  glowColor: "#b8862a",
+  glowIntensity: 4,
+  pattern: "none",
+  patternColor: "#fff",
+  patternOpacity: 0.3,
+  patternScale: 1,
+  patternRotation: 0,
+  patternFilled: false,
+  patternLineWidth: 1.5,
+  icon: "bolt",
+  iconColor: "#ffe066",
+  iconOpacity: 0.9,
+  iconGlow: false,
+  iconGlowColor: "#ffe066",
+  iconGlowIntensity: 4
+}, {
+  id: "factory_plasma",
+  name: "Plasma",
+  assignedTo: "plasma",
+  isFactory: true,
+  shape: "square",
+  shapeRotation: 0,
+  cornerRadius: 6,
+  color: "#3060b0",
+  borderColor: "#2850a0",
+  borderWidth: 2,
+  glowEnabled: true,
+  glowColor: "#4080d8",
+  glowIntensity: 4,
+  pattern: "none",
+  patternColor: "#fff",
+  patternOpacity: 0.3,
+  patternScale: 1,
+  patternRotation: 0,
+  patternFilled: false,
+  patternLineWidth: 1.5,
+  icon: "dot",
+  iconColor: "#80ddff",
+  iconOpacity: 0.85,
+  iconGlow: true,
+  iconGlowColor: "#50c8ff",
+  iconGlowIntensity: 5
+}, {
+  id: "factory_crate",
+  name: "Crate",
+  assignedTo: "crate",
+  isFactory: true,
+  shape: "square",
+  shapeRotation: 0,
+  cornerRadius: 6,
+  color: "#b8862a",
+  borderColor: "#9a7020",
+  borderWidth: 2,
+  glowEnabled: true,
+  glowColor: "#d4a843",
+  glowIntensity: 4,
+  pattern: "none",
+  patternColor: "#fff",
+  patternOpacity: 0.3,
+  patternScale: 1,
+  patternRotation: 0,
+  patternFilled: false,
+  patternLineWidth: 1.5,
+  icon: "crate_ic",
+  iconColor: "#4a4a5a",
+  iconOpacity: 0.75,
+  iconGlow: false,
+  iconGlowColor: "#fff",
+  iconGlowIntensity: 4
+}, {
+  id: "factory_drone",
+  name: "Drone",
+  assignedTo: "drone",
+  isFactory: true,
+  shape: "square",
+  shapeRotation: 0,
+  cornerRadius: 6,
+  color: "#8844cc",
+  borderColor: "#6633aa",
+  borderWidth: 2,
+  glowEnabled: true,
+  glowColor: "#aa66ee",
+  glowIntensity: 4,
+  pattern: "none",
+  patternColor: "#fff",
+  patternOpacity: 0.3,
+  patternScale: 1,
+  patternRotation: 0,
+  patternFilled: false,
+  patternLineWidth: 1.5,
+  icon: "drone_ic",
+  iconColor: "#e8e8ff",
+  iconOpacity: 0.75,
+  iconGlow: false,
+  iconGlowColor: "#80ffee",
+  iconGlowIntensity: 3
+}, {
+  id: "factory_indestructible",
+  name: "Indestructible",
+  assignedTo: "indestructible",
+  isFactory: true,
+  shape: "square",
+  shapeRotation: 0,
+  cornerRadius: 6,
+  color: "#707580",
+  borderColor: "#555555",
+  borderWidth: 3,
+  glowEnabled: false,
+  glowColor: "#888",
+  glowIntensity: 4,
+  pattern: "squares",
+  patternColor: "#323232",
+  patternOpacity: 0.8,
+  patternScale: 2.6,
+  patternRotation: 45,
+  patternFilled: true,
+  patternLineWidth: 2,
+  icon: "none",
+  iconColor: "#fff",
+  iconOpacity: 0.8,
+  iconGlow: false,
+  iconGlowColor: "#fff",
+  iconGlowIntensity: 4
+}, {
+  id: "factory_acid_barrel",
+  name: "Acid Barrel",
+  assignedTo: "acid_barrel",
+  isFactory: true,
+  shape: "square",
+  shapeRotation: 0,
+  cornerRadius: 6,
+  color: "#2a8a2a",
+  borderColor: "#1a6a1a",
+  borderWidth: 2,
+  glowEnabled: true,
+  glowColor: "#40b840",
+  glowIntensity: 4,
+  pattern: "none",
+  patternColor: "#fff",
+  patternOpacity: 0.3,
+  patternScale: 1,
+  patternRotation: 0,
+  patternFilled: false,
+  patternLineWidth: 1.5,
+  icon: "barrel",
+  iconColor: "#80ff80",
+  iconOpacity: 0.75,
+  iconGlow: false,
+  iconGlowColor: "#80ff80",
+  iconGlowIntensity: 3
+}, {
+  id: "factory_force_field",
+  name: "Force Field",
+  assignedTo: "force_field",
+  isFactory: true,
+  shape: "square",
+  shapeRotation: 0,
+  cornerRadius: 6,
+  color: "#4060a0",
+  borderColor: "#3050a0",
+  borderWidth: 2,
+  glowEnabled: true,
+  glowColor: "#82b4ff",
+  glowIntensity: 5,
+  pattern: "none",
+  patternColor: "#fff",
+  patternOpacity: 0.3,
+  patternScale: 1,
+  patternRotation: 0,
+  patternFilled: false,
+  patternLineWidth: 1.5,
+  icon: "crate_ic",
+  iconColor: "#82b4ff",
+  iconOpacity: 0.75,
+  iconGlow: false,
+  iconGlowColor: "#82b4ff",
+  iconGlowIntensity: 4,
+  phases: {
+    2: {
+      glowEnabled: false,
+      borderWidth: 1,
+      borderColor: "rgba(130,180,255,0.35)"
+    },
+    3: {
+      glowEnabled: false,
+      borderWidth: 0,
+      borderColor: "transparent",
+      icon: "console_open"
+    }
+  }
+}];
+
+// ── SVG Pattern renderer ──
+function PatternDef(props) {
+  var id = props.id,
+    patternId = props.patternId,
+    color = props.color,
+    opacity = props.opacity,
+    scale = props.scale,
+    rotation = props.rotation,
+    filled = props.filled,
+    lineWidth = props.lineWidth;
+  if (patternId === "none") return null;
+  var sz = 10,
+    half = 5,
+    strokeW = lineWidth,
+    fill = filled ? color : "none",
+    stroke = color,
+    inner = null;
+  switch (patternId) {
+    case "dots":
+      inner = React.createElement("circle", {
+        cx: half,
+        cy: half,
+        r: 2,
+        fill: color,
+        stroke: "none",
+        opacity: opacity
+      });
+      break;
+    case "lines":
+      inner = React.createElement("line", {
+        x1: 0,
+        y1: half,
+        x2: sz,
+        y2: half,
+        stroke: stroke,
+        strokeWidth: strokeW,
+        opacity: opacity
+      });
+      break;
+    case "crosshatch":
+      inner = React.createElement("g", {
+        opacity: opacity
+      }, React.createElement("line", {
+        x1: 0,
+        y1: 0,
+        x2: sz,
+        y2: sz,
+        stroke: stroke,
+        strokeWidth: strokeW
+      }), React.createElement("line", {
+        x1: sz,
+        y1: 0,
+        x2: 0,
+        y2: sz,
+        stroke: stroke,
+        strokeWidth: strokeW
+      }));
+      break;
+    case "chevrons":
+      inner = React.createElement("polyline", {
+        points: "0," + half + " " + half + ",0 " + sz + "," + half,
+        fill: "none",
+        stroke: stroke,
+        strokeWidth: strokeW,
+        opacity: opacity
+      });
+      break;
+    case "waves":
+      inner = React.createElement("path", {
+        d: "M 0,5 Q 2.5,2 5,5 Q 7.5,8 10,5",
+        fill: "none",
+        stroke: stroke,
+        strokeWidth: strokeW,
+        opacity: opacity
+      });
+      break;
+    case "circles":
+      inner = React.createElement("circle", {
+        cx: half,
+        cy: half,
+        r: 3.5,
+        fill: fill,
+        stroke: stroke,
+        strokeWidth: strokeW,
+        opacity: opacity
+      });
+      break;
+    case "squares":
+      var sqSz = 3.5,
+        sqOff = (sz - sqSz) / 2;
+      inner = React.createElement("rect", {
+        x: sqOff,
+        y: sqOff,
+        width: sqSz,
+        height: sqSz,
+        fill: fill,
+        stroke: stroke,
+        strokeWidth: strokeW,
+        opacity: opacity
+      });
+      break;
+    default:
+      return null;
+  }
+  var transform = "translate(50 50) scale(" + scale + ") rotate(" + rotation + ") translate(-50 -50)";
+  return React.createElement("pattern", {
+    id: id,
+    patternUnits: "userSpaceOnUse",
+    width: sz,
+    height: sz,
+    patternTransform: transform
+  }, inner);
+}
+
+// ── SVG Block Preview (for designed blocks) ──
+function BDBlockPreview(props) {
+  var design = props.design,
+    size = props.size || 120;
+  var shapePath = getShapePath(design.shape);
+  var isCircle = design.shape === "circle";
+  var isSquare = design.shape === "square";
+  var patId = "preview-pattern-" + design.pattern + "-" + size;
+  var hasRotation = design.shapeRotation && design.shapeRotation !== 0;
+  var hasCorners = CORNER_SHAPES[design.shape] && design.cornerRadius > 0;
+  var cr = design.cornerRadius || 0;
+  var glowStyle = {};
+  if (design.glowEnabled) {
+    glowStyle.filter = "drop-shadow(0 0 " + design.glowIntensity + "px " + design.glowColor + ")";
+  }
+  var shapeElement;
+  if (isCircle) {
+    shapeElement = React.createElement("circle", {
+      cx: 50,
+      cy: 50,
+      r: 46,
+      fill: design.color,
+      stroke: design.borderColor,
+      strokeWidth: design.borderWidth * 2
+    });
+  } else if (isSquare && hasCorners) {
+    shapeElement = React.createElement("rect", {
+      x: 4,
+      y: 4,
+      width: 92,
+      height: 92,
+      rx: cr,
+      ry: cr,
+      fill: design.color,
+      stroke: design.borderColor,
+      strokeWidth: design.borderWidth * 2
+    });
+  } else {
+    shapeElement = React.createElement("path", {
+      d: shapePath,
+      fill: design.color,
+      stroke: design.borderColor,
+      strokeWidth: design.borderWidth * 2,
+      strokeLinejoin: "round"
+    });
+  }
+  var patternOverlay = null;
+  if (design.pattern !== "none") {
+    if (isCircle) {
+      patternOverlay = React.createElement("circle", {
+        cx: 50,
+        cy: 50,
+        r: 46,
+        fill: "url(#" + patId + ")",
+        stroke: "none"
+      });
+    } else if (isSquare && hasCorners) {
+      patternOverlay = React.createElement("rect", {
+        x: 4,
+        y: 4,
+        width: 92,
+        height: 92,
+        rx: cr,
+        ry: cr,
+        fill: "url(#" + patId + ")",
+        stroke: "none"
+      });
+    } else {
+      patternOverlay = React.createElement("path", {
+        d: shapePath,
+        fill: "url(#" + patId + ")",
+        stroke: "none"
+      });
+    }
+  }
+  var iconElement = null,
+    iconGlowFilter = null,
+    iconGlowPath = null;
+  var iconDef = null;
+  for (var ii = 0; ii < BD_ICONS.length; ii++) {
+    if (BD_ICONS[ii].id === design.icon) {
+      iconDef = BD_ICONS[ii];
+      break;
+    }
+  }
+  if (iconDef && iconDef.path) {
+    if (design.iconGlow) {
+      var glowFilterId = "icon-glow-" + size;
+      iconGlowFilter = React.createElement("filter", {
+        id: glowFilterId
+      }, React.createElement("feGaussianBlur", {
+        stdDeviation: design.iconGlowIntensity || 4,
+        result: "blur"
+      }), React.createElement("feMerge", null, React.createElement("feMergeNode", {
+        "in": "blur"
+      }), React.createElement("feMergeNode", {
+        "in": "SourceGraphic"
+      })));
+      iconGlowPath = React.createElement("path", {
+        d: iconDef.path,
+        fill: design.iconGlowColor || design.iconColor,
+        fillRule: iconDef.fillRule || "evenodd",
+        opacity: Math.min(1, (design.iconOpacity || 0.8) + 0.15),
+        stroke: "none",
+        filter: "url(#" + glowFilterId + ")"
+      });
+    }
+    iconElement = React.createElement(React.Fragment, null, iconGlowPath, React.createElement("path", {
+      d: iconDef.path,
+      fill: design.iconColor,
+      fillRule: iconDef.fillRule || "evenodd",
+      opacity: design.iconOpacity,
+      stroke: "none"
+    }));
+  }
+  var groupProps = {};
+  if (hasRotation) {
+    groupProps.transform = "rotate(" + design.shapeRotation + " 50 50)";
+  }
+  return React.createElement("div", {
+    style: Object.assign({
+      width: size,
+      height: size,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center"
+    }, glowStyle)
+  }, React.createElement("svg", {
+    viewBox: "0 0 100 100",
+    width: size,
+    height: size,
+    xmlns: "http://www.w3.org/2000/svg"
+  }, React.createElement("defs", null, React.createElement(PatternDef, {
+    id: patId,
+    patternId: design.pattern,
+    color: design.patternColor,
+    opacity: design.patternOpacity,
+    scale: design.patternScale,
+    rotation: design.patternRotation,
+    filled: design.patternFilled,
+    lineWidth: design.patternLineWidth
+  }), iconGlowFilter), React.createElement("g", groupProps, shapeElement, patternOverlay, iconElement)));
+}
+
+// ── Active design storage (shared with the Workshop) ──
+var BD_STORAGE_KEY = "cosmic-drift-block-designs";
+var BD_ACTIVE_KEY = "cosmic-drift-active-blocks";
+function bdLoadDesigns() {
+  return window.storage.get(BD_STORAGE_KEY).then(function (result) {
+    return result ? JSON.parse(result.value) : [];
+  }).catch(function () {
+    return [];
+  });
+}
+function bdLoadActive() {
+  return window.storage.get(BD_ACTIVE_KEY).then(function (result) {
+    return result ? JSON.parse(result.value) : {};
+  }).catch(function () {
+    return {};
+  });
+}
+
+// Numeric grid block type -> Block Designer string id. Types 4 (extra core)
+// and 17 (UFO) have no design-system equivalent. Crate variants 11-16 -> "crate".
+var BLOCK_TYPE_TO_BD = {
+  1: "regular",
+  2: "cross_shot",
+  3: "lightning",
+  5: "plasma",
+  6: "drone",
+  7: "indestructible",
+  8: "acid_barrel",
+  9: "crate",
+  10: "force_field"
+};
+
+// Resolves the design for a numeric block type: the active custom design if
+// one is set, otherwise the factory preset for that type. Returns null only
+// for types with no design-system equivalent (4 Extra Core, 17 UFO).
+function bdResolveActiveDesign(blockType, activeMap, savedDesigns) {
+  var bdId = BLOCK_TYPE_TO_BD[blockType];
+  if (!bdId && blockType >= 11 && blockType <= 16) bdId = "crate";
+  if (!bdId) return null;
+  var designId = activeMap[bdId];
+  if (designId) {
+    for (var i = 0; i < savedDesigns.length; i++) {
+      if (savedDesigns[i].id === designId) {
+        if (savedDesigns[i].assignedTo === bdId) return savedDesigns[i];
+        break;
+      }
+    }
+  }
+  for (var j = 0; j < BD_FACTORY_PRESETS.length; j++) {
+    if (BD_FACTORY_PRESETS[j].assignedTo === bdId) return BD_FACTORY_PRESETS[j];
+  }
+  return null;
+}
+
+// Loaded once on game mount; read by BlockContent on every render.
+var GAME_BLOCK_DESIGNS = [];
+var GAME_ACTIVE_BLOCKS = {};
+
+// Corner power-icon badge for crate variant blocks (types 11-16).
+function crateBadgeIcon(type, baseSize) {
+  var sz = Math.max(7, baseSize * (type === 12 || type === 16 ? 0.2 : 0.18));
+  if (type === 11) return /*#__PURE__*/React.createElement(DroneIcon, {
+    size: sz
+  });
+  if (type === 12) return /*#__PURE__*/React.createElement(LightningIcon, {
+    size: sz
+  });
+  if (type === 13) return /*#__PURE__*/React.createElement(CrossShotIcon, {
+    size: sz
+  });
+  if (type === 14) return /*#__PURE__*/React.createElement("svg", {
+    width: sz,
+    height: sz,
+    viewBox: "0 0 24 24"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M4 20L12 4",
+    stroke: "#80ddff",
+    strokeWidth: "3",
+    strokeLinecap: "round"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M12 4L20 20",
+    stroke: "#80ddff",
+    strokeWidth: "3",
+    strokeLinecap: "round"
+  }));
+  if (type === 15) return /*#__PURE__*/React.createElement("svg", {
+    width: sz,
+    height: sz,
+    viewBox: "0 0 24 24"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "6",
+    y: "2",
+    width: "12",
+    height: "8",
+    rx: "2",
+    fill: "#7a7a88"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "10",
+    y: "8",
+    width: "4",
+    height: "12",
+    rx: "1",
+    fill: "#9a9aaa"
+  }));
+  if (type === 16) return /*#__PURE__*/React.createElement(CoreIcon, {
+    size: sz,
+    mode: "lit"
+  });
+  return null;
+}
+
+// Renders a block from a resolved design: BDBlockPreview, plus the crate
+// corner badge for variants and the shield-ring overlay for force fields.
+function DesignBlock(props) {
+  var design = props.design,
+    type = props.type,
+    size = props.size,
+    sl = props.shieldLevel || 0;
+  var inner;
+  if (type >= 11 && type <= 16) {
+    var badgeBox = Math.max(10, size * 0.3);
+    var cv = CRATE_VARIANTS.filter(function (c) {
+      return c.type === type;
+    })[0];
+    inner = /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: "relative",
+        width: size,
+        height: size
+      }
+    }, /*#__PURE__*/React.createElement(BDBlockPreview, {
+      design: design,
+      size: size
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: "absolute",
+        bottom: -2,
+        right: -2,
+        width: badgeBox,
+        height: badgeBox,
+        borderRadius: "50%",
+        background: "rgba(10,10,20,0.85)",
+        border: "1px solid " + (cv ? cv.color : "rgba(255,255,255,0.3)"),
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }
+    }, crateBadgeIcon(type, size)));
+  } else {
+    inner = /*#__PURE__*/React.createElement(BDBlockPreview, {
+      design: design,
+      size: size
+    });
+  }
+  if (type === 10 && sl > 0) {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: "relative"
+      }
+    }, inner, /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: "absolute",
+        inset: sl === 2 ? -4 : -2,
+        borderRadius: 10,
+        border: sl === 2 ? "2px solid rgba(130,180,255,0.7)" : "1px solid rgba(130,180,255,0.35)",
+        boxShadow: sl === 2 ? "0 0 16px rgba(130,180,255,0.5), 0 0 30px rgba(130,180,255,0.25), inset 0 0 10px rgba(130,180,255,0.3)" : "0 0 8px rgba(130,180,255,0.2), inset 0 0 4px rgba(130,180,255,0.1)",
+        pointerEvents: "none",
+        transition: "all 0.3s"
+      }
+    }));
+  }
+  return inner;
+}
 function BlockContent(props) {
   var type = props.type,
     size = props.size,
@@ -2010,6 +2819,13 @@ function BlockContent(props) {
   if (type === 17) return /*#__PURE__*/React.createElement(UFOBlockSvg, {
     size: size,
     animPhase: props.animPhase
+  });
+  var _design = bdResolveActiveDesign(type, GAME_ACTIVE_BLOCKS, GAME_BLOCK_DESIGNS);
+  if (_design) return /*#__PURE__*/React.createElement(DesignBlock, {
+    design: _design,
+    type: type,
+    size: size,
+    shieldLevel: sl
   });
   if (type === 7) return /*#__PURE__*/React.createElement(DiamondPlateBlock, {
     size: size
@@ -3724,6 +4540,10 @@ function CosmicDriftGame() {
   var _sc = useState(3),
     shipCol = _sc[0],
     setShipCol = _sc[1];
+  // Bumped once block designs finish loading, so memoized grid re-renders.
+  var _dv = useState(0),
+    designsVersion = _dv[0],
+    setDesignsVersion = _dv[1];
   var gridRef2 = useRef(generateGrid(1));
   var _g = useState(function () {
       return gridRef2.current.slice();
@@ -4318,6 +5138,16 @@ function CosmicDriftGame() {
         }
       }).catch(function () {});
     } catch (e) {}
+  }, []);
+  // Load Block Designer designs + active-block map (shared with the Workshop).
+  useEffect(function () {
+    Promise.all([bdLoadDesigns(), bdLoadActive()]).then(function (res) {
+      GAME_BLOCK_DESIGNS = res[0] || [];
+      GAME_ACTIVE_BLOCKS = res[1] || {};
+      setDesignsVersion(function (v) {
+        return v + 1;
+      });
+    }).catch(function () {});
   }, []);
   // ?play=levelId deep link: auto-load and start a custom level (used by Workshop "Play" buttons).
   useEffect(function () {
@@ -10239,7 +11069,8 @@ function CosmicDriftGame() {
     blockSize: blockSize,
     burntBlocksRef: burntBlocksRef,
     shieldRef: shieldRef,
-    ufoPhase: ufoPhase
+    ufoPhase: ufoPhase,
+    designsVersion: designsVersion
   }), showTutorialHint && /*#__PURE__*/React.createElement("div", {
     style: {
       position: "absolute",
