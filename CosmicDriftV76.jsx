@@ -974,7 +974,7 @@ function HudPanel(props) {
   var extraDisplay = [];
   for (var ei2 = 0; ei2 < extraCores; ei2++) extraDisplay.push(<CoreIcon key={"e" + ei2} size={14} mode="lit" />);
   return <div style={{ display: "flex", gap: 5, alignItems: "stretch" }}>
-    <div style={{ flex: 1.3, background: SCRN, border: SCRNB, borderRadius: 4, padding: "4px 6px 6px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: SCRNS, minHeight: 60 }}>
+    <div onClick={function () { if (gameState === "needsRecharge") setGameState("recharging"); }} style={{ flex: 1.3, background: SCRN, border: SCRNB, borderRadius: 4, padding: "4px 6px 6px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: SCRNS, minHeight: 60, cursor: gameState === "needsRecharge" ? "pointer" : "default" }}>
       <div style={{ color: "rgba(180,200,220,0.4)", fontSize: 7, textTransform: "uppercase", letterSpacing: 1, fontWeight: 700, marginBottom: 3 }}>Reactor Cores</div>
       <div style={{ display: "flex", gap: 3, justifyContent: "center", alignItems: "center", marginBottom: extraCores > 0 ? 2 : 0 }}>{baseSlots}</div>
       {extraCores > 0 && <div style={{ display: "flex", gap: 3, justifyContent: "center", alignItems: "center", position: "relative" }}>{extraDisplay}</div>}

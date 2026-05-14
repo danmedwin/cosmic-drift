@@ -4033,6 +4033,9 @@ function HudPanel(props) {
       alignItems: "stretch"
     }
   }, /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      if (gameState === "needsRecharge") setGameState("recharging");
+    },
     style: {
       flex: 1.3,
       background: SCRN,
@@ -4044,7 +4047,8 @@ function HudPanel(props) {
       alignItems: "center",
       justifyContent: "center",
       boxShadow: SCRNS,
-      minHeight: 60
+      minHeight: 60,
+      cursor: gameState === "needsRecharge" ? "pointer" : "default"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
