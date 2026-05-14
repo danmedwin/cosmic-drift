@@ -2,95 +2,71 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Cosmic Workshop</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body { width: 100%; height: 100%; overflow: hidden; background: #0b0c1a; }
-#root { width: 100%; height: 100%; }
-#loading-screen { position: fixed; inset: 0; background: #0b0c1a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; font-family: "Quicksand", sans-serif; }
-#loading-screen .title { font-size: 11px; font-weight: 700; letter-spacing: 4px; color: rgba(180,200,220,0.3); text-transform: uppercase; margin-bottom: 8px; }
-#loading-screen .main { font-size: 24px; font-weight: 700; letter-spacing: 3px; color: #80ddff; text-transform: uppercase; text-shadow: 0 0 20px rgba(80,200,255,0.3); }
-#loading-screen .dots { margin-top: 20px; display: flex; gap: 8px; }
-#loading-screen .dot { width: 6px; height: 6px; border-radius: 50%; background: #80ddff; opacity: 0.3; animation: loadPulse 1.2s ease-in-out infinite; }
-#loading-screen .dot:nth-child(2) { animation-delay: 0.2s; }
-#loading-screen .dot:nth-child(3) { animation-delay: 0.4s; }
-@keyframes loadPulse { 0%, 100% { opacity: 0.3; transform: scale(1); } 50% { opacity: 1; transform: scale(1.3); } }
-@font-face { font-family: "Quicksand"; font-display: swap; src: local("Quicksand"); }
-#error-display { position: fixed; inset: 0; background: #0b0c1a; color: #ff8866; font-family: monospace; padding: 20px; overflow: auto; z-index: 99999; display: none; }
-#error-display h2 { color: #ff4444; margin-bottom: 10px; font-family: sans-serif; }
-#error-display pre { white-space: pre-wrap; word-break: break-all; font-size: 13px; line-height: 1.6; color: #ffaa88; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #0b0c1a; }
+  #root { width: 100%; height: 100%; }
+  #loading-screen {
+    position: fixed; inset: 0; background: #0b0c1a; display: flex;
+    flex-direction: column; align-items: center; justify-content: center;
+    font-family: "Quicksand", sans-serif; z-index: 9999;
+  }
+  #loading-screen .title { font-size: 32px; font-weight: 700; color: #c8b8ff;
+    letter-spacing: 6px; text-transform: uppercase; margin-bottom: 20px; }
+  #loading-screen .bar-track { width: 200px; height: 4px; background: rgba(200,184,255,0.15);
+    border-radius: 2px; overflow: hidden; }
+  #loading-screen .bar-fill { height: 100%; width: 30%; background: linear-gradient(90deg, #c8b8ff, #50c8ff);
+    border-radius: 2px; animation: loadSlide 1.2s ease-in-out infinite; }
+  @keyframes loadSlide { 0% { transform: translateX(-100%); } 100% { transform: translateX(400%); } }
 </style>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Exo+2:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 </head>
 <body>
-<div id="loading-screen">
-  <div class="title">COSMIC DRIFT</div>
-  <div class="main">Loading...</div>
-  <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-</div>
-<div id="error-display"><h2>Runtime Error</h2><pre id="error-text"></pre></div>
+<div id="loading-screen"><div class="title">Cosmic Drift</div><div class="bar-track"><div class="bar-fill"></div></div></div>
 <div id="root"></div>
-<script>window.onerror=function(m,s,l,c,e){document.getElementById("error-display").style.display="block";document.getElementById("error-text").textContent=m+"\n\nSource: "+s+"\nLine: "+l+", Col: "+c+"\n\n"+(e&&e.stack?e.stack:"");document.getElementById("loading-screen").style.display="none";return true;};</script>
-<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-<script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script>
-if (!window.React) { document.getElementById("error-display").style.display="block"; document.getElementById("error-text").textContent="React failed to load from CDN"; document.getElementById("loading-screen").style.display="none"; }
-</script>
-<script>
-var useState = React.useState;
-var useRef = React.useRef;
-var useCallback = React.useCallback;
-var useEffect = React.useEffect;
-var memo = React.memo;
+// Storage shim: wraps localStorage with cd_ prefix
+window.storage = {
+  get: function(key) {
+    try { var val = localStorage.getItem("cd_" + key);
+      return Promise.resolve(val != null ? { key: key, value: val } : null);
+    } catch(e) { return Promise.resolve(null); }
+  },
+  set: function(key, value) {
+    try { localStorage.setItem("cd_" + key, value);
+      return Promise.resolve({ key: key, value: value });
+    } catch(e) { return Promise.resolve(null); }
+  },
+  delete: function(key) {
+    try { localStorage.removeItem("cd_" + key);
+      return Promise.resolve({ key: key, deleted: true });
+    } catch(e) { return Promise.resolve(null); }
+  },
+  list: function(prefix) {
+    try { var keys = []; var pfx = "cd_" + (prefix || "");
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k.indexOf(pfx) === 0) keys.push(k.substring(3));
+      }
+      return Promise.resolve({ keys: keys });
+    } catch(e) { return Promise.resolve({ keys: [] }); }
+  }
+};
 
-// window.storage shim using localStorage
-if (!window.storage) {
-  window.storage = {
-    get: function(key) {
-      return new Promise(function(resolve, reject) {
-        try {
-          var val = localStorage.getItem("csd_" + key);
-          if (val !== null) resolve({ key: key, value: val });
-          else reject(new Error("Key not found"));
-        } catch(e) { reject(e); }
-      });
-    },
-    set: function(key, value) {
-      return new Promise(function(resolve, reject) {
-        try {
-          localStorage.setItem("csd_" + key, value);
-          resolve({ key: key, value: value });
-        } catch(e) { reject(e); }
-      });
-    },
-    delete: function(key) {
-      return new Promise(function(resolve) {
-        localStorage.removeItem("csd_" + key);
-        resolve({ key: key, deleted: true });
-      });
-    },
-    list: function(prefix) {
-      return new Promise(function(resolve) {
-        var keys = [];
-        for (var i = 0; i < localStorage.length; i++) {
-          var k = localStorage.key(i);
-          if (k.indexOf("csd_") === 0) {
-            var realKey = k.substring(4);
-            if (!prefix || realKey.indexOf(prefix) === 0) keys.push(realKey);
-          }
-        }
-        resolve({ keys: keys });
-      });
-    }
-  };
-}
+var useState = React.useState, useRef = React.useRef, useCallback = React.useCallback, useEffect = React.useEffect, memo = React.memo;
+
 </script>
 <script>
-try {
 /* ============================================================
    COSMIC WORKSHOP v2.0
    Creative suite for Cosmic Drift: Level Builder + Block Designer
@@ -5600,34 +5576,9 @@ function CosmicWorkshop() {
     setBdCurrentView("list");
   }))));
 }
-
-// Mount with error boundary
-var ErrorBoundary = (function() {
-  function EB(props) { this.state = { hasError: false, error: null }; }
-  EB.prototype = Object.create(React.Component.prototype);
-  EB.prototype.constructor = EB;
-  EB.getDerivedStateFromError = function(error) { return { hasError: true, error: error }; };
-  EB.prototype.componentDidCatch = function(error, info) {
-    document.getElementById("error-display").style.display = "block";
-    document.getElementById("error-text").textContent = error.message + "\n\n" + (error.stack || "") + "\n\nComponent Stack: " + (info && info.componentStack ? info.componentStack : "N/A");
-    document.getElementById("loading-screen").style.display = "none";
-  };
-  EB.prototype.render = function() {
-    if (this.state.hasError) return null;
-    return this.props.children;
-  };
-  return EB;
-})();
-
 var root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(React.createElement(ErrorBoundary, null, React.createElement(isCrate, null)));
-var ls = document.getElementById("loading-screen");
-if (ls) ls.style.display = "none";
-} catch(e) {
-  document.getElementById("error-display").style.display = "block";
-  document.getElementById("error-text").textContent = "Init Error: " + e.message + "\n\n" + (e.stack || "");
-  document.getElementById("loading-screen").style.display = "none";
-}
+root.render(React.createElement(CosmicWorkshop));
+var ls = document.getElementById("loading-screen"); if (ls) ls.remove();
 </script>
 </body>
 </html>
