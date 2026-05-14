@@ -2791,6 +2791,15 @@ function CosmicWorkshop() {
     setBuilderTourStep = _btour[1];
   var builderTourSeenRef = useRef(false);
   var builderGridRef = useRef(null);
+  // Refs for the builder walkthrough to highlight each editor region.
+  var tourPaletteRef = useRef(null);
+  var tourCrateRef = useRef(null);
+  var tourShipRef = useRef(null);
+  var tourPlasmaRef = useRef(null);
+  var tourSaveRef = useRef(null);
+  var _btrect = useState(null),
+    builderTourRect = _btrect[0],
+    setBuilderTourRect = _btrect[1];
 
   // ── My Levels state ──
   var _slvls = useState([]),
@@ -2891,6 +2900,36 @@ function CosmicWorkshop() {
       setBdPhase(1);
     }
   }, [bdDesign.assignedTo]);
+
+  // Builder walkthrough: when the step changes, measure the target region
+  // so the glow ring + tooltip can be positioned over it.
+  useEffect(function () {
+    if (builderTourStep == null) {
+      setBuilderTourRect(null);
+      return;
+    }
+    var refs = [builderGridRef, tourPaletteRef, tourCrateRef, tourShipRef, tourPlasmaRef, tourSaveRef];
+    var el = refs[builderTourStep] && refs[builderTourStep].current;
+    if (!el) {
+      setBuilderTourRect(null);
+      return;
+    }
+    var r = el.getBoundingClientRect();
+    setBuilderTourRect({
+      top: r.top,
+      left: r.left,
+      width: r.width,
+      height: r.height
+    });
+  }, [builderTourStep]);
+
+  // Tooltip placement: below the target if it's in the upper half, else above.
+  var tourTipBelow = false,
+    tourTipLeft = 0;
+  if (builderTourRect) {
+    tourTipBelow = builderTourRect.top + builderTourRect.height / 2 < window.innerHeight * 0.5;
+    tourTipLeft = Math.max(8, Math.min(window.innerWidth - 288, builderTourRect.left + builderTourRect.width / 2 - 140));
+  }
   var bdDisplayDesign = getDesignForPhase(bdDesign, bdPhase);
   var bdIsActive = !!(bdEditId && !bdDirty && bdDesign.assignedTo && bdActiveMap[bdDesign.assignedTo] === bdEditId);
 
@@ -4551,6 +4590,12 @@ function CosmicWorkshop() {
     strokeLinecap: "round",
     strokeLinejoin: "round"
   })), "My Levels"), React.createElement("div", {
+    ref: tourSaveRef,
+    style: {
+      display: "flex",
+      gap: 5
+    }
+  }, React.createElement("div", {
     onClick: handleBuilderSave,
     style: BTN_SAVE
   }, "Save"), React.createElement("div", {
@@ -4567,7 +4612,7 @@ function CosmicWorkshop() {
   }, React.createElement("path", {
     d: "M5 3 L20 12 L5 21 Z",
     fill: "currentColor"
-  })), "Save & Play"), React.createElement("div", {
+  })), "Save & Play")), React.createElement("div", {
     style: {
       flex: 1,
       background: SCRN,
@@ -4702,6 +4747,7 @@ function CosmicWorkshop() {
       }
     }));
   })), React.createElement("div", {
+    ref: tourShipRef,
     style: {
       width: "100%",
       maxWidth: 380,
@@ -4766,6 +4812,7 @@ function CosmicWorkshop() {
       }
     }));
   })), React.createElement("div", {
+    ref: tourPlasmaRef,
     style: {
       display: "flex",
       alignItems: "center",
@@ -4920,6 +4967,7 @@ function CosmicWorkshop() {
       boxShadow: "0 -3px 8px rgba(0,0,0,0.3)"
     }
   }, React.createElement("div", {
+    ref: tourPaletteRef,
     style: {
       display: "flex",
       gap: 3,
@@ -4931,6 +4979,7 @@ function CosmicWorkshop() {
       var isCrateActive = isCrate(selectedBlockType);
       return React.createElement("div", {
         key: t,
+        ref: tourCrateRef,
         onClick: function () {
           if (isCrateActive && !crateSubPanelOpen) {
             setCrateSubPanelOpen(true);
@@ -5157,49 +5206,51 @@ function CosmicWorkshop() {
       letterSpacing: 1,
       textTransform: "uppercase"
     }
-  }, "Clear All"))), builderTourStep != null && React.createElement("div", {
-    onClick: function () {
-      setBuilderTourStep(null);
-      builderTourSeenRef.current = true;
-      try {
-        window.storage.set("cosmic_drift_builder_tour", "seen");
-      } catch (e) {}
-    },
+  }, "Clear All"))), builderTourStep != null && builderTourRect && React.createElement(React.Fragment, null, React.createElement("div", {
     style: {
       position: "fixed",
-      inset: 0,
-      zIndex: 500,
-      background: "rgba(5,5,20,0.75)",
-      backdropFilter: "blur(3px)",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center"
+      top: builderTourRect.top - 5,
+      left: builderTourRect.left - 5,
+      width: builderTourRect.width + 10,
+      height: builderTourRect.height + 10,
+      border: "2px solid #50c8ff",
+      borderRadius: 8,
+      boxShadow: "0 0 16px rgba(80,200,255,0.6), inset 0 0 10px rgba(80,200,255,0.2)",
+      pointerEvents: "none",
+      zIndex: 499,
+      animation: "pulse 1.6s ease-in-out infinite"
     }
-  }, React.createElement("div", {
-    onClick: function (e) {
-      e.stopPropagation();
-    },
-    style: Object.assign({}, OVERLAY_BOX, {
-      border: "1px solid rgba(80,200,255,0.25)",
-      maxWidth: 290,
-      width: "85%"
+  }), React.createElement("div", {
+    style: Object.assign({
+      position: "fixed",
+      left: tourTipLeft,
+      width: 280,
+      zIndex: 500,
+      background: "linear-gradient(170deg,#1a2740,#15203a)",
+      border: "1px solid rgba(80,200,255,0.35)",
+      borderRadius: 12,
+      padding: "14px 16px",
+      boxShadow: "0 8px 28px rgba(0,0,0,0.6)"
+    }, tourTipBelow ? {
+      top: builderTourRect.top + builderTourRect.height + 14
+    } : {
+      bottom: window.innerHeight - builderTourRect.top + 14
     })
   }, React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "center",
       gap: 6,
-      marginBottom: 14
+      marginBottom: 12
     }
   }, BUILDER_TOUR_STEPS.map(function (s, si) {
     return React.createElement("div", {
       key: si,
       style: {
-        width: 8,
-        height: 8,
+        width: 7,
+        height: 7,
         borderRadius: "50%",
-        background: si === builderTourStep ? "#50c8ff" : si < builderTourStep ? "rgba(80,200,255,0.35)" : "rgba(80,200,255,0.12)",
-        transition: "background 0.2s"
+        background: si === builderTourStep ? "#50c8ff" : si < builderTourStep ? "rgba(80,200,255,0.35)" : "rgba(80,200,255,0.12)"
       }
     });
   })), React.createElement("div", {
@@ -5212,10 +5263,10 @@ function CosmicWorkshop() {
     }
   }, BUILDER_TOUR_STEPS[builderTourStep].title), React.createElement("div", {
     style: {
-      color: "rgba(180,200,220,0.7)",
+      color: "rgba(180,200,220,0.75)",
       fontSize: 13,
       lineHeight: 1.5,
-      marginBottom: 18
+      marginBottom: 14
     }
   }, BUILDER_TOUR_STEPS[builderTourStep].desc), React.createElement("div", {
     style: {
@@ -5232,7 +5283,7 @@ function CosmicWorkshop() {
       padding: "6px 16px",
       borderRadius: 16,
       border: "1px solid rgba(80,200,255,0.2)",
-      color: "rgba(180,200,220,0.4)",
+      color: "rgba(180,200,220,0.5)",
       fontSize: 11,
       fontWeight: 600,
       cursor: "pointer"
@@ -5265,15 +5316,15 @@ function CosmicWorkshop() {
       display: "flex",
       justifyContent: "space-between",
       alignItems: "center",
-      marginTop: 12
+      marginTop: 10
     }
   }, React.createElement("div", {
     style: {
-      width: 40
+      width: 36
     }
   }), React.createElement("div", {
     style: {
-      color: "rgba(180,200,220,0.25)",
+      color: "rgba(180,200,220,0.3)",
       fontSize: 10
     }
   }, builderTourStep + 1 + " of " + BUILDER_TOUR_STEPS.length), builderTourStep < BUILDER_TOUR_STEPS.length - 1 ? React.createElement("div", {
@@ -5285,14 +5336,14 @@ function CosmicWorkshop() {
       } catch (e) {}
     },
     style: {
-      color: "rgba(180,200,220,0.3)",
+      color: "rgba(180,200,220,0.35)",
       fontSize: 10,
       fontWeight: 600,
       cursor: "pointer"
     }
   }, "Skip") : React.createElement("div", {
     style: {
-      width: 40
+      width: 36
     }
   })))), showBackWarn && renderBackWarnOverlay(function () {
     setShowBackWarn(false);

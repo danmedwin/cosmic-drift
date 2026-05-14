@@ -654,6 +654,13 @@ export default function CosmicWorkshop() {
   var _btour = useState(null), builderTourStep = _btour[0], setBuilderTourStep = _btour[1];
   var builderTourSeenRef = useRef(false);
   var builderGridRef = useRef(null);
+  // Refs for the builder walkthrough to highlight each editor region.
+  var tourPaletteRef = useRef(null);
+  var tourCrateRef = useRef(null);
+  var tourShipRef = useRef(null);
+  var tourPlasmaRef = useRef(null);
+  var tourSaveRef = useRef(null);
+  var _btrect = useState(null), builderTourRect = _btrect[0], setBuilderTourRect = _btrect[1];
 
   // ── My Levels state ──
   var _slvls = useState([]), savedLevels = _slvls[0], setSavedLevels = _slvls[1];
@@ -715,6 +722,24 @@ export default function CosmicWorkshop() {
     }
     if (bdDesign.assignedTo !== "force_field") { setBdPhase(1); }
   }, [bdDesign.assignedTo]);
+
+  // Builder walkthrough: when the step changes, measure the target region
+  // so the glow ring + tooltip can be positioned over it.
+  useEffect(function() {
+    if (builderTourStep == null) { setBuilderTourRect(null); return; }
+    var refs = [builderGridRef, tourPaletteRef, tourCrateRef, tourShipRef, tourPlasmaRef, tourSaveRef];
+    var el = refs[builderTourStep] && refs[builderTourStep].current;
+    if (!el) { setBuilderTourRect(null); return; }
+    var r = el.getBoundingClientRect();
+    setBuilderTourRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+  }, [builderTourStep]);
+
+  // Tooltip placement: below the target if it's in the upper half, else above.
+  var tourTipBelow = false, tourTipLeft = 0;
+  if (builderTourRect) {
+    tourTipBelow = (builderTourRect.top + builderTourRect.height / 2) < (window.innerHeight * 0.5);
+    tourTipLeft = Math.max(8, Math.min(window.innerWidth - 288, builderTourRect.left + builderTourRect.width / 2 - 140));
+  }
 
   var bdDisplayDesign = getDesignForPhase(bdDesign, bdPhase);
   var bdIsActive = !!(bdEditId && !bdDirty && bdDesign.assignedTo && bdActiveMap[bdDesign.assignedTo] === bdEditId);
@@ -1224,8 +1249,9 @@ export default function CosmicWorkshop() {
       lbScreen === "editor" && React.createElement(React.Fragment, null,
         React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 5, padding: "6px 8px", background: PNL, borderBottom: PNLB, boxShadow: "0 3px 6px rgba(0,0,0,0.4)", position: "relative", zIndex: 2 } },
           React.createElement("div", { onClick: handleBuilderBack, style: Object.assign({}, BTN_TOPBAR, { display: "flex", alignItems: "center", gap: 3 }) }, React.createElement("svg", { width: "8", height: "8", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M15 18l-6-6 6-6", fill: "none", stroke: "currentColor", strokeWidth: "3", strokeLinecap: "round", strokeLinejoin: "round" })), "My Levels"),
-          React.createElement("div", { onClick: handleBuilderSave, style: BTN_SAVE }, "Save"),
-          React.createElement("div", { onClick: handleBuilderSaveAndPlay, style: Object.assign({}, BTN_SAVE, { display: "flex", alignItems: "center", gap: 3 }) }, React.createElement("svg", { width: "8", height: "8", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M5 3 L20 12 L5 21 Z", fill: "currentColor" })), "Save & Play"),
+          React.createElement("div", { ref: tourSaveRef, style: { display: "flex", gap: 5 } },
+            React.createElement("div", { onClick: handleBuilderSave, style: BTN_SAVE }, "Save"),
+            React.createElement("div", { onClick: handleBuilderSaveAndPlay, style: Object.assign({}, BTN_SAVE, { display: "flex", alignItems: "center", gap: 3 }) }, React.createElement("svg", { width: "8", height: "8", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M5 3 L20 12 L5 21 Z", fill: "currentColor" })), "Save & Play")),
           React.createElement("div", { style: { flex: 1, background: SCRN, border: SCRNB, borderRadius: 4, padding: "4px 8px", boxShadow: SCRNS } },
             React.createElement("input", { value: builderLevelName, onChange: function(e) { setBuilderLevelName(e.target.value); setBuilderDirty(true); }, placeholder: "Level name...", style: { width: "100%", background: "transparent", border: "none", outline: "none", color: "#b0c8d8", fontSize: 16, fontWeight: 600, fontFamily: "'Quicksand',sans-serif", letterSpacing: 0.5 } })),
           React.createElement("div", { onClick: function() { setBuilderTourStep(0); }, style: { width: 28, height: 28, borderRadius: 4, background: PNL, border: PNLB, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" } }, React.createElement("svg", { width: "12", height: "12", viewBox: "0 0 16 16" }, React.createElement("circle", { cx: "8", cy: "8", r: "7", fill: "none", stroke: "rgba(180,200,220,0.5)", strokeWidth: "1.5" }), React.createElement("text", { x: "8", y: "12", textAnchor: "middle", fill: "rgba(180,200,220,0.5)", fontSize: "10", fontWeight: "700" }, "?")))),
@@ -1237,14 +1263,14 @@ export default function CosmicWorkshop() {
                 cell > 0 && renderBuilderBlock(cell, 40, cell === 10 ? 2 : 0),
                 cell === 0 && React.createElement("div", { style: { width: 6, height: 6, borderRadius: "50%", background: "rgba(80,100,140,0.15)" } }));
             })),
-          React.createElement("div", { style: { width: "100%", maxWidth: 380, height: 50, position: "relative", marginTop: 4 } },
+          React.createElement("div", { ref: tourShipRef, style: { width: "100%", maxWidth: 380, height: 50, position: "relative", marginTop: 4 } },
             React.createElement("div", { style: { position: "absolute", bottom: 0, left: 0, right: 0, height: 2, background: "rgba(140,160,180,0.06)" } }),
             [0,1,2,3,4,5,6,7].map(function(c) {
               var isSelected = c === builderShipStart;
               return React.createElement("div", { key: c, onClick: function() { setBuilderShipStart(c); setBuilderDirty(true); }, style: { position: "absolute", left: (c / COLS * 100) + "%", width: (100 / COLS) + "%", top: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" } },
                 isSelected ? React.createElement("svg", { viewBox: "0 0 36 40", width: "28", height: "32" }, React.createElement("defs", null, React.createElement("linearGradient", { id: "bsg", x1: "0", y1: "0", x2: "0", y2: "1" }, React.createElement("stop", { offset: "0%", stopColor: "#ffd0ff" }), React.createElement("stop", { offset: "100%", stopColor: "#cc70cc" }))), React.createElement("path", { d: "M18 0L4 32L12 27L18 40L24 27L32 32Z", fill: "url(#bsg)" })) : React.createElement("div", { style: { width: 8, height: 8, borderRadius: "50%", background: "rgba(255,168,255,0.15)", border: "1px solid rgba(255,168,255,0.1)" } }));
             })),
-          React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginTop: 6, marginBottom: 2 } },
+          React.createElement("div", { ref: tourPlasmaRef, style: { display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginTop: 6, marginBottom: 2 } },
             React.createElement("div", { onClick: function() { var n = Math.max(1, builderPlasma - 1); setBuilderPlasma(n); setBuilderDirty(true); }, style: { width: 28, height: 28, borderRadius: 4, background: PNL, border: PNLB, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#b0c8d8", fontSize: 16, fontWeight: 700 } }, "-"),
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
               React.createElement(PlasmaContainer, { current: builderPlasma, max: 20 }),
@@ -1262,11 +1288,11 @@ export default function CosmicWorkshop() {
                 React.createElement("div", { style: { fontSize: 7, fontWeight: 700, color: isActive2 ? "rgba(212,168,67,0.9)" : "rgba(180,200,220,0.4)", textTransform: "uppercase", letterSpacing: 0.3, textAlign: "center", lineHeight: 1.2 } }, cv.name));
             }))),
         React.createElement("div", { style: { position: "relative", zIndex: 2, background: PNL, borderTop: "3px solid #505058", padding: "8px 6px 10px", boxShadow: "0 -3px 8px rgba(0,0,0,0.3)" } },
-          React.createElement("div", { style: { display: "flex", gap: 3, flexWrap: "wrap", justifyContent: "center" } },
+          React.createElement("div", { ref: tourPaletteRef, style: { display: "flex", gap: 3, flexWrap: "wrap", justifyContent: "center" } },
             [1,2,3,5,9,6,7,8,10,17].map(function(t) {
               if (t === 9) {
                 var isCrateActive = isCrate(selectedBlockType);
-                return React.createElement("div", { key: t, onClick: function() { if (isCrateActive && !crateSubPanelOpen) { setCrateSubPanelOpen(true); } else if (crateSubPanelOpen) { return; } else { setSelectedBlockType(selectedCrateType); setEraserActive(false); setCrateSubPanelOpen(true); } }, style: { width: "18%", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "5px 2px 4px", borderRadius: crateSubPanelOpen ? "0 0 4px 4px" : 4, background: crateSubPanelOpen ? "rgba(100,80,30,0.35)" : isCrateActive ? "rgba(40,100,120,0.4)" : PNL, border: crateSubPanelOpen ? "2px solid rgba(212,168,67,0.4)" : isCrateActive ? "2px solid rgba(80,200,255,0.5)" : PNLB, cursor: "pointer", boxShadow: crateSubPanelOpen ? "inset 0 0 10px rgba(212,168,67,0.15), 0 0 6px rgba(212,168,67,0.15)" : isCrateActive ? "inset 0 0 10px rgba(80,200,255,0.15), 0 0 8px rgba(80,200,255,0.2)" : "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)" } },
+                return React.createElement("div", { key: t, ref: tourCrateRef, onClick: function() { if (isCrateActive && !crateSubPanelOpen) { setCrateSubPanelOpen(true); } else if (crateSubPanelOpen) { return; } else { setSelectedBlockType(selectedCrateType); setEraserActive(false); setCrateSubPanelOpen(true); } }, style: { width: "18%", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "5px 2px 4px", borderRadius: crateSubPanelOpen ? "0 0 4px 4px" : 4, background: crateSubPanelOpen ? "rgba(100,80,30,0.35)" : isCrateActive ? "rgba(40,100,120,0.4)" : PNL, border: crateSubPanelOpen ? "2px solid rgba(212,168,67,0.4)" : isCrateActive ? "2px solid rgba(80,200,255,0.5)" : PNLB, cursor: "pointer", boxShadow: crateSubPanelOpen ? "inset 0 0 10px rgba(212,168,67,0.15), 0 0 6px rgba(212,168,67,0.15)" : isCrateActive ? "inset 0 0 10px rgba(80,200,255,0.15), 0 0 8px rgba(80,200,255,0.2)" : "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)" } },
                   React.createElement("div", { style: { width: 28, height: 28 } }, renderBuilderBlock(selectedCrateType, 28, 0)),
                   React.createElement("div", { style: { fontSize: 7, fontWeight: 700, color: crateSubPanelOpen ? "rgba(212,168,67,0.8)" : isCrateActive ? "#80ddff" : "rgba(180,200,220,0.5)", textTransform: "uppercase", letterSpacing: 0.3, textAlign: "center", lineHeight: 1.2 } }, crateSubPanelOpen ? "OPEN" : isCrateActive ? "ACTIVE" : "Crate"));
               }
@@ -1292,18 +1318,19 @@ export default function CosmicWorkshop() {
               React.createElement("svg", { width: "12", height: "12", viewBox: "0 0 24 24" }, React.createElement("line", { x1: "6", y1: "6", x2: "18", y2: "18", stroke: "currentColor", strokeWidth: "2.5", strokeLinecap: "round" }), React.createElement("line", { x1: "18", y1: "6", x2: "6", y2: "18", stroke: "currentColor", strokeWidth: "2.5", strokeLinecap: "round" })),
               "Deselect"),
             React.createElement("div", { onClick: function() { setBuilderGrid(new Array(COLS * ROWS).fill(0)); setBuilderDirty(true); }, style: { padding: "6px 14px", borderRadius: 4, background: PNL, border: PNLB, cursor: "pointer", color: "rgba(200,210,220,0.5)", fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" } }, "Clear All"))),
-        builderTourStep != null && React.createElement("div", { onClick: function() { setBuilderTourStep(null); builderTourSeenRef.current = true; try { window.storage.set("cosmic_drift_builder_tour", "seen"); } catch (e) {} }, style: { position: "fixed", inset: 0, zIndex: 500, background: "rgba(5,5,20,0.75)", backdropFilter: "blur(3px)", display: "flex", alignItems: "center", justifyContent: "center" } },
-          React.createElement("div", { onClick: function(e) { e.stopPropagation(); }, style: Object.assign({}, OVERLAY_BOX, { border: "1px solid rgba(80,200,255,0.25)", maxWidth: 290, width: "85%" }) },
-            React.createElement("div", { style: { display: "flex", justifyContent: "center", gap: 6, marginBottom: 14 } }, BUILDER_TOUR_STEPS.map(function(s, si) { return React.createElement("div", { key: si, style: { width: 8, height: 8, borderRadius: "50%", background: si === builderTourStep ? "#50c8ff" : si < builderTourStep ? "rgba(80,200,255,0.35)" : "rgba(80,200,255,0.12)", transition: "background 0.2s" } }); })),
+        builderTourStep != null && builderTourRect && React.createElement(React.Fragment, null,
+          React.createElement("div", { style: { position: "fixed", top: builderTourRect.top - 5, left: builderTourRect.left - 5, width: builderTourRect.width + 10, height: builderTourRect.height + 10, border: "2px solid #50c8ff", borderRadius: 8, boxShadow: "0 0 16px rgba(80,200,255,0.6), inset 0 0 10px rgba(80,200,255,0.2)", pointerEvents: "none", zIndex: 499, animation: "pulse 1.6s ease-in-out infinite" } }),
+          React.createElement("div", { style: Object.assign({ position: "fixed", left: tourTipLeft, width: 280, zIndex: 500, background: "linear-gradient(170deg,#1a2740,#15203a)", border: "1px solid rgba(80,200,255,0.35)", borderRadius: 12, padding: "14px 16px", boxShadow: "0 8px 28px rgba(0,0,0,0.6)" }, tourTipBelow ? { top: builderTourRect.top + builderTourRect.height + 14 } : { bottom: (window.innerHeight - builderTourRect.top) + 14 }) },
+            React.createElement("div", { style: { display: "flex", justifyContent: "center", gap: 6, marginBottom: 12 } }, BUILDER_TOUR_STEPS.map(function(s, si) { return React.createElement("div", { key: si, style: { width: 7, height: 7, borderRadius: "50%", background: si === builderTourStep ? "#50c8ff" : si < builderTourStep ? "rgba(80,200,255,0.35)" : "rgba(80,200,255,0.12)" } }); })),
             React.createElement("div", { style: { color: "#80ddff", fontSize: 15, fontWeight: 700, marginBottom: 6, letterSpacing: 0.5 } }, BUILDER_TOUR_STEPS[builderTourStep].title),
-            React.createElement("div", { style: { color: "rgba(180,200,220,0.7)", fontSize: 13, lineHeight: 1.5, marginBottom: 18 } }, BUILDER_TOUR_STEPS[builderTourStep].desc),
+            React.createElement("div", { style: { color: "rgba(180,200,220,0.75)", fontSize: 13, lineHeight: 1.5, marginBottom: 14 } }, BUILDER_TOUR_STEPS[builderTourStep].desc),
             React.createElement("div", { style: { display: "flex", gap: 10, justifyContent: "center", alignItems: "center" } },
-              builderTourStep > 0 && React.createElement("div", { onClick: function() { setBuilderTourStep(builderTourStep - 1); }, style: { padding: "6px 16px", borderRadius: 16, border: "1px solid rgba(80,200,255,0.2)", color: "rgba(180,200,220,0.4)", fontSize: 11, fontWeight: 600, cursor: "pointer" } }, "Back"),
+              builderTourStep > 0 && React.createElement("div", { onClick: function() { setBuilderTourStep(builderTourStep - 1); }, style: { padding: "6px 16px", borderRadius: 16, border: "1px solid rgba(80,200,255,0.2)", color: "rgba(180,200,220,0.5)", fontSize: 11, fontWeight: 600, cursor: "pointer" } }, "Back"),
               React.createElement("div", { onClick: function() { if (builderTourStep < BUILDER_TOUR_STEPS.length - 1) { setBuilderTourStep(builderTourStep + 1); } else { setBuilderTourStep(null); builderTourSeenRef.current = true; try { window.storage.set("cosmic_drift_builder_tour", "seen"); } catch (e) {} } }, style: { padding: "8px 24px", borderRadius: 16, background: "linear-gradient(135deg,#2a4a6a,#1a3a5a)", border: "2px solid rgba(80,200,255,0.4)", color: "#80ddff", fontSize: 13, fontWeight: 700, cursor: "pointer", letterSpacing: 0.5 } }, builderTourStep < BUILDER_TOUR_STEPS.length - 1 ? "Next" : "Got It!")),
-            React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 12 } },
-              React.createElement("div", { style: { width: 40 } }),
-              React.createElement("div", { style: { color: "rgba(180,200,220,0.25)", fontSize: 10 } }, (builderTourStep + 1) + " of " + BUILDER_TOUR_STEPS.length),
-              builderTourStep < BUILDER_TOUR_STEPS.length - 1 ? React.createElement("div", { onClick: function() { setBuilderTourStep(null); builderTourSeenRef.current = true; try { window.storage.set("cosmic_drift_builder_tour", "seen"); } catch (e) {} }, style: { color: "rgba(180,200,220,0.3)", fontSize: 10, fontWeight: 600, cursor: "pointer" } }, "Skip") : React.createElement("div", { style: { width: 40 } })))),
+            React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 10 } },
+              React.createElement("div", { style: { width: 36 } }),
+              React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 10 } }, (builderTourStep + 1) + " of " + BUILDER_TOUR_STEPS.length),
+              builderTourStep < BUILDER_TOUR_STEPS.length - 1 ? React.createElement("div", { onClick: function() { setBuilderTourStep(null); builderTourSeenRef.current = true; try { window.storage.set("cosmic_drift_builder_tour", "seen"); } catch (e) {} }, style: { color: "rgba(180,200,220,0.35)", fontSize: 10, fontWeight: 600, cursor: "pointer" } }, "Skip") : React.createElement("div", { style: { width: 36 } })))),
         showBackWarn && renderBackWarnOverlay(function() { setShowBackWarn(false); }, function() { setShowBackWarn(false); loadSavedLevels(); setLbScreen("list"); }))),
 
     // ═══ BLOCK DESIGNER ═══
