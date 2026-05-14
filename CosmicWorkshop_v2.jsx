@@ -1059,6 +1059,32 @@ export default function CosmicWorkshop() {
     setBdCopied(false);
   }
 
+  // Export the custom designs currently set active, as one importable group.
+  function bdExportActiveBlocks() {
+    var arr = [];
+    Object.keys(bdActiveMap).forEach(function(typeId) {
+      var id = bdActiveMap[typeId];
+      for (var i = 0; i < bdSaved.length; i++) {
+        if (bdSaved[i].id === id && bdSaved[i].assignedTo === typeId) {
+          var out = {}; Object.keys(bdSaved[i]).forEach(function(k) { out[k] = bdSaved[i][k]; });
+          arr.push(out); break;
+        }
+      }
+    });
+    setBdExportAllText(JSON.stringify(arr));
+    setBdShowExportAll(true);
+    setBdCopied(false);
+  }
+
+  // Set imported designs active for their block types (merge - leaves other types alone).
+  function bdActivateImported(entries) {
+    setBdActiveMap(function(prev) {
+      var next = {}; Object.keys(prev).forEach(function(k) { next[k] = prev[k]; });
+      for (var i = 0; i < entries.length; i++) { if (entries[i].assignedTo) { next[entries[i].assignedTo] = entries[i].id; } }
+      bdSaveActive(next); return next;
+    });
+  }
+
   function bdValidateDesignImport(parsed) {
     if (typeof parsed !== "object" || parsed === null) return "Invalid design data";
     if (!parsed.shape || typeof parsed.color !== "string") return "Missing required fields (shape, color)";
@@ -1075,12 +1101,14 @@ export default function CosmicWorkshop() {
       var newEntries = [];
       for (var a = 0; a < parsed.length; a++) { var err = bdValidateDesignImport(parsed[a]); if (err) { setBdImportError("Design " + (a + 1) + ": " + err); return; } var entry = Object.assign({}, bdDefaultDesign(), parsed[a]); entry.id = genUUID(); entry.isFactory = false; entry.modifiedAt = new Date().toISOString(); newEntries.push(entry); }
       setBdSaved(function(prev) { var list = prev.concat(newEntries); bdSaveDesigns(list); return list; });
+      if (bdSavedTab === "active") { bdActivateImported(newEntries); }
       setBdShowImport(false); setBdImportText(""); setBdImportError(""); return;
     }
     var err2 = bdValidateDesignImport(parsed);
     if (err2) { setBdImportError(err2); return; }
     var entry2 = Object.assign({}, bdDefaultDesign(), parsed); entry2.id = genUUID(); entry2.isFactory = false; entry2.modifiedAt = new Date().toISOString();
     setBdSaved(function(prev) { var list = prev.concat([entry2]); bdSaveDesigns(list); return list; });
+    if (bdSavedTab === "active") { bdActivateImported([entry2]); }
     setBdShowImport(false); setBdImportText(""); setBdImportError("");
   }
 
@@ -1340,14 +1368,14 @@ export default function CosmicWorkshop() {
       bdCurrentView === "list" && React.createElement(React.Fragment, null,
         React.createElement(WorkshopTopBar, { onBack: function() { setScreen("splash"); }, backLabel: "Workshop", title: "My Blocks", color: "#c8b8ff",
           rightContent: React.createElement("div", { style: { display: "flex", gap: 4 } },
-            React.createElement("div", { onClick: function() { setBdShowImport(true); setBdImportText(""); setBdImportError(""); }, style: BTN_TOPBAR_PURPLE }, "Import"),
-            bdSaved.length > 0 && React.createElement("div", { onClick: bdExportAllDesigns, style: Object.assign({}, BTN_TOPBAR, { color: "rgba(200,184,255,0.6)", fontSize: 8 }) }, "Exp All"),
+            React.createElement("div", { onClick: function() { setBdShowImport(true); setBdImportText(""); setBdImportError(""); }, style: BTN_TOPBAR_PURPLE }, bdSavedTab === "active" ? "Import Set" : "Import"),
+            ((bdSavedTab === "active" && Object.keys(bdActiveMap).length > 0) || (bdSavedTab !== "active" && bdSaved.length > 0)) && React.createElement("div", { onClick: bdSavedTab === "active" ? bdExportActiveBlocks : bdExportAllDesigns, style: Object.assign({}, BTN_TOPBAR, { color: "rgba(200,184,255,0.6)", fontSize: 8 }) }, "Exp All"),
             React.createElement("div", { onClick: function() { bdOpenEditor(null); }, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #1a3a4a, #0f2a38)", boxShadow: "0 0 8px rgba(80,200,255,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, "+ New")) }),
         // Tabs: My Designs / Game Blocks
         React.createElement("div", { style: { display: "flex", margin: "0 10px", borderBottom: "1px solid rgba(60,60,80,0.3)", position: "relative", zIndex: 1 } },
-          [["custom", "My Designs (" + bdSaved.length + ")"], ["factory", "Game Blocks"]].map(function(tab) {
+          [["custom", "My Designs (" + bdSaved.length + ")"], ["factory", "Game Blocks"], ["active", "Active Blocks"]].map(function(tab) {
             var active = bdSavedTab === tab[0];
-            return React.createElement("div", { key: tab[0], onClick: function() { setBdSavedTab(tab[0]); }, style: { flex: 1, textAlign: "center", padding: "10px 0 8px", color: active ? "#c8b8ff" : "rgba(180,200,220,0.3)", fontSize: 12, fontWeight: active ? 700 : 600, cursor: "pointer", borderBottom: active ? "2px solid #c8b8ff" : "2px solid transparent", letterSpacing: 0.5 } }, tab[1]);
+            return React.createElement("div", { key: tab[0], onClick: function() { setBdSavedTab(tab[0]); }, style: { flex: 1, textAlign: "center", padding: "10px 0 8px", color: active ? "#c8b8ff" : "rgba(180,200,220,0.3)", fontSize: 11, fontWeight: active ? 700 : 600, cursor: "pointer", borderBottom: active ? "2px solid #c8b8ff" : "2px solid transparent", letterSpacing: 0.2 } }, tab[1]);
           })),
         bdSavedTab === "custom" && bdSaved.length > 1 && renderSortBar(bdSortMode, setBdSortMode, [["type", "Type"]]),
         React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "6px 10px 20px", position: "relative", zIndex: 1 } },
@@ -1382,6 +1410,19 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { flex: 1, minWidth: 0 } },
                 React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, preset.name)),
               React.createElement("div", { onClick: function() { bdCopyPreset(preset); }, style: BTN_EDIT }, "COPY"));
+          }),
+          // Active Blocks tab - the design active for each block type
+          bdSavedTab === "active" && BD_BLOCK_TYPES.map(function(bt) {
+            var activeId = bdActiveMap[bt.id], customActive = null;
+            if (activeId) { for (var ci = 0; ci < bdSaved.length; ci++) { if (bdSaved[ci].id === activeId && bdSaved[ci].assignedTo === bt.id) { customActive = bdSaved[ci]; break; } } }
+            var factory = null; for (var fi = 0; fi < BD_FACTORY_PRESETS.length; fi++) { if (BD_FACTORY_PRESETS[fi].assignedTo === bt.id) { factory = BD_FACTORY_PRESETS[fi]; break; } }
+            var shown = customActive || factory;
+            return React.createElement("div", { key: bt.id, style: Object.assign({}, CARD_STYLE, { display: "flex", alignItems: "center", gap: 10 }) },
+              shown && React.createElement(BDBlockPreview, { design: shown, size: 38 }),
+              React.createElement("div", { style: { flex: 1, minWidth: 0 } },
+                React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, bt.label),
+                React.createElement("div", { style: { color: customActive ? "rgba(150,220,170,0.7)" : "rgba(180,200,220,0.3)", fontSize: 10 } }, customActive ? (customActive.name || "Unnamed") : "Default")),
+              customActive && React.createElement("div", { onClick: function() { bdToggleActive(customActive); }, style: BTN_RENAME }, "Use Default"));
           })),
         bdDeletingId && renderDeleteOverlay("Delete Design?", function() { setBdDeletingId(null); }, function() { bdDeleteDesign(bdDeletingId); }),
         bdExportId && renderExportOverlay("Export Design", bdExportText, bdCopied, function() { copyToClipboard(bdExportText, setBdCopied); }, function() { setBdExportId(null); }),
