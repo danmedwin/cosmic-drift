@@ -112,6 +112,18 @@ function UFOBlockSvg(props) {
       React.createElement("ellipse", { cx: hx - dRx * 0.22, cy: dY - dRy * 0.28, rx: dRx * 0.27, ry: dRy * 0.22, fill: "white", opacity: "0.25", transform: "rotate(-20," + (hx - dRx * 0.22) + "," + (dY - dRy * 0.28) + ")", clipPath: "url(#ufo-dc)" })));
 }
 
+// Corner power-icon badge for crate variant blocks (types 11-16).
+function crateBadgeIcon(type, baseSize) {
+  var sz = Math.max(7, baseSize * (type === 12 || type === 16 ? 0.2 : 0.18));
+  if (type === 11) return React.createElement(DroneIcon, { size: sz });
+  if (type === 12) return React.createElement(LightningIcon, { size: sz });
+  if (type === 13) return React.createElement(CrossShotIcon, { size: sz });
+  if (type === 14) return React.createElement("svg", { width: sz, height: sz, viewBox: "0 0 24 24" }, React.createElement("path", { d: "M4 20L12 4", stroke: "#80ddff", strokeWidth: "3", strokeLinecap: "round" }), React.createElement("path", { d: "M12 4L20 20", stroke: "#80ddff", strokeWidth: "3", strokeLinecap: "round" }));
+  if (type === 15) return React.createElement("svg", { width: sz, height: sz, viewBox: "0 0 24 24" }, React.createElement("rect", { x: "6", y: "2", width: "12", height: "8", rx: "2", fill: "#7a7a88" }), React.createElement("rect", { x: "10", y: "8", width: "4", height: "12", rx: "1", fill: "#9a9aaa" }));
+  if (type === 16) return React.createElement(CoreIcon, { size: sz, mode: "lit" });
+  return null;
+}
+
 function BlockContent(props) {
   var type = props.type, size = props.size, is = Math.max(18, size * 0.55), sl = props.shieldLevel || 0;
   if (type === 17) return React.createElement(UFOBlockSvg, { size: size, animPhase: props.animPhase });
@@ -129,16 +141,9 @@ function BlockContent(props) {
   else if (isCrate(type) && type !== 9) {
     var cvMatch = null;
     for (var ci = 0; ci < CRATE_VARIANTS.length; ci++) { if (CRATE_VARIANTS[ci].type === type) { cvMatch = CRATE_VARIANTS[ci]; break; } }
-    var badgeIcon = null;
-    if (type === 11) badgeIcon = React.createElement(DroneIcon, { size: Math.max(7, size * 0.18) });
-    else if (type === 12) badgeIcon = React.createElement(LightningIcon, { size: Math.max(7, size * 0.2) });
-    else if (type === 13) badgeIcon = React.createElement(CrossShotIcon, { size: Math.max(7, size * 0.18) });
-    else if (type === 14) badgeIcon = React.createElement("svg", { width: Math.max(7, size * 0.18), height: Math.max(7, size * 0.18), viewBox: "0 0 24 24" }, React.createElement("path", { d: "M4 20L12 4", stroke: "#80ddff", strokeWidth: "3", strokeLinecap: "round" }), React.createElement("path", { d: "M12 4L20 20", stroke: "#80ddff", strokeWidth: "3", strokeLinecap: "round" }));
-    else if (type === 15) badgeIcon = React.createElement("svg", { width: Math.max(7, size * 0.18), height: Math.max(7, size * 0.18), viewBox: "0 0 24 24" }, React.createElement("rect", { x: "6", y: "2", width: "12", height: "8", rx: "2", fill: "#7a7a88" }), React.createElement("rect", { x: "10", y: "8", width: "4", height: "12", rx: "1", fill: "#9a9aaa" }));
-    else if (type === 16) badgeIcon = React.createElement(CoreIcon, { size: Math.max(7, size * 0.2), mode: "lit" });
     iconEl = React.createElement("div", { style: { position: "relative", width: Math.max(24, size * 0.8), height: Math.max(24, size * 0.8) } },
       React.createElement(TreasureCrateIcon, { size: Math.max(24, size * 0.8) }),
-      React.createElement("div", { style: { position: "absolute", bottom: -2, right: -2, width: Math.max(10, size * 0.3), height: Math.max(10, size * 0.3), borderRadius: "50%", background: "rgba(10,10,20,0.8)", border: "1px solid " + (cvMatch ? cvMatch.color : "rgba(255,255,255,0.3)"), display: "flex", alignItems: "center", justifyContent: "center" } }, badgeIcon));
+      React.createElement("div", { style: { position: "absolute", bottom: -2, right: -2, width: Math.max(10, size * 0.3), height: Math.max(10, size * 0.3), borderRadius: "50%", background: "rgba(10,10,20,0.8)", border: "1px solid " + (cvMatch ? cvMatch.color : "rgba(255,255,255,0.3)"), display: "flex", alignItems: "center", justifyContent: "center" } }, crateBadgeIcon(type, size)));
   }
   else if (type === 10 && sl > 0) {
     iconEl = React.createElement("svg", { width: is, height: is, viewBox: "0 0 24 24" }, React.createElement("rect", { x: "3", y: "8", width: "18", height: "12", rx: "1.5", fill: "#2a3a5a", stroke: "rgba(130,180,255,0.6)", strokeWidth: "1" }), React.createElement("rect", { x: "3", y: "8", width: "18", height: "4", fill: "#3a4a6a", rx: "1.5" }), React.createElement("line", { x1: "3", y1: "12", x2: "21", y2: "12", stroke: "rgba(130,180,255,0.4)", strokeWidth: "0.8" }), React.createElement("rect", { x: "9", y: "13", width: "6", height: "4", rx: "1", fill: "rgba(130,180,255,0.15)", stroke: "rgba(130,180,255,0.5)", strokeWidth: "0.7" }), React.createElement("circle", { cx: "12", cy: "15", r: "1", fill: "rgba(180,220,255,0.8)" }), React.createElement("rect", { x: "5", y: "9", width: "3", height: "2", rx: "0.5", fill: "rgba(130,180,255,0.2)" }), React.createElement("rect", { x: "16", y: "9", width: "3", height: "2", rx: "0.5", fill: "rgba(130,180,255,0.2)" }));
@@ -321,6 +326,40 @@ function bdSaveDesigns(designs) {
   });
 }
 
+// Active block designs: explicit, opt-in map of { blockTypeId: designId }.
+// A numeric grid block with no active design just keeps its hardcoded icon.
+var BD_ACTIVE_KEY = "cosmic-drift-active-blocks";
+
+function bdLoadActive() {
+  return window.storage.get(BD_ACTIVE_KEY).then(function(result) {
+    return result ? JSON.parse(result.value) : {};
+  }).catch(function() { return {}; });
+}
+
+function bdSaveActive(map) {
+  return window.storage.set(BD_ACTIVE_KEY, JSON.stringify(map)).catch(function(e) {
+    console.error("Save failed:", e);
+  });
+}
+
+// Numeric grid block type -> Block Designer string id. Types 4 (extra core)
+// and 17 (UFO) are not designable. Crate variants 11-16 resolve to "crate".
+var BLOCK_TYPE_TO_BD = { 1: "regular", 2: "cross_shot", 3: "lightning", 5: "plasma", 6: "drone", 7: "indestructible", 8: "acid_barrel", 9: "crate", 10: "force_field" };
+
+function bdResolveActiveDesign(blockType, activeMap, savedDesigns) {
+  var bdId = BLOCK_TYPE_TO_BD[blockType];
+  if (!bdId && blockType >= 11 && blockType <= 16) bdId = "crate";
+  if (!bdId) return null;
+  var designId = activeMap[bdId];
+  if (!designId) return null;
+  for (var i = 0; i < savedDesigns.length; i++) {
+    if (savedDesigns[i].id === designId) {
+      return savedDesigns[i].assignedTo === bdId ? savedDesigns[i] : null;
+    }
+  }
+  return null;
+}
+
 var BD_FACTORY_PRESETS = [
   { id: "factory_regular", name: "Regular", assignedTo: "regular", isFactory: true, shape: "square", shapeRotation: 0, cornerRadius: 6, color: "#7b5ea7", borderColor: "#6b4e97", borderWidth: 2, glowEnabled: true, glowColor: "#9f7fd0", glowIntensity: 4, pattern: "none", patternColor: "#fff", patternOpacity: 0.3, patternScale: 1, patternRotation: 0, patternFilled: false, patternLineWidth: 1.5, icon: "none", iconColor: "#fff", iconOpacity: 0.8, iconGlow: false, iconGlowColor: "#fff", iconGlowIntensity: 4 },
   { id: "factory_cross_shot", name: "Cross Shot", assignedTo: "cross_shot", isFactory: true, shape: "square", shapeRotation: 0, cornerRadius: 6, color: "#e0457b", borderColor: "#c03868", borderWidth: 2, glowEnabled: true, glowColor: "#ff6b9d", glowIntensity: 4, pattern: "none", patternColor: "#fff", patternOpacity: 0.3, patternScale: 1, patternRotation: 0, patternFilled: false, patternLineWidth: 1.5, icon: "cross", iconColor: "#ffffff", iconOpacity: 0.85, iconGlow: false, iconGlowColor: "#fff", iconGlowIntensity: 4 },
@@ -485,6 +524,8 @@ var BTN_TOPBAR_ACCENT = Object.assign({}, BTN_TOPBAR, { border: "2px solid rgba(
 var BTN_TOPBAR_PURPLE = Object.assign({}, BTN_TOPBAR, { border: "1px solid rgba(200,184,255,0.3)", color: "#c8b8ff" });
 var BTN_SAVE = Object.assign({}, BTN_TOPBAR, { background: "linear-gradient(180deg, #2a5a3a, #1a3a28)", border: "2px solid rgba(80,200,100,0.4)", color: "#80dd90" });
 var BTN_PLAY = Object.assign({}, BTN_BASE, { padding: "5px 12px", background: "linear-gradient(180deg, #2a5a3a, #1a3a28)", border: "1px solid rgba(80,200,100,0.45)", color: "#80dd90" });
+var BTN_SETACTIVE = Object.assign({}, BTN_BASE, { padding: "5px 10px", background: PNL, border: "1px solid rgba(120,200,140,0.4)", color: "rgba(150,220,170,0.8)" });
+var BTN_ISACTIVE = Object.assign({}, BTN_BASE, { padding: "5px 10px", background: "linear-gradient(180deg, #2a5a3a, #1a3a28)", border: "1px solid rgba(80,220,120,0.7)", color: "#80dd90" });
 
 // Navigate to the game, optionally auto-playing a custom level by id.
 // Hosted detection matches cosmicdriftapp.com (and localhost); the Claude
@@ -547,6 +588,7 @@ export default function CosmicWorkshop() {
   // ══ BLOCK DESIGNER STATE ══
   var _bdDesign = useState(function() { return bdDefaultDesign(); }), bdDesign = _bdDesign[0], setBdDesign = _bdDesign[1];
   var _bdSaved = useState([]), bdSaved = _bdSaved[0], setBdSaved = _bdSaved[1];
+  var _bdActive = useState({}), bdActiveMap = _bdActive[0], setBdActiveMap = _bdActive[1];
   var _bdEditId = useState(null), bdEditId = _bdEditId[0], setBdEditId = _bdEditId[1];
   var _bdActivePanel = useState(null), bdActivePanel = _bdActivePanel[0], setBdActivePanel = _bdActivePanel[1];
   var _bdPhase = useState(1), bdPhase = _bdPhase[0], setBdPhase = _bdPhase[1];
@@ -620,6 +662,7 @@ export default function CosmicWorkshop() {
       setBdSaved(designs);
       setBdLoaded(true);
     });
+    bdLoadActive().then(function(map) { setBdActiveMap(map); });
   }, []);
 
   useEffect(function() {
@@ -630,6 +673,8 @@ export default function CosmicWorkshop() {
   }, [bdDesign.assignedTo]);
 
   var bdDisplayDesign = getDesignForPhase(bdDesign, bdPhase);
+  var bdCanSetActive = !!(bdEditId && !bdDirty && bdDesign.assignedTo);
+  var bdIsActive = bdCanSetActive && bdActiveMap[bdDesign.assignedTo] === bdEditId;
 
   // ═══════════════════════════════════════
   // SHARED UTILITIES
@@ -845,8 +890,42 @@ export default function CosmicWorkshop() {
 
   function bdDeleteDesign(id) {
     setBdSaved(function(prev) { var list = prev.filter(function(d) { return d.id !== id; }); bdSaveDesigns(list); return list; });
+    setBdActiveMap(function(prev) {
+      var next = {}; var changed = false;
+      Object.keys(prev).forEach(function(k) { if (prev[k] === id) { changed = true; } else { next[k] = prev[k]; } });
+      if (changed) bdSaveActive(next);
+      return changed ? next : prev;
+    });
     if (bdEditId === id) setBdEditId(null);
     setBdDeletingId(null);
+  }
+
+  // Toggle a saved design as the active design for its assigned block type.
+  function bdToggleActive(design) {
+    if (!design || !design.id || !design.assignedTo) return;
+    setBdActiveMap(function(prev) {
+      var next = {}; Object.keys(prev).forEach(function(k) { next[k] = prev[k]; });
+      if (next[design.assignedTo] === design.id) { delete next[design.assignedTo]; }
+      else { next[design.assignedTo] = design.id; }
+      bdSaveActive(next);
+      return next;
+    });
+  }
+
+  // Render a numeric Level Builder block: uses the active Block Designer
+  // design when one exists, otherwise falls back to the hardcoded BlockContent.
+  function renderBuilderBlock(type, size, shieldLevel) {
+    var design = bdResolveActiveDesign(type, bdActiveMap, bdSaved);
+    if (!design) return React.createElement(BlockContent, { type: type, size: size, shieldLevel: shieldLevel || 0 });
+    if (type >= 11 && type <= 16) {
+      var badgeBox = Math.max(10, size * 0.3);
+      var cvColor = null;
+      for (var ci = 0; ci < CRATE_VARIANTS.length; ci++) { if (CRATE_VARIANTS[ci].type === type) { cvColor = CRATE_VARIANTS[ci].color; break; } }
+      return React.createElement("div", { style: { position: "relative", width: size, height: size } },
+        React.createElement(BDBlockPreview, { design: design, size: size }),
+        React.createElement("div", { style: { position: "absolute", bottom: -2, right: -2, width: badgeBox, height: badgeBox, borderRadius: "50%", background: "rgba(10,10,20,0.85)", border: "1px solid " + (cvColor || "rgba(255,255,255,0.3)"), display: "flex", alignItems: "center", justifyContent: "center" } }, crateBadgeIcon(type, size)));
+    }
+    return React.createElement(BDBlockPreview, { design: design, size: size });
   }
 
   function bdRenameDesign(id, newName) {
@@ -1085,7 +1164,7 @@ export default function CosmicWorkshop() {
           React.createElement("div", { ref: builderGridRef, onClick: handleBuilderGridClick, onTouchStart: handleBuilderGridTS, onTouchMove: handleBuilderGridTM, onTouchEnd: handleBuilderGridTE, onMouseDown: handleBuilderGridMD, onMouseMove: handleBuilderGridMM, onMouseUp: handleBuilderGridMU, onMouseLeave: function() { if (builderDragRef.current) { builderDragRef.current = null; setTimeout(function() { builderTouchUsedRef.current = false; }, 100); } }, style: { display: "grid", gridTemplateColumns: "repeat(" + COLS + ", 1fr)", gap: GAP, width: "100%", maxWidth: 380, aspectRatio: COLS + "/" + ROWS, userSelect: "none", WebkitUserSelect: "none" } },
             builderGrid.map(function(cell, idx) {
               return React.createElement("div", { key: idx, style: { aspectRatio: "1", borderRadius: 6, background: cell > 0 ? "transparent" : "rgba(30,30,50,0.6)", border: cell > 0 ? (eraserActive ? "1px solid rgba(255,80,80,0.25)" : "none") : "1px dashed rgba(80,100,140,0.3)", cursor: (selectedBlockType !== null || eraserActive) ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", pointerEvents: "none" } },
-                cell > 0 && React.createElement(BlockContent, { type: cell, size: 40, shieldLevel: cell === 10 ? 2 : 0 }),
+                cell > 0 && renderBuilderBlock(cell, 40, cell === 10 ? 2 : 0),
                 cell === 0 && React.createElement("div", { style: { width: 6, height: 6, borderRadius: "50%", background: "rgba(80,100,140,0.15)" } }));
             })),
           React.createElement("div", { style: { width: "100%", maxWidth: 380, height: 50, position: "relative", marginTop: 4 } },
@@ -1109,7 +1188,7 @@ export default function CosmicWorkshop() {
             CRATE_VARIANTS.map(function(cv) {
               var isActive2 = selectedCrateType === cv.type;
               return React.createElement("div", { key: cv.type, onClick: function() { setSelectedCrateType(cv.type); setSelectedBlockType(cv.type); setEraserActive(false); setCrateSubPanelOpen(false); }, style: { flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3, padding: "5px 2px 4px", borderRadius: 4, background: isActive2 ? "rgba(100,80,30,0.5)" : "rgba(30,30,50,0.6)", border: isActive2 ? "2px solid rgba(212,168,67,0.6)" : "1px solid rgba(80,80,100,0.3)", cursor: "pointer" } },
-                React.createElement("div", { style: { width: 28, height: 28 } }, React.createElement(BlockContent, { type: cv.type, size: 28, shieldLevel: 0 })),
+                React.createElement("div", { style: { width: 28, height: 28 } }, renderBuilderBlock(cv.type, 28, 0)),
                 React.createElement("div", { style: { fontSize: 7, fontWeight: 700, color: isActive2 ? "rgba(212,168,67,0.9)" : "rgba(180,200,220,0.4)", textTransform: "uppercase", letterSpacing: 0.3, textAlign: "center", lineHeight: 1.2 } }, cv.name));
             }))),
         React.createElement("div", { style: { position: "relative", zIndex: 2, background: PNL, borderTop: "3px solid #505058", padding: "8px 6px 10px", boxShadow: "0 -3px 8px rgba(0,0,0,0.3)" } },
@@ -1118,7 +1197,7 @@ export default function CosmicWorkshop() {
               if (t === 9) {
                 var isCrateActive = isCrate(selectedBlockType);
                 return React.createElement("div", { key: t, onClick: function() { if (isCrateActive && !crateSubPanelOpen) { setCrateSubPanelOpen(true); } else if (crateSubPanelOpen) { return; } else { setSelectedBlockType(selectedCrateType); setEraserActive(false); setCrateSubPanelOpen(true); } }, style: { width: "18%", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "5px 2px 4px", borderRadius: crateSubPanelOpen ? "0 0 4px 4px" : 4, background: crateSubPanelOpen ? "rgba(100,80,30,0.35)" : isCrateActive ? "rgba(40,100,120,0.4)" : PNL, border: crateSubPanelOpen ? "2px solid rgba(212,168,67,0.4)" : isCrateActive ? "2px solid rgba(80,200,255,0.5)" : PNLB, cursor: "pointer", boxShadow: crateSubPanelOpen ? "inset 0 0 10px rgba(212,168,67,0.15), 0 0 6px rgba(212,168,67,0.15)" : isCrateActive ? "inset 0 0 10px rgba(80,200,255,0.15), 0 0 8px rgba(80,200,255,0.2)" : "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)" } },
-                  React.createElement("div", { style: { width: 28, height: 28 } }, React.createElement(BlockContent, { type: selectedCrateType, size: 28, shieldLevel: 0 })),
+                  React.createElement("div", { style: { width: 28, height: 28 } }, renderBuilderBlock(selectedCrateType, 28, 0)),
                   React.createElement("div", { style: { fontSize: 7, fontWeight: 700, color: crateSubPanelOpen ? "rgba(212,168,67,0.8)" : isCrateActive ? "#80ddff" : "rgba(180,200,220,0.5)", textTransform: "uppercase", letterSpacing: 0.3, textAlign: "center", lineHeight: 1.2 } }, crateSubPanelOpen ? "OPEN" : isCrateActive ? "ACTIVE" : "Crate"));
               }
               if (t === 17) {
@@ -1126,13 +1205,13 @@ export default function CosmicWorkshop() {
                 var isUfoActive = selectedBlockType === 17;
                 if (ufoOnBoard && !isUfoActive) {
                   return React.createElement("div", { key: t, onClick: function() { setBuilderWarn("Only one UFO allowed. Remove it from the board to place in a new location."); setTimeout(function() { setBuilderWarn(null); }, 4000); }, style: { width: "18%", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "5px 2px 4px", borderRadius: 4, background: "rgba(30,30,40,0.6)", border: "1px solid rgba(80,80,100,0.2)", cursor: "pointer", opacity: 0.4 } },
-                    React.createElement("div", { style: { width: 28, height: 28 } }, React.createElement(BlockContent, { type: 17, size: 28 })),
+                    React.createElement("div", { style: { width: 28, height: 28 } }, renderBuilderBlock(17, 28, 0)),
                     React.createElement("div", { style: { fontSize: 7, fontWeight: 700, color: "rgba(140,140,160,0.4)", textTransform: "uppercase", letterSpacing: 0.3, textAlign: "center", lineHeight: 1.2 } }, "UFO"));
                 }
               }
               var isActive = selectedBlockType === t;
               return React.createElement("div", { key: t, onClick: function() { setSelectedBlockType(isActive ? null : t); setEraserActive(false); setCrateSubPanelOpen(false); }, style: { width: "18%", display: "flex", flexDirection: "column", alignItems: "center", gap: 2, padding: "5px 2px 4px", borderRadius: 4, background: isActive ? "rgba(40,100,120,0.4)" : PNL, border: isActive ? "2px solid rgba(80,200,255,0.5)" : PNLB, cursor: "pointer", boxShadow: isActive ? "inset 0 0 10px rgba(80,200,255,0.15), 0 0 8px rgba(80,200,255,0.2)" : "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)" } },
-                React.createElement("div", { style: { width: 28, height: 28 } }, React.createElement(BlockContent, { type: t, size: 28, shieldLevel: t === 10 ? 2 : 0 })),
+                React.createElement("div", { style: { width: 28, height: 28 } }, renderBuilderBlock(t, 28, t === 10 ? 2 : 0)),
                 React.createElement("div", { style: { fontSize: 7, fontWeight: 700, color: isActive ? "#80ddff" : "rgba(180,200,220,0.5)", textTransform: "uppercase", letterSpacing: 0.3, textAlign: "center", lineHeight: 1.2 } }, isActive ? "ACTIVE" : BLOCK_LABELS[t]));
             })),
           React.createElement("div", { style: { display: "flex", gap: 6, justifyContent: "center", marginTop: 6 } },
@@ -1193,6 +1272,7 @@ export default function CosmicWorkshop() {
                   React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, saved.name || "Unnamed"),
                   React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 10 } }, (bt ? bt.label + " \u00B7 " : "") + saved.shape + (saved.pattern !== "none" ? " \u00B7 " + saved.pattern : "") + (dateStr ? " \u00B7 " + dateStr : "")))),
               React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } },
+                saved.assignedTo && React.createElement("div", { onClick: function() { bdToggleActive(saved); }, style: bdActiveMap[saved.assignedTo] === saved.id ? BTN_ISACTIVE : BTN_SETACTIVE }, bdActiveMap[saved.assignedTo] === saved.id ? "★ Active" : "Set Active"),
                 React.createElement("div", { onClick: function() { bdOpenEditor(saved); }, style: BTN_EDIT }, "EDIT"),
                 React.createElement("div", { onClick: function() { setBdRenamingId(saved.id); setBdRenamingName(saved.name || ""); }, style: BTN_RENAME }, "RENAME"),
                 React.createElement("div", { onClick: function() { bdExportDesign(saved); }, style: BTN_EXPORT }, "EXPORT"),
@@ -1216,6 +1296,7 @@ export default function CosmicWorkshop() {
         React.createElement(WorkshopTopBar, { onBack: bdHandleBack, backLabel: "My Blocks", title: "Block Designer", color: "#c8b8ff", fontFamily: "'Exo 2', sans-serif",
           rightContent: React.createElement("div", { style: { display: "flex", gap: 4, alignItems: "center" } },
             React.createElement("div", { onClick: bdSaveCurrentDesign, style: BTN_SAVE }, "Save"),
+            React.createElement("div", { onClick: function() { if (bdCanSetActive) bdToggleActive({ id: bdEditId, assignedTo: bdDesign.assignedTo }); }, style: Object.assign({}, BTN_TOPBAR, { opacity: bdCanSetActive ? 1 : 0.4, color: bdIsActive ? "#80dd90" : "rgba(200,210,220,0.7)", border: bdIsActive ? "2px solid rgba(80,200,100,0.5)" : PNLB }) }, bdIsActive ? "★ Active" : "Set Active"),
             React.createElement("div", { style: { marginLeft: 4 } }, React.createElement(BDBlockPreview, { design: bdDisplayDesign, size: 36 }))) }),
         bdSaveStatus && React.createElement("div", { style: { padding: "6px 12px", textAlign: "center", fontSize: 12, fontWeight: 600, color: "#80dd90", background: "rgba(80,200,100,0.1)", zIndex: 2, position: "relative" } }, bdSaveStatus),
         React.createElement("div", { ref: bdScrollRef, style: { flex: 1, overflowY: "auto", fontFamily: "'Exo 2', sans-serif" } },

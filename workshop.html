@@ -822,6 +822,59 @@ function UFOBlockSvg(props) {
     clipPath: "url(#ufo-dc)"
   })));
 }
+
+// Corner power-icon badge for crate variant blocks (types 11-16).
+function crateBadgeIcon(type, baseSize) {
+  var sz = Math.max(7, baseSize * (type === 12 || type === 16 ? 0.2 : 0.18));
+  if (type === 11) return React.createElement(DroneIcon, {
+    size: sz
+  });
+  if (type === 12) return React.createElement(LightningIcon, {
+    size: sz
+  });
+  if (type === 13) return React.createElement(CrossShotIcon, {
+    size: sz
+  });
+  if (type === 14) return React.createElement("svg", {
+    width: sz,
+    height: sz,
+    viewBox: "0 0 24 24"
+  }, React.createElement("path", {
+    d: "M4 20L12 4",
+    stroke: "#80ddff",
+    strokeWidth: "3",
+    strokeLinecap: "round"
+  }), React.createElement("path", {
+    d: "M12 4L20 20",
+    stroke: "#80ddff",
+    strokeWidth: "3",
+    strokeLinecap: "round"
+  }));
+  if (type === 15) return React.createElement("svg", {
+    width: sz,
+    height: sz,
+    viewBox: "0 0 24 24"
+  }, React.createElement("rect", {
+    x: "6",
+    y: "2",
+    width: "12",
+    height: "8",
+    rx: "2",
+    fill: "#7a7a88"
+  }), React.createElement("rect", {
+    x: "10",
+    y: "8",
+    width: "4",
+    height: "12",
+    rx: "1",
+    fill: "#9a9aaa"
+  }));
+  if (type === 16) return React.createElement(CoreIcon, {
+    size: sz,
+    mode: "lit"
+  });
+  return null;
+}
 function BlockContent(props) {
   var type = props.type,
     size = props.size,
@@ -860,49 +913,6 @@ function BlockContent(props) {
         break;
       }
     }
-    var badgeIcon = null;
-    if (type === 11) badgeIcon = React.createElement(DroneIcon, {
-      size: Math.max(7, size * 0.18)
-    });else if (type === 12) badgeIcon = React.createElement(LightningIcon, {
-      size: Math.max(7, size * 0.2)
-    });else if (type === 13) badgeIcon = React.createElement(CrossShotIcon, {
-      size: Math.max(7, size * 0.18)
-    });else if (type === 14) badgeIcon = React.createElement("svg", {
-      width: Math.max(7, size * 0.18),
-      height: Math.max(7, size * 0.18),
-      viewBox: "0 0 24 24"
-    }, React.createElement("path", {
-      d: "M4 20L12 4",
-      stroke: "#80ddff",
-      strokeWidth: "3",
-      strokeLinecap: "round"
-    }), React.createElement("path", {
-      d: "M12 4L20 20",
-      stroke: "#80ddff",
-      strokeWidth: "3",
-      strokeLinecap: "round"
-    }));else if (type === 15) badgeIcon = React.createElement("svg", {
-      width: Math.max(7, size * 0.18),
-      height: Math.max(7, size * 0.18),
-      viewBox: "0 0 24 24"
-    }, React.createElement("rect", {
-      x: "6",
-      y: "2",
-      width: "12",
-      height: "8",
-      rx: "2",
-      fill: "#7a7a88"
-    }), React.createElement("rect", {
-      x: "10",
-      y: "8",
-      width: "4",
-      height: "12",
-      rx: "1",
-      fill: "#9a9aaa"
-    }));else if (type === 16) badgeIcon = React.createElement(CoreIcon, {
-      size: Math.max(7, size * 0.2),
-      mode: "lit"
-    });
     iconEl = React.createElement("div", {
       style: {
         position: "relative",
@@ -925,7 +935,7 @@ function BlockContent(props) {
         alignItems: "center",
         justifyContent: "center"
       }
-    }, badgeIcon));
+    }, crateBadgeIcon(type, size)));
   } else if (type === 10 && sl > 0) {
     iconEl = React.createElement("svg", {
       width: is,
@@ -1467,6 +1477,49 @@ function bdSaveDesigns(designs) {
   return window.storage.set(BD_STORAGE_KEY, JSON.stringify(designs)).catch(function (e) {
     console.error("Save failed:", e);
   });
+}
+
+// Active block designs: explicit, opt-in map of { blockTypeId: designId }.
+// A numeric grid block with no active design just keeps its hardcoded icon.
+var BD_ACTIVE_KEY = "cosmic-drift-active-blocks";
+function bdLoadActive() {
+  return window.storage.get(BD_ACTIVE_KEY).then(function (result) {
+    return result ? JSON.parse(result.value) : {};
+  }).catch(function () {
+    return {};
+  });
+}
+function bdSaveActive(map) {
+  return window.storage.set(BD_ACTIVE_KEY, JSON.stringify(map)).catch(function (e) {
+    console.error("Save failed:", e);
+  });
+}
+
+// Numeric grid block type -> Block Designer string id. Types 4 (extra core)
+// and 17 (UFO) are not designable. Crate variants 11-16 resolve to "crate".
+var BLOCK_TYPE_TO_BD = {
+  1: "regular",
+  2: "cross_shot",
+  3: "lightning",
+  5: "plasma",
+  6: "drone",
+  7: "indestructible",
+  8: "acid_barrel",
+  9: "crate",
+  10: "force_field"
+};
+function bdResolveActiveDesign(blockType, activeMap, savedDesigns) {
+  var bdId = BLOCK_TYPE_TO_BD[blockType];
+  if (!bdId && blockType >= 11 && blockType <= 16) bdId = "crate";
+  if (!bdId) return null;
+  var designId = activeMap[bdId];
+  if (!designId) return null;
+  for (var i = 0; i < savedDesigns.length; i++) {
+    if (savedDesigns[i].id === designId) {
+      return savedDesigns[i].assignedTo === bdId ? savedDesigns[i] : null;
+    }
+  }
+  return null;
 }
 var BD_FACTORY_PRESETS = [{
   id: "factory_regular",
@@ -2411,6 +2464,18 @@ var BTN_PLAY = Object.assign({}, BTN_BASE, {
   border: "1px solid rgba(80,200,100,0.45)",
   color: "#80dd90"
 });
+var BTN_SETACTIVE = Object.assign({}, BTN_BASE, {
+  padding: "5px 10px",
+  background: PNL,
+  border: "1px solid rgba(120,200,140,0.4)",
+  color: "rgba(150,220,170,0.8)"
+});
+var BTN_ISACTIVE = Object.assign({}, BTN_BASE, {
+  padding: "5px 10px",
+  background: "linear-gradient(180deg, #2a5a3a, #1a3a28)",
+  border: "1px solid rgba(80,220,120,0.7)",
+  color: "#80dd90"
+});
 
 // Navigate to the game, optionally auto-playing a custom level by id.
 // Hosted detection matches cosmicdriftapp.com (and localhost); the Claude
@@ -2495,6 +2560,9 @@ function CosmicWorkshop() {
   var _bdSaved = useState([]),
     bdSaved = _bdSaved[0],
     setBdSaved = _bdSaved[1];
+  var _bdActive = useState({}),
+    bdActiveMap = _bdActive[0],
+    setBdActiveMap = _bdActive[1];
   var _bdEditId = useState(null),
     bdEditId = _bdEditId[0],
     setBdEditId = _bdEditId[1];
@@ -2668,6 +2736,9 @@ function CosmicWorkshop() {
       setBdSaved(designs);
       setBdLoaded(true);
     });
+    bdLoadActive().then(function (map) {
+      setBdActiveMap(map);
+    });
   }, []);
   useEffect(function () {
     if (bdDesign.assignedTo === "force_field" && !bdDesign.phases) {
@@ -2682,6 +2753,8 @@ function CosmicWorkshop() {
     }
   }, [bdDesign.assignedTo]);
   var bdDisplayDesign = getDesignForPhase(bdDesign, bdPhase);
+  var bdCanSetActive = !!(bdEditId && !bdDirty && bdDesign.assignedTo);
+  var bdIsActive = bdCanSetActive && bdActiveMap[bdDesign.assignedTo] === bdEditId;
 
   // ═══════════════════════════════════════
   // SHARED UTILITIES
@@ -3187,8 +3260,88 @@ function CosmicWorkshop() {
       bdSaveDesigns(list);
       return list;
     });
+    setBdActiveMap(function (prev) {
+      var next = {};
+      var changed = false;
+      Object.keys(prev).forEach(function (k) {
+        if (prev[k] === id) {
+          changed = true;
+        } else {
+          next[k] = prev[k];
+        }
+      });
+      if (changed) bdSaveActive(next);
+      return changed ? next : prev;
+    });
     if (bdEditId === id) setBdEditId(null);
     setBdDeletingId(null);
+  }
+
+  // Toggle a saved design as the active design for its assigned block type.
+  function bdToggleActive(design) {
+    if (!design || !design.id || !design.assignedTo) return;
+    setBdActiveMap(function (prev) {
+      var next = {};
+      Object.keys(prev).forEach(function (k) {
+        next[k] = prev[k];
+      });
+      if (next[design.assignedTo] === design.id) {
+        delete next[design.assignedTo];
+      } else {
+        next[design.assignedTo] = design.id;
+      }
+      bdSaveActive(next);
+      return next;
+    });
+  }
+
+  // Render a numeric Level Builder block: uses the active Block Designer
+  // design when one exists, otherwise falls back to the hardcoded BlockContent.
+  function renderBuilderBlock(type, size, shieldLevel) {
+    var design = bdResolveActiveDesign(type, bdActiveMap, bdSaved);
+    if (!design) return React.createElement(BlockContent, {
+      type: type,
+      size: size,
+      shieldLevel: shieldLevel || 0
+    });
+    if (type >= 11 && type <= 16) {
+      var badgeBox = Math.max(10, size * 0.3);
+      var cvColor = null;
+      for (var ci = 0; ci < CRATE_VARIANTS.length; ci++) {
+        if (CRATE_VARIANTS[ci].type === type) {
+          cvColor = CRATE_VARIANTS[ci].color;
+          break;
+        }
+      }
+      return React.createElement("div", {
+        style: {
+          position: "relative",
+          width: size,
+          height: size
+        }
+      }, React.createElement(BDBlockPreview, {
+        design: design,
+        size: size
+      }), React.createElement("div", {
+        style: {
+          position: "absolute",
+          bottom: -2,
+          right: -2,
+          width: badgeBox,
+          height: badgeBox,
+          borderRadius: "50%",
+          background: "rgba(10,10,20,0.85)",
+          border: "1px solid " + (cvColor || "rgba(255,255,255,0.3)"),
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center"
+        }
+      }, crateBadgeIcon(type, size)));
+    }
+    return React.createElement(BDBlockPreview, {
+      design: design,
+      size: size
+    });
   }
   function bdRenameDesign(id, newName) {
     setBdSaved(function (prev) {
@@ -4313,11 +4466,7 @@ function CosmicWorkshop() {
         position: "relative",
         pointerEvents: "none"
       }
-    }, cell > 0 && React.createElement(BlockContent, {
-      type: cell,
-      size: 40,
-      shieldLevel: cell === 10 ? 2 : 0
-    }), cell === 0 && React.createElement("div", {
+    }, cell > 0 && renderBuilderBlock(cell, 40, cell === 10 ? 2 : 0), cell === 0 && React.createElement("div", {
       style: {
         width: 6,
         height: 6,
@@ -4523,11 +4672,7 @@ function CosmicWorkshop() {
         width: 28,
         height: 28
       }
-    }, React.createElement(BlockContent, {
-      type: cv.type,
-      size: 28,
-      shieldLevel: 0
-    })), React.createElement("div", {
+    }, renderBuilderBlock(cv.type, 28, 0)), React.createElement("div", {
       style: {
         fontSize: 7,
         fontWeight: 700,
@@ -4588,11 +4733,7 @@ function CosmicWorkshop() {
           width: 28,
           height: 28
         }
-      }, React.createElement(BlockContent, {
-        type: selectedCrateType,
-        size: 28,
-        shieldLevel: 0
-      })), React.createElement("div", {
+      }, renderBuilderBlock(selectedCrateType, 28, 0)), React.createElement("div", {
         style: {
           fontSize: 7,
           fontWeight: 700,
@@ -4634,10 +4775,7 @@ function CosmicWorkshop() {
             width: 28,
             height: 28
           }
-        }, React.createElement(BlockContent, {
-          type: 17,
-          size: 28
-        })), React.createElement("div", {
+        }, renderBuilderBlock(17, 28, 0)), React.createElement("div", {
           style: {
             fontSize: 7,
             fontWeight: 700,
@@ -4676,11 +4814,7 @@ function CosmicWorkshop() {
         width: 28,
         height: 28
       }
-    }, React.createElement(BlockContent, {
-      type: t,
-      size: 28,
-      shieldLevel: t === 10 ? 2 : 0
-    })), React.createElement("div", {
+    }, renderBuilderBlock(t, 28, t === 10 ? 2 : 0)), React.createElement("div", {
       style: {
         fontSize: 7,
         fontWeight: 700,
@@ -5145,7 +5279,12 @@ function CosmicWorkshop() {
         gap: 6,
         flexWrap: "wrap"
       }
-    }, React.createElement("div", {
+    }, saved.assignedTo && React.createElement("div", {
+      onClick: function () {
+        bdToggleActive(saved);
+      },
+      style: bdActiveMap[saved.assignedTo] === saved.id ? BTN_ISACTIVE : BTN_SETACTIVE
+    }, bdActiveMap[saved.assignedTo] === saved.id ? "★ Active" : "Set Active"), React.createElement("div", {
       onClick: function () {
         bdOpenEditor(saved);
       },
@@ -5231,6 +5370,18 @@ function CosmicWorkshop() {
       onClick: bdSaveCurrentDesign,
       style: BTN_SAVE
     }, "Save"), React.createElement("div", {
+      onClick: function () {
+        if (bdCanSetActive) bdToggleActive({
+          id: bdEditId,
+          assignedTo: bdDesign.assignedTo
+        });
+      },
+      style: Object.assign({}, BTN_TOPBAR, {
+        opacity: bdCanSetActive ? 1 : 0.4,
+        color: bdIsActive ? "#80dd90" : "rgba(200,210,220,0.7)",
+        border: bdIsActive ? "2px solid rgba(80,200,100,0.5)" : PNLB
+      })
+    }, bdIsActive ? "★ Active" : "Set Active"), React.createElement("div", {
       style: {
         marginLeft: 4
       }
