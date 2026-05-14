@@ -1377,6 +1377,10 @@ var BD_ICONS = [{
   id: "ring",
   label: "Ring",
   path: "M 50,24 A 26,26 0 1,1 49.99,24 Z M 50,36 A 14,14 0 1,0 50.01,36 Z"
+}, {
+  id: "hex_core",
+  label: "Hex Core",
+  path: "M 50,16 L 79.4,33 L 79.4,67 L 50,84 L 20.6,67 L 20.6,33 Z M 50,29 L 68.2,39.5 L 68.2,60.5 L 50,71 L 31.8,60.5 L 31.8,39.5 Z M 50,43 A 7,7 0 1,1 49.99,43 Z"
 }];
 var BD_BLOCK_TYPES = [{
   id: "regular",
@@ -1501,6 +1505,7 @@ var BLOCK_TYPE_TO_BD = {
   1: "regular",
   2: "cross_shot",
   3: "lightning",
+  4: "core",
   5: "plasma",
   6: "drone",
   7: "indestructible",
@@ -1787,6 +1792,33 @@ var BD_FACTORY_PRESETS = [{
       icon: "console_open"
     }
   }
+}, {
+  id: "factory_core",
+  name: "Extra Core",
+  assignedTo: "core",
+  isFactory: true,
+  shape: "square",
+  shapeRotation: 0,
+  cornerRadius: 6,
+  color: "#2090a0",
+  borderColor: "#1a7888",
+  borderWidth: 2,
+  glowEnabled: true,
+  glowColor: "#30c0d0",
+  glowIntensity: 4,
+  pattern: "none",
+  patternColor: "#fff",
+  patternOpacity: 0.3,
+  patternScale: 1,
+  patternRotation: 0,
+  patternFilled: false,
+  patternLineWidth: 1.5,
+  icon: "hex_core",
+  iconColor: "#50e8f0",
+  iconOpacity: 0.9,
+  iconGlow: true,
+  iconGlowColor: "#50e8f0",
+  iconGlowIntensity: 4
 }];
 
 // ── SVG Pattern renderer ──

@@ -264,6 +264,7 @@ var BD_ICONS = [
   { id: "shield_ic", label: "Shield", path: "M 50,18 L 78,30 L 75,58 Q 68,76 50,85 Q 32,76 25,58 L 22,30 Z" },
   { id: "gear", label: "Gear", path: "M 50,10 L 61,24 L 78,22 L 76,39 L 90,50 L 76,61 L 78,78 L 61,76 L 50,90 L 39,76 L 22,78 L 24,61 L 10,50 L 24,39 L 22,22 L 39,24 Z M 50,38 A 12,12 0 1,0 50.01,38 Z" },
   { id: "ring", label: "Ring", path: "M 50,24 A 26,26 0 1,1 49.99,24 Z M 50,36 A 14,14 0 1,0 50.01,36 Z" },
+  { id: "hex_core", label: "Hex Core", path: "M 50,16 L 79.4,33 L 79.4,67 L 50,84 L 20.6,67 L 20.6,33 Z M 50,29 L 68.2,39.5 L 68.2,60.5 L 50,71 L 31.8,60.5 L 31.8,39.5 Z M 50,43 A 7,7 0 1,1 49.99,43 Z" },
 ];
 
 var BD_BLOCK_TYPES = [
@@ -344,7 +345,7 @@ function bdSaveActive(map) {
 
 // Numeric grid block type -> Block Designer string id. Types 4 (extra core)
 // and 17 (UFO) are not designable. Crate variants 11-16 resolve to "crate".
-var BLOCK_TYPE_TO_BD = { 1: "regular", 2: "cross_shot", 3: "lightning", 5: "plasma", 6: "drone", 7: "indestructible", 8: "acid_barrel", 9: "crate", 10: "force_field" };
+var BLOCK_TYPE_TO_BD = { 1: "regular", 2: "cross_shot", 3: "lightning", 4: "core", 5: "plasma", 6: "drone", 7: "indestructible", 8: "acid_barrel", 9: "crate", 10: "force_field" };
 
 // Resolves the design for a numeric block type: the active custom design if
 // one is set, otherwise the factory preset for that type. Returns null only
@@ -379,6 +380,7 @@ var BD_FACTORY_PRESETS = [
   { id: "factory_indestructible", name: "Indestructible", assignedTo: "indestructible", isFactory: true, shape: "square", shapeRotation: 0, cornerRadius: 6, color: "#707580", borderColor: "#555555", borderWidth: 3, glowEnabled: false, glowColor: "#888", glowIntensity: 4, pattern: "squares", patternColor: "#323232", patternOpacity: 0.8, patternScale: 2.6, patternRotation: 45, patternFilled: true, patternLineWidth: 2, icon: "none", iconColor: "#fff", iconOpacity: 0.8, iconGlow: false, iconGlowColor: "#fff", iconGlowIntensity: 4 },
   { id: "factory_acid_barrel", name: "Acid Barrel", assignedTo: "acid_barrel", isFactory: true, shape: "square", shapeRotation: 0, cornerRadius: 6, color: "#2a8a2a", borderColor: "#1a6a1a", borderWidth: 2, glowEnabled: true, glowColor: "#40b840", glowIntensity: 4, pattern: "none", patternColor: "#fff", patternOpacity: 0.3, patternScale: 1, patternRotation: 0, patternFilled: false, patternLineWidth: 1.5, icon: "barrel", iconColor: "#80ff80", iconOpacity: 0.75, iconGlow: false, iconGlowColor: "#80ff80", iconGlowIntensity: 3 },
   { id: "factory_force_field", name: "Force Field", assignedTo: "force_field", isFactory: true, shape: "square", shapeRotation: 0, cornerRadius: 6, color: "#4060a0", borderColor: "#3050a0", borderWidth: 2, glowEnabled: true, glowColor: "#82b4ff", glowIntensity: 5, pattern: "none", patternColor: "#fff", patternOpacity: 0.3, patternScale: 1, patternRotation: 0, patternFilled: false, patternLineWidth: 1.5, icon: "crate_ic", iconColor: "#82b4ff", iconOpacity: 0.75, iconGlow: false, iconGlowColor: "#82b4ff", iconGlowIntensity: 4, phases: { 2: { glowEnabled: false, borderWidth: 1, borderColor: "rgba(130,180,255,0.35)" }, 3: { glowEnabled: false, borderWidth: 0, borderColor: "transparent", icon: "console_open" } } },
+  { id: "factory_core", name: "Extra Core", assignedTo: "core", isFactory: true, shape: "square", shapeRotation: 0, cornerRadius: 6, color: "#2090a0", borderColor: "#1a7888", borderWidth: 2, glowEnabled: true, glowColor: "#30c0d0", glowIntensity: 4, pattern: "none", patternColor: "#fff", patternOpacity: 0.3, patternScale: 1, patternRotation: 0, patternFilled: false, patternLineWidth: 1.5, icon: "hex_core", iconColor: "#50e8f0", iconOpacity: 0.9, iconGlow: true, iconGlowColor: "#50e8f0", iconGlowIntensity: 4 },
 ];
 
 // ── SVG Pattern renderer ──
