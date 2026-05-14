@@ -7546,16 +7546,35 @@ function CosmicDriftGame() {
       setLevelsLoading(false);
     });
   }
-  function navigateToWorkshop(editId) {
-    var workshopUrl = "workshop.html";
-    if (editId) workshopUrl = workshopUrl + "?edit=" + editId;
+  function isHostedContext() {
+    var h = window.location.hostname;
+    return h === "localhost" || h === "127.0.0.1" || h.indexOf("cosmicdriftapp.com") >= 0;
+  }
+  function navigateToWorkshop() {
     try {
-      var h = window.location.hostname;
-      if (h === "localhost" || h === "127.0.0.1" || h.indexOf("cosmicdriftapp.com") >= 0) {
-        window.location.href = workshopUrl;
+      if (isHostedContext()) {
+        window.location.href = "workshop.html";
       } else {
         alert("Workshop is available at your hosted site: /workshop.html");
       }
+    } catch (e) {
+      alert("Workshop is available at your hosted site: /workshop.html");
+    }
+  }
+
+  // Hands a level off to the Workshop and opens it directly in the Level Builder.
+  // A level with an id edits the saved level in place; one without opens as new.
+  function openLevelInBuilder(levelData) {
+    try {
+      if (!isHostedContext()) {
+        alert("Workshop is available at your hosted site: /workshop.html");
+        return;
+      }
+      window.storage.set("cosmic_drift_workshop_handoff", JSON.stringify(levelData)).then(function () {
+        window.location.href = "workshop.html?builder=1";
+      }).catch(function () {
+        window.location.href = "workshop.html?builder=1";
+      });
     } catch (e) {
       alert("Workshop is available at your hosted site: /workshop.html");
     }
@@ -8819,7 +8838,12 @@ function CosmicDriftGame() {
     }
   }, "Replay"), /*#__PURE__*/React.createElement("div", {
     onClick: function () {
-      navigateToWorkshop();
+      openLevelInBuilder(customLevelDataRef.current || {
+        name: customLevelName,
+        grid: customGridRef.current.slice(),
+        shipStart: customShipRef.current,
+        startPlasma: customPlasmaRef.current
+      });
     },
     style: {
       padding: "10px 20px",
@@ -9013,7 +9037,12 @@ function CosmicDriftGame() {
     }
   }, "Retry"), /*#__PURE__*/React.createElement("div", {
     onClick: function () {
-      navigateToWorkshop();
+      openLevelInBuilder(customLevelDataRef.current || {
+        name: customLevelName,
+        grid: customGridRef.current.slice(),
+        shipStart: customShipRef.current,
+        startPlasma: customPlasmaRef.current
+      });
     },
     style: {
       padding: "12px 20px",
@@ -10810,7 +10839,12 @@ function CosmicDriftGame() {
         pa = getLevelPlasma(level);
         ln = "Level " + level;
       }
-      navigateToWorkshop();
+      openLevelInBuilder({
+        grid: gd,
+        shipStart: ss,
+        startPlasma: pa,
+        name: ln
+      });
     },
     style: {
       display: "flex",
@@ -10832,7 +10866,12 @@ function CosmicDriftGame() {
   })), "Open in Workshop"), customLevelMode && /*#__PURE__*/React.createElement("div", {
     onClick: function () {
       setGameMenuOpen(false);
-      navigateToWorkshop();
+      openLevelInBuilder(customLevelDataRef.current || {
+        name: customLevelName,
+        grid: customGridRef.current.slice(),
+        shipStart: customShipRef.current,
+        startPlasma: customPlasmaRef.current
+      });
     },
     style: {
       display: "flex",

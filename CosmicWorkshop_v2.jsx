@@ -674,6 +674,26 @@ export default function CosmicWorkshop() {
     bdLoadActive().then(function(map) { setBdActiveMap(map); });
   }, []);
 
+  // ?builder=1 handoff: the game wrote a level to storage; open it in the Level Builder.
+  // A level with an id edits the saved level in place; one without opens as new.
+  useEffect(function() {
+    try {
+      if (new URLSearchParams(window.location.search).get("builder") !== "1") return;
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+      if (!window.storage || !window.storage.get) return;
+      window.storage.get("cosmic_drift_workshop_handoff").then(function(r) {
+        if (window.storage.delete) { window.storage.delete("cosmic_drift_workshop_handoff"); }
+        if (!r || !r.value) return;
+        var data = JSON.parse(r.value);
+        if (!data || !data.grid) return;
+        setScreen("builder");
+        openBuilder(data);
+      }).catch(function() {});
+    } catch (e) {}
+  }, []);
+
   useEffect(function() {
     if (bdDesign.assignedTo === "force_field" && !bdDesign.phases) {
       setBdDesign(function(prev) { return Object.assign({}, prev, { phases: bdDefaultPhases() }); });
