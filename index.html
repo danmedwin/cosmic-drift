@@ -3590,66 +3590,6 @@ function LegendOverlay(props) {
       color: "#b0c8d8",
       letterSpacing: 1,
       textTransform: "uppercase",
-      marginBottom: 3
-    }
-  }, "Block Types"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: "rgba(180,200,220,0.7)",
-      fontSize: 13,
-      marginBottom: 8,
-      lineHeight: 1.4
-    }
-  }, "Destroy most of these blocks for points."), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      flexDirection: "column",
-      gap: 6
-    }
-  }, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (t, i) {
-    return blockCard(t, i);
-  })), /*#__PURE__*/React.createElement("div", {
-    style: {
-      borderTop: "1px solid rgba(80,80,90,0.4)",
-      margin: "14px 0 8px",
-      paddingTop: 10
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 15,
-      fontWeight: 700,
-      color: "#b0c8d8",
-      letterSpacing: 1,
-      textTransform: "uppercase",
-      marginBottom: 4
-    }
-  }, "Power-Ups"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: "rgba(180,200,220,0.7)",
-      fontSize: 13,
-      marginBottom: 8,
-      lineHeight: 1.4
-    }
-  }, "Found in treasure crates. Tap to arm, tap grid or ship to deploy."), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      flexDirection: "column",
-      gap: 6
-    }
-  }, pups.map(function (p, i) {
-    return pupCard(p, i);
-  }))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      borderTop: "1px solid rgba(80,80,90,0.4)",
-      margin: "14px 0 8px",
-      paddingTop: 10
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 15,
-      fontWeight: 700,
-      color: "#b0c8d8",
-      letterSpacing: 1,
-      textTransform: "uppercase",
       marginBottom: 4
     }
   }, "Game Modes"), /*#__PURE__*/React.createElement("div", {
@@ -3705,7 +3645,64 @@ function LegendOverlay(props) {
       fontSize: 13,
       lineHeight: 1.5
     }
-  }, "A curated set of hand-crafted challenge levels, each with a fixed layout and starting setup. Work through them all to master the game.")))), /*#__PURE__*/React.createElement("div", {
+  }, "A curated set of hand-crafted challenge levels, each with a fixed layout and starting setup. Work through them all to master the game."))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      borderTop: "1px solid rgba(80,80,90,0.4)",
+      marginTop: 14,
+      paddingTop: 10,
+      fontSize: 15,
+      fontWeight: 700,
+      color: "#b0c8d8",
+      letterSpacing: 1,
+      textTransform: "uppercase",
+      marginBottom: 3
+    }
+  }, "Block Types"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "rgba(180,200,220,0.7)",
+      fontSize: 13,
+      marginBottom: 8,
+      lineHeight: 1.4
+    }
+  }, "Destroy most of these blocks for points."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 6
+    }
+  }, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (t, i) {
+    return blockCard(t, i);
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      borderTop: "1px solid rgba(80,80,90,0.4)",
+      margin: "14px 0 8px",
+      paddingTop: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 15,
+      fontWeight: 700,
+      color: "#b0c8d8",
+      letterSpacing: 1,
+      textTransform: "uppercase",
+      marginBottom: 4
+    }
+  }, "Power-Ups"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "rgba(180,200,220,0.7)",
+      fontSize: 13,
+      marginBottom: 8,
+      lineHeight: 1.4
+    }
+  }, "Found in treasure crates. Tap to arm, tap grid or ship to deploy."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 6
+    }
+  }, pups.map(function (p, i) {
+    return pupCard(p, i);
+  }))), /*#__PURE__*/React.createElement("div", {
     style: {
       borderTop: "1px solid rgba(80,80,90,0.4)",
       margin: "20px 0 8px",
@@ -4844,6 +4841,9 @@ function CosmicDriftGame() {
   var _testerMenu = useState(false),
     showTesterMenu = _testerMenu[0],
     setShowTesterMenu = _testerMenu[1];
+  var _tutsReset = useState(false),
+    tutsReset = _tutsReset[0],
+    setTutsReset = _tutsReset[1];
   var _ufoDbg = useState(null),
     ufoDebugText = _ufoDbg[0],
     setUfoDebugText = _ufoDbg[1];
@@ -11754,7 +11754,36 @@ function CosmicDriftGame() {
       letterSpacing: 1,
       boxSizing: "border-box"
     }
-  }, "Report a Bug"), _shotTimingLog.length > 0 && /*#__PURE__*/React.createElement("div", {
+  }, "Report a Bug"), /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      try {
+        window.storage.delete("cosmic_drift_skip_popup");
+      } catch (e) {}
+      try {
+        window.storage.delete("cosmic_drift_builder_tour");
+      } catch (e) {}
+      setNpSavedChoice(null);
+      setTutsReset(true);
+      setTimeout(function () {
+        setTutsReset(false);
+      }, 2500);
+    },
+    style: {
+      width: "100%",
+      padding: "11px 0",
+      marginTop: 10,
+      borderRadius: 8,
+      background: tutsReset ? "rgba(80,200,120,0.12)" : "rgba(80,140,255,0.1)",
+      border: tutsReset ? "1px solid rgba(80,200,120,0.3)" : "1px solid rgba(80,140,255,0.25)",
+      color: tutsReset ? "rgba(130,220,150,0.9)" : "rgba(120,170,255,0.85)",
+      fontSize: 12,
+      fontWeight: 700,
+      cursor: "pointer",
+      textAlign: "center",
+      letterSpacing: 1,
+      boxSizing: "border-box"
+    }
+  }, tutsReset ? "Tutorials Reset ✓ - new-player popup + builder walkthrough will show again" : "Reset Tutorials"), _shotTimingLog.length > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 14
     }
