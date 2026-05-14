@@ -633,6 +633,7 @@ export default function CosmicWorkshop() {
   var _bdShowImport = useState(false), bdShowImport = _bdShowImport[0], setBdShowImport = _bdShowImport[1];
   var _bdImportText = useState(""), bdImportText = _bdImportText[0], setBdImportText = _bdImportText[1];
   var _bdImportError = useState(""), bdImportError = _bdImportError[0], setBdImportError = _bdImportError[1];
+  var _bdImportConfirm = useState(null), bdImportConfirm = _bdImportConfirm[0], setBdImportConfirm = _bdImportConfirm[1];
   var _bdBackWarn = useState(false), bdShowBackWarn = _bdBackWarn[0], setBdShowBackWarn = _bdBackWarn[1];
   var bdScrollRef = useRef(null);
 
@@ -1077,12 +1078,32 @@ export default function CosmicWorkshop() {
   }
 
   // Set imported designs active for their block types (merge - leaves other types alone).
+  // When multiple entries share the same assignedTo, picks the most-recently-edited one.
   function bdActivateImported(entries) {
+    var best = {};
+    for (var i = 0; i < entries.length; i++) {
+      var e = entries[i];
+      if (!e.assignedTo) continue;
+      if (!best[e.assignedTo]) {
+        best[e.assignedTo] = e;
+      } else {
+        var existingTime = best[e.assignedTo].modifiedAt ? new Date(best[e.assignedTo].modifiedAt).getTime() : 0;
+        var newTime = e.modifiedAt ? new Date(e.modifiedAt).getTime() : 0;
+        if (newTime > existingTime) { best[e.assignedTo] = e; }
+      }
+    }
     setBdActiveMap(function(prev) {
       var next = {}; Object.keys(prev).forEach(function(k) { next[k] = prev[k]; });
-      for (var i = 0; i < entries.length; i++) { if (entries[i].assignedTo) { next[entries[i].assignedTo] = entries[i].id; } }
+      Object.keys(best).forEach(function(k) { next[k] = best[k].id; });
       bdSaveActive(next); return next;
     });
+  }
+
+  function bdConfirmImport() {
+    var entries = bdImportConfirm;
+    setBdSaved(function(prev) { var list = prev.concat(entries); bdSaveDesigns(list); return list; });
+    bdActivateImported(entries);
+    setBdImportConfirm(null);
   }
 
   function bdValidateDesignImport(parsed) {
@@ -1100,15 +1121,15 @@ export default function CosmicWorkshop() {
       if (parsed.length === 0) { setBdImportError("Empty array - no designs to import"); return; }
       var newEntries = [];
       for (var a = 0; a < parsed.length; a++) { var err = bdValidateDesignImport(parsed[a]); if (err) { setBdImportError("Design " + (a + 1) + ": " + err); return; } var entry = Object.assign({}, bdDefaultDesign(), parsed[a]); entry.id = genUUID(); entry.isFactory = false; entry.modifiedAt = new Date().toISOString(); newEntries.push(entry); }
+      if (bdSavedTab === "active") { setBdImportConfirm(newEntries); setBdShowImport(false); setBdImportText(""); setBdImportError(""); return; }
       setBdSaved(function(prev) { var list = prev.concat(newEntries); bdSaveDesigns(list); return list; });
-      if (bdSavedTab === "active") { bdActivateImported(newEntries); }
       setBdShowImport(false); setBdImportText(""); setBdImportError(""); return;
     }
     var err2 = bdValidateDesignImport(parsed);
     if (err2) { setBdImportError(err2); return; }
     var entry2 = Object.assign({}, bdDefaultDesign(), parsed); entry2.id = genUUID(); entry2.isFactory = false; entry2.modifiedAt = new Date().toISOString();
+    if (bdSavedTab === "active") { setBdImportConfirm([entry2]); setBdShowImport(false); setBdImportText(""); setBdImportError(""); return; }
     setBdSaved(function(prev) { var list = prev.concat([entry2]); bdSaveDesigns(list); return list; });
-    if (bdSavedTab === "active") { bdActivateImported([entry2]); }
     setBdShowImport(false); setBdImportText(""); setBdImportError("");
   }
 
@@ -1147,6 +1168,20 @@ export default function CosmicWorkshop() {
         React.createElement("div", { style: { display: "flex", gap: 12, justifyContent: "center", marginTop: 12 } },
           React.createElement("div", { onClick: onClose, style: { padding: "8px 20px", borderRadius: 16, border: "1px solid rgba(120,80,255,0.3)", color: "#c8b8ff", fontSize: 12, fontWeight: 600, cursor: "pointer" } }, "Cancel"),
           React.createElement("div", { onClick: onImport, style: { padding: "8px 20px", borderRadius: 16, background: "linear-gradient(135deg,#2a5a6a,#1a3a4a)", border: "1px solid rgba(80,200,255,0.4)", color: "#80ddff", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "Import"))));
+  }
+
+  function renderImportConfirmOverlay(entries, onConfirm, onCancel) {
+    var typeCount = 0;
+    var seen = {};
+    for (var i = 0; i < entries.length; i++) { if (entries[i].assignedTo && !seen[entries[i].assignedTo]) { seen[entries[i].assignedTo] = true; typeCount++; } }
+    var msg = "Import " + entries.length + " design" + (entries.length === 1 ? "" : "s") + " and set " + (typeCount === 1 ? "it" : "them") + " active for " + typeCount + " block type" + (typeCount === 1 ? "" : "s") + "?";
+    return React.createElement("div", { style: OVERLAY_BG, onClick: function(e) { e.stopPropagation(); } },
+      React.createElement("div", { onClick: function(e) { e.stopPropagation(); }, style: Object.assign({}, OVERLAY_BOX, { border: "1px solid rgba(80,200,255,0.3)", maxWidth: 300 }) },
+        React.createElement("div", { style: { color: "#80ddff", fontSize: 15, fontWeight: 700, marginBottom: 8, fontFamily: "'Quicksand',sans-serif" } }, "Import Set"),
+        React.createElement("div", { style: { color: "rgba(180,200,220,0.6)", fontSize: 12, marginBottom: 16, lineHeight: 1.5 } }, msg),
+        React.createElement("div", { style: { display: "flex", gap: 12, justifyContent: "center" } },
+          React.createElement("div", { onClick: onCancel, style: { padding: "8px 20px", borderRadius: 16, border: "1px solid rgba(120,80,255,0.3)", color: "#c8b8ff", fontSize: 12, fontWeight: 600, cursor: "pointer" } }, "Cancel"),
+          React.createElement("div", { onClick: onConfirm, style: { padding: "8px 20px", borderRadius: 16, background: "linear-gradient(135deg,#2a5a6a,#1a3a4a)", border: "1px solid rgba(80,200,255,0.4)", color: "#80ddff", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "Import & Set Active"))));
   }
 
   function renderBackWarnOverlay(onStay, onLeave) {
@@ -1427,6 +1462,7 @@ export default function CosmicWorkshop() {
         bdDeletingId && renderDeleteOverlay("Delete Design?", function() { setBdDeletingId(null); }, function() { bdDeleteDesign(bdDeletingId); }),
         bdExportId && renderExportOverlay("Export Design", bdExportText, bdCopied, function() { copyToClipboard(bdExportText, setBdCopied); }, function() { setBdExportId(null); }),
         bdShowImport && renderImportOverlay("Import Design", bdImportText, setBdImportText, bdImportError, setBdImportError, bdHandleImport, function() { setBdShowImport(false); setBdImportText(""); setBdImportError(""); }),
+        bdImportConfirm && renderImportConfirmOverlay(bdImportConfirm, bdConfirmImport, function() { setBdImportConfirm(null); }),
         bdShowExportAll && renderExportOverlay("Export All Designs (" + bdSaved.length + ")", bdExportAllText, bdCopied, function() { copyToClipboard(bdExportAllText, setBdCopied); }, function() { setBdShowExportAll(false); })),
 
       // ── DESIGN EDITOR ──
