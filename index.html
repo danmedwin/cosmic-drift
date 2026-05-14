@@ -2776,7 +2776,7 @@ var GAME_ACTIVE_BLOCKS = {};
 // Corner power-icon badge for crate variant blocks (types 11-16).
 function crateBadgeIcon(type, baseSize) {
   var sz = Math.max(9, baseSize * (type === 12 || type === 16 ? 0.26 : 0.24));
-  if (type === 11) return /*#__PURE__*/React.createElement(DroneIcon, {
+  if (type === 11) return /*#__PURE__*/React.createElement(BDDroneIcon, {
     size: sz
   });
   if (type === 12) return /*#__PURE__*/React.createElement(LightningIcon, {
