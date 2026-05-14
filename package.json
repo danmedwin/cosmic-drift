@@ -1,0 +1,15 @@
+{
+  "name": "cosmic-drift",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mobile-first arcade/puzzle block shooter. Standalone HTML built from React JSX source.",
+  "scripts": {
+    "build:game": "node build.js CosmicDriftV76.jsx index.html \"Cosmic Drift\"",
+    "build:workshop": "node build.js CosmicWorkshop_v2.jsx workshop.html \"Cosmic Workshop\"",
+    "build": "npm run build:game && npm run build:workshop"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-react": "^7.26.3"
+  }
+}
