@@ -58,7 +58,7 @@ var SCRNB = "2px solid #3a3a45";
 var SCRNS = "inset 0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.05)";
 
 // ── Animation CSS (subset needed for Workshop) ──
-var ANIM_CSS = "@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@400;600;700&display=swap');\n@keyframes starDrift{0%{transform:translateY(-50%)}100%{transform:translateY(0)}}\n@keyframes introFadeIn{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}\n@keyframes pulse{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}\n@keyframes ufoWarpOut{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}\n@keyframes ufoWarpIn{0%{transform:scale(0.05);opacity:0}60%{transform:scale(1.08);opacity:0.9}100%{transform:scale(1);opacity:1}}\n@keyframes ufoLightSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}\n@keyframes splashFloat{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}\n@keyframes splashGlow{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}\n* { box-sizing: border-box; }\ninput[type=range] { -webkit-appearance: none; appearance: none; background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; outline: none; }\ninput[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }\ninput[type=range]::-moz-range-thumb { width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }";
+var ANIM_CSS = "@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@400;600;700&display=swap');\n@keyframes starDrift{0%{transform:translateY(-50%)}100%{transform:translateY(0)}}\n@keyframes introFadeIn{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}\n@keyframes pulse{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}\n@keyframes ufoWarpOut{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}\n@keyframes ufoWarpIn{0%{transform:scale(0.05);opacity:0}60%{transform:scale(1.08);opacity:0.9}100%{transform:scale(1);opacity:1}}\n@keyframes ufoLightSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}\n@keyframes splashFloat{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}\n@keyframes splashGlow{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}\n* { box-sizing: border-box; }\ninput[type=range] { -webkit-appearance: none; appearance: none; background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; outline: none; }\ninput[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }\ninput[type=range]::-moz-range-thumb { width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }@keyframes vfxOozeDrip{0%{transform:scaleY(0);opacity:0}100%{transform:scaleY(1);opacity:0.85}}@keyframes vfxOozeWave{0%{transform:translateY(0)}100%{transform:translateY(50%)}}@keyframes vfxBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxRing{0%{transform:scale(0.1);opacity:1}100%{transform:scale(2.2);opacity:0}}@keyframes vfxFlash{0%{transform:scale(0.2);opacity:1}100%{transform:scale(1.8);opacity:0}}@keyframes vfxPop{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(1.2);filter:brightness(1.8)}100%{transform:scale(0);opacity:0}}@keyframes vfxBubble{0%{transform:translateY(0) scale(0.5);opacity:0}15%{opacity:0.55}85%{opacity:0.55}100%{transform:translateY(88px) scale(1);opacity:0}}@keyframes vfxSpark{0%{transform:translate(0,0) scale(1);opacity:1}35%{transform:translate(calc(var(--sx)*0.45),calc(var(--sy)*0.25 - 7px));opacity:0.9}100%{transform:translate(var(--sx),var(--sy)) scale(0.3);opacity:0}}@keyframes vfxBurnBlock{0%{opacity:1;filter:brightness(1)}10%{opacity:1;filter:brightness(2.3)}55%{opacity:0;filter:brightness(1)}100%{opacity:0;filter:brightness(1)}}";
 
 // ═══════════════════════════════════════════════════════════════
 // SHARED VISUAL COMPONENTS
@@ -321,6 +321,113 @@ function bdDefaultPhases() {
 }
 
 var BD_STORAGE_KEY = "cosmic-drift-block-designs";
+// VFX Studio: saved-designs model, mirroring the Block Designer.
+//   cosmic-drift-vfx-designs -> array of VFX design objects
+//   cosmic-drift-vfx-active  -> { effectType: designId } active map
+var VFX_STORAGE_KEY = "cosmic-drift-vfx-designs";
+var VFX_ACTIVE_KEY = "cosmic-drift-vfx-active";
+
+// Effect type registry: drives the type-picker buttons, sorting, the editor.
+var VFX_EFFECT_TYPES = [
+  { id: "acid_ooze",     label: "Acid Ooze",     color: "#35a035" },
+  { id: "burn",          label: "Burn",          color: "#ff6633" },
+  { id: "block_destroy", label: "Block Destroy", color: "#80ddff" },
+  { id: "drone_explode", label: "Drone Explode", color: "#ffe066" }
+];
+function vfxTypeInfo(id) {
+  for (var i = 0; i < VFX_EFFECT_TYPES.length; i++) { if (VFX_EFFECT_TYPES[i].id === id) return VFX_EFFECT_TYPES[i]; }
+  return VFX_EFFECT_TYPES[0];
+}
+
+// Per-effect parameter defaults: the starting point for a brand-new design.
+var VFX_DEFAULTS = {
+  acid_ooze:     { color1: "#1a6a1a", color2: "#35a035", width: 1.0, waveSize: 1.0, freq: 5, speed: 1.0, splash: 1.0 },
+  burn:          { emberColor: "#ff6633", emberOpacity: 1.0, sparkColor: "#ffffff", sparkOpacity: 0.85, speed: 1.0, spread: 1.0, density: 1.0, emberSize: 1.0 },
+  block_destroy: { accentColor: "#80ddff", speed: 1.0, intensity: 1.0 },
+  drone_explode: { color1: "#ffe066", color2: "#ff6633", speed: 1.0, intensity: 1.0 }
+};
+
+// Factory presets: the built-in look per effect type (Defaults tab + fallback
+// when no custom design is active). Acid Ooze uses the in-game-matching values.
+var VFX_FACTORY_PRESETS = [
+  { id: "factory_acid_ooze",     name: "Default Acid Ooze",     effectType: "acid_ooze",     isFactory: true, color1: "#1a6a1a", color2: "#35a035", width: 1.3, waveSize: 0.8, freq: 8, speed: 0.5, splash: 1.8 },
+  { id: "factory_burn",          name: "Default Burn",          effectType: "burn",          isFactory: true, emberColor: "#ff6633", emberOpacity: 1.0, sparkColor: "#ffffff", sparkOpacity: 0.85, speed: 1.0, spread: 1.0, density: 1.0, emberSize: 1.0 },
+  { id: "factory_block_destroy", name: "Default Block Destroy", effectType: "block_destroy", isFactory: true, accentColor: "#80ddff", speed: 1.0, intensity: 1.0 },
+  { id: "factory_drone_explode", name: "Default Drone Explode", effectType: "drone_explode", isFactory: true, color1: "#ffe066", color2: "#ff6633", speed: 1.0, intensity: 1.0 }
+];
+function vfxFactoryFor(effectType) {
+  for (var i = 0; i < VFX_FACTORY_PRESETS.length; i++) { if (VFX_FACTORY_PRESETS[i].effectType === effectType) return VFX_FACTORY_PRESETS[i]; }
+  return null;
+}
+
+// A fresh, unsaved design for the given effect type.
+// A fresh, unsaved design. effectType null = not yet chosen (the editor shows
+// the "pick an effect" empty state until the user picks a type).
+function vfxDefaultDesign(effectType) {
+  var d = { name: "", effectType: effectType || null };
+  var params = VFX_DEFAULTS[effectType] || {};
+  Object.keys(params).forEach(function(k) { d[k] = params[k]; });
+  return d;
+}
+
+function vfxLoadDesigns() {
+  return window.storage.get(VFX_STORAGE_KEY).then(function(result) {
+    if (!result) return [];
+    var parsed = JSON.parse(result.value);
+    return Array.isArray(parsed) ? parsed : [];
+  }).catch(function() { return []; });
+}
+function vfxSaveDesigns(designs) {
+  return window.storage.set(VFX_STORAGE_KEY, JSON.stringify(designs)).catch(function(e) { console.error("Save failed:", e); });
+}
+function vfxLoadActive() {
+  return window.storage.get(VFX_ACTIVE_KEY).then(function(result) {
+    return result ? JSON.parse(result.value) : {};
+  }).catch(function() { return {}; });
+}
+function vfxSaveActive(map) {
+  return window.storage.set(VFX_ACTIVE_KEY, JSON.stringify(map)).catch(function(e) { console.error("Save failed:", e); });
+}
+
+// Resolves the design for an effect type: the active custom design if set,
+// otherwise the factory preset.
+function vfxResolveActive(effectType, activeMap, savedDesigns) {
+  var id = activeMap[effectType];
+  if (id) {
+    for (var i = 0; i < savedDesigns.length; i++) {
+      if (savedDesigns[i].id === id && savedDesigns[i].effectType === effectType) return savedDesigns[i];
+    }
+  }
+  return vfxFactoryFor(effectType);
+}
+// Ported from the game's makeOozePath: a wavy vertical ooze column.
+// freq = whole number of wave cycles down the column. Rounded to an integer so
+// the wave tiles seamlessly when the column scrolls by h.
+function vfxMakeOozePath(h, ampMul, widthMul, freq) {
+  var cycles = Math.max(2, Math.round(freq || 5));
+  var period = h / cycles;
+  var hw = 11 * (widthMul || 1);
+  var amp = 1.6 * (ampMul || 1);
+  var rPhase = 0.15, cx = 30, step = 3;
+  var totalH = 2 * h;
+  var lx = cx - hw, rx = cx + hw;
+  var leftPts = [], rightPts = [];
+  for (var y = 0; y <= totalH; y += step) {
+    var lWave = amp * Math.sin(y * 2 * Math.PI / period);
+    leftPts.push((lx + lWave).toFixed(1) + "," + y);
+  }
+  for (var y2 = totalH; y2 >= 0; y2 -= step) {
+    var rWave = amp * Math.sin(y2 * 2 * Math.PI / period + Math.PI * rPhase);
+    rightPts.push((rx + rWave).toFixed(1) + "," + y2);
+  }
+  return { path: "M " + leftPts.join(" L ") + " L " + rightPts.join(" L ") + " Z", svgH: totalH };
+}
+// 0..1 opacity -> 2-char hex suffix, for baking opacity into a hex color.
+function vfxAlphaHex(o) {
+  var n = Math.round(Math.max(0, Math.min(1, o == null ? 1 : o)) * 255);
+  var h = n.toString(16);
+  return h.length < 2 ? "0" + h : h;
+}
 
 function bdLoadDesigns() {
   return window.storage.get(BD_STORAGE_KEY).then(function(result) {
@@ -635,6 +742,29 @@ export default function CosmicWorkshop() {
   var _bdImportError = useState(""), bdImportError = _bdImportError[0], setBdImportError = _bdImportError[1];
   var _bdImportConfirm = useState(null), bdImportConfirm = _bdImportConfirm[0], setBdImportConfirm = _bdImportConfirm[1];
   var _bdBackWarn = useState(false), bdShowBackWarn = _bdBackWarn[0], setBdShowBackWarn = _bdBackWarn[1];
+  // ══ VFX STUDIO STATE ══
+  var _vfxSaved = useState([]), vfxSaved = _vfxSaved[0], setVfxSaved = _vfxSaved[1];
+  var _vfxActive = useState({}), vfxActiveMap = _vfxActive[0], setVfxActiveMap = _vfxActive[1];
+  var _vfxView = useState("list"), vfxCurrentView = _vfxView[0], setVfxCurrentView = _vfxView[1];
+  var _vfxSavedTab = useState("custom"), vfxSavedTab = _vfxSavedTab[0], setVfxSavedTab = _vfxSavedTab[1];
+  var _vfxSortMode = useState("date_new"), vfxSortMode = _vfxSortMode[0], setVfxSortMode = _vfxSortMode[1];
+  var _vfxEditDesign = useState(function() { return vfxDefaultDesign(null); }), vfxEditDesign = _vfxEditDesign[0], setVfxEditDesign = _vfxEditDesign[1];
+  var _vfxEditId = useState(null), vfxEditId = _vfxEditId[0], setVfxEditId = _vfxEditId[1];
+  var _vfxDirty = useState(false), vfxDirty = _vfxDirty[0], setVfxDirty = _vfxDirty[1];
+  var _vfxPrevKey = useState(0), vfxPrevKey = _vfxPrevKey[0], setVfxPrevKey = _vfxPrevKey[1];
+  var _vfxSaveStatus = useState(""), vfxSaveStatus = _vfxSaveStatus[0], setVfxSaveStatus = _vfxSaveStatus[1];
+  var _vfxRenamingId = useState(null), vfxRenamingId = _vfxRenamingId[0], setVfxRenamingId = _vfxRenamingId[1];
+  var _vfxRenamingName = useState(""), vfxRenamingName = _vfxRenamingName[0], setVfxRenamingName = _vfxRenamingName[1];
+  var _vfxDeletingId = useState(null), vfxDeletingId = _vfxDeletingId[0], setVfxDeletingId = _vfxDeletingId[1];
+  var _vfxExportId = useState(null), vfxExportId = _vfxExportId[0], setVfxExportId = _vfxExportId[1];
+  var _vfxExportText = useState(""), vfxExportText = _vfxExportText[0], setVfxExportText = _vfxExportText[1];
+  var _vfxCopied = useState(false), vfxCopied = _vfxCopied[0], setVfxCopied = _vfxCopied[1];
+  var _vfxShowExportAll = useState(false), vfxShowExportAll = _vfxShowExportAll[0], setVfxShowExportAll = _vfxShowExportAll[1];
+  var _vfxExportAllText = useState(""), vfxExportAllText = _vfxExportAllText[0], setVfxExportAllText = _vfxExportAllText[1];
+  var _vfxShowImport = useState(false), vfxShowImport = _vfxShowImport[0], setVfxShowImport = _vfxShowImport[1];
+  var _vfxImportText = useState(""), vfxImportText = _vfxImportText[0], setVfxImportText = _vfxImportText[1];
+  var _vfxImportError = useState(""), vfxImportError = _vfxImportError[0], setVfxImportError = _vfxImportError[1];
+  var _vfxBackWarn = useState(false), vfxShowBackWarn = _vfxBackWarn[0], setVfxShowBackWarn = _vfxBackWarn[1];
   var bdScrollRef = useRef(null);
 
   // ══ LEVEL BUILDER STATE ══
@@ -695,6 +825,8 @@ export default function CosmicWorkshop() {
       setBdLoaded(true);
     });
     bdLoadActive().then(function(map) { setBdActiveMap(map); });
+    vfxLoadDesigns().then(function(designs) { setVfxSaved(designs); });
+    vfxLoadActive().then(function(map) { setVfxActiveMap(map); });
   }, []);
 
   // ?builder=1 handoff: the game wrote a level to storage; open it in the Level Builder.
@@ -744,6 +876,7 @@ export default function CosmicWorkshop() {
 
   var bdDisplayDesign = getDesignForPhase(bdDesign, bdPhase);
   var bdIsActive = !!(bdEditId && !bdDirty && bdDesign.assignedTo && bdActiveMap[bdDesign.assignedTo] === bdEditId);
+  var vfxIsActive = !!(vfxEditId && !vfxDirty && vfxActiveMap[vfxEditDesign.effectType] === vfxEditId);
 
   // ═══════════════════════════════════════
   // SHARED UTILITIES
@@ -1133,6 +1266,312 @@ export default function CosmicWorkshop() {
     setBdShowImport(false); setBdImportText(""); setBdImportError("");
   }
 
+  // ── VFX Studio: design list / editor (mirrors the bd* functions) ──
+  function vfxUpdateDesign(key, value) {
+    setVfxEditDesign(function(prev) {
+      var next = {}; Object.keys(prev).forEach(function(k) { next[k] = prev[k]; });
+      next[key] = value; return next;
+    });
+    setVfxDirty(true);
+  }
+  function vfxSaveCurrentDesign() {
+    if (!vfxEditDesign.effectType) { setVfxSaveStatus("Pick an effect type first"); setTimeout(function() { setVfxSaveStatus(""); }, 2500); return; }
+    var saveName = (vfxEditDesign.name || "").trim() || "Unnamed Effect";
+    var newDesign = {}; Object.keys(vfxEditDesign).forEach(function(k) { newDesign[k] = vfxEditDesign[k]; });
+    newDesign.name = saveName;
+    newDesign.id = vfxEditId || genUUID();
+    newDesign.createdAt = newDesign.createdAt || new Date().toISOString();
+    newDesign.modifiedAt = new Date().toISOString();
+    setVfxSaved(function(prev) {
+      var list = prev.slice(); var found = false;
+      for (var i = 0; i < list.length; i++) { if (list[i].id === newDesign.id) { list[i] = newDesign; found = true; break; } }
+      if (!found) list.push(newDesign);
+      vfxSaveDesigns(list); return list;
+    });
+    setVfxEditId(newDesign.id);
+    setVfxEditDesign(function(prev) { return Object.assign({}, prev, { name: saveName }); });
+    setVfxDirty(false);
+    setVfxSaveStatus("Saved!");
+    setTimeout(function() { setVfxSaveStatus(""); }, 2000);
+  }
+  function vfxDeleteDesign(id) {
+    setVfxSaved(function(prev) { var list = prev.filter(function(d) { return d.id !== id; }); vfxSaveDesigns(list); return list; });
+    setVfxActiveMap(function(prev) {
+      var next = {}; var changed = false;
+      Object.keys(prev).forEach(function(k) { if (prev[k] === id) { changed = true; } else { next[k] = prev[k]; } });
+      if (changed) vfxSaveActive(next);
+      return changed ? next : prev;
+    });
+    if (vfxEditId === id) setVfxEditId(null);
+    setVfxDeletingId(null);
+  }
+  function vfxToggleActive(design) {
+    if (!design || !design.id || !design.effectType) return;
+    setVfxActiveMap(function(prev) {
+      var next = {}; Object.keys(prev).forEach(function(k) { next[k] = prev[k]; });
+      if (next[design.effectType] === design.id) { delete next[design.effectType]; }
+      else { next[design.effectType] = design.id; }
+      vfxSaveActive(next);
+      return next;
+    });
+  }
+  function vfxRenameDesign(id, newName) {
+    setVfxSaved(function(prev) {
+      var list = prev.map(function(d) { return d.id === id ? Object.assign({}, d, { name: newName, modifiedAt: new Date().toISOString() }) : d; });
+      vfxSaveDesigns(list); return list;
+    });
+    setVfxRenamingId(null);
+  }
+  function vfxOpenEditor(design) {
+    if (design) {
+      var loaded = {}; Object.keys(design).forEach(function(k) { loaded[k] = design[k]; });
+      setVfxEditDesign(loaded);
+      setVfxEditId(design.id || null);
+    } else {
+      setVfxEditDesign(vfxDefaultDesign(null));
+      setVfxEditId(null);
+    }
+    setVfxDirty(false);
+    setVfxSaveStatus("");
+    setVfxCurrentView("editor");
+  }
+  function vfxCopyPreset(preset) {
+    var copy = {}; Object.keys(preset).forEach(function(k) { if (k !== "isFactory" && k !== "id") copy[k] = preset[k]; });
+    copy.name = preset.name + " (custom)";
+    setVfxEditDesign(copy);
+    setVfxEditId(null);
+    setVfxDirty(true);
+    setVfxSaveStatus("");
+    setVfxCurrentView("editor");
+  }
+  function vfxResetDesign() {
+    var params = VFX_DEFAULTS[vfxEditDesign.effectType] || {};
+    setVfxEditDesign(function(prev) {
+      var next = { name: prev.name, effectType: prev.effectType };
+      if (prev.id) next.id = prev.id;
+      if (prev.createdAt) next.createdAt = prev.createdAt;
+      Object.keys(params).forEach(function(k) { next[k] = params[k]; });
+      return next;
+    });
+    setVfxDirty(true);
+  }
+  // Pick (or switch) the effect type in the editor. Switching resets the
+  // type-specific params to that type's defaults, since each effect's controls
+  // are entirely different; the name and ids are kept.
+  function vfxPickEffectType(type) {
+    if (vfxEditDesign.effectType === type) return;
+    var params = VFX_DEFAULTS[type] || {};
+    setVfxEditDesign(function(prev) {
+      var next = { name: prev.name, effectType: type };
+      if (prev.id) next.id = prev.id;
+      if (prev.createdAt) next.createdAt = prev.createdAt;
+      Object.keys(params).forEach(function(k) { next[k] = params[k]; });
+      return next;
+    });
+    setVfxDirty(true);
+  }
+  function vfxHandleBack() {
+    if (vfxDirty) { setVfxShowBackWarn(true); return; }
+    setVfxCurrentView("list");
+  }
+  function vfxExportDesign(design) {
+    var out = {}; Object.keys(design).forEach(function(k) { if (k !== "isFactory") out[k] = design[k]; });
+    setVfxExportText(JSON.stringify(out));
+    setVfxExportId(design.id);
+    setVfxCopied(false);
+  }
+  function vfxExportAllDesigns() {
+    var arr = vfxSaved.map(function(d) { var out = {}; Object.keys(d).forEach(function(k) { out[k] = d[k]; }); return out; });
+    setVfxExportAllText(JSON.stringify(arr));
+    setVfxShowExportAll(true);
+    setVfxCopied(false);
+  }
+  function vfxValidateImport(parsed) {
+    if (typeof parsed !== "object" || parsed === null) return "Invalid effect data";
+    if (!parsed.effectType || !vfxFactoryFor(parsed.effectType)) return "Missing or unknown effectType";
+    return null;
+  }
+  function vfxHandleImport() {
+    var text = vfxImportText.trim();
+    if (!text) { setVfxImportError("Paste an effect code first"); return; }
+    var parsed;
+    try { parsed = JSON.parse(text); } catch (e) { setVfxImportError("Invalid format - not valid JSON"); return; }
+    var arr = Array.isArray(parsed) ? parsed : [parsed];
+    if (arr.length === 0) { setVfxImportError("Empty array - no effects to import"); return; }
+    var newEntries = [];
+    for (var a = 0; a < arr.length; a++) {
+      var err = vfxValidateImport(arr[a]);
+      if (err) { setVfxImportError((arr.length > 1 ? "Effect " + (a + 1) + ": " : "") + err); return; }
+      var entry = {}; Object.keys(arr[a]).forEach(function(k) { if (k !== "isFactory") entry[k] = arr[a][k]; });
+      entry.id = genUUID();
+      entry.modifiedAt = new Date().toISOString();
+      newEntries.push(entry);
+    }
+    setVfxSaved(function(prev) { var list = prev.concat(newEntries); vfxSaveDesigns(list); return list; });
+    setVfxShowImport(false); setVfxImportText(""); setVfxImportError("");
+  }
+  // Compact, non-animated icon for list cards (one per design, reflects its params).
+  function renderVfxIcon(design) {
+    var et = design.effectType;
+    var box = { position: "relative", width: 44, height: 44, borderRadius: 6, background: "rgba(5,5,20,0.85)", border: "1px solid rgba(255,255,255,0.07)", overflow: "hidden", flexShrink: 0 };
+    if (et === "acid_ooze") {
+      var ic1 = design.color1 || "#1a6a1a", ic2 = design.color2 || "#35a035";
+      var iw = Math.max(0.5, Math.min(2, design.width || 1));
+      var iwv = Math.max(0.5, Math.min(2, design.waveSize || 1));
+      var ifq = Math.max(2, Math.min(12, Math.round(design.freq == null ? 5 : design.freq)));
+      var iop = vfxMakeOozePath(40, iwv, iw, ifq);
+      var igid = "vfxicon_" + design.id;
+      return React.createElement("div", { style: box },
+        React.createElement("svg", { viewBox: "0 0 60 " + iop.svgH, width: 22, height: 40, preserveAspectRatio: "none", style: { position: "absolute", left: "50%", top: 2, transform: "translateX(-50%)" } },
+          React.createElement("defs", null,
+            React.createElement("linearGradient", { id: igid, x1: "0", y1: "0", x2: "1", y2: "0" },
+              React.createElement("stop", { offset: "0%", stopColor: ic1, stopOpacity: "0.6" }),
+              React.createElement("stop", { offset: "50%", stopColor: ic2 }),
+              React.createElement("stop", { offset: "100%", stopColor: ic1, stopOpacity: "0.6" }))),
+          React.createElement("path", { d: iop.path, fill: "url(#" + igid + ")" })));
+    }
+    if (et === "burn") {
+      var ibc = (design.emberColor || "#ff6633") + vfxAlphaHex(design.emberOpacity);
+      var isc = (design.sparkColor || "#ffffff") + vfxAlphaHex(design.sparkOpacity == null ? 0.85 : design.sparkOpacity);
+      var idots = [];
+      var iang = [25, 150, 215, 330];
+      for (var bi2 = 0; bi2 < 4; bi2++) {
+        var br2 = iang[bi2] * Math.PI / 180;
+        idots.push(React.createElement("div", { key: bi2, style: { position: "absolute", left: 22 + Math.cos(br2) * 13 - 2, top: 22 + Math.sin(br2) * 13 - 2, width: 4, height: 4, borderRadius: bi2 % 2 ? "50%" : "1px", background: bi2 % 2 ? isc : ibc } }));
+      }
+      return React.createElement("div", { style: box },
+        React.createElement("div", { style: { position: "absolute", left: 15, top: 15, width: 14, height: 14, borderRadius: 3, background: "#3a3030", border: "1px solid " + (design.emberColor || "#ff6633") } }),
+        idots);
+    }
+    if (et === "block_destroy") {
+      var idc = design.accentColor || "#80ddff";
+      var idots2 = [];
+      var iang2 = [0, 60, 120, 180, 240, 300];
+      for (var di2 = 0; di2 < 6; di2++) {
+        var dr2 = iang2[di2] * Math.PI / 180;
+        idots2.push(React.createElement("div", { key: di2, style: { position: "absolute", left: 22 + Math.cos(dr2) * 14 - 2, top: 22 + Math.sin(dr2) * 14 - 2, width: 4, height: 4, borderRadius: "50%", background: di2 % 2 ? "rgba(200,200,255,0.7)" : idc } }));
+      }
+      return React.createElement("div", { style: box },
+        React.createElement("div", { style: { position: "absolute", left: 16, top: 16, width: 12, height: 12, borderRadius: 3, background: "#444", border: "1px solid " + idc + "88" } }),
+        idots2);
+    }
+    if (et === "drone_explode") {
+      var ir1 = design.color1 || "#ffe066", ir2 = design.color2 || "#ff6633";
+      return React.createElement("div", { style: box },
+        React.createElement("div", { style: { position: "absolute", left: 6, top: 6, width: 32, height: 32, borderRadius: "50%", border: "2px solid " + ir1 + "80" } }),
+        React.createElement("div", { style: { position: "absolute", left: 14, top: 14, width: 16, height: 16, borderRadius: "50%", background: "radial-gradient(circle, #fff 0%, " + ir1 + " 40%, " + ir2 + " 80%, transparent 100%)" } }));
+    }
+    return React.createElement("div", { style: box });
+  }
+  function renderVfxPreview(design, prevKey) {
+    var effect = design.effectType;
+    var c = design;
+    var particles = [];
+    var angles8 = [0, 45, 90, 135, 180, 225, 270, 315];
+    var previewStyle = { position: "relative", height: 130, background: "rgba(5,5,20,0.8)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.07)", margin: "0 0 16px 0", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" };
+    if (effect === "acid_ooze") {
+      var oozeC1 = c.color1 || "#1a6a1a";
+      var oozeC2 = c.color2 || "#35a035";
+      var oozeWidth = Math.max(0.5, Math.min(2, c.width || 1));
+      var oozeWave = Math.max(0.5, Math.min(2, c.waveSize || 1));
+      var oozeFreq = Math.max(2, Math.min(12, Math.round(c.freq == null ? 5 : c.freq)));
+      var oozeFlow = Math.max(0.5, Math.min(2, c.speed || 1));
+      var oozeBub = Math.max(0, Math.min(2, c.splash == null ? 1 : c.splash));
+      var colH = 76, colW = 52;
+      var op = vfxMakeOozePath(colH, oozeWave, oozeWidth, oozeFreq);
+      var waveDur = (1.2 / oozeFlow).toFixed(2) + "s";
+      var gid = "vfxog" + prevKey;
+      var oozeBubbles = [];
+      var bubCount = Math.round(oozeBub * 5);
+      for (var obi = 0; obi < bubCount; obi++) {
+        var obx = 12 + (obi * 13) % 28;
+        var obsize = 3 + (obi % 3);
+        var obdelay = ((obi * 0.47) % 2.4).toFixed(2);
+        var obdur = (2 + (obi % 3) * 0.6).toFixed(2);
+        oozeBubbles.push(React.createElement("div", { key: "ob" + obi, style: { position: "absolute", left: obx, top: -6, width: obsize, height: obsize, borderRadius: "50%", background: oozeC2, opacity: 0.55, animation: "vfxBubble " + obdur + "s ease-in " + obdelay + "s infinite" } }));
+      }
+      return React.createElement("div", { key: prevKey + "-" + effect, style: previewStyle },
+        React.createElement("div", { style: { position: "relative", display: "flex", flexDirection: "column", alignItems: "center" } },
+          React.createElement("div", { style: { width: 34, height: 20, borderRadius: 5, background: oozeC1, border: "1.5px solid " + oozeC2, zIndex: 3 } }),
+          React.createElement("div", { style: { position: "relative", width: colW, height: colH, overflow: "hidden", marginTop: -3 } },
+            React.createElement("div", { style: { position: "absolute", left: "50%", top: 0, width: colW * 0.8, height: colH, transform: "translateX(-50%)", background: "linear-gradient(to bottom, transparent, " + oozeC2 + "33 15%, " + oozeC2 + "33 85%, transparent)", filter: "blur(6px)", pointerEvents: "none" } }),
+            React.createElement("svg", { viewBox: "0 0 60 " + op.svgH, width: colW, height: colH * 2, preserveAspectRatio: "none", style: { position: "absolute", top: -colH, left: 0, animation: "vfxOozeWave " + waveDur + " linear infinite" } },
+              React.createElement("defs", null,
+                React.createElement("linearGradient", { id: gid, x1: "0", y1: "0", x2: "1", y2: "0" },
+                  React.createElement("stop", { offset: "0%", stopColor: oozeC1, stopOpacity: "0.6" }),
+                  React.createElement("stop", { offset: "35%", stopColor: oozeC2, stopOpacity: "0.9" }),
+                  React.createElement("stop", { offset: "50%", stopColor: oozeC2 }),
+                  React.createElement("stop", { offset: "65%", stopColor: oozeC2, stopOpacity: "0.9" }),
+                  React.createElement("stop", { offset: "100%", stopColor: oozeC1, stopOpacity: "0.6" }))),
+              React.createElement("path", { d: op.path, fill: "url(#" + gid + ")" })),
+            oozeBubbles),
+          React.createElement("div", { style: { width: colW * 0.9, height: 10, borderRadius: "50%", background: oozeC2 + "99", marginTop: -4, filter: "blur(3px)" } })));
+    }
+    if (effect === "burn") {
+      // Mimics the in-game lightning burn: the block flares then fades out
+      // while flame-colored embers scatter radially (no gravity) and white
+      // sparks fly sideways and arc downward.
+      var emberC = c.emberColor || "#ff6633";
+      var sparkC = c.sparkColor || "#ffffff";
+      var emberCol = emberC + vfxAlphaHex(c.emberOpacity);
+      var sparkCol = sparkC + vfxAlphaHex(c.sparkOpacity == null ? 0.85 : c.sparkOpacity);
+      var bSpeed = Math.max(0.5, Math.min(2, c.speed || 1));
+      var bSpread = Math.max(0.5, Math.min(2, c.spread || 1));
+      var bDensity = Math.max(0.5, Math.min(2, c.density || 1));
+      var bSize = Math.max(0.5, Math.min(2, c.emberSize || 1));
+      var burnDur = (1.4 / bSpeed).toFixed(2) + "s";
+      var emberCount = Math.round(bDensity * 9);
+      var sparkCount = Math.round(bDensity * 5);
+      for (var bi = 0; bi < emberCount; bi++) {
+        var brad = (bi / emberCount) * Math.PI * 2 + (bi % 2) * 0.5;
+        var bdist = (24 + (bi % 3) * 13) * bSpread;
+        var bsz = (4 + (bi % 3) * 2.5) * bSize;
+        particles.push(React.createElement("div", { key: "e" + bi, style: { position: "absolute", left: "50%", top: "50%", width: bsz, height: bsz, marginLeft: -bsz / 2, marginTop: -bsz / 2, borderRadius: bi % 2 === 0 ? "50%" : "1px", background: emberCol, animation: "vfxBurst " + burnDur + " ease-out " + ((bi * 0.13) % 1).toFixed(2) + "s infinite", "--bx": (Math.cos(brad) * bdist).toFixed(0) + "px", "--by": (Math.sin(brad) * bdist).toFixed(0) + "px" } }));
+      }
+      for (var si = 0; si < sparkCount; si++) {
+        var sdir = si % 2 === 0 ? 1 : -1;
+        var ssx = sdir * (16 + (si % 3) * 14) * bSpread;
+        var ssy = (22 + (si % 4) * 11) * bSpread;
+        var ssz = (2 + (si % 2) * 1.5) * bSize;
+        particles.push(React.createElement("div", { key: "s" + si, style: { position: "absolute", left: "50%", top: "50%", width: ssz, height: ssz, marginLeft: -ssz / 2, marginTop: -ssz / 2, borderRadius: "50%", background: sparkCol, animation: "vfxSpark " + burnDur + " ease-in " + (0.1 + (si * 0.17) % 0.8).toFixed(2) + "s infinite", "--sx": ssx.toFixed(0) + "px", "--sy": ssy.toFixed(0) + "px" } }));
+      }
+      return React.createElement("div", { key: prevKey + "-" + effect, style: previewStyle },
+        React.createElement("div", { style: { width: 30, height: 30, borderRadius: 5, background: "#3a3030", border: "1.5px solid " + emberC, animation: "vfxBurnBlock " + burnDur + " ease-out infinite" } }),
+        React.createElement("div", { style: { position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" } }, particles));
+    }
+    if (effect === "block_destroy") {
+      var destC = c.accentColor || "#80ddff";
+      var destDur = (0.65 / Math.max(0.5, Math.min(2, c.speed || 1))).toFixed(2) + "s";
+      var destDelay = parseFloat(destDur) / 8;
+      for (var di = 0; di < 8; di++) {
+        var drad = angles8[di] * Math.PI / 180;
+        var ddist = 38;
+        particles.push(React.createElement("div", { key: "d" + di, style: { position: "absolute", left: "50%", top: "50%", width: 6, height: 6, borderRadius: "50%", background: di % 2 === 0 ? destC : "rgba(200,200,255,0.7)", marginLeft: -3, marginTop: -3, animation: "vfxBurst " + destDur + " ease-out " + (di * destDelay).toFixed(2) + "s infinite", "--bx": (Math.cos(drad) * ddist).toFixed(0) + "px", "--by": (Math.sin(drad) * ddist).toFixed(0) + "px" } }));
+      }
+      return React.createElement("div", { key: prevKey + "-" + effect, style: previewStyle },
+        React.createElement("div", { style: { position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" } },
+          React.createElement("div", { style: { width: 28, height: 28, borderRadius: 5, background: "#444", border: "1.5px solid " + destC + "66", animation: "vfxPop " + destDur + " ease-out infinite" } }),
+          particles));
+    }
+    if (effect === "drone_explode") {
+      var drC1 = c.color1 || "#ffe066";
+      var drC2 = c.color2 || "#ff6633";
+      var drDur = (0.7 / Math.max(0.5, Math.min(2, c.speed || 1))).toFixed(2) + "s";
+      var drDelay = parseFloat(drDur) / 8;
+      for (var dri = 0; dri < 8; dri++) {
+        var drrad = angles8[dri] * Math.PI / 180;
+        var drdist = 40;
+        particles.push(React.createElement("div", { key: "r" + dri, style: { position: "absolute", left: "50%", top: "50%", width: dri % 2 === 0 ? 8 : 6, height: dri % 2 === 0 ? 8 : 6, borderRadius: "50%", background: dri % 2 === 0 ? drC1 : drC2, marginLeft: -3, marginTop: -3, animation: "vfxBurst " + drDur + " ease-out " + (dri * drDelay).toFixed(2) + "s infinite", "--bx": (Math.cos(drrad) * drdist).toFixed(0) + "px", "--by": (Math.sin(drrad) * drdist).toFixed(0) + "px" } }));
+      }
+      return React.createElement("div", { key: prevKey + "-" + effect, style: previewStyle },
+        React.createElement("div", { style: { position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" } },
+          React.createElement("div", { style: { position: "absolute", width: 90, height: 90, borderRadius: "50%", border: "2px solid " + drC1 + "80", animation: "vfxRing " + drDur + " ease-out infinite" } }),
+          React.createElement("div", { style: { position: "absolute", width: 24, height: 24, borderRadius: "50%", background: "radial-gradient(circle, #fff 0%, " + drC1 + " 40%, " + drC2 + " 80%, transparent 100%)", animation: "vfxFlash " + drDur + " ease-out infinite" } }),
+          particles));
+    }
+    return React.createElement("div", { key: prevKey + "-" + effect, style: previewStyle });
+  }
+
   // ═══════════════════════════════════════
   // SHARED OVERLAY RENDERERS
   // ═══════════════════════════════════════
@@ -1216,6 +1655,14 @@ export default function CosmicWorkshop() {
         if (ao !== bo) return ao - bo;
         return (a.name || "").localeCompare(b.name || "");
       }
+      if (mode === "effect") {
+        var eorder = {};
+        for (var eti = 0; eti < VFX_EFFECT_TYPES.length; eti++) { eorder[VFX_EFFECT_TYPES[eti].id] = eti; }
+        var aeo = eorder[a.effectType] != null ? eorder[a.effectType] : 99;
+        var beo = eorder[b.effectType] != null ? eorder[b.effectType] : 99;
+        if (aeo !== beo) return aeo - beo;
+        return (a.name || "").localeCompare(b.name || "");
+      }
       if (mode === "date_old") return ((a[dateKey] ? new Date(a[dateKey]).getTime() : 0) || 0) - ((b[dateKey] ? new Date(b[dateKey]).getTime() : 0) || 0);
       return ((b[dateKey] ? new Date(b[dateKey]).getTime() : 0) || 0) - ((a[dateKey] ? new Date(a[dateKey]).getTime() : 0) || 0);
     });
@@ -1261,14 +1708,16 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { color: "#c8b8ff", fontSize: 16, fontWeight: 700, letterSpacing: 1 } }, "Block Designer"),
               React.createElement("div", { style: { color: "rgba(180,200,220,0.35)", fontSize: 11, marginTop: 3 } }, bdSaved.length > 0 ? bdSaved.length + " saved design" + (bdSaved.length !== 1 ? "s" : "") : "Create custom block skins")))),
         // Coming soon
-        React.createElement("div", { style: { background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 20px", opacity: 0.4 } },
+        React.createElement("div", { onClick: function() { setScreen("vfx"); }, style: { background: "linear-gradient(135deg, rgba(255,180,60,0.08), rgba(255,140,40,0.02))", border: "1px solid rgba(255,180,60,0.2)", borderRadius: 12, padding: "20px 20px", cursor: "pointer" } },
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 14 } },
-            React.createElement("div", { style: { width: 48, height: 48, borderRadius: 10, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } },
-              React.createElement("svg", { width: "24", height: "24", viewBox: "0 0 24 24" }, React.createElement("circle", { cx: "12", cy: "12", r: "8", fill: "none", stroke: "rgba(180,200,220,0.3)", strokeWidth: "1.5", strokeDasharray: "3 3" }), React.createElement("text", { x: "12", y: "16", textAnchor: "middle", fill: "rgba(180,200,220,0.3)", fontSize: "12", fontWeight: "700" }, "?"))),
+            React.createElement("div", { style: { width: 48, height: 48, borderRadius: 10, background: "rgba(255,180,60,0.1)", border: "1px solid rgba(255,180,60,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } },
+              React.createElement("svg", { width: "24", height: "24", viewBox: "0 0 24 24" },
+                React.createElement("circle", { cx: "12", cy: "12", r: "3", fill: "#ffb43c" }),
+                React.createElement("path", { d: "M12 2v3M12 19v3M2 12h3M19 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M16.3 7.7l-2.1 2.1M7.7 16.3l-2.1 2.1", stroke: "#ffb43c", strokeWidth: "1.8", strokeLinecap: "round" }))),
             React.createElement("div", null,
-              React.createElement("div", { style: { color: "rgba(180,200,220,0.4)", fontSize: 14, fontWeight: 700, letterSpacing: 1 } }, "More Coming Soon"),
-              React.createElement("div", { style: { color: "rgba(180,200,220,0.2)", fontSize: 11, marginTop: 3 } }, "VFX designer, sound mixer..."))))),
-      React.createElement("div", { style: { position: "absolute", bottom: 16, color: "rgba(180,200,220,0.15)", fontSize: 9, letterSpacing: 1 } }, "Created by Dan Medwin and Claude")),
+              React.createElement("div", { style: { color: "#ffb43c", fontSize: 16, fontWeight: 700, letterSpacing: 1 } }, "VFX Studio"),
+              React.createElement("div", { style: { color: "rgba(180,200,220,0.35)", fontSize: 11, marginTop: 3 } }, "Customize visual effects")))),
+      React.createElement("div", { style: { position: "absolute", bottom: 16, color: "rgba(180,200,220,0.15)", fontSize: 9, letterSpacing: 1 } }, "Created by Dan Medwin and Claude"))),
 
     // ═══ LEVEL BUILDER ═══
     screen === "builder" && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%" } },
@@ -1444,7 +1893,7 @@ export default function CosmicWorkshop() {
               React.createElement(BDBlockPreview, { design: preset, size: 38 }),
               React.createElement("div", { style: { flex: 1, minWidth: 0 } },
                 React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, preset.name)),
-              React.createElement("div", { onClick: function() { bdCopyPreset(preset); }, style: BTN_EDIT }, "COPY"));
+              React.createElement("div", { onClick: function() { bdCopyPreset(preset); }, style: BTN_EDIT }, "Edit Copy"));
           }),
           // Active Blocks tab - the design active for each block type
           bdSavedTab === "active" && BD_BLOCK_TYPES.map(function(bt) {
@@ -1457,7 +1906,9 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { flex: 1, minWidth: 0 } },
                 React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, bt.label),
                 React.createElement("div", { style: { color: customActive ? "rgba(150,220,170,0.7)" : "rgba(180,200,220,0.3)", fontSize: 10 } }, customActive ? (customActive.name || "Unnamed") : "Default")),
-              customActive && React.createElement("div", { onClick: function() { bdToggleActive(customActive); }, style: BTN_RENAME }, "Use Default"));
+              customActive && React.createElement("div", { onClick: function() { bdToggleActive(customActive); }, style: BTN_RENAME }, "Use Default"),
+              customActive && React.createElement("div", { onClick: function() { bdOpenEditor(customActive); }, style: BTN_EDIT }, "Edit"),
+              !customActive && factory && React.createElement("div", { onClick: function() { bdCopyPreset(factory); }, style: BTN_EDIT }, "Edit Copy"));
           })),
         bdDeletingId && renderDeleteOverlay("Delete Design?", function() { setBdDeletingId(null); }, function() { bdDeleteDesign(bdDeletingId); }),
         bdExportId && renderExportOverlay("Export Design", bdExportText, bdCopied, function() { copyToClipboard(bdExportText, setBdCopied); }, function() { setBdExportId(null); }),
@@ -1544,6 +1995,128 @@ export default function CosmicWorkshop() {
                   bdDisplayDesign.iconGlow && React.createElement(React.Fragment, null,
                     React.createElement(BDColorPicker, { value: bdDisplayDesign.iconGlowColor, onChange: function(v) { bdUpdateDesign("iconGlowColor", v); }, label: "Glow Color" }),
                     React.createElement(BDSlider, { label: "Glow Spread", value: bdDisplayDesign.iconGlowIntensity, onChange: function(v) { bdUpdateDesign("iconGlowIntensity", v); }, min: 1, max: 12, step: 0.5 }))))))),
-        bdShowBackWarn && renderBackWarnOverlay(function() { setBdShowBackWarn(false); }, function() { setBdShowBackWarn(false); setBdCurrentView("list"); })))
+        bdShowBackWarn && renderBackWarnOverlay(function() { setBdShowBackWarn(false); }, function() { setBdShowBackWarn(false); setBdCurrentView("list"); }))),
+
+    screen === "vfx" && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%" } },
+
+      // ── VFX EFFECTS LIST ──
+      vfxCurrentView === "list" && React.createElement(React.Fragment, null,
+        React.createElement(WorkshopTopBar, { onBack: function() { setScreen("splash"); }, backLabel: "Workshop", title: "VFX Studio", color: "#ffb43c",
+          rightContent: React.createElement("div", { style: { display: "flex", gap: 4 } },
+            React.createElement("div", { onClick: function() { setVfxShowImport(true); setVfxImportText(""); setVfxImportError(""); }, style: BTN_TOPBAR_PURPLE }, "Import"),
+            vfxSaved.length > 0 && React.createElement("div", { onClick: vfxExportAllDesigns, style: Object.assign({}, BTN_TOPBAR, { color: "rgba(255,180,60,0.7)", fontSize: 8 }) }, "Exp All"),
+            React.createElement("div", { onClick: function() { vfxOpenEditor(null); }, style: Object.assign({}, BTN_TOPBAR_ACCENT, { border: "2px solid rgba(255,180,60,0.4)", color: "#ffb43c" }) }, "+ New")) }),
+        // Tabs
+        React.createElement("div", { style: { display: "flex", margin: "8px 10px 0", borderBottom: "1px solid rgba(60,60,80,0.3)", position: "relative", zIndex: 1 } },
+          [["custom", "My Effects (" + vfxSaved.length + ")"], ["factory", "Defaults"], ["active", "Active"]].map(function(tab) {
+            var tabActive = vfxSavedTab === tab[0];
+            return React.createElement("div", { key: tab[0], onClick: function() { setVfxSavedTab(tab[0]); }, style: { flex: 1, textAlign: "center", padding: "10px 0 8px", color: tabActive ? "#ffb43c" : "rgba(180,200,220,0.3)", fontSize: 11, fontWeight: tabActive ? 700 : 600, cursor: "pointer", borderBottom: tabActive ? "2px solid #ffb43c" : "2px solid transparent" } }, tab[1]);
+          })),
+        vfxSavedTab === "custom" && vfxSaved.length > 1 && renderSortBar(vfxSortMode, setVfxSortMode, [["effect", "Effect"]]),
+        React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "6px 10px 20px", position: "relative", zIndex: 1 } },
+          vfxSavedTab === "custom" && vfxSaved.length === 0 && React.createElement("div", { style: { textAlign: "center", padding: 40 } },
+            React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 14, marginBottom: 8 } }, "No saved effects yet"),
+            React.createElement("div", { style: { color: "rgba(180,200,220,0.2)", fontSize: 12 } }, "Create a new effect or copy a Default to start.")),
+          vfxSavedTab === "custom" && sortItems(vfxSaved, vfxSortMode, "modifiedAt").map(function(saved) {
+            var etInfo = vfxTypeInfo(saved.effectType);
+            var dateStr = saved.modifiedAt ? new Date(saved.modifiedAt).toLocaleString() : (saved.createdAt ? new Date(saved.createdAt).toLocaleString() : "");
+            var isAct = vfxActiveMap[saved.effectType] === saved.id;
+            return React.createElement("div", { key: saved.id, style: CARD_STYLE },
+              vfxRenamingId === saved.id ? React.createElement("div", { style: { display: "flex", gap: 6, marginBottom: 8, alignItems: "center" } },
+                React.createElement("input", { value: vfxRenamingName, onChange: function(e) { setVfxRenamingName(e.target.value); }, style: { flex: 1, padding: "4px 8px", borderRadius: 4, background: SCRN, border: SCRNB, color: "#b0c8d8", fontSize: 16, fontFamily: "'Quicksand',sans-serif", outline: "none" } }),
+                React.createElement("div", { onClick: function() { vfxRenameDesign(saved.id, vfxRenamingName); }, style: { padding: "4px 10px", borderRadius: 4, background: "rgba(80,200,100,0.2)", border: "1px solid rgba(80,200,100,0.4)", color: "#80dd90", fontWeight: 700, cursor: "pointer" } }, "OK"),
+                React.createElement("div", { onClick: function() { setVfxRenamingId(null); }, style: { padding: "4px 8px", borderRadius: 4, border: "1px solid rgba(255,180,60,0.3)", color: "#ffb43c", fontWeight: 700, cursor: "pointer" } }, "X"))
+              : React.createElement("div", { style: { display: "flex", gap: 10, marginBottom: 8, alignItems: "center" } },
+                renderVfxIcon(saved),
+                React.createElement("div", { style: { flex: 1, minWidth: 0 } },
+                  React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, saved.name || "Unnamed"),
+                  React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 10 } }, etInfo.label + (dateStr ? " · " + dateStr : "")))),
+              React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } },
+                React.createElement("div", { onClick: function() { vfxToggleActive(saved); }, style: isAct ? BTN_ISACTIVE : BTN_SETACTIVE }, isAct ? "★ Active" : "Set Active"),
+                React.createElement("div", { onClick: function() { vfxOpenEditor(saved); }, style: BTN_EDIT }, "EDIT"),
+                React.createElement("div", { onClick: function() { setVfxRenamingId(saved.id); setVfxRenamingName(saved.name || ""); }, style: BTN_RENAME }, "RENAME"),
+                React.createElement("div", { onClick: function() { vfxExportDesign(saved); }, style: BTN_EXPORT }, "EXPORT"),
+                React.createElement("div", { onClick: function() { setVfxDeletingId(saved.id); }, style: BTN_DELETE }, "DELETE")));
+          }),
+          vfxSavedTab === "factory" && VFX_FACTORY_PRESETS.map(function(preset) {
+            return React.createElement("div", { key: preset.id, style: Object.assign({}, CARD_STYLE, { display: "flex", alignItems: "center", gap: 10 }) },
+              renderVfxIcon(preset),
+              React.createElement("div", { style: { flex: 1, minWidth: 0 } },
+                React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, preset.name),
+                React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 10 } }, vfxTypeInfo(preset.effectType).label + " · built-in")),
+              React.createElement("div", { onClick: function() { vfxCopyPreset(preset); }, style: BTN_EDIT }, "Edit Copy"));
+          }),
+          vfxSavedTab === "active" && VFX_EFFECT_TYPES.map(function(et) {
+            var activeId = vfxActiveMap[et.id], customActive = null;
+            if (activeId) { for (var ci = 0; ci < vfxSaved.length; ci++) { if (vfxSaved[ci].id === activeId && vfxSaved[ci].effectType === et.id) { customActive = vfxSaved[ci]; break; } } }
+            var shown = customActive || vfxFactoryFor(et.id);
+            return React.createElement("div", { key: et.id, style: Object.assign({}, CARD_STYLE, { display: "flex", alignItems: "center", gap: 10 }) },
+              shown && renderVfxIcon(shown),
+              React.createElement("div", { style: { flex: 1, minWidth: 0 } },
+                React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, et.label),
+                React.createElement("div", { style: { color: customActive ? "rgba(255,200,120,0.7)" : "rgba(180,200,220,0.3)", fontSize: 10 } }, customActive ? (customActive.name || "Unnamed") : "Default")),
+              customActive && React.createElement("div", { onClick: function() { vfxToggleActive(customActive); }, style: BTN_RENAME }, "Use Default"),
+              customActive && React.createElement("div", { onClick: function() { vfxOpenEditor(customActive); }, style: BTN_EDIT }, "Edit"),
+              !customActive && shown && React.createElement("div", { onClick: function() { vfxCopyPreset(shown); }, style: BTN_EDIT }, "Edit Copy"));
+          })),
+        vfxDeletingId && renderDeleteOverlay("Delete Effect?", function() { setVfxDeletingId(null); }, function() { vfxDeleteDesign(vfxDeletingId); }),
+        vfxExportId && renderExportOverlay("Export Effect", vfxExportText, vfxCopied, function() { copyToClipboard(vfxExportText, setVfxCopied); }, function() { setVfxExportId(null); }),
+        vfxShowImport && renderImportOverlay("Import Effect", vfxImportText, setVfxImportText, vfxImportError, setVfxImportError, vfxHandleImport, function() { setVfxShowImport(false); setVfxImportText(""); setVfxImportError(""); }),
+        vfxShowExportAll && renderExportOverlay("Export All Effects (" + vfxSaved.length + ")", vfxExportAllText, vfxCopied, function() { copyToClipboard(vfxExportAllText, setVfxCopied); }, function() { setVfxShowExportAll(false); })),
+
+      // ── VFX EFFECT EDITOR ──
+      vfxCurrentView === "editor" && React.createElement(React.Fragment, null,
+        React.createElement(WorkshopTopBar, { onBack: vfxHandleBack, backLabel: "VFX Studio", title: "VFX Studio", color: "#ffb43c",
+          rightContent: React.createElement("div", { style: { display: "flex", gap: 4, alignItems: "center" } },
+            React.createElement("div", { onClick: vfxSaveCurrentDesign, style: BTN_SAVE }, "Save"),
+            React.createElement("div", { onClick: function() {
+              if (!vfxEditId || vfxDirty) { setVfxSaveStatus("Save the effect first"); setTimeout(function() { setVfxSaveStatus(""); }, 2500); return; }
+              vfxToggleActive({ id: vfxEditId, effectType: vfxEditDesign.effectType });
+            }, style: Object.assign({}, BTN_TOPBAR, { color: vfxIsActive ? "#80dd90" : "rgba(200,210,220,0.7)", border: vfxIsActive ? "2px solid rgba(80,200,100,0.5)" : PNLB }) }, vfxIsActive ? "★ Active" : "Set Active")) }),
+        vfxSaveStatus && React.createElement("div", { style: { padding: "6px 12px", textAlign: "center", fontSize: 12, fontWeight: 600, color: "#80dd90", background: "rgba(80,200,100,0.1)", zIndex: 2, position: "relative" } }, vfxSaveStatus),
+        React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "12px 14px 60px" } },
+          React.createElement("div", { style: { marginBottom: 12 } },
+            React.createElement("div", { style: { fontSize: 10, color: "#445", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 } }, "Name"),
+            React.createElement("input", { value: vfxEditDesign.name, onChange: function(e) { vfxUpdateDesign("name", e.target.value); }, placeholder: "Unnamed Effect", style: { width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.3)", color: "#e0e0e0", fontSize: 16, fontFamily: "'Quicksand',sans-serif", outline: "none", boxSizing: "border-box" } })),
+          React.createElement("div", { style: { fontSize: 10, color: "#445", marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 } }, "Effect"),
+          React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 } },
+            VFX_EFFECT_TYPES.map(function(et) {
+              var sel = vfxEditDesign.effectType === et.id;
+              return React.createElement("div", { key: et.id, onClick: function() { vfxPickEffectType(et.id); }, style: { padding: "7px 14px", borderRadius: 16, background: sel ? "rgba(255,255,255,0.1)" : "transparent", border: sel ? "1px solid " + et.color + "88" : "1px solid rgba(255,255,255,0.08)", color: sel ? et.color : "rgba(180,200,220,0.45)", fontSize: 11, fontWeight: 700, cursor: "pointer", letterSpacing: 0.3 } }, et.label);
+            })),
+          !vfxEditDesign.effectType && React.createElement("div", { style: { textAlign: "center", padding: "48px 20px", color: "rgba(180,200,220,0.35)" } },
+            React.createElement("div", { style: { fontSize: 14, fontWeight: 600, marginBottom: 6 } }, "Pick an effect to work on"),
+            React.createElement("div", { style: { fontSize: 12, color: "rgba(180,200,220,0.25)" } }, "Choose one of the effect types above to start designing.")),
+          vfxEditDesign.effectType && React.createElement(React.Fragment, null,
+            renderVfxPreview(vfxEditDesign, vfxPrevKey),
+            vfxEditDesign.effectType === "acid_ooze" && React.createElement(React.Fragment, null,
+              React.createElement(BDColorPicker, { label: "Body Color", value: vfxEditDesign.color1, onChange: function(v) { vfxUpdateDesign("color1", v); } }),
+              React.createElement(BDColorPicker, { label: "Highlight Color", value: vfxEditDesign.color2, onChange: function(v) { vfxUpdateDesign("color2", v); } }),
+              React.createElement(BDSlider, { label: "Width", value: vfxEditDesign.width, onChange: function(v) { vfxUpdateDesign("width", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.width || 1).toFixed(1) + "x" }),
+              React.createElement(BDSlider, { label: "Waves", value: vfxEditDesign.waveSize, onChange: function(v) { vfxUpdateDesign("waveSize", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.waveSize || 1).toFixed(1) + "x" }),
+              React.createElement(BDSlider, { label: "Frequency", value: vfxEditDesign.freq, onChange: function(v) { vfxUpdateDesign("freq", v); }, min: 2, max: 12, step: 1, displayValue: String(Math.round(vfxEditDesign.freq == null ? 5 : vfxEditDesign.freq)) }),
+              React.createElement(BDSlider, { label: "Speed of Flow", value: vfxEditDesign.speed, onChange: function(v) { vfxUpdateDesign("speed", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.speed || 1).toFixed(1) + "x" }),
+              React.createElement(BDSlider, { label: "Splash", value: vfxEditDesign.splash, onChange: function(v) { vfxUpdateDesign("splash", v); }, min: 0, max: 2, step: 0.1, displayValue: (vfxEditDesign.splash == null ? 1 : vfxEditDesign.splash).toFixed(1) + "x" })),
+            vfxEditDesign.effectType === "burn" && React.createElement(React.Fragment, null,
+              React.createElement(BDColorPicker, { label: "Ember Color", value: vfxEditDesign.emberColor, onChange: function(v) { vfxUpdateDesign("emberColor", v); } }),
+              React.createElement(BDSlider, { label: "Ember Opacity", value: vfxEditDesign.emberOpacity, onChange: function(v) { vfxUpdateDesign("emberOpacity", v); }, min: 0.1, max: 1, step: 0.05, displayValue: Math.round((vfxEditDesign.emberOpacity == null ? 1 : vfxEditDesign.emberOpacity) * 100) + "%" }),
+              React.createElement(BDColorPicker, { label: "Spark Color", value: vfxEditDesign.sparkColor, onChange: function(v) { vfxUpdateDesign("sparkColor", v); } }),
+              React.createElement(BDSlider, { label: "Spark Opacity", value: vfxEditDesign.sparkOpacity, onChange: function(v) { vfxUpdateDesign("sparkOpacity", v); }, min: 0.1, max: 1, step: 0.05, displayValue: Math.round((vfxEditDesign.sparkOpacity == null ? 0.85 : vfxEditDesign.sparkOpacity) * 100) + "%" }),
+              React.createElement(BDSlider, { label: "Speed", value: vfxEditDesign.speed, onChange: function(v) { vfxUpdateDesign("speed", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.speed || 1).toFixed(1) + "x" }),
+              React.createElement(BDSlider, { label: "Spread", value: vfxEditDesign.spread, onChange: function(v) { vfxUpdateDesign("spread", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.spread || 1).toFixed(1) + "x" }),
+              React.createElement(BDSlider, { label: "Density", value: vfxEditDesign.density, onChange: function(v) { vfxUpdateDesign("density", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.density || 1).toFixed(1) + "x" }),
+              React.createElement(BDSlider, { label: "Ember Size", value: vfxEditDesign.emberSize, onChange: function(v) { vfxUpdateDesign("emberSize", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.emberSize || 1).toFixed(1) + "x" })),
+            vfxEditDesign.effectType === "block_destroy" && React.createElement(React.Fragment, null,
+              React.createElement(BDColorPicker, { label: "Burst Accent", value: vfxEditDesign.accentColor, onChange: function(v) { vfxUpdateDesign("accentColor", v); } }),
+              React.createElement(BDSlider, { label: "Speed", value: vfxEditDesign.speed, onChange: function(v) { vfxUpdateDesign("speed", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.speed || 1).toFixed(1) + "x" }),
+              React.createElement(BDSlider, { label: "Count", value: vfxEditDesign.intensity, onChange: function(v) { vfxUpdateDesign("intensity", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.intensity || 1).toFixed(1) + "x" })),
+            vfxEditDesign.effectType === "drone_explode" && React.createElement(React.Fragment, null,
+              React.createElement(BDColorPicker, { label: "Primary", value: vfxEditDesign.color1, onChange: function(v) { vfxUpdateDesign("color1", v); } }),
+              React.createElement(BDColorPicker, { label: "Secondary", value: vfxEditDesign.color2, onChange: function(v) { vfxUpdateDesign("color2", v); } }),
+              React.createElement(BDSlider, { label: "Speed", value: vfxEditDesign.speed, onChange: function(v) { vfxUpdateDesign("speed", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.speed || 1).toFixed(1) + "x" }),
+              React.createElement(BDSlider, { label: "Intensity", value: vfxEditDesign.intensity, onChange: function(v) { vfxUpdateDesign("intensity", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.intensity || 1).toFixed(1) + "x" })),
+            React.createElement("div", { style: { display: "flex", gap: 10, marginTop: 8, justifyContent: "center" } },
+              React.createElement("div", { onClick: vfxResetDesign, style: Object.assign({}, BTN_RENAME, { padding: "8px 18px", fontSize: 11 }) }, "Reset to Default")))),
+        vfxShowBackWarn && renderBackWarnOverlay(function() { setVfxShowBackWarn(false); }, function() { setVfxShowBackWarn(false); setVfxCurrentView("list"); })))
   );
 }

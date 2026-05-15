@@ -724,6 +724,24 @@ function BDBlockPreview(props) {
 var BD_STORAGE_KEY = "cosmic-drift-block-designs";
 var BD_ACTIVE_KEY = "cosmic-drift-active-blocks";
 
+var VFX_STORAGE_KEY = "cosmic-drift-vfx-designs";
+var GAME_VFX_CONFIG = null;
+var VFX_DEFAULTS = {
+  acid_ooze:     { color1: "#1a6a1a", color2: "#35a035", speed: 1.0, intensity: 1.0 },
+  burn:          { color: "#ff6633",  sparkColor: "#ffffff", speed: 1.0, intensity: 1.0 },
+  block_destroy: { accentColor: "#80ddff", speed: 1.0, intensity: 1.0 },
+  drone_explode: { color1: "#ffe066", color2: "#ff6633", speed: 1.0, intensity: 1.0 }
+};
+function vfxLoadConfig() {
+  return window.storage.get(VFX_STORAGE_KEY).then(function(r) {
+    return r ? JSON.parse(r.value) : {};
+  }).catch(function() { return {}; });
+}
+function vfxGet(key) {
+  var stored = (GAME_VFX_CONFIG && GAME_VFX_CONFIG[key]) ? GAME_VFX_CONFIG[key] : {};
+  return Object.assign({}, VFX_DEFAULTS[key], stored);
+}
+
 function bdLoadDesigns() {
   return window.storage.get(BD_STORAGE_KEY).then(function (result) {
     return result ? JSON.parse(result.value) : [];
@@ -825,36 +843,48 @@ var _cvfxParticles = [];
 var MAX_PARTICLES = 150;
 function spawnBurnScatter(x, y, blockSz, color) {
   if (_cvfxParticles.length >= MAX_PARTICLES) return;
+  var cfg = vfxGet("burn");
+  var pc = cfg.color || color;
+  var sc = cfg.sparkColor || "#ffffff";
+  var spd = Math.max(0.5, Math.min(2, cfg.speed || 1));
+  var cnt = Math.round(Math.max(6, Math.min(24, 12 * (cfg.intensity || 1))));
+  var scnt = Math.round(Math.max(3, Math.min(12, 6 * (cfg.intensity || 1))));
   var now = Date.now();
-  for (var i = 0; i < 12; i++) {
+  for (var i = 0; i < cnt; i++) {
     var angle = Math.random() * Math.PI * 2;
     var dist = 20 + Math.random() * 50;
-    var frames = (350 + Math.random() * 350) / 16;
-    _cvfxParticles.push({ x: x, y: y, vx: Math.cos(angle) * dist / frames, vy: Math.sin(angle) * dist / frames, gravity: 0, life: 1, decay: 1 / frames, size: 3 + Math.random() * 5, color: color, round: Math.random() > 0.5, startTime: now + Math.random() * 100 });
+    var frames = (350 + Math.random() * 350) / 16 / spd;
+    _cvfxParticles.push({ x: x, y: y, vx: Math.cos(angle) * dist / frames, vy: Math.sin(angle) * dist / frames, gravity: 0, life: 1, decay: 1 / frames, size: 3 + Math.random() * 5, color: pc, round: Math.random() > 0.5, startTime: now + Math.random() * 100 });
   }
-  for (var j = 0; j < 6; j++) {
-    var frames2 = (350 + Math.random() * 250) / 16;
-    _cvfxParticles.push({ x: x + (Math.random() - 0.5) * blockSz, y: y + (Math.random() - 0.5) * blockSz, vx: (-40 + Math.random() * 80) / frames2, vy: (-3 + Math.random() * 10) / frames2, gravity: 0.08, life: 1, decay: 1 / frames2, size: 2 + Math.random() * 3, color: "#ffffff", round: true, startTime: now + 60 + Math.random() * 300 });
+  for (var j = 0; j < scnt; j++) {
+    var frames2 = (350 + Math.random() * 250) / 16 / spd;
+    _cvfxParticles.push({ x: x + (Math.random() - 0.5) * blockSz, y: y + (Math.random() - 0.5) * blockSz, vx: (-40 + Math.random() * 80) / frames2, vy: (-3 + Math.random() * 10) / frames2, gravity: 0.08, life: 1, decay: 1 / frames2, size: 2 + Math.random() * 3, color: sc, round: true, startTime: now + 60 + Math.random() * 300 });
   }
   _kickCvfx();
 }
 function spawnPlasmaShatter(x, y, color) {
   if (_cvfxParticles.length >= MAX_PARTICLES) return;
-  var now = Date.now(); var frames = 16;
-  for (var i = 0; i < 8; i++) {
-    var angle = (i * Math.PI * 2) / 8;
-    _cvfxParticles.push({ x: x, y: y, vx: Math.cos(angle) * 36 / frames, vy: Math.sin(angle) * 36 / frames, gravity: 0, life: 1, decay: 1 / frames, size: 6, color: i % 2 === 0 ? color : "#80ddff", round: true, fadeIn: true, startTime: now });
+  var cfg = vfxGet("block_destroy");
+  var ac = cfg.accentColor || "#80ddff";
+  var spd = Math.max(0.5, Math.min(2, cfg.speed || 1));
+  var cnt = Math.round(Math.max(4, Math.min(16, 8 * (cfg.intensity || 1))));
+  var now = Date.now(); var frames = 16 / spd;
+  for (var i = 0; i < cnt; i++) {
+    var angle = (i * Math.PI * 2) / cnt;
+    _cvfxParticles.push({ x: x, y: y, vx: Math.cos(angle) * 36 / frames, vy: Math.sin(angle) * 36 / frames, gravity: 0, life: 1, decay: 1 / frames, size: 6, color: i % 2 === 0 ? color : ac, round: true, fadeIn: true, startTime: now });
   }
   _kickCvfx();
 }
 function spawnOozeSplash(x, y, hw) {
+  var cfg = vfxGet("acid_ooze");
+  var c1 = cfg.color1 || "#1a6a1a";
+  var c2 = cfg.color2 || "#35a035";
   var now = Date.now(); var frames = 30;
   for (var i = 0; i < 6; i++) {
     var goLeft = i < 3;
     var flyX = (goLeft ? -1 : 1) * (6 + Math.random() * 12);
     var flyY = -6 + Math.random() * 18;
-    var ci = i % 3;
-    _cvfxParticles.push({ x: x + (goLeft ? -hw : hw), y: y, vx: flyX / frames, vy: flyY / frames, gravity: 0.05, life: 1, decay: 1 / frames, size: 3 + Math.random() * 2, color: ci === 0 ? "#50dd50" : ci === 1 ? "#30aa30" : "#40c840", round: true, startTime: now + Math.random() * 50 });
+    _cvfxParticles.push({ x: x + (goLeft ? -hw : hw), y: y, vx: flyX / frames, vy: flyY / frames, gravity: 0.05, life: 1, decay: 1 / frames, size: 3 + Math.random() * 2, color: i % 2 === 0 ? c2 : c1, round: true, startTime: now + Math.random() * 50 });
   }
   _kickCvfx();
 }
@@ -1301,6 +1331,9 @@ export default function CosmicDriftGame() {
       GAME_ACTIVE_BLOCKS = res[1] || {};
       setDesignsVersion(function (v) { return v + 1; });
     }).catch(function () {});
+  }, []);
+  useEffect(function() {
+    vfxLoadConfig().then(function(cfg) { GAME_VFX_CONFIG = cfg; }).catch(function() {});
   }, []);
   // ?play=levelId deep link: auto-load and start a custom level (used by Workshop "Play" buttons).
   useEffect(function () {
@@ -2035,10 +2068,10 @@ function logUfo(msg) {
 
     if (v.type === "coreFly") return <div key={v.id} style={{ position: "absolute", left: v.startX - 10, top: v.startY - 10, animation: "coreFly 0.6s ease-in forwards", "--endX": (v.endX - v.startX) + "px", "--endY": (v.endY - v.startY) + "px" }}><CoreIcon size={20} mode="lit" /></div>;
     if (v.type === "plasmaZip") return <div key={v.id} style={{ position: "absolute", left: v.startX - 10, top: v.startY - 10, animation: "plasmaZip 0.6s ease-in forwards", "--endX": (v.endX - v.startX) + "px", "--endY": (v.endY - v.startY) + "px" }}><PlasmaIcon size={20} /></div>;
-    if (v.type === "ooze") { var oh = v.h, ox2 = v.x, oy2 = v.y; var ow = oh * 1.05; var op = makeOozePath(oh + 8, oy2, blockSize + GAP); var gid = "og" + v.id; var glowW = ow * 1.05; return <div key={v.id} style={{ position: "absolute", left: ox2 - ow / 2, top: oy2 - oh / 2 - 3, width: ow, height: oh + 8, overflow: "hidden", animation: "oozeFlow 0.22s ease-out forwards", transformOrigin: "top center" }}><div style={{ position: "absolute", left: "50%", top: 0, width: glowW, height: oh + 8, transform: "translateX(-50%)", background: "linear-gradient(to bottom, transparent 0%, rgba(40,180,40,0.18) 10%, rgba(40,180,40,0.18) 90%, transparent 100%)", filter: "blur(8px)", pointerEvents: "none" }} /><svg viewBox={"0 0 40 " + op.svgH} width={ow} height={(oh + 8) * 2} preserveAspectRatio="none" style={{ position: "absolute", top: -(oh + 8), left: 0, animation: "oozeWaveFlow 1.2s linear infinite" }}><defs><linearGradient id={gid} x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#0d3a0d" /><stop offset="18%" stopColor="#1a6a1a" /><stop offset="35%" stopColor="#2a8a2a" /><stop offset="50%" stopColor="#35a035" /><stop offset="65%" stopColor="#2a8a2a" /><stop offset="82%" stopColor="#1a6a1a" /><stop offset="100%" stopColor="#0d3a0d" /></linearGradient></defs><path d={op.path} fill={"url(#" + gid + ")"} /></svg></div>; }
-    if (v.type === "oozePuddle") return <div key={v.id} style={{ position: "absolute", left: v.x - v.w * 0.6, top: v.y - 6, width: v.w * 1.2, height: 14, animation: "oozePuddleSpread 2s ease-out forwards" }}><div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "radial-gradient(ellipse, rgba(80,255,80,0.7) 0%, rgba(50,200,50,0.5) 40%, rgba(30,150,30,0.2) 75%, transparent 100%)", boxShadow: "0 0 10px rgba(80,255,80,0.4), 0 0 20px rgba(60,220,60,0.2)" }} /></div>;
+    if (v.type === "ooze") { var _oc = vfxGet("acid_ooze"); var ovc1 = _oc.color1; var ovc2 = _oc.color2; var owaveDur = (1.2 / Math.max(0.5, Math.min(2, _oc.speed))).toFixed(2) + "s"; var oh = v.h, ox2 = v.x, oy2 = v.y; var ow = oh * 1.05; var op = makeOozePath(oh + 8, oy2, blockSize + GAP); var gid = "og" + v.id; var glowW = ow * 1.05; return <div key={v.id} style={{ position: "absolute", left: ox2 - ow / 2, top: oy2 - oh / 2 - 3, width: ow, height: oh + 8, overflow: "hidden", animation: "oozeFlow 0.22s ease-out forwards", transformOrigin: "top center" }}><div style={{ position: "absolute", left: "50%", top: 0, width: glowW, height: oh + 8, transform: "translateX(-50%)", background: "linear-gradient(to bottom, transparent 0%, " + ovc2 + "2e 10%, " + ovc2 + "2e 90%, transparent 100%)", filter: "blur(8px)", pointerEvents: "none" }} /><svg viewBox={"0 0 40 " + op.svgH} width={ow} height={(oh + 8) * 2} preserveAspectRatio="none" style={{ position: "absolute", top: -(oh + 8), left: 0, animation: "oozeWaveFlow " + owaveDur + " linear infinite" }}><defs><linearGradient id={gid} x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor={ovc1} stopOpacity="0.6" /><stop offset="35%" stopColor={ovc2} stopOpacity="0.9" /><stop offset="50%" stopColor={ovc2} /><stop offset="65%" stopColor={ovc2} stopOpacity="0.9" /><stop offset="100%" stopColor={ovc1} stopOpacity="0.6" /></linearGradient></defs><path d={op.path} fill={"url(#" + gid + ")"} /></svg></div>; }
+    if (v.type === "oozePuddle") { var opc2 = vfxGet("acid_ooze").color2 || "#50ff50"; return <div key={v.id} style={{ position: "absolute", left: v.x - v.w * 0.6, top: v.y - 6, width: v.w * 1.2, height: 14, animation: "oozePuddleSpread 2s ease-out forwards" }}><div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "radial-gradient(ellipse, " + opc2 + "b3 0%, " + opc2 + "80 40%, " + opc2 + "33 75%, transparent 100%)", boxShadow: "0 0 10px " + opc2 + "66, 0 0 20px " + opc2 + "33" }} /></div>; }
     if (v.type === "oozeSplash") { var sp = []; var halfW = v.ow || 14; for (var si = 0; si < 6; si++) { var goLeft = si < 3; var edgeX = goLeft ? -halfW : halfW; var flyX = (goLeft ? -1 : 1) * (6 + Math.random() * 12); var flyY = -6 + Math.random() * 12; sp.push(<div key={si} style={{ position: "absolute", left: 18 + edgeX, top: 14 + (Math.random() * 8 - 4), width: 3 + Math.random() * 2, height: 3 + Math.random() * 2, borderRadius: "50%", background: si % 3 === 0 ? "#50dd50" : si % 3 === 1 ? "#30aa30" : "#40c840", opacity: 0.7, animation: "explodeParticle 0.5s ease-out forwards", "--px": flyX + "px", "--py": flyY + "px" }} />); } return <div key={v.id} style={{ position: "absolute", left: v.x - 18, top: v.y - 18, width: 36, height: 36, pointerEvents: "none" }}>{sp}</div>; }
-    if (v.type === "drone") { var ep = []; if (v.exploded) for (var i3 = 0; i3 < 12; i3++) { var a2 = (i3 * Math.PI * 2) / 12; var d2 = 40 + (i3 % 3) * 10; ep.push(<div key={i3} style={{ position: "absolute", left: 56, top: 56, width: i3 % 3 === 0 ? 10 : 7, height: i3 % 3 === 0 ? 10 : 7, borderRadius: "50%", background: i3 % 3 === 0 ? "#ffe066" : i3 % 3 === 1 ? "#ff6633" : "#ff9944", animation: "explodeParticle 0.6s ease-out forwards", "--px": Math.cos(a2) * d2 + "px", "--py": Math.sin(a2) * d2 + "px" }} />); } return <div key={v.id}>{!v.exploded && <div style={{ position: "absolute", left: v.startX - 10, top: v.startY - 10, animation: "droneMoveX 0.65s linear forwards", "--dx": v.dx + "px" }}><div style={{ animation: "droneMoveY 0.65s ease-in forwards", "--peak": v.arcPeak + "px", "--dy": v.dy + "px", "--startRot": v.startRot, "--endRot": v.endRot }}><BDDroneIcon size={20} /></div></div>}{v.exploded && <div style={{ position: "absolute", left: v.endX - 60, top: v.endY - 60, width: 120, height: 120 }}><div style={{ position: "absolute", left: 10, top: 10, width: 100, height: 100, borderRadius: "50%", background: "radial-gradient(circle,rgba(255,230,100,0.6) 0%,rgba(255,102,51,0.4) 40%,transparent 70%)", animation: "explodeRing 0.6s ease-out forwards" }} />{ep}<div style={{ position: "absolute", left: 30, top: 30, width: 60, height: 60, borderRadius: "50%", background: "radial-gradient(circle,#fff 0%,#ffe066 30%,#ff6633 60%,transparent 80%)", animation: "explodeFlash 0.4s ease-out forwards" }} /></div>}</div>; }
+    if (v.type === "drone") { var dvc1 = vfxGet("drone_explode").color1 || "#ffe066"; var dvc2 = vfxGet("drone_explode").color2 || "#ff6633"; var ep = []; if (v.exploded) for (var i3 = 0; i3 < 12; i3++) { var a2 = (i3 * Math.PI * 2) / 12; var d2 = 40 + (i3 % 3) * 10; ep.push(<div key={i3} style={{ position: "absolute", left: 56, top: 56, width: i3 % 3 === 0 ? 10 : 7, height: i3 % 3 === 0 ? 10 : 7, borderRadius: "50%", background: i3 % 3 === 0 ? dvc1 : dvc2, animation: "explodeParticle 0.6s ease-out forwards", "--px": Math.cos(a2) * d2 + "px", "--py": Math.sin(a2) * d2 + "px" }} />); } return <div key={v.id}>{!v.exploded && <div style={{ position: "absolute", left: v.startX - 10, top: v.startY - 10, animation: "droneMoveX 0.65s linear forwards", "--dx": v.dx + "px" }}><div style={{ animation: "droneMoveY 0.65s ease-in forwards", "--peak": v.arcPeak + "px", "--dy": v.dy + "px", "--startRot": v.startRot, "--endRot": v.endRot }}><BDDroneIcon size={20} /></div></div>}{v.exploded && <div style={{ position: "absolute", left: v.endX - 60, top: v.endY - 60, width: 120, height: 120 }}><div style={{ position: "absolute", left: 10, top: 10, width: 100, height: 100, borderRadius: "50%", background: "radial-gradient(circle," + dvc1 + "99 0%," + dvc2 + "66 40%,transparent 70%)", animation: "explodeRing 0.6s ease-out forwards" }} />{ep}<div style={{ position: "absolute", left: 30, top: 30, width: 60, height: 60, borderRadius: "50%", background: "radial-gradient(circle,#fff 0%," + dvc1 + " 30%," + dvc2 + " 60%,transparent 80%)", animation: "explodeFlash 0.4s ease-out forwards" }} /></div>}</div>; }
     if (v.type === "itemFly") return <div key={v.id} style={{ position: "absolute", left: v.startX - 10, top: v.startY - 10, animation: "itemFly 0.6s ease-in-out forwards", "--endX": (v.endX - v.startX) + "px", "--endY": (v.endY - v.startY) + "px" }}>{v.icon === "drone" ? <BDDroneIcon size={20} /> : v.icon === "crossshot" ? <BDCrossIcon size={20} /> : <LightningIcon size={20} />}</div>;
     if (v.type === "bonusCharge") return <div key={v.id} style={{ position: "absolute", left: v.startX - 6, top: v.startY - 6, width: 12, height: 12, borderRadius: "50%", background: "radial-gradient(circle,#fff 0%,#50c8ff 50%,transparent 100%)", boxShadow: "0 0 8px #50c8ff", animation: "bonusCharge 0.4s ease-in forwards", "--endX": (v.endX - v.startX) + "px", "--endY": (v.endY - v.startY) + "px" }} />;
     if (v.type === "blockErupt") return <div key={v.id} style={{ position: "absolute", left: v.startX - 16, top: v.startY - 16, width: 32, height: 32, animation: "blockErupt 0.5s ease-out forwards", "--endX": (v.endX - v.startX) + "px", "--endY": (v.endY - v.startY) + "px" }}><div style={{ width: 32, height: 32, borderRadius: 6, background: BLOCK_COLORS[v.spawnType] ? BLOCK_COLORS[v.spawnType].bg : "#7b5ea7", border: "2px solid " + (BLOCK_COLORS[v.spawnType] ? BLOCK_COLORS[v.spawnType].border : "#6b4e97"), boxShadow: "0 0 12px rgba(130,180,255,0.4)" }} /></div>;
@@ -2287,6 +2320,7 @@ function logUfo(msg) {
               </div>
               <div style={{ display: "flex", gap: 6 }}>
                 <div onClick={function () { playCustomLevel(lv); }} style={{ padding: "5px 16px", borderRadius: 4, background: "linear-gradient(180deg, #2a5a3a, #1a3a28)", border: "1px solid rgba(80,200,100,0.4)", color: "#80dd90", fontSize: 10, fontWeight: 700, cursor: "pointer", letterSpacing: 0.5 }}>PLAY</div>
+                <div onClick={function () { openLevelInBuilder(lv); }} style={{ padding: "5px 16px", borderRadius: 4, background: "linear-gradient(180deg, #1a3a4a, #0f2a38)", border: "1px solid rgba(80,200,255,0.4)", color: "#80ddff", fontSize: 10, fontWeight: 700, cursor: "pointer", letterSpacing: 0.5 }}>EDIT</div>
               </div>
             </div>;
           })}
