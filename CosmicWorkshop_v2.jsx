@@ -293,7 +293,7 @@ var BD_BLOCK_TYPES = [
   { id: "lightning", label: "Lightning" }, { id: "plasma", label: "Plasma" },
   { id: "crate", label: "Crate" }, { id: "drone", label: "Drone" },
   { id: "indestructible", label: "Indestructible" }, { id: "acid_barrel", label: "Acid Barrel" },
-  { id: "force_field", label: "Force Field" },
+  { id: "force_field", label: "Force Field" }, { id: "core", label: "Extra Core" },
 ];
 
 var BD_COLOR_PRESETS = [
@@ -471,14 +471,13 @@ function bdSaveActive(map) {
   });
 }
 
-// Numeric grid block type -> Block Designer string id. Types 4 (extra core)
-// and 17 (UFO) are not designable. Crate variants 11-16 resolve to "crate".
+// Numeric grid block type -> Block Designer string id. Crate variants 11-16
+// resolve to "crate". Type 17 (UFO) has no design-system equivalent.
 var BLOCK_TYPE_TO_BD = { 1: "regular", 2: "cross_shot", 3: "lightning", 4: "core", 5: "plasma", 6: "drone", 7: "indestructible", 8: "acid_barrel", 9: "crate", 10: "force_field" };
 
 // Resolves the design for a numeric block type: the active custom design if
 // one is set, otherwise the factory preset for that type. Returns null only
-// for types with no design-system equivalent (4 Extra Core, 17 UFO), which
-// keep their bespoke hardcoded rendering.
+// for type 17 (UFO), which keeps its bespoke hardcoded rendering.
 function bdResolveActiveDesign(blockType, activeMap, savedDesigns) {
   var bdId = BLOCK_TYPE_TO_BD[blockType];
   if (!bdId && blockType >= 11 && blockType <= 16) bdId = "crate";
@@ -636,11 +635,13 @@ var HUD_TABS = [
 ];
 
 function BDHudTabBar(props) {
-  var active = props.active, onSelect = props.onSelect;
+  var active = props.active, onSelect = props.onSelect, lockedTabs = props.lockedTabs || {}, onLockedClick = props.onLockedClick;
   return React.createElement("div", { style: { display: "flex", gap: 4, marginBottom: 8 } },
     HUD_TABS.map(function(tab) {
       var selected = tab.id === active;
-      return React.createElement("button", { key: tab.id, onClick: function() { onSelect(tab.id); }, style: { flex: 1, padding: "10px 2px 8px", borderRadius: 8, border: selected ? "1px solid rgba(68,136,255,0.5)" : "1px solid rgba(255,255,255,0.06)", background: selected ? "rgba(68,136,255,0.15)" : "rgba(255,255,255,0.02)", color: selected ? "#88bbff" : "#667", fontSize: 10, fontFamily: "'Exo 2', sans-serif", fontWeight: 600, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, WebkitTapHighlightColor: "transparent", textTransform: "uppercase", letterSpacing: 0.5, transition: "all 0.15s ease" } },
+      var locked = !!lockedTabs[tab.id];
+      var handleClick = locked ? onLockedClick : function() { onSelect(tab.id); };
+      return React.createElement("button", { key: tab.id, onClick: handleClick, style: { flex: 1, padding: "10px 2px 8px", borderRadius: 8, border: selected ? "1px solid rgba(68,136,255,0.5)" : "1px solid rgba(255,255,255,0.06)", background: selected ? "rgba(68,136,255,0.15)" : "rgba(255,255,255,0.02)", color: selected ? "#88bbff" : "#667", fontSize: 10, fontFamily: "'Exo 2', sans-serif", fontWeight: 600, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, WebkitTapHighlightColor: "transparent", textTransform: "uppercase", letterSpacing: 0.5, transition: "all 0.15s ease", opacity: locked ? 0.3 : 1 } },
         React.createElement(HudIcon, { type: tab.iconType, color: selected ? "#88bbff" : "#556" }),
         React.createElement("span", null, tab.label));
     }));
@@ -2053,7 +2054,7 @@ export default function CosmicWorkshop() {
             })),
           // Controls area
           React.createElement("div", { style: { padding: "0 12px 100px" } },
-            React.createElement(BDHudTabBar, { active: bdActivePanel, onSelect: bdTogglePanel }),
+            React.createElement(BDHudTabBar, { active: bdActivePanel, onSelect: bdTogglePanel, lockedTabs: bdDesign.shape === "none" ? { color: true, border: true, pattern: true } : {}, onLockedClick: function() { setBdActivePanel("shape"); setBdSaveStatus("Select Shape to edit properties."); setTimeout(function() { setBdSaveStatus(""); }, 2500); } }),
             bdActivePanel && React.createElement("div", { style: { borderRadius: 10, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(68,136,255,0.15)", padding: "16px", marginTop: 2 } },
               bdActivePanel === "shape" && React.createElement(React.Fragment, null,
                 React.createElement(BDOptionGrid, { options: SHAPES, value: bdDesign.shape, onChange: function(v) { bdUpdateDesign("shape", v); }, columns: 4 }),

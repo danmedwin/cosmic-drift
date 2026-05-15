@@ -1499,6 +1499,9 @@ var BD_BLOCK_TYPES = [{
 }, {
   id: "force_field",
   label: "Force Field"
+}, {
+  id: "core",
+  label: "Extra Core"
 }];
 var BD_COLOR_PRESETS = ["#ff4444", "#ff8800", "#ffcc00", "#44dd44", "#00cccc", "#4488ff", "#8844ff", "#ff44cc", "#ffffff", "#aaaaaa", "#555555", "#222222"];
 function bdDefaultDesign() {
@@ -1816,8 +1819,8 @@ function bdSaveActive(map) {
   });
 }
 
-// Numeric grid block type -> Block Designer string id. Types 4 (extra core)
-// and 17 (UFO) are not designable. Crate variants 11-16 resolve to "crate".
+// Numeric grid block type -> Block Designer string id. Crate variants 11-16
+// resolve to "crate". Type 17 (UFO) has no design-system equivalent.
 var BLOCK_TYPE_TO_BD = {
   1: "regular",
   2: "cross_shot",
@@ -1833,8 +1836,7 @@ var BLOCK_TYPE_TO_BD = {
 
 // Resolves the design for a numeric block type: the active custom design if
 // one is set, otherwise the factory preset for that type. Returns null only
-// for types with no design-system equivalent (4 Extra Core, 17 UFO), which
-// keep their bespoke hardcoded rendering.
+// for type 17 (UFO), which keeps its bespoke hardcoded rendering.
 function bdResolveActiveDesign(blockType, activeMap, savedDesigns) {
   var bdId = BLOCK_TYPE_TO_BD[blockType];
   if (!bdId && blockType >= 11 && blockType <= 16) bdId = "crate";
@@ -2580,7 +2582,9 @@ var HUD_TABS = [{
 }];
 function BDHudTabBar(props) {
   var active = props.active,
-    onSelect = props.onSelect;
+    onSelect = props.onSelect,
+    lockedTabs = props.lockedTabs || {},
+    onLockedClick = props.onLockedClick;
   return React.createElement("div", {
     style: {
       display: "flex",
@@ -2589,11 +2593,13 @@ function BDHudTabBar(props) {
     }
   }, HUD_TABS.map(function (tab) {
     var selected = tab.id === active;
+    var locked = !!lockedTabs[tab.id];
+    var handleClick = locked ? onLockedClick : function () {
+      onSelect(tab.id);
+    };
     return React.createElement("button", {
       key: tab.id,
-      onClick: function () {
-        onSelect(tab.id);
-      },
+      onClick: handleClick,
       style: {
         flex: 1,
         padding: "10px 2px 8px",
@@ -2612,7 +2618,8 @@ function BDHudTabBar(props) {
         WebkitTapHighlightColor: "transparent",
         textTransform: "uppercase",
         letterSpacing: 0.5,
-        transition: "all 0.15s ease"
+        transition: "all 0.15s ease",
+        opacity: locked ? 0.3 : 1
       }
     }, React.createElement(HudIcon, {
       type: tab.iconType,
@@ -7313,7 +7320,19 @@ function CosmicWorkshop() {
     }
   }, React.createElement(BDHudTabBar, {
     active: bdActivePanel,
-    onSelect: bdTogglePanel
+    onSelect: bdTogglePanel,
+    lockedTabs: bdDesign.shape === "none" ? {
+      color: true,
+      border: true,
+      pattern: true
+    } : {},
+    onLockedClick: function () {
+      setBdActivePanel("shape");
+      setBdSaveStatus("Select Shape to edit properties.");
+      setTimeout(function () {
+        setBdSaveStatus("");
+      }, 2500);
+    }
   }), bdActivePanel && React.createElement("div", {
     style: {
       borderRadius: 10,
