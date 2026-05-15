@@ -538,12 +538,17 @@ function DiamondPlateBlock(props) { var ps = Math.max(8, props.size * 0.22), h =
 function UFOBlockSvg(props) {
   var size = props.size || 48;
   var animPhase = props.animPhase || "idle";
+  var d = Object.assign({}, UFO_DEFAULT_DESIGN, props.design || {});
+  var hullLight = ufoAdjustColor(d.hullColor, 1.5);
+  var hullDark = ufoAdjustColor(d.hullColor, 0.4);
+  var lightDark = ufoAdjustColor(d.lightColor, 0.55);
+  var lightBright = ufoAdjustColor(d.lightColor, 1.6);
   var hx = 70, hy = 80;
   var dRx = 22, dRy = 23, dY = hy - 16;
   var gStyle = {};
   if (animPhase === "warpOut") { gStyle = { animation: "ufoWarpOut 0.5s ease-in forwards", transformOrigin: hx + "px " + hy + "px" }; }
   else if (animPhase === "warpIn") { gStyle = { animation: "ufoWarpIn 0.6s ease-out forwards", transformOrigin: hx + "px " + hy + "px" }; }
-  var stealthColors = ["#4488ff", "#2266cc", "#99ccff"];
+  var stealthColors = [d.lightColor, lightDark, lightBright];
   var lights = [];
   for (var li = 0; li < 3; li++) {
     var la = (li / 3) * Math.PI * 2;
@@ -553,14 +558,14 @@ function UFOBlockSvg(props) {
     <svg viewBox="20 25 100 100" width={size} height={size} style={{ display: "block", overflow: "visible" }}>
       <defs>
         <radialGradient id="ufo-h" cx="50%" cy="26%">
-          <stop offset="0%" stopColor="#e09050" />
-          <stop offset="55%" stopColor="#b86020" />
-          <stop offset="100%" stopColor="#602010" />
+          <stop offset="0%" stopColor={hullLight} />
+          <stop offset="55%" stopColor={d.hullColor} />
+          <stop offset="100%" stopColor={hullDark} />
         </radialGradient>
         <radialGradient id="ufo-d" cx="33%" cy="25%">
           <stop offset="0%" stopColor="#ffffff" stopOpacity="0.92" />
-          <stop offset="38%" stopColor="#44ffee" stopOpacity="0.55" />
-          <stop offset="100%" stopColor="#602010" stopOpacity="0.22" />
+          <stop offset="38%" stopColor={d.domeColor} stopOpacity="0.55" />
+          <stop offset="100%" stopColor={hullDark} stopOpacity="0.22" />
         </radialGradient>
         <clipPath id="ufo-dc">
           <rect x={hx - dRx - 3} y={0} width={dRx * 2 + 6} height={hy} />
@@ -568,7 +573,7 @@ function UFOBlockSvg(props) {
       </defs>
       <g style={gStyle}>
         <ellipse cx={hx} cy={hy} rx={48} ry={14} fill="url(#ufo-h)" />
-        <g style={{ animation: "ufoLightSpin 8s linear infinite", transformOrigin: hx + "px " + hy + "px" }}>
+        <g style={{ animation: "ufoLightSpin " + d.lightSpeed + "s linear infinite", transformOrigin: hx + "px " + hy + "px" }}>
           {lights.map(function(lp, li2) {
             return <circle key={li2} cx={lp.x} cy={lp.y} r="3.5" fill={lp.c} style={{ animation: "pulse " + (1.8 + li2 * 0.4) + "s ease-in-out infinite" }} />;
           })}
@@ -772,6 +777,9 @@ var BD_ACTIVE_KEY = "cosmic-drift-active-blocks";
 var VFX_STORAGE_KEY = "cosmic-drift-vfx-designs";
 var VFX_ACTIVE_KEY = "cosmic-drift-vfx-active";
 var GAME_VFX_DESIGNS = [];
+var UFO_STORAGE_KEY = "cosmic-drift-ufo-design";
+var UFO_DEFAULT_DESIGN = { hullColor: "#b86020", domeColor: "#44ffee", lightColor: "#4488ff", lightSpeed: 8 };
+var GAME_UFO_DESIGN = Object.assign({}, UFO_DEFAULT_DESIGN);
 var GAME_VFX_ACTIVE = {};
 var VFX_DEFAULTS = {
   acid_ooze:     { color1: "#1a6a1a", color2: "#35a035", width: 1.0, waveSize: 1.0, freq: 5, speed: 1.0, splash: 1.0 },
@@ -815,6 +823,11 @@ function vfxGet(effectType) {
 function vfxAlphaHex(o) {
   var n = Math.round(Math.max(0, Math.min(1, o == null ? 1 : o)) * 255);
   var h = n.toString(16); return h.length < 2 ? "0" + h : h;
+}
+function ufoAdjustColor(hex, factor) {
+  var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  r = Math.min(255, Math.round(r * factor)); g = Math.min(255, Math.round(g * factor)); b = Math.min(255, Math.round(b * factor));
+  return "#" + ("0"+r.toString(16)).slice(-2) + ("0"+g.toString(16)).slice(-2) + ("0"+b.toString(16)).slice(-2);
 }
 
 function bdLoadDesigns() {
@@ -895,7 +908,7 @@ function DesignBlock(props) {
   return inner;
 }
 
-function BlockContent(props) { var type = props.type, size = props.size, is = Math.max(18, size * 0.55), sl = props.shieldLevel || 0; if (type === 17) return <UFOBlockSvg size={size} animPhase={props.animPhase} />; var _design = bdResolveActiveDesign(type, GAME_ACTIVE_BLOCKS, GAME_BLOCK_DESIGNS); if (_design) return <DesignBlock design={_design} type={type} size={size} shieldLevel={sl} uid={props.uid} />; if (type === 7) return <DiamondPlateBlock size={size} />; var bc = BLOCK_COLORS[type]; var blockEl = <div style={{ width: size, height: size, background: bc.bg, border: "2px solid " + bc.border, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: bc.shadow, boxSizing: "border-box", position: "relative" }}>{type === 2 && <CrossShotIcon size={is} />}{type === 3 && <LightningIcon size={is} />}{type === 4 && <CoreIcon size={is} mode="lit" />}{type === 5 && <PlasmaIcon size={is} />}{type === 6 && <DroneIcon size={Math.max(24, size * 0.8)} />}{type === 8 && <AcidBarrelIcon size={Math.max(22, size * 0.75)} />}{type === 9 && <TreasureCrateIcon size={Math.max(24, size * 0.8)} />}{isCrate(type) && type !== 9 && <div style={{ position: "relative", width: Math.max(24, size * 0.8), height: Math.max(24, size * 0.8) }}><TreasureCrateIcon size={Math.max(24, size * 0.8)} /><div style={{ position: "absolute", bottom: -2, right: -2, width: Math.max(10, size * 0.3), height: Math.max(10, size * 0.3), borderRadius: "50%", background: "rgba(10,10,20,0.8)", border: "1px solid " + (CRATE_VARIANTS.filter(function(cv) { return cv.type === type; })[0] || {}).color, display: "flex", alignItems: "center", justifyContent: "center" }}>{type === 11 && <DroneIcon size={Math.max(7, size * 0.18)} />}{type === 12 && <LightningIcon size={Math.max(7, size * 0.2)} />}{type === 13 && <CrossShotIcon size={Math.max(7, size * 0.18)} />}{type === 14 && <svg width={Math.max(7, size * 0.18)} height={Math.max(7, size * 0.18)} viewBox="0 0 24 24"><path d="M4 20L12 4" stroke="#80ddff" strokeWidth="3" strokeLinecap="round" /><path d="M12 4L20 20" stroke="#80ddff" strokeWidth="3" strokeLinecap="round" /></svg>}{type === 15 && <svg width={Math.max(7, size * 0.18)} height={Math.max(7, size * 0.18)} viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="8" rx="2" fill="#7a7a88" /><rect x="10" y="8" width="4" height="12" rx="1" fill="#9a9aaa" /></svg>}{type === 16 && <CoreIcon size={Math.max(7, size * 0.2)} mode="lit" />}</div></div>}{type === 10 && sl > 0 && <svg width={is} height={is} viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="1.5" fill="#2a3a5a" stroke="rgba(130,180,255,0.6)" strokeWidth="1" /><rect x="3" y="8" width="18" height="4" fill="#3a4a6a" rx="1.5" /><line x1="3" y1="12" x2="21" y2="12" stroke="rgba(130,180,255,0.4)" strokeWidth="0.8" /><rect x="9" y="13" width="6" height="4" rx="1" fill="rgba(130,180,255,0.15)" stroke="rgba(130,180,255,0.5)" strokeWidth="0.7" /><circle cx="12" cy="15" r="1" fill="rgba(180,220,255,0.8)" /><rect x="5" y="9" width="3" height="2" rx="0.5" fill="rgba(130,180,255,0.2)" /><rect x="16" y="9" width="3" height="2" rx="0.5" fill="rgba(130,180,255,0.2)" /></svg>}{type === 10 && sl === 0 && <svg width={is} height={is} viewBox="0 0 24 24"><rect x="3" y="12" width="18" height="9" rx="1.5" fill="#2a3a5a" stroke="rgba(130,180,255,0.4)" strokeWidth="1" /><line x1="3" y1="15" x2="21" y2="15" stroke="rgba(130,180,255,0.3)" strokeWidth="0.5" /><path d="M4 12 L4 7 Q12 3 20 7 L20 12" fill="none" stroke="rgba(130,180,255,0.5)" strokeWidth="1" /><rect x="9" y="16" width="6" height="3" rx="1" fill="rgba(130,180,255,0.1)" stroke="rgba(130,180,255,0.3)" strokeWidth="0.5" /></svg>}</div>; if (type === 10 && sl > 0) return <div style={{ position: "relative" }}>{blockEl}<div style={{ position: "absolute", inset: sl === 2 ? -4 : -2, borderRadius: 10, border: sl === 2 ? "2px solid rgba(130,180,255,0.7)" : "1px solid rgba(130,180,255,0.35)", boxShadow: sl === 2 ? "0 0 16px rgba(130,180,255,0.5), 0 0 30px rgba(130,180,255,0.25), inset 0 0 10px rgba(130,180,255,0.3)" : "0 0 8px rgba(130,180,255,0.2), inset 0 0 4px rgba(130,180,255,0.1)", pointerEvents: "none", transition: "all 0.3s" }} /></div>; return blockEl; }
+function BlockContent(props) { var type = props.type, size = props.size, is = Math.max(18, size * 0.55), sl = props.shieldLevel || 0; if (type === 17) return <UFOBlockSvg size={size} animPhase={props.animPhase} design={GAME_UFO_DESIGN} />; var _design = bdResolveActiveDesign(type, GAME_ACTIVE_BLOCKS, GAME_BLOCK_DESIGNS); if (_design) return <DesignBlock design={_design} type={type} size={size} shieldLevel={sl} uid={props.uid} />; if (type === 7) return <DiamondPlateBlock size={size} />; var bc = BLOCK_COLORS[type]; var blockEl = <div style={{ width: size, height: size, background: bc.bg, border: "2px solid " + bc.border, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: bc.shadow, boxSizing: "border-box", position: "relative" }}>{type === 2 && <CrossShotIcon size={is} />}{type === 3 && <LightningIcon size={is} />}{type === 4 && <CoreIcon size={is} mode="lit" />}{type === 5 && <PlasmaIcon size={is} />}{type === 6 && <DroneIcon size={Math.max(24, size * 0.8)} />}{type === 8 && <AcidBarrelIcon size={Math.max(22, size * 0.75)} />}{type === 9 && <TreasureCrateIcon size={Math.max(24, size * 0.8)} />}{isCrate(type) && type !== 9 && <div style={{ position: "relative", width: Math.max(24, size * 0.8), height: Math.max(24, size * 0.8) }}><TreasureCrateIcon size={Math.max(24, size * 0.8)} /><div style={{ position: "absolute", bottom: -2, right: -2, width: Math.max(10, size * 0.3), height: Math.max(10, size * 0.3), borderRadius: "50%", background: "rgba(10,10,20,0.8)", border: "1px solid " + (CRATE_VARIANTS.filter(function(cv) { return cv.type === type; })[0] || {}).color, display: "flex", alignItems: "center", justifyContent: "center" }}>{type === 11 && <DroneIcon size={Math.max(7, size * 0.18)} />}{type === 12 && <LightningIcon size={Math.max(7, size * 0.2)} />}{type === 13 && <CrossShotIcon size={Math.max(7, size * 0.18)} />}{type === 14 && <svg width={Math.max(7, size * 0.18)} height={Math.max(7, size * 0.18)} viewBox="0 0 24 24"><path d="M4 20L12 4" stroke="#80ddff" strokeWidth="3" strokeLinecap="round" /><path d="M12 4L20 20" stroke="#80ddff" strokeWidth="3" strokeLinecap="round" /></svg>}{type === 15 && <svg width={Math.max(7, size * 0.18)} height={Math.max(7, size * 0.18)} viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="8" rx="2" fill="#7a7a88" /><rect x="10" y="8" width="4" height="12" rx="1" fill="#9a9aaa" /></svg>}{type === 16 && <CoreIcon size={Math.max(7, size * 0.2)} mode="lit" />}</div></div>}{type === 10 && sl > 0 && <svg width={is} height={is} viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="1.5" fill="#2a3a5a" stroke="rgba(130,180,255,0.6)" strokeWidth="1" /><rect x="3" y="8" width="18" height="4" fill="#3a4a6a" rx="1.5" /><line x1="3" y1="12" x2="21" y2="12" stroke="rgba(130,180,255,0.4)" strokeWidth="0.8" /><rect x="9" y="13" width="6" height="4" rx="1" fill="rgba(130,180,255,0.15)" stroke="rgba(130,180,255,0.5)" strokeWidth="0.7" /><circle cx="12" cy="15" r="1" fill="rgba(180,220,255,0.8)" /><rect x="5" y="9" width="3" height="2" rx="0.5" fill="rgba(130,180,255,0.2)" /><rect x="16" y="9" width="3" height="2" rx="0.5" fill="rgba(130,180,255,0.2)" /></svg>}{type === 10 && sl === 0 && <svg width={is} height={is} viewBox="0 0 24 24"><rect x="3" y="12" width="18" height="9" rx="1.5" fill="#2a3a5a" stroke="rgba(130,180,255,0.4)" strokeWidth="1" /><line x1="3" y1="15" x2="21" y2="15" stroke="rgba(130,180,255,0.3)" strokeWidth="0.5" /><path d="M4 12 L4 7 Q12 3 20 7 L20 12" fill="none" stroke="rgba(130,180,255,0.5)" strokeWidth="1" /><rect x="9" y="16" width="6" height="3" rx="1" fill="rgba(130,180,255,0.1)" stroke="rgba(130,180,255,0.3)" strokeWidth="0.5" /></svg>}</div>; if (type === 10 && sl > 0) return <div style={{ position: "relative" }}>{blockEl}<div style={{ position: "absolute", inset: sl === 2 ? -4 : -2, borderRadius: 10, border: sl === 2 ? "2px solid rgba(130,180,255,0.7)" : "1px solid rgba(130,180,255,0.35)", boxShadow: sl === 2 ? "0 0 16px rgba(130,180,255,0.5), 0 0 30px rgba(130,180,255,0.25), inset 0 0 10px rgba(130,180,255,0.3)" : "0 0 8px rgba(130,180,255,0.2), inset 0 0 4px rgba(130,180,255,0.1)", pointerEvents: "none", transition: "all 0.3s" }} /></div>; return blockEl; }
 function PlasmaContainer(props) { var pct = Math.min(1, Math.max(0, props.current / props.max)); var glowColor = pct > 0.5 ? "rgba(48,192,208,0.5)" : pct > 0.25 ? "rgba(255,170,50,0.4)" : "rgba(255,68,85,0.4)"; var glowSize = Math.round(4 + pct * 8); var fillH = 18 * pct; return <div style={{ filter: "drop-shadow(0 0 " + glowSize + "px " + glowColor + ")", transition: "filter 0.5s" }}><svg width="32" height="28" viewBox="0 0 32 28"><defs><clipPath id="hexClip"><polygon points="16,1 29,7.5 29,20.5 16,27 3,20.5 3,7.5" /></clipPath></defs><polygon points="16,1 29,7.5 29,20.5 16,27 3,20.5 3,7.5" fill="rgba(48,192,208,0.06)" stroke={"rgba(48,192,208," + (0.25 + pct * 0.35) + ")"} strokeWidth="1.2" /><rect x="3" y={25 - fillH} width="26" height={fillH + 2} fill="#30c0d0" opacity={0.3 + pct * 0.3} clipPath="url(#hexClip)" style={{ transition: "y 0.6s ease-in-out, height 0.6s ease-in-out, opacity 0.6s" }} /><text x="16" y="17.5" textAnchor="middle" fill="#fff" fontSize="10" fontWeight="700" fontFamily="Quicksand,sans-serif">{props.current}</text></svg></div>; }
 function makeLightningPath(h) { var seg = Math.max(6, Math.floor(h / 18)), segH = h / seg, d = "M15 " + h, pts = [{ x: 15, y: h }]; for (var i = 1; i <= seg; i++) { var y = h - i * segH, x = 15 + (i % 2 === 0 ? 1 : -1) * (4 + Math.sin(i * 2.7) * 6); pts.push({ x: x, y: y }); d += " L" + x + " " + y; } return { main: d, pts: pts }; }
 function makeOozePath(h, yStart, segSpacing, opts) {
@@ -1448,6 +1461,7 @@ export default function CosmicDriftGame() {
   useEffect(function() {
     vfxLoadDesigns().then(function(d) { GAME_VFX_DESIGNS = d; }).catch(function() {});
     vfxLoadActive().then(function(m) { GAME_VFX_ACTIVE = m; }).catch(function() {});
+    try { window.storage.get(UFO_STORAGE_KEY).then(function(r) { if (r && r.value) { GAME_UFO_DESIGN = Object.assign({}, UFO_DEFAULT_DESIGN, JSON.parse(r.value)); } }).catch(function() {}); } catch(e) {}
   }, []);
   // ?play=levelId deep link: auto-load and start a custom level (used by Workshop "Play" buttons).
   useEffect(function () {

@@ -81,15 +81,26 @@ function AcidBarrelIcon(props) { var s = props.size; return React.createElement(
 function TreasureCrateIcon(props) { var s = props.size; return React.createElement("svg", { width: s, height: s, viewBox: "0 0 24 24" }, React.createElement("rect", { x: "2", y: "7", width: "20", height: "14", rx: "1", fill: "#4a4a5a", stroke: "#707088", strokeWidth: "1" }), React.createElement("rect", { x: "2", y: "7", width: "20", height: "4", fill: "#5a5a6a", rx: "1" }), React.createElement("line", { x1: "2", y1: "11", x2: "22", y2: "11", stroke: "#707088", strokeWidth: "0.8" }), React.createElement("rect", { x: "4", y: "8.5", width: "3", height: "2", rx: "0.5", fill: "#606070", stroke: "#808098", strokeWidth: "0.3" }), React.createElement("rect", { x: "17", y: "8.5", width: "3", height: "2", rx: "0.5", fill: "#606070", stroke: "#808098", strokeWidth: "0.3" }), React.createElement("rect", { x: "9", y: "13", width: "6", height: "4", rx: "1", fill: "#2a2a3a", stroke: "#ffe066", strokeWidth: "0.8" }), React.createElement("circle", { cx: "12", cy: "15", r: "1.2", fill: "#ffe066", opacity: "0.9" }), React.createElement("line", { x1: "4", y1: "17", x2: "8", y2: "17", stroke: "#606070", strokeWidth: "0.5" }), React.createElement("line", { x1: "16", y1: "17", x2: "20", y2: "17", stroke: "#606070", strokeWidth: "0.5" }), React.createElement("rect", { x: "4", y: "13", width: "3", height: "1", rx: "0.3", fill: "#606070", opacity: "0.5" }), React.createElement("rect", { x: "17", y: "13", width: "3", height: "1", rx: "0.3", fill: "#606070", opacity: "0.5" })); }
 function DiamondPlateBlock(props) { var ps = Math.max(8, props.size * 0.22), h = ps / 2; return React.createElement("div", { style: { width: props.size, height: props.size, borderRadius: 6, overflow: "hidden", border: "2px solid #555", position: "relative", boxSizing: "border-box" } }, React.createElement("svg", { width: props.size, height: props.size, style: { position: "absolute", top: -2, left: -2 } }, React.createElement("defs", null, React.createElement("pattern", { id: "dpat", x: "0", y: "0", width: ps, height: ps, patternUnits: "userSpaceOnUse" }, React.createElement("rect", { width: ps, height: ps, fill: "#707580" }), React.createElement("path", { d: "M" + h + " 1L" + (ps - 1) + " " + h + "L" + h + " " + (ps - 1) + "L1 " + h + "Z", fill: "#888a90", stroke: "#606368", strokeWidth: "0.5" }))), React.createElement("rect", { width: props.size, height: props.size, fill: "url(#dpat)" }))); }
 
+var UFO_DEFAULT_DESIGN = { hullColor: "#b86020", domeColor: "#44ffee", lightColor: "#4488ff", lightSpeed: 8 };
+function ufoAdjustColor(hex, factor) {
+  var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  r = Math.min(255, Math.round(r * factor)); g = Math.min(255, Math.round(g * factor)); b = Math.min(255, Math.round(b * factor));
+  return "#" + ("0"+r.toString(16)).slice(-2) + ("0"+g.toString(16)).slice(-2) + ("0"+b.toString(16)).slice(-2);
+}
 function UFOBlockSvg(props) {
   var size = props.size || 48;
   var animPhase = props.animPhase || "idle";
+  var d = Object.assign({}, UFO_DEFAULT_DESIGN, props.design || {});
+  var hullLight = ufoAdjustColor(d.hullColor, 1.5);
+  var hullDark = ufoAdjustColor(d.hullColor, 0.4);
+  var lightDark = ufoAdjustColor(d.lightColor, 0.55);
+  var lightBright = ufoAdjustColor(d.lightColor, 1.6);
   var hx = 70, hy = 80;
   var dRx = 22, dRy = 23, dY = hy - 16;
   var gStyle = {};
   if (animPhase === "warpOut") { gStyle = { animation: "ufoWarpOut 0.5s ease-in forwards", transformOrigin: hx + "px " + hy + "px" }; }
   else if (animPhase === "warpIn") { gStyle = { animation: "ufoWarpIn 0.6s ease-out forwards", transformOrigin: hx + "px " + hy + "px" }; }
-  var stealthColors = ["#4488ff", "#2266cc", "#99ccff"];
+  var stealthColors = [d.lightColor, lightDark, lightBright];
   var lights = [];
   for (var li = 0; li < 3; li++) {
     var la = (li / 3) * Math.PI * 2;
@@ -98,18 +109,18 @@ function UFOBlockSvg(props) {
   return React.createElement("svg", { viewBox: "20 25 100 100", width: size, height: size, style: { display: "block", overflow: "visible" } },
     React.createElement("defs", null,
       React.createElement("radialGradient", { id: "ufo-h", cx: "50%", cy: "26%" },
-        React.createElement("stop", { offset: "0%", stopColor: "#e09050" }),
-        React.createElement("stop", { offset: "55%", stopColor: "#b86020" }),
-        React.createElement("stop", { offset: "100%", stopColor: "#602010" })),
+        React.createElement("stop", { offset: "0%", stopColor: hullLight }),
+        React.createElement("stop", { offset: "55%", stopColor: d.hullColor }),
+        React.createElement("stop", { offset: "100%", stopColor: hullDark })),
       React.createElement("radialGradient", { id: "ufo-d", cx: "33%", cy: "25%" },
         React.createElement("stop", { offset: "0%", stopColor: "#ffffff", stopOpacity: "0.92" }),
-        React.createElement("stop", { offset: "38%", stopColor: "#44ffee", stopOpacity: "0.55" }),
-        React.createElement("stop", { offset: "100%", stopColor: "#602010", stopOpacity: "0.22" })),
+        React.createElement("stop", { offset: "38%", stopColor: d.domeColor, stopOpacity: "0.55" }),
+        React.createElement("stop", { offset: "100%", stopColor: hullDark, stopOpacity: "0.22" })),
       React.createElement("clipPath", { id: "ufo-dc" },
         React.createElement("rect", { x: hx - dRx - 3, y: 0, width: dRx * 2 + 6, height: hy }))),
     React.createElement("g", { style: gStyle },
       React.createElement("ellipse", { cx: hx, cy: hy, rx: 48, ry: 14, fill: "url(#ufo-h)" }),
-      React.createElement("g", { style: { animation: "ufoLightSpin 8s linear infinite", transformOrigin: hx + "px " + hy + "px" } },
+      React.createElement("g", { style: { animation: "ufoLightSpin " + d.lightSpeed + "s linear infinite", transformOrigin: hx + "px " + hy + "px" } },
         lights.map(function(lp, li2) {
           return React.createElement("circle", { key: li2, cx: lp.x, cy: lp.y, r: "3.5", fill: lp.c, style: { animation: "pulse " + (1.8 + li2 * 0.4) + "s ease-in-out infinite" } });
         })),
@@ -340,6 +351,7 @@ var BD_STORAGE_KEY = "cosmic-drift-block-designs";
 //   cosmic-drift-vfx-active  -> { effectType: designId } active map
 var VFX_STORAGE_KEY = "cosmic-drift-vfx-designs";
 var VFX_ACTIVE_KEY = "cosmic-drift-vfx-active";
+var UFO_STORAGE_KEY = "cosmic-drift-ufo-design";
 
 // Effect type registry: drives the type-picker buttons, sorting, the editor.
 var VFX_EFFECT_TYPES = [
@@ -819,6 +831,9 @@ export default function CosmicWorkshop() {
   var _vfxImportText = useState(""), vfxImportText = _vfxImportText[0], setVfxImportText = _vfxImportText[1];
   var _vfxImportError = useState(""), vfxImportError = _vfxImportError[0], setVfxImportError = _vfxImportError[1];
   var _vfxBackWarn = useState(false), vfxShowBackWarn = _vfxBackWarn[0], setVfxShowBackWarn = _vfxBackWarn[1];
+  // ══ UFO CUSTOMIZER STATE ══
+  var _ufoDesign = useState(function() { return Object.assign({}, UFO_DEFAULT_DESIGN); }), ufoDesign = _ufoDesign[0], setUfoDesign = _ufoDesign[1];
+  var _ufoSaveStatus = useState(""), ufoSaveStatus = _ufoSaveStatus[0], setUfoSaveStatus = _ufoSaveStatus[1];
   var bdScrollRef = useRef(null);
 
   // ══ LEVEL BUILDER STATE ══
@@ -881,6 +896,7 @@ export default function CosmicWorkshop() {
     bdLoadActive().then(function(map) { setBdActiveMap(map); });
     vfxLoadDesigns().then(function(designs) { setVfxSaved(designs); });
     vfxLoadActive().then(function(map) { setVfxActiveMap(map); });
+    try { window.storage.get(UFO_STORAGE_KEY).then(function(r) { if (r && r.value) setUfoDesign(Object.assign({}, UFO_DEFAULT_DESIGN, JSON.parse(r.value))); }).catch(function() {}); } catch(e) {}
   }, []);
 
   // ?builder=1 handoff: the game wrote a level to storage; open it in the Level Builder.
@@ -1815,6 +1831,14 @@ export default function CosmicWorkshop() {
             React.createElement("div", null,
               React.createElement("div", { style: { color: "#ffb43c", fontSize: 16, fontWeight: 700, letterSpacing: 1 } }, "VFX Studio"),
               React.createElement("div", { style: { color: "rgba(180,200,220,0.35)", fontSize: 11, marginTop: 3 } }, "Customize visual effects")))),
+        // UFO Customizer card
+        React.createElement("div", { onClick: function() { setScreen("ufo"); }, style: { background: "linear-gradient(135deg, rgba(100,220,180,0.08), rgba(60,200,160,0.02))", border: "1px solid rgba(100,220,180,0.2)", borderRadius: 12, padding: "20px 20px", cursor: "pointer" } },
+          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 14 } },
+            React.createElement("div", { style: { width: 48, height: 48, borderRadius: 10, background: "rgba(100,220,180,0.1)", border: "1px solid rgba(100,220,180,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } },
+              React.createElement(UFOBlockSvg, { size: 38, design: ufoDesign })),
+            React.createElement("div", null,
+              React.createElement("div", { style: { color: "#64dcb4", fontSize: 16, fontWeight: 700, letterSpacing: 1 } }, "UFO Customizer"),
+              React.createElement("div", { style: { color: "rgba(180,200,220,0.35)", fontSize: 11, marginTop: 3 } }, "Customize your UFO's appearance")))),
       React.createElement("div", { style: { position: "absolute", bottom: 16, color: "rgba(180,200,220,0.15)", fontSize: 9, letterSpacing: 1 } }, "Created by Dan Medwin and Claude"))),
 
     // ═══ LEVEL BUILDER ═══
@@ -2231,6 +2255,68 @@ export default function CosmicWorkshop() {
               React.createElement(BDSlider, { label: "Particle Size", value: vfxEditDesign.particleSize, onChange: function(v) { vfxUpdateDesign("particleSize", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.particleSize || 1).toFixed(1) + "x" })),
             React.createElement("div", { style: { display: "flex", gap: 10, marginTop: 8, justifyContent: "center" } },
               React.createElement("div", { onClick: vfxResetDesign, style: Object.assign({}, BTN_RENAME, { padding: "8px 18px", fontSize: 11 }) }, "Reset to Default")))),
-        vfxShowBackWarn && renderBackWarnOverlay(function() { setVfxShowBackWarn(false); }, function() { setVfxShowBackWarn(false); setVfxCurrentView("list"); })))
+        vfxShowBackWarn && renderBackWarnOverlay(function() { setVfxShowBackWarn(false); }, function() { setVfxShowBackWarn(false); setVfxCurrentView("list"); }))),
+
+    // ═══ UFO CUSTOMIZER ═══
+    screen === "ufo" && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%" } },
+      React.createElement(WorkshopTopBar, { onBack: function() { setScreen("splash"); }, backLabel: "Workshop", title: "UFO Customizer", color: "#64dcb4" }),
+      React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "0 16px 32px" } },
+        // Live preview
+        React.createElement("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", padding: "28px 0 24px" } },
+          React.createElement(UFOBlockSvg, { size: 140, design: ufoDesign }),
+          ufoSaveStatus !== "" && React.createElement("div", { style: { marginTop: 12, fontSize: 12, color: "#64dcb4", fontFamily: "'Exo 2', sans-serif" } }, ufoSaveStatus)),
+        // Controls
+        React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px" } },
+          React.createElement(BDColorPicker, {
+            label: "Hull Color",
+            value: ufoDesign.hullColor,
+            presets: ["#b86020", "#804020", "#207040", "#204080", "#602080", "#808080", "#a0a060", "#a03020"],
+            onChange: function(v) {
+              var next = Object.assign({}, ufoDesign, { hullColor: v });
+              setUfoDesign(next);
+              try { window.storage.set(UFO_STORAGE_KEY, JSON.stringify(next)).catch(function() {}); setUfoSaveStatus("Saved"); setTimeout(function() { setUfoSaveStatus(""); }, 1500); } catch(e) {}
+            }
+          }),
+          React.createElement(BDColorPicker, {
+            label: "Dome Color",
+            value: ufoDesign.domeColor,
+            presets: ["#44ffee", "#88ddff", "#ffcc44", "#ff88dd", "#aaffaa", "#ff8844", "#cc88ff", "#ffffff"],
+            onChange: function(v) {
+              var next = Object.assign({}, ufoDesign, { domeColor: v });
+              setUfoDesign(next);
+              try { window.storage.set(UFO_STORAGE_KEY, JSON.stringify(next)).catch(function() {}); setUfoSaveStatus("Saved"); setTimeout(function() { setUfoSaveStatus(""); }, 1500); } catch(e) {}
+            }
+          }),
+          React.createElement(BDColorPicker, {
+            label: "Light Color",
+            value: ufoDesign.lightColor,
+            presets: ["#4488ff", "#ff4488", "#44ff88", "#ffaa44", "#aa44ff", "#44ddff", "#ffff44", "#ff6644"],
+            onChange: function(v) {
+              var next = Object.assign({}, ufoDesign, { lightColor: v });
+              setUfoDesign(next);
+              try { window.storage.set(UFO_STORAGE_KEY, JSON.stringify(next)).catch(function() {}); setUfoSaveStatus("Saved"); setTimeout(function() { setUfoSaveStatus(""); }, 1500); } catch(e) {}
+            }
+          }),
+          React.createElement(BDSlider, {
+            label: "Light Speed",
+            value: ufoDesign.lightSpeed,
+            min: 2, max: 16, step: 0.5,
+            displayValue: ufoDesign.lightSpeed + "s",
+            onChange: function(v) {
+              var next = Object.assign({}, ufoDesign, { lightSpeed: v });
+              setUfoDesign(next);
+              try { window.storage.set(UFO_STORAGE_KEY, JSON.stringify(next)).catch(function() {}); setUfoSaveStatus("Saved"); setTimeout(function() { setUfoSaveStatus(""); }, 1500); } catch(e) {}
+            }
+          })),
+        // Reset button
+        React.createElement("div", { style: { display: "flex", justifyContent: "center", marginTop: 20 } },
+          React.createElement("div", {
+            onClick: function() {
+              var next = Object.assign({}, UFO_DEFAULT_DESIGN);
+              setUfoDesign(next);
+              try { window.storage.set(UFO_STORAGE_KEY, JSON.stringify(next)).catch(function() {}); setUfoSaveStatus("Reset to defaults"); setTimeout(function() { setUfoSaveStatus(""); }, 1500); } catch(e) {}
+            },
+            style: { padding: "8px 20px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.1)", color: "rgba(180,200,220,0.5)", fontSize: 11, fontFamily: "'Exo 2', sans-serif", cursor: "pointer", letterSpacing: 0.5 }
+          }, "Reset to Defaults"))))
   );
 }
