@@ -2827,6 +2827,8 @@ var VFX_STORAGE_KEY = "cosmic-drift-vfx-designs";
 var VFX_ACTIVE_KEY = "cosmic-drift-vfx-active";
 var GAME_VFX_DESIGNS = [];
 var UFO_STORAGE_KEY = "cosmic-drift-ufo-design";
+var UFO_DESIGNS_KEY = "cosmic-drift-ufo-designs";
+var UFO_ACTIVE_KEY_G = "cosmic-drift-ufo-active";
 var UFO_DEFAULT_DESIGN = {
   hullColor: "#b86020",
   domeColor: "#44ffee",
@@ -5548,9 +5550,29 @@ function CosmicDriftGame() {
       GAME_VFX_ACTIVE = m;
     }).catch(function () {});
     try {
-      window.storage.get(UFO_STORAGE_KEY).then(function (r) {
+      window.storage.get(UFO_DESIGNS_KEY).then(function (r) {
         if (r && r.value) {
-          GAME_UFO_DESIGN = Object.assign({}, UFO_DEFAULT_DESIGN, JSON.parse(r.value));
+          var designs = JSON.parse(r.value);
+          if (Array.isArray(designs) && designs.length > 0) {
+            window.storage.get(UFO_ACTIVE_KEY_G).then(function (ra) {
+              var activeId = ra && ra.value ? ra.value : null;
+              var found = null;
+              for (var i = 0; i < designs.length; i++) {
+                if (designs[i].id === activeId) {
+                  found = designs[i];
+                  break;
+                }
+              }
+              if (!found) found = designs[0];
+              GAME_UFO_DESIGN = Object.assign({}, UFO_DEFAULT_DESIGN, found);
+            }).catch(function () {});
+          }
+        } else {
+          window.storage.get(UFO_STORAGE_KEY).then(function (r2) {
+            if (r2 && r2.value) {
+              GAME_UFO_DESIGN = Object.assign({}, UFO_DEFAULT_DESIGN, JSON.parse(r2.value));
+            }
+          }).catch(function () {});
         }
       }).catch(function () {});
     } catch (e) {}

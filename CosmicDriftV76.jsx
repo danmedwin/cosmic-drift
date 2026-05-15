@@ -801,7 +801,9 @@ var BD_ACTIVE_KEY = "cosmic-drift-active-blocks";
 var VFX_STORAGE_KEY = "cosmic-drift-vfx-designs";
 var VFX_ACTIVE_KEY = "cosmic-drift-vfx-active";
 var GAME_VFX_DESIGNS = [];
-var UFO_STORAGE_KEY = "cosmic-drift-ufo-design";
+var UFO_STORAGE_KEY  = "cosmic-drift-ufo-design";
+var UFO_DESIGNS_KEY  = "cosmic-drift-ufo-designs";
+var UFO_ACTIVE_KEY_G = "cosmic-drift-ufo-active";
 var UFO_DEFAULT_DESIGN = { hullColor: "#b86020", domeColor: "#44ffee", lightColor: "#4488ff", lightSpeed: 8, particleCount: 3, particleSize: 1.0, glowOpacity: 0.0, showAlien: false };
 var GAME_UFO_DESIGN = Object.assign({}, UFO_DEFAULT_DESIGN);
 var GAME_VFX_ACTIVE = {};
@@ -1485,7 +1487,26 @@ export default function CosmicDriftGame() {
   useEffect(function() {
     vfxLoadDesigns().then(function(d) { GAME_VFX_DESIGNS = d; }).catch(function() {});
     vfxLoadActive().then(function(m) { GAME_VFX_ACTIVE = m; }).catch(function() {});
-    try { window.storage.get(UFO_STORAGE_KEY).then(function(r) { if (r && r.value) { GAME_UFO_DESIGN = Object.assign({}, UFO_DEFAULT_DESIGN, JSON.parse(r.value)); } }).catch(function() {}); } catch(e) {}
+    try {
+      window.storage.get(UFO_DESIGNS_KEY).then(function(r) {
+        if (r && r.value) {
+          var designs = JSON.parse(r.value);
+          if (Array.isArray(designs) && designs.length > 0) {
+            window.storage.get(UFO_ACTIVE_KEY_G).then(function(ra) {
+              var activeId = ra && ra.value ? ra.value : null;
+              var found = null;
+              for (var i = 0; i < designs.length; i++) { if (designs[i].id === activeId) { found = designs[i]; break; } }
+              if (!found) found = designs[0];
+              GAME_UFO_DESIGN = Object.assign({}, UFO_DEFAULT_DESIGN, found);
+            }).catch(function() {});
+          }
+        } else {
+          window.storage.get(UFO_STORAGE_KEY).then(function(r2) {
+            if (r2 && r2.value) { GAME_UFO_DESIGN = Object.assign({}, UFO_DEFAULT_DESIGN, JSON.parse(r2.value)); }
+          }).catch(function() {});
+        }
+      }).catch(function() {});
+    } catch(e) {}
   }, []);
   // ?play=levelId deep link: auto-load and start a custom level (used by Workshop "Play" buttons).
   useEffect(function () {
