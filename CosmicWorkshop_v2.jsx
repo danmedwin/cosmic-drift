@@ -242,6 +242,7 @@ var PATTERNS = [
   { id: "rings", label: "Rings" },
   { id: "circles", label: "Circles" },
   { id: "squares", label: "Squares" },
+  { id: "craters", label: "Craters" },
 ];
 
 var PATTERN_CAPS = {
@@ -251,6 +252,7 @@ var PATTERN_CAPS = {
   rings:      { lineWidth: true,  filled: false, spacing: false, ringSpacing: true  },
   circles:    { lineWidth: true,  filled: true,  spacing: true,  ringSpacing: false },
   squares:    { lineWidth: true,  filled: true,  spacing: true,  ringSpacing: false },
+  craters:    { lineWidth: true,  filled: true,  spacing: true,  ringSpacing: false },
 };
 
 var CORNER_SHAPES = { square: true };
@@ -509,6 +511,27 @@ function PatternDef(props) {
     case "chevrons": { var chHW = 5, chHH = 2.5; var chTop = half - 2 * chHH, chBot = half; var pts = (half - chHW) + "," + chBot + " " + half + "," + chTop + " " + (half + chHW) + "," + chBot; inner = React.createElement("polyline", { points: pts, fill: "none", stroke: stroke, strokeWidth: strokeW, opacity: opacity }); break; }
     case "circles": inner = React.createElement("circle", { cx: half, cy: half, r: 3.5, fill: fill, stroke: stroke, strokeWidth: strokeW, opacity: opacity }); break;
     case "squares": var sqSz = 3.5, sqOff = (sz - sqSz) / 2; inner = React.createElement("rect", { x: sqOff, y: sqOff, width: sqSz, height: sqSz, fill: fill, stroke: stroke, strokeWidth: strokeW, opacity: opacity }); break;
+    case "craters": {
+      // Four irregular "asteroid" silhouettes per tile, varying sizes/positions.
+      // Vertex angles and radii are perturbed via sin() so each crater looks
+      // hand-drawn but the result is deterministic (no Math.random in render).
+      var craterDefs = [[2.5, 3.0, 1.8, 7, 0.3], [6.7, 2.3, 1.2, 6, 1.4], [3.2, 7.2, 2.4, 8, 2.1], [7.6, 7.4, 1.5, 7, 0.9]];
+      var craterEls = [];
+      for (var cri = 0; cri < craterDefs.length; cri++) {
+        var cdef = craterDefs[cri];
+        var ccx = cdef[0], ccy = cdef[1], baseR = cdef[2], nPts = cdef[3], cseed = cdef[4];
+        var cPts = [];
+        for (var cpi = 0; cpi < nPts; cpi++) {
+          var cang = (cpi / nPts) * Math.PI * 2 + Math.sin(cpi * 1.7 + cseed) * 0.15;
+          var cjr = 0.72 + 0.45 * Math.sin(cpi * 2.3 + cseed * 5);
+          var crr = baseR * cjr;
+          cPts.push((ccx + Math.cos(cang) * crr).toFixed(2) + "," + (ccy + Math.sin(cang) * crr).toFixed(2));
+        }
+        craterEls.push(React.createElement("polygon", { key: cri, points: cPts.join(" "), fill: fill, stroke: stroke, strokeWidth: strokeW, opacity: opacity }));
+      }
+      inner = React.createElement("g", null, craterEls);
+      break;
+    }
     default: return null;
   }
   var transform = "translate(50 50) scale(" + scale + ") rotate(" + rotation + ") translate(-50 -50)";
@@ -2044,8 +2067,8 @@ export default function CosmicWorkshop() {
                   return React.createElement(React.Fragment, null,
                     React.createElement(BDColorPicker, { value: bdDesign.patternColor, onChange: function(v) { bdUpdateDesign("patternColor", v); }, label: "Color" }),
                     React.createElement(BDSlider, { label: "Opacity", value: bdDesign.patternOpacity, onChange: function(v) { bdUpdateDesign("patternOpacity", v); }, min: 0.1, max: 1, step: 0.05, displayValue: Math.round(bdDesign.patternOpacity * 100) + "%" }),
-                    React.createElement(BDSlider, { label: "Scale", value: bdDesign.patternScale, onChange: function(v) { bdUpdateDesign("patternScale", v); }, min: 0.3, max: 3, step: 0.1, displayValue: bdDesign.patternScale.toFixed(1) + "x" }),
-                    React.createElement(BDSlider, { label: "Rotation", value: bdDesign.patternRotation, onChange: function(v) { bdUpdateDesign("patternRotation", v); }, min: 0, max: 360, step: 5, displayValue: bdDesign.patternRotation + "\u00b0" }),
+                    bdDesign.pattern !== "rings" && React.createElement(BDSlider, { label: "Scale", value: bdDesign.patternScale, onChange: function(v) { bdUpdateDesign("patternScale", v); }, min: 0.3, max: 3, step: 0.1, displayValue: bdDesign.patternScale.toFixed(1) + "x" }),
+                    bdDesign.pattern !== "rings" && React.createElement(BDSlider, { label: "Rotation", value: bdDesign.patternRotation, onChange: function(v) { bdUpdateDesign("patternRotation", v); }, min: 0, max: 360, step: 5, displayValue: bdDesign.patternRotation + "\u00b0" }),
                     caps.lineWidth && React.createElement(BDSlider, { label: "Line Width", value: bdDesign.patternLineWidth, onChange: function(v) { bdUpdateDesign("patternLineWidth", v); }, min: 0.5, max: 4, step: 0.25 }),
                     caps.spacing && React.createElement(BDSlider, { label: "Spacing", value: bdDesign.patternSpacing == null ? 10 : bdDesign.patternSpacing, onChange: function(v) { bdUpdateDesign("patternSpacing", v); }, min: 4, max: 30, step: 1, displayValue: String(Math.round(bdDesign.patternSpacing == null ? 10 : bdDesign.patternSpacing)) }),
                     caps.ringSpacing && React.createElement(BDSlider, { label: "Ring Spacing", value: bdDesign.patternRingSpacing == null ? 6 : bdDesign.patternRingSpacing, onChange: function(v) { bdUpdateDesign("patternRingSpacing", v); }, min: 2, max: 30, step: 1, displayValue: String(Math.round(bdDesign.patternRingSpacing == null ? 6 : bdDesign.patternRingSpacing)) }),

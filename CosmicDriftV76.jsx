@@ -666,6 +666,24 @@ function PatternDef(props) {
     case "chevrons": { var chHW = 5, chHH = 2.5; var chTop = half - 2 * chHH, chBot = half; var pts = (half - chHW) + "," + chBot + " " + half + "," + chTop + " " + (half + chHW) + "," + chBot; inner = React.createElement("polyline", { points: pts, fill: "none", stroke: stroke, strokeWidth: strokeW, opacity: opacity }); break; }
     case "circles": inner = React.createElement("circle", { cx: half, cy: half, r: 3.5, fill: fill, stroke: stroke, strokeWidth: strokeW, opacity: opacity }); break;
     case "squares": var sqSz = 3.5, sqOff = (sz - sqSz) / 2; inner = React.createElement("rect", { x: sqOff, y: sqOff, width: sqSz, height: sqSz, fill: fill, stroke: stroke, strokeWidth: strokeW, opacity: opacity }); break;
+    case "craters": {
+      var craterDefs = [[2.5, 3.0, 1.8, 7, 0.3], [6.7, 2.3, 1.2, 6, 1.4], [3.2, 7.2, 2.4, 8, 2.1], [7.6, 7.4, 1.5, 7, 0.9]];
+      var craterEls = [];
+      for (var cri = 0; cri < craterDefs.length; cri++) {
+        var cdef = craterDefs[cri];
+        var ccx = cdef[0], ccy = cdef[1], baseR = cdef[2], nPts = cdef[3], cseed = cdef[4];
+        var cPts = [];
+        for (var cpi = 0; cpi < nPts; cpi++) {
+          var cang = (cpi / nPts) * Math.PI * 2 + Math.sin(cpi * 1.7 + cseed) * 0.15;
+          var cjr = 0.72 + 0.45 * Math.sin(cpi * 2.3 + cseed * 5);
+          var crr = baseR * cjr;
+          cPts.push((ccx + Math.cos(cang) * crr).toFixed(2) + "," + (ccy + Math.sin(cang) * crr).toFixed(2));
+        }
+        craterEls.push(React.createElement("polygon", { key: cri, points: cPts.join(" "), fill: fill, stroke: stroke, strokeWidth: strokeW, opacity: opacity }));
+      }
+      inner = React.createElement("g", null, craterEls);
+      break;
+    }
     default: return null;
   }
   var transform = "translate(50 50) scale(" + scale + ") rotate(" + rotation + ") translate(-50 -50)";
