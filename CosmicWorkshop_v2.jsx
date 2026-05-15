@@ -884,6 +884,9 @@ export default function CosmicWorkshop() {
   var _ufoSaveStatus = useState(""), ufoSaveStatus = _ufoSaveStatus[0], setUfoSaveStatus = _ufoSaveStatus[1];
   var _ufoDeletingId = useState(null), ufoDeletingId = _ufoDeletingId[0], setUfoDeletingId = _ufoDeletingId[1];
   var _ufoBackWarn = useState(false), ufoShowBackWarn = _ufoBackWarn[0], setUfoShowBackWarn = _ufoBackWarn[1];
+  var _ufoShowImport = useState(false), ufoShowImport = _ufoShowImport[0], setUfoShowImport = _ufoShowImport[1];
+  var _ufoImportText = useState(""), ufoImportText = _ufoImportText[0], setUfoImportText = _ufoImportText[1];
+  var _ufoImportError = useState(""), ufoImportError = _ufoImportError[0], setUfoImportError = _ufoImportError[1];
   var _ufoExportId = useState(null), ufoExportId = _ufoExportId[0], setUfoExportId = _ufoExportId[1];
   var _ufoExportText = useState(""), ufoExportText = _ufoExportText[0], setUfoExportText = _ufoExportText[1];
   var _ufoCopied = useState(false), ufoCopied = _ufoCopied[0], setUfoCopied = _ufoCopied[1];
@@ -1920,6 +1923,28 @@ export default function CosmicWorkshop() {
     setUfoExportId(design.id);
     setUfoCopied(false);
   }
+  function ufoHandleImport() {
+    var text = ufoImportText.trim();
+    if (!text) { setUfoImportError("Paste a UFO design code first"); return; }
+    var parsed;
+    try { parsed = JSON.parse(text); } catch (e) { setUfoImportError("Invalid format — not valid JSON"); return; }
+    var arr = Array.isArray(parsed) ? parsed : [parsed];
+    if (arr.length === 0) { setUfoImportError("No designs found"); return; }
+    var newEntries = [];
+    for (var a = 0; a < arr.length; a++) {
+      var d = arr[a];
+      if (!d || typeof d !== "object") { setUfoImportError("Item " + (a + 1) + ": not an object"); return; }
+      if (typeof d.hullColor !== "string") { setUfoImportError("Item " + (a + 1) + ": missing hullColor"); return; }
+      var entry = Object.assign({}, UFO_DEFAULT_DESIGN, d);
+      entry.id = genUUID();
+      entry.name = d.name || "Imported UFO";
+      entry.isFactory = false;
+      entry.savedAt = new Date().toISOString();
+      newEntries.push(entry);
+    }
+    setUfoSaved(function(prev) { var list = prev.concat(newEntries); ufoSaveDesigns(list); return list; });
+    setUfoShowImport(false); setUfoImportText(""); setUfoImportError("");
+  }
 
   // RENDER
   // ═══════════════════════════════════════
@@ -2402,7 +2427,9 @@ export default function CosmicWorkshop() {
       ufoView === "list" && React.createElement(React.Fragment, null,
         React.createElement(WorkshopTopBar, {
           onBack: function() { setScreen("splash"); setUfoView("list"); }, backLabel: "Workshop", title: "UFO Customizer", color: "#64dcb4",
-          rightContent: React.createElement("div", { onClick: ufoOpenNew, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #1a3a30, #0f2a22)", boxShadow: "0 0 8px rgba(100,220,180,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, "+ New")
+          rightContent: React.createElement("div", { style: { display: "flex", gap: 4 } },
+            React.createElement("div", { onClick: function() { setUfoShowImport(true); setUfoImportText(""); setUfoImportError(""); }, style: BTN_TOPBAR_PURPLE }, "Import"),
+            React.createElement("div", { onClick: ufoOpenNew, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #1a3a30, #0f2a22)", boxShadow: "0 0 8px rgba(100,220,180,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, "+ New"))
         }),
         React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "6px 10px 20px" } },
           ufoSaved.length === 0 && React.createElement("div", { style: { textAlign: "center", padding: 40 } },
@@ -2424,7 +2451,8 @@ export default function CosmicWorkshop() {
                 React.createElement("div", { onClick: function() { setUfoDeletingId(design.id); }, style: BTN_DELETE }, "DELETE")));
           })),
         ufoDeletingId && renderDeleteOverlay("Delete UFO Design?", function() { setUfoDeletingId(null); }, function() { ufoDeleteDesign(ufoDeletingId); }),
-        ufoExportId && renderExportOverlay("Export UFO Design", ufoExportText, ufoCopied, function() { copyToClipboard(ufoExportText, setUfoCopied); }, function() { setUfoExportId(null); })),
+        ufoExportId && renderExportOverlay("Export UFO Design", ufoExportText, ufoCopied, function() { copyToClipboard(ufoExportText, setUfoCopied); }, function() { setUfoExportId(null); }),
+        ufoShowImport && renderImportOverlay("Import UFO Design", ufoImportText, setUfoImportText, ufoImportError, setUfoImportError, ufoHandleImport, function() { setUfoShowImport(false); setUfoImportText(""); setUfoImportError(""); })),
 
       // ── EDITOR VIEW ──
       ufoView === "editor" && React.createElement(React.Fragment, null,

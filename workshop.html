@@ -3286,6 +3286,15 @@ function CosmicWorkshop() {
   var _ufoBackWarn = useState(false),
     ufoShowBackWarn = _ufoBackWarn[0],
     setUfoShowBackWarn = _ufoBackWarn[1];
+  var _ufoShowImport = useState(false),
+    ufoShowImport = _ufoShowImport[0],
+    setUfoShowImport = _ufoShowImport[1];
+  var _ufoImportText = useState(""),
+    ufoImportText = _ufoImportText[0],
+    setUfoImportText = _ufoImportText[1];
+  var _ufoImportError = useState(""),
+    ufoImportError = _ufoImportError[0],
+    setUfoImportError = _ufoImportError[1];
   var _ufoExportId = useState(null),
     ufoExportId = _ufoExportId[0],
     setUfoExportId = _ufoExportId[1];
@@ -5679,6 +5688,51 @@ function CosmicWorkshop() {
     setUfoExportText(JSON.stringify(exp, null, 2));
     setUfoExportId(design.id);
     setUfoCopied(false);
+  }
+  function ufoHandleImport() {
+    var text = ufoImportText.trim();
+    if (!text) {
+      setUfoImportError("Paste a UFO design code first");
+      return;
+    }
+    var parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch (e) {
+      setUfoImportError("Invalid format — not valid JSON");
+      return;
+    }
+    var arr = Array.isArray(parsed) ? parsed : [parsed];
+    if (arr.length === 0) {
+      setUfoImportError("No designs found");
+      return;
+    }
+    var newEntries = [];
+    for (var a = 0; a < arr.length; a++) {
+      var d = arr[a];
+      if (!d || typeof d !== "object") {
+        setUfoImportError("Item " + (a + 1) + ": not an object");
+        return;
+      }
+      if (typeof d.hullColor !== "string") {
+        setUfoImportError("Item " + (a + 1) + ": missing hullColor");
+        return;
+      }
+      var entry = Object.assign({}, UFO_DEFAULT_DESIGN, d);
+      entry.id = genUUID();
+      entry.name = d.name || "Imported UFO";
+      entry.isFactory = false;
+      entry.savedAt = new Date().toISOString();
+      newEntries.push(entry);
+    }
+    setUfoSaved(function (prev) {
+      var list = prev.concat(newEntries);
+      ufoSaveDesigns(list);
+      return list;
+    });
+    setUfoShowImport(false);
+    setUfoImportText("");
+    setUfoImportError("");
   }
 
   // RENDER
@@ -8563,12 +8617,24 @@ function CosmicWorkshop() {
     title: "UFO Customizer",
     color: "#64dcb4",
     rightContent: React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 4
+      }
+    }, React.createElement("div", {
+      onClick: function () {
+        setUfoShowImport(true);
+        setUfoImportText("");
+        setUfoImportError("");
+      },
+      style: BTN_TOPBAR_PURPLE
+    }, "Import"), React.createElement("div", {
       onClick: ufoOpenNew,
       style: Object.assign({}, BTN_TOPBAR_ACCENT, {
         background: "linear-gradient(180deg, #1a3a30, #0f2a22)",
         boxShadow: "0 0 8px rgba(100,220,180,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)"
       })
-    }, "+ New")
+    }, "+ New"))
   }), React.createElement("div", {
     style: {
       flex: 1,
@@ -8682,6 +8748,10 @@ function CosmicWorkshop() {
     copyToClipboard(ufoExportText, setUfoCopied);
   }, function () {
     setUfoExportId(null);
+  }), ufoShowImport && renderImportOverlay("Import UFO Design", ufoImportText, setUfoImportText, ufoImportError, setUfoImportError, ufoHandleImport, function () {
+    setUfoShowImport(false);
+    setUfoImportText("");
+    setUfoImportError("");
   })),
   // ── EDITOR VIEW ──
   ufoView === "editor" && React.createElement(React.Fragment, null, React.createElement(WorkshopTopBar, {
