@@ -541,7 +541,10 @@ function PatternDef(props) {
     }
     default: return null;
   }
-  var transform = "translate(50 50) scale(" + scale + ") rotate(" + rotation + ") translate(-50 -50)";
+  // Craters' Scale slider is repurposed: min 3 = the densest "current 3x" zoom,
+  // max 10 = a single tile fills a 100x100 block (no visible repetition).
+  var effScale = patternId === "craters" ? Math.max(3, Math.min(10, scale == null ? 10 : scale)) : scale;
+  var transform = "translate(50 50) scale(" + effScale + ") rotate(" + rotation + ") translate(-50 -50)";
   return React.createElement("pattern", { id: id, patternUnits: "userSpaceOnUse", width: sz, height: sz, patternTransform: transform }, inner);
 }
 
@@ -2068,13 +2071,24 @@ export default function CosmicWorkshop() {
                   React.createElement(BDColorPicker, { value: bdDisplayDesign.glowColor, onChange: function(v) { bdUpdateDesign("glowColor", v); }, label: "Glow Color" }),
                   React.createElement(BDSlider, { label: "Intensity", value: bdDisplayDesign.glowIntensity, onChange: function(v) { bdUpdateDesign("glowIntensity", v); }, min: 2, max: 20, step: 1 }))),
               bdActivePanel === "pattern" && React.createElement(React.Fragment, null,
-                React.createElement(BDOptionGrid, { options: PATTERNS, value: bdDesign.pattern, onChange: function(v) { bdUpdateDesign("pattern", v); }, columns: 4 }),
+                React.createElement(BDOptionGrid, { options: PATTERNS, value: bdDesign.pattern, onChange: function(v) {
+                  // Craters uses a wider Scale range (3..10); other patterns use 0.3..3.
+                  // Adjust patternScale on switch so the slider lands in-range.
+                  if (v === "craters" && (bdDesign.patternScale == null || bdDesign.patternScale < 3)) { bdUpdateDesign("patternScale", 10); }
+                  else if (v !== "craters" && bdDesign.patternScale != null && bdDesign.patternScale > 3) { bdUpdateDesign("patternScale", 1); }
+                  bdUpdateDesign("pattern", v);
+                }, columns: 4 }),
                 bdDesign.pattern !== "none" && (function() {
                   var caps = PATTERN_CAPS[bdDesign.pattern] || {};
                   return React.createElement(React.Fragment, null,
                     React.createElement(BDColorPicker, { value: bdDesign.patternColor, onChange: function(v) { bdUpdateDesign("patternColor", v); }, label: "Color" }),
                     React.createElement(BDSlider, { label: "Opacity", value: bdDesign.patternOpacity, onChange: function(v) { bdUpdateDesign("patternOpacity", v); }, min: 0.1, max: 1, step: 0.05, displayValue: Math.round(bdDesign.patternOpacity * 100) + "%" }),
-                    bdDesign.pattern !== "rings" && React.createElement(BDSlider, { label: "Scale", value: bdDesign.patternScale, onChange: function(v) { bdUpdateDesign("patternScale", v); }, min: 0.3, max: 3, step: 0.1, displayValue: bdDesign.patternScale.toFixed(1) + "x" }),
+                    bdDesign.pattern !== "rings" && (function() {
+                      var isCraters = bdDesign.pattern === "craters";
+                      var sMin = isCraters ? 3 : 0.3, sMax = isCraters ? 10 : 3, sStep = isCraters ? 0.5 : 0.1;
+                      var sVal = bdDesign.patternScale == null ? (isCraters ? 10 : 1) : Math.max(sMin, Math.min(sMax, bdDesign.patternScale));
+                      return React.createElement(BDSlider, { label: "Scale", value: sVal, onChange: function(v) { bdUpdateDesign("patternScale", v); }, min: sMin, max: sMax, step: sStep, displayValue: sVal.toFixed(1) + "x" });
+                    })(),
                     bdDesign.pattern !== "rings" && React.createElement(BDSlider, { label: "Rotation", value: bdDesign.patternRotation, onChange: function(v) { bdUpdateDesign("patternRotation", v); }, min: 0, max: 360, step: 5, displayValue: bdDesign.patternRotation + "\u00b0" }),
                     caps.lineWidth && React.createElement(BDSlider, { label: "Line Width", value: bdDesign.patternLineWidth, onChange: function(v) { bdUpdateDesign("patternLineWidth", v); }, min: 0.5, max: 4, step: 0.25 }),
                     caps.spacing && React.createElement(BDSlider, { label: "Spacing", value: bdDesign.patternSpacing == null ? 10 : bdDesign.patternSpacing, onChange: function(v) { bdUpdateDesign("patternSpacing", v); }, min: 4, max: 30, step: 1, displayValue: String(Math.round(bdDesign.patternSpacing == null ? 10 : bdDesign.patternSpacing)) }),

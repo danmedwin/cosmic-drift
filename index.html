@@ -2527,7 +2527,8 @@ function PatternDef(props) {
     default:
       return null;
   }
-  var transform = "translate(50 50) scale(" + scale + ") rotate(" + rotation + ") translate(-50 -50)";
+  var effScale = patternId === "craters" ? Math.max(3, Math.min(10, scale == null ? 10 : scale)) : scale;
+  var transform = "translate(50 50) scale(" + effScale + ") rotate(" + rotation + ") translate(-50 -50)";
   return React.createElement("pattern", {
     id: id,
     patternUnits: "userSpaceOnUse",
