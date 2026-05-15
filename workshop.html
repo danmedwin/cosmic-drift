@@ -8702,7 +8702,7 @@ function CosmicWorkshop() {
       }
     }, ufoEditId && React.createElement("div", {
       onClick: function () {
-        ufoSetActive(ufoEditId);
+        ufoEditId === ufoActiveId ? ufoSetActive(null) : ufoSetActive(ufoEditId);
       },
       style: Object.assign({}, BTN_TOPBAR, {
         color: ufoEditId === ufoActiveId ? "#80dd90" : "rgba(200,210,220,0.7)",

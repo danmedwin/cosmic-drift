@@ -2434,7 +2434,7 @@ export default function CosmicWorkshop() {
           },
           backLabel: "My UFOs", title: ufoEditId ? "Edit UFO" : "New UFO", color: "#64dcb4",
           rightContent: React.createElement("div", { style: { display: "flex", gap: 6 } },
-            ufoEditId && React.createElement("div", { onClick: function() { ufoSetActive(ufoEditId); }, style: Object.assign({}, BTN_TOPBAR, { color: ufoEditId === ufoActiveId ? "#80dd90" : "rgba(200,210,220,0.7)", border: ufoEditId === ufoActiveId ? "2px solid rgba(80,200,100,0.5)" : PNLB }) }, ufoEditId === ufoActiveId ? "★ Active" : "Set Active"),
+            ufoEditId && React.createElement("div", { onClick: function() { ufoEditId === ufoActiveId ? ufoSetActive(null) : ufoSetActive(ufoEditId); }, style: Object.assign({}, BTN_TOPBAR, { color: ufoEditId === ufoActiveId ? "#80dd90" : "rgba(200,210,220,0.7)", border: ufoEditId === ufoActiveId ? "2px solid rgba(80,200,100,0.5)" : PNLB }) }, ufoEditId === ufoActiveId ? "★ Active" : "Set Active"),
             React.createElement("div", { onClick: ufoSaveCurrent, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #1a3a30, #0f2a22)", boxShadow: "0 0 8px rgba(100,220,180,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, ufoSaveStatus || "Save"))
         }),
         React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "0 16px 32px" } },
