@@ -245,12 +245,12 @@ var PATTERNS = [
 ];
 
 var PATTERN_CAPS = {
-  lines:      { lineWidth: true,  filled: false, ringSpacing: false },
-  crosshatch: { lineWidth: true,  filled: false, ringSpacing: false },
-  chevrons:   { lineWidth: true,  filled: false, ringSpacing: false },
-  rings:      { lineWidth: true,  filled: true,  ringSpacing: true  },
-  circles:    { lineWidth: true,  filled: true,  ringSpacing: false },
-  squares:    { lineWidth: true,  filled: true,  ringSpacing: false },
+  lines:      { lineWidth: true,  filled: false, spacing: true,  ringSpacing: false },
+  crosshatch: { lineWidth: true,  filled: false, spacing: false, ringSpacing: false },
+  chevrons:   { lineWidth: true,  filled: false, spacing: true,  ringSpacing: false },
+  rings:      { lineWidth: true,  filled: false, spacing: false, ringSpacing: true  },
+  circles:    { lineWidth: true,  filled: true,  spacing: true,  ringSpacing: false },
+  squares:    { lineWidth: true,  filled: true,  spacing: true,  ringSpacing: false },
 };
 
 var CORNER_SHAPES = { square: true };
@@ -292,7 +292,7 @@ function bdDefaultDesign() {
     color: "#4488ff", borderColor: "#88bbff", borderWidth: 2, fillOpacity: 1, borderOpacity: 1,
     glowEnabled: false, glowColor: "#88bbff", glowIntensity: 6,
     pattern: "none", patternColor: "#ffffff", patternOpacity: 0.3,
-    patternScale: 1, patternRotation: 0, patternFilled: false, patternLineWidth: 1.5, patternRingSpacing: 2,
+    patternScale: 1, patternRotation: 0, patternFilled: false, patternLineWidth: 1.5, patternSpacing: 10, patternRingSpacing: 6,
     icon: "none", iconColor: "#ffffff", iconOpacity: 0.8, iconRotation: 0,
     iconGlow: false, iconGlowColor: "#ffffff", iconGlowIntensity: 6,
     assignedTo: "regular", phases: null,
@@ -498,13 +498,15 @@ var BD_FACTORY_PRESETS = [
 // ── SVG Pattern renderer ──
 function PatternDef(props) {
   var id = props.id, patternId = props.patternId, color = props.color, opacity = props.opacity, scale = props.scale, rotation = props.rotation, filled = props.filled, lineWidth = props.lineWidth;
-  if (patternId === "none") return null;
-  var sz = 10, half = 5, strokeW = lineWidth, fill = filled ? color : "none", stroke = color, inner = null;
+  if (patternId === "none" || patternId === "rings") return null;
+  // Tile size = spacing. Elements have fixed (or relative) sizes inside the tile,
+  // so increasing spacing grows the whitespace between elements.
+  var sz = Math.max(2, Math.min(50, props.spacing == null ? 10 : props.spacing));
+  var half = sz / 2, strokeW = lineWidth, fill = filled ? color : "none", stroke = color, inner = null;
   switch (patternId) {
     case "lines": inner = React.createElement("line", { x1: 0, y1: half, x2: sz, y2: half, stroke: stroke, strokeWidth: strokeW, opacity: opacity }); break;
     case "crosshatch": inner = React.createElement("g", { opacity: opacity }, React.createElement("line", { x1: 0, y1: 0, x2: sz, y2: sz, stroke: stroke, strokeWidth: strokeW }), React.createElement("line", { x1: sz, y1: 0, x2: 0, y2: sz, stroke: stroke, strokeWidth: strokeW })); break;
-    case "chevrons": inner = React.createElement("polyline", { points: "0," + half + " " + half + ",0 " + sz + "," + half, fill: "none", stroke: stroke, strokeWidth: strokeW, opacity: opacity }); break;
-    case "rings": { var rMax = 4.5, rSpacing = Math.max(0.5, Math.min(rMax, props.ringSpacing == null ? 2 : props.ringSpacing)); var rings = [], rk = 0; for (var rr = rMax; rr > 0.4; rr -= rSpacing) { rings.push(React.createElement("circle", { key: rk++, cx: half, cy: half, r: rr, fill: filled ? color : "none", stroke: stroke, strokeWidth: strokeW, opacity: opacity })); } inner = React.createElement("g", null, rings); break; }
+    case "chevrons": { var chHW = 5, chHH = 2.5; var chTop = half - 2 * chHH, chBot = half; var pts = (half - chHW) + "," + chBot + " " + half + "," + chTop + " " + (half + chHW) + "," + chBot; inner = React.createElement("polyline", { points: pts, fill: "none", stroke: stroke, strokeWidth: strokeW, opacity: opacity }); break; }
     case "circles": inner = React.createElement("circle", { cx: half, cy: half, r: 3.5, fill: fill, stroke: stroke, strokeWidth: strokeW, opacity: opacity }); break;
     case "squares": var sqSz = 3.5, sqOff = (sz - sqSz) / 2; inner = React.createElement("rect", { x: sqOff, y: sqOff, width: sqSz, height: sqSz, fill: fill, stroke: stroke, strokeWidth: strokeW, opacity: opacity }); break;
     default: return null;
@@ -535,7 +537,27 @@ function BDBlockPreview(props) {
     else { shapeElement = React.createElement("path", { d: shapePath, fill: design.color, fillOpacity: fillOp, stroke: design.borderColor, strokeOpacity: borderOp, strokeWidth: design.borderWidth * 2, strokeLinejoin: "round" }); }
   }
   var patternOverlay = null;
-  if (!isNone && design.pattern !== "none") {
+  var ringsClipDef = null;
+  if (!isNone && design.pattern === "rings") {
+    // Rings = single bullseye centered on the shape, clipped to the shape outline.
+    var rSpacing = Math.max(1, Math.min(50, design.patternRingSpacing == null ? 6 : design.patternRingSpacing));
+    var rLineW = design.patternLineWidth || 1.5;
+    var rOpacity = design.patternOpacity == null ? 0.3 : design.patternOpacity;
+    var rColor = design.patternColor || "#fff";
+    var clipId = "ring-clip-" + size;
+    var clipShape = isCircle
+      ? React.createElement("circle", { cx: 50, cy: 50, r: 46 })
+      : (isSquare && hasCorners)
+        ? React.createElement("rect", { x: 4, y: 4, width: 92, height: 92, rx: cr, ry: cr })
+        : React.createElement("path", { d: shapePath });
+    ringsClipDef = React.createElement("clipPath", { id: clipId }, clipShape);
+    var ringCircles = [], ringK = 0;
+    // Outer max 70 covers the shape extent in the 100x100 viewBox; clip cuts what's outside.
+    for (var ringR = 70; ringR > 0.5; ringR -= rSpacing) {
+      ringCircles.push(React.createElement("circle", { key: ringK++, cx: 50, cy: 50, r: ringR, fill: "none", stroke: rColor, strokeWidth: rLineW, opacity: rOpacity }));
+    }
+    patternOverlay = React.createElement("g", { clipPath: "url(#" + clipId + ")" }, ringCircles);
+  } else if (!isNone && design.pattern !== "none") {
     if (isCircle) { patternOverlay = React.createElement("circle", { cx: 50, cy: 50, r: 46, fill: "url(#" + patId + ")", stroke: "none" }); }
     else if (isSquare && hasCorners) { patternOverlay = React.createElement("rect", { x: 4, y: 4, width: 92, height: 92, rx: cr, ry: cr, fill: "url(#" + patId + ")", stroke: "none" }); }
     else { patternOverlay = React.createElement("path", { d: shapePath, fill: "url(#" + patId + ")", stroke: "none" }); }
@@ -557,7 +579,7 @@ function BDBlockPreview(props) {
   if (hasRotation) { groupProps.transform = "rotate(" + design.shapeRotation + " 50 50)"; }
   return React.createElement("div", { style: Object.assign({ width: size, height: size, display: "flex", alignItems: "center", justifyContent: "center" }, glowStyle) },
     React.createElement("svg", { viewBox: "0 0 100 100", width: size, height: size, xmlns: "http://www.w3.org/2000/svg" },
-      React.createElement("defs", null, React.createElement(PatternDef, { id: patId, patternId: design.pattern, color: design.patternColor, opacity: design.patternOpacity, scale: design.patternScale, rotation: design.patternRotation, filled: design.patternFilled, lineWidth: design.patternLineWidth, ringSpacing: design.patternRingSpacing }), iconGlowFilter),
+      React.createElement("defs", null, React.createElement(PatternDef, { id: patId, patternId: design.pattern, color: design.patternColor, opacity: design.patternOpacity, scale: design.patternScale, rotation: design.patternRotation, filled: design.patternFilled, lineWidth: design.patternLineWidth, spacing: design.patternSpacing }), ringsClipDef, iconGlowFilter),
       React.createElement("g", groupProps, shapeElement, patternOverlay, iconElement)));
 }
 
@@ -2025,7 +2047,8 @@ export default function CosmicWorkshop() {
                     React.createElement(BDSlider, { label: "Scale", value: bdDesign.patternScale, onChange: function(v) { bdUpdateDesign("patternScale", v); }, min: 0.3, max: 3, step: 0.1, displayValue: bdDesign.patternScale.toFixed(1) + "x" }),
                     React.createElement(BDSlider, { label: "Rotation", value: bdDesign.patternRotation, onChange: function(v) { bdUpdateDesign("patternRotation", v); }, min: 0, max: 360, step: 5, displayValue: bdDesign.patternRotation + "\u00b0" }),
                     caps.lineWidth && React.createElement(BDSlider, { label: "Line Width", value: bdDesign.patternLineWidth, onChange: function(v) { bdUpdateDesign("patternLineWidth", v); }, min: 0.5, max: 4, step: 0.25 }),
-                    caps.ringSpacing && React.createElement(BDSlider, { label: "Ring Spacing", value: bdDesign.patternRingSpacing == null ? 2 : bdDesign.patternRingSpacing, onChange: function(v) { bdUpdateDesign("patternRingSpacing", v); }, min: 0.5, max: 5, step: 0.25, displayValue: (bdDesign.patternRingSpacing == null ? 2 : bdDesign.patternRingSpacing).toFixed(2) }),
+                    caps.spacing && React.createElement(BDSlider, { label: "Spacing", value: bdDesign.patternSpacing == null ? 10 : bdDesign.patternSpacing, onChange: function(v) { bdUpdateDesign("patternSpacing", v); }, min: 4, max: 30, step: 1, displayValue: String(Math.round(bdDesign.patternSpacing == null ? 10 : bdDesign.patternSpacing)) }),
+                    caps.ringSpacing && React.createElement(BDSlider, { label: "Ring Spacing", value: bdDesign.patternRingSpacing == null ? 6 : bdDesign.patternRingSpacing, onChange: function(v) { bdUpdateDesign("patternRingSpacing", v); }, min: 2, max: 30, step: 1, displayValue: String(Math.round(bdDesign.patternRingSpacing == null ? 6 : bdDesign.patternRingSpacing)) }),
                     caps.filled && React.createElement(BDToggle, { label: "Filled", value: bdDesign.patternFilled, onChange: function(v) { bdUpdateDesign("patternFilled", v); } }));
                 })()),
               bdActivePanel === "icon" && React.createElement(React.Fragment, null,
