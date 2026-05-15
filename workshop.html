@@ -786,6 +786,7 @@ function ufoAdjustColor(hex, factor) {
 function UFOBlockSvg(props) {
   var size = props.size || 48;
   var animPhase = props.animPhase || "idle";
+  var uid = props.uid || "0";
   var d = Object.assign({}, UFO_DEFAULT_DESIGN, props.design || {});
   var hullLight = ufoAdjustColor(d.hullColor, 1.5);
   var hullDark = ufoAdjustColor(d.hullColor, 0.4);
@@ -836,7 +837,7 @@ function UFOBlockSvg(props) {
       overflow: "visible"
     }
   }, React.createElement("defs", null, React.createElement("radialGradient", {
-    id: "ufo-h",
+    id: "ufo-h-" + uid,
     cx: "50%",
     cy: "26%"
   }, React.createElement("stop", {
@@ -849,7 +850,7 @@ function UFOBlockSvg(props) {
     offset: "100%",
     stopColor: hullDark
   })), React.createElement("radialGradient", {
-    id: "ufo-d",
+    id: "ufo-d-" + uid,
     cx: "33%",
     cy: "25%"
   }, React.createElement("stop", {
@@ -865,7 +866,7 @@ function UFOBlockSvg(props) {
     stopColor: hullDark,
     stopOpacity: "0.22"
   })), glowOp > 0 ? React.createElement("radialGradient", {
-    id: "ufo-g",
+    id: "ufo-g-" + uid,
     cx: "50%",
     cy: "40%"
   }, React.createElement("stop", {
@@ -881,7 +882,7 @@ function UFOBlockSvg(props) {
     stopColor: d.hullColor,
     stopOpacity: 0
   })) : null, React.createElement("clipPath", {
-    id: "ufo-dc"
+    id: "ufo-dc-" + uid
   }, React.createElement("rect", {
     x: hx - dRx - 3,
     y: 0,
@@ -894,19 +895,19 @@ function UFOBlockSvg(props) {
     cy: hy + 15,
     rx: 72,
     ry: 35,
-    fill: "url(#ufo-g)"
+    fill: "url(#ufo-g-" + uid + ")"
   }) : null, React.createElement("ellipse", {
     cx: hx,
     cy: hy,
     rx: 48,
     ry: 14,
-    fill: "url(#ufo-h)"
+    fill: "url(#ufo-h-" + uid + ")"
   }), React.createElement("ellipse", {
     cx: hx,
     cy: hy - 1,
     rx: 46.5,
     ry: 10,
-    fill: "url(#ufo-h)"
+    fill: "url(#ufo-h-" + uid + ")"
   }), lights.map(function (lp, li2) {
     return React.createElement("g", {
       key: li2,
@@ -924,7 +925,7 @@ function UFOBlockSvg(props) {
       }
     }));
   }), showAlien ? React.createElement("g", {
-    clipPath: "url(#ufo-dc)"
+    clipPath: "url(#ufo-dc-" + uid + ")"
   }, React.createElement("ellipse", {
     cx: hx,
     cy: hy - 10,
@@ -960,8 +961,8 @@ function UFOBlockSvg(props) {
     cy: dY,
     rx: dRx,
     ry: dRy,
-    fill: "url(#ufo-d)",
-    clipPath: "url(#ufo-dc)"
+    fill: "url(#ufo-d-" + uid + ")",
+    clipPath: "url(#ufo-dc-" + uid + ")"
   }), React.createElement("ellipse", {
     cx: hx - dRx * 0.22,
     cy: dY - dRy * 0.28,
@@ -970,7 +971,7 @@ function UFOBlockSvg(props) {
     fill: "white",
     opacity: "0.25",
     transform: "rotate(-20," + (hx - dRx * 0.22) + "," + (dY - dRy * 0.28) + ")",
-    clipPath: "url(#ufo-dc)"
+    clipPath: "url(#ufo-dc-" + uid + ")"
   })));
 }
 
@@ -3285,6 +3286,15 @@ function CosmicWorkshop() {
   var _ufoBackWarn = useState(false),
     ufoShowBackWarn = _ufoBackWarn[0],
     setUfoShowBackWarn = _ufoBackWarn[1];
+  var _ufoExportId = useState(null),
+    ufoExportId = _ufoExportId[0],
+    setUfoExportId = _ufoExportId[1];
+  var _ufoExportText = useState(""),
+    ufoExportText = _ufoExportText[0],
+    setUfoExportText = _ufoExportText[1];
+  var _ufoCopied = useState(false),
+    ufoCopied = _ufoCopied[0],
+    setUfoCopied = _ufoCopied[1];
   var ufoEditDirtyRef = useRef(false);
   var bdScrollRef = useRef(null);
 
@@ -5661,6 +5671,15 @@ function CosmicWorkshop() {
     }
     setUfoDeletingId(null);
   }
+  function ufoExportDesign(design) {
+    var exp = {};
+    Object.keys(design).forEach(function (k) {
+      exp[k] = design[k];
+    });
+    setUfoExportText(JSON.stringify(exp, null, 2));
+    setUfoExportId(design.id);
+    setUfoCopied(false);
+  }
 
   // RENDER
   // ═══════════════════════════════════════
@@ -6027,7 +6046,8 @@ function CosmicWorkshop() {
     }
   }, React.createElement(UFOBlockSvg, {
     size: 38,
-    design: ufoGetActiveDesign()
+    design: ufoGetActiveDesign(),
+    uid: "splash"
   })), React.createElement("div", null, React.createElement("div", {
     style: {
       color: "#64dcb4",
@@ -8597,7 +8617,8 @@ function CosmicWorkshop() {
       }
     }, React.createElement(UFOBlockSvg, {
       size: 56,
-      design: design
+      design: design,
+      uid: design.id
     })), React.createElement("div", {
       style: {
         flex: 1,
@@ -8644,6 +8665,11 @@ function CosmicWorkshop() {
       })
     }, "SET ACTIVE"), React.createElement("div", {
       onClick: function () {
+        ufoExportDesign(design);
+      },
+      style: BTN_EXPORT
+    }, "EXPORT"), React.createElement("div", {
+      onClick: function () {
         setUfoDeletingId(design.id);
       },
       style: BTN_DELETE
@@ -8652,6 +8678,10 @@ function CosmicWorkshop() {
     setUfoDeletingId(null);
   }, function () {
     ufoDeleteDesign(ufoDeletingId);
+  }), ufoExportId && renderExportOverlay("Export UFO Design", ufoExportText, ufoCopied, function () {
+    copyToClipboard(ufoExportText, setUfoCopied);
+  }, function () {
+    setUfoExportId(null);
   })),
   // ── EDITOR VIEW ──
   ufoView === "editor" && React.createElement(React.Fragment, null, React.createElement(WorkshopTopBar, {
@@ -8666,12 +8696,27 @@ function CosmicWorkshop() {
     title: ufoEditId ? "Edit UFO" : "New UFO",
     color: "#64dcb4",
     rightContent: React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 6
+      }
+    }, ufoEditId && ufoEditId !== ufoActiveId && React.createElement("div", {
+      onClick: function () {
+        ufoSetActive(ufoEditId);
+      },
+      style: Object.assign({}, BTN_TOPBAR, {
+        padding: "5px 10px",
+        fontSize: 10,
+        color: "#64dcb4",
+        border: "1px solid rgba(100,220,180,0.35)"
+      })
+    }, "Set Active"), React.createElement("div", {
       onClick: ufoSaveCurrent,
       style: Object.assign({}, BTN_TOPBAR_ACCENT, {
         background: "linear-gradient(180deg, #1a3a30, #0f2a22)",
         boxShadow: "0 0 8px rgba(100,220,180,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)"
       })
-    }, ufoSaveStatus || "Save")
+    }, ufoSaveStatus || "Save"))
   }), React.createElement("div", {
     style: {
       flex: 1,
@@ -8689,7 +8734,8 @@ function CosmicWorkshop() {
     }
   }, React.createElement(UFOBlockSvg, {
     size: 140,
-    design: ufoEditDesign
+    design: ufoEditDesign,
+    uid: "edit"
   })),
   // Name field
   React.createElement("div", {
