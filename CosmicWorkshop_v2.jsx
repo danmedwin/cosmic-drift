@@ -108,7 +108,15 @@ function UFOBlockSvg(props) {
   var lights = [];
   for (var li = 0; li < pCount; li++) {
     var la = (li / pCount) * Math.PI * 2;
-    lights.push({ x: hx + 45 * Math.cos(la), y: hy + 8.12 * Math.sin(la), c: stealthColors[li % 3] });
+    var orbitR = 40 + (li * 11 % 5) * 3;
+    var orbitY = 6.5 + (li * 7 % 4) * 1.5;
+    var speedFac = 0.65 + (li * 13 % 7) * 0.1;
+    lights.push({
+      x: hx + orbitR * Math.cos(la), y: hy + orbitY * Math.sin(la),
+      c: stealthColors[li % 3],
+      dur: (d.lightSpeed * speedFac).toFixed(2),
+      pulse: (1.8 + li * 0.4 % 1.8).toFixed(2)
+    });
   }
   return React.createElement("svg", { viewBox: "20 25 100 100", width: size, height: size, style: { display: "block", overflow: "visible" } },
     React.createElement("defs", null,
@@ -120,20 +128,20 @@ function UFOBlockSvg(props) {
         React.createElement("stop", { offset: "0%", stopColor: "#ffffff", stopOpacity: "0.92" }),
         React.createElement("stop", { offset: "38%", stopColor: d.domeColor, stopOpacity: "0.55" }),
         React.createElement("stop", { offset: "100%", stopColor: hullDark, stopOpacity: "0.22" })),
-      glowOp > 0 ? React.createElement("radialGradient", { id: "ufo-g", cx: "50%", cy: "30%" },
-        React.createElement("stop", { offset: "0%", stopColor: d.hullColor, stopOpacity: glowOp * 0.7 }),
-        React.createElement("stop", { offset: "55%", stopColor: d.hullColor, stopOpacity: glowOp * 0.15 }),
+      glowOp > 0 ? React.createElement("radialGradient", { id: "ufo-g", cx: "50%", cy: "40%" },
+        React.createElement("stop", { offset: "0%", stopColor: d.hullColor, stopOpacity: glowOp }),
+        React.createElement("stop", { offset: "45%", stopColor: d.hullColor, stopOpacity: glowOp * 0.5 }),
         React.createElement("stop", { offset: "100%", stopColor: d.hullColor, stopOpacity: 0 })) : null,
       React.createElement("clipPath", { id: "ufo-dc" },
         React.createElement("rect", { x: hx - dRx - 3, y: 0, width: dRx * 2 + 6, height: hy }))),
     React.createElement("g", { style: gStyle },
-      glowOp > 0 ? React.createElement("ellipse", { cx: hx, cy: hy + 10, rx: 58, ry: 22, fill: "url(#ufo-g)" }) : null,
+      glowOp > 0 ? React.createElement("ellipse", { cx: hx, cy: hy + 15, rx: 72, ry: 35, fill: "url(#ufo-g)" }) : null,
       React.createElement("ellipse", { cx: hx, cy: hy, rx: 48, ry: 14, fill: "url(#ufo-h)" }),
-      React.createElement("g", { style: { animation: "ufoLightSpin " + d.lightSpeed + "s linear infinite", transformOrigin: hx + "px " + hy + "px" } },
-        lights.map(function(lp, li2) {
-          return React.createElement("circle", { key: li2, cx: lp.x, cy: lp.y, r: 3.5 * pSize, fill: lp.c, style: { animation: "pulse " + (1.8 + li2 * 0.4) + "s ease-in-out infinite" } });
-        })),
       React.createElement("ellipse", { cx: hx, cy: hy - 1, rx: 46.5, ry: 10, fill: "url(#ufo-h)" }),
+      lights.map(function(lp, li2) {
+        return React.createElement("g", { key: li2, style: { animation: "ufoLightSpin " + lp.dur + "s linear infinite", transformOrigin: hx + "px " + hy + "px" } },
+          React.createElement("circle", { cx: lp.x, cy: lp.y, r: 3.5 * pSize, fill: lp.c, style: { animation: "pulse " + lp.pulse + "s ease-in-out infinite" } }));
+      }),
       showAlien ? React.createElement("g", { clipPath: "url(#ufo-dc)" },
         React.createElement("ellipse", { cx: hx, cy: hy - 10, rx: 5, ry: 5.5, fill: "#70b870", opacity: "0.9" }),
         React.createElement("ellipse", { cx: hx, cy: hy - 22, rx: 9, ry: 9, fill: "#70b870", opacity: "0.9" }),
@@ -2305,7 +2313,7 @@ export default function CosmicWorkshop() {
             min: 0.3, max: 2.5, step: 0.1, displayValue: (ufoDesign.particleSize || 1.0).toFixed(1) + "x",
             onChange: function(v) { ufoSave(Object.assign({}, ufoDesign, { particleSize: v })); } }),
           React.createElement(BDSlider, { label: "Glow Intensity", value: ufoDesign.glowOpacity || 0,
-            min: 0, max: 1, step: 0.05, displayValue: Math.round((ufoDesign.glowOpacity || 0) * 100) + "%",
+            min: 0, max: 1, step: 0.05, displayValue: (Math.round((ufoDesign.glowOpacity || 0) * 100) || 0) + "%",
             onChange: function(v) { ufoSave(Object.assign({}, ufoDesign, { glowOpacity: v })); } }),
           React.createElement(BDToggle, { label: "Alien Inside", value: !!ufoDesign.showAlien,
             onChange: function(v) { ufoSave(Object.assign({}, ufoDesign, { showAlien: v })); } })),

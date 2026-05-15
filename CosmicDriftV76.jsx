@@ -556,7 +556,15 @@ function UFOBlockSvg(props) {
   var lights = [];
   for (var li = 0; li < pCount; li++) {
     var la = (li / pCount) * Math.PI * 2;
-    lights.push({ x: hx + 45 * Math.cos(la), y: hy + 8.12 * Math.sin(la), c: stealthColors[li % 3] });
+    var orbitR = 40 + (li * 11 % 5) * 3;
+    var orbitY = 6.5 + (li * 7 % 4) * 1.5;
+    var speedFac = 0.65 + (li * 13 % 7) * 0.1;
+    lights.push({
+      x: hx + orbitR * Math.cos(la), y: hy + orbitY * Math.sin(la),
+      c: stealthColors[li % 3],
+      dur: (d.lightSpeed * speedFac).toFixed(2),
+      pulse: (1.8 + li * 0.4 % 1.8).toFixed(2)
+    });
   }
   return (
     <svg viewBox="20 25 100 100" width={size} height={size} style={{ display: "block", overflow: "visible" }}>
@@ -571,9 +579,9 @@ function UFOBlockSvg(props) {
           <stop offset="38%" stopColor={d.domeColor} stopOpacity="0.55" />
           <stop offset="100%" stopColor={hullDark} stopOpacity="0.22" />
         </radialGradient>
-        {glowOp > 0 && <radialGradient id="ufo-g" cx="50%" cy="30%">
-          <stop offset="0%" stopColor={d.hullColor} stopOpacity={glowOp * 0.7} />
-          <stop offset="55%" stopColor={d.hullColor} stopOpacity={glowOp * 0.15} />
+        {glowOp > 0 && <radialGradient id="ufo-g" cx="50%" cy="40%">
+          <stop offset="0%" stopColor={d.hullColor} stopOpacity={glowOp} />
+          <stop offset="45%" stopColor={d.hullColor} stopOpacity={glowOp * 0.5} />
           <stop offset="100%" stopColor={d.hullColor} stopOpacity={0} />
         </radialGradient>}
         <clipPath id="ufo-dc">
@@ -581,14 +589,14 @@ function UFOBlockSvg(props) {
         </clipPath>
       </defs>
       <g style={gStyle}>
-        {glowOp > 0 && <ellipse cx={hx} cy={hy + 10} rx={58} ry={22} fill="url(#ufo-g)" />}
+        {glowOp > 0 && <ellipse cx={hx} cy={hy + 15} rx={72} ry={35} fill="url(#ufo-g)" />}
         <ellipse cx={hx} cy={hy} rx={48} ry={14} fill="url(#ufo-h)" />
-        <g style={{ animation: "ufoLightSpin " + d.lightSpeed + "s linear infinite", transformOrigin: hx + "px " + hy + "px" }}>
-          {lights.map(function(lp, li2) {
-            return <circle key={li2} cx={lp.x} cy={lp.y} r={3.5 * pSize} fill={lp.c} style={{ animation: "pulse " + (1.8 + li2 * 0.4) + "s ease-in-out infinite" }} />;
-          })}
-        </g>
         <ellipse cx={hx} cy={hy - 1} rx={46.5} ry={10} fill="url(#ufo-h)" />
+        {lights.map(function(lp, li2) {
+          return <g key={li2} style={{ animation: "ufoLightSpin " + lp.dur + "s linear infinite", transformOrigin: hx + "px " + hy + "px" }}>
+            <circle cx={lp.x} cy={lp.y} r={3.5 * pSize} fill={lp.c} style={{ animation: "pulse " + lp.pulse + "s ease-in-out infinite" }} />
+          </g>;
+        })}
         {showAlien && <g clipPath="url(#ufo-dc)">
           <ellipse cx={hx} cy={hy - 10} rx={5} ry={5.5} fill="#70b870" opacity="0.9" />
           <ellipse cx={hx} cy={hy - 22} rx={9} ry={9} fill="#70b870" opacity="0.9" />
