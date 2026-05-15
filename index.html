@@ -2541,11 +2541,13 @@ function PatternDef(props) {
 // ── SVG Block Preview (for designed blocks) ──
 function BDBlockPreview(props) {
   var design = props.design,
-    size = props.size || 120;
+    size = props.size || 120,
+    uid = props.uid;
   var shapePath = getShapePath(design.shape);
   var isCircle = design.shape === "circle";
   var isSquare = design.shape === "square";
-  var patId = "preview-pattern-" + design.pattern + "-" + size;
+  var uidSuffix = uid != null ? "-" + uid : design.id ? "-" + design.id : "";
+  var patId = "preview-pattern-" + design.pattern + "-" + size + uidSuffix;
   var hasRotation = design.shapeRotation && design.shapeRotation !== 0;
   var hasCorners = CORNER_SHAPES[design.shape] && design.cornerRadius > 0;
   var cr = design.cornerRadius || 0;
@@ -2602,7 +2604,7 @@ function BDBlockPreview(props) {
     var rLineW = design.patternLineWidth || 1.5;
     var rOpacity = design.patternOpacity == null ? 0.3 : design.patternOpacity;
     var rColor = design.patternColor || "#fff";
-    var clipId = "ring-clip-" + size;
+    var clipId = "ring-clip-" + size + uidSuffix;
     var clipShape = isCircle ? React.createElement("circle", {
       cx: 50,
       cy: 50,
@@ -2677,7 +2679,7 @@ function BDBlockPreview(props) {
   }
   if (iconDef && iconDef.path) {
     if (design.iconGlow) {
-      var glowFilterId = "icon-glow-" + size;
+      var glowFilterId = "icon-glow-" + size + uidSuffix;
       iconGlowFilter = React.createElement("filter", {
         id: glowFilterId
       }, React.createElement("feGaussianBlur", {
@@ -2981,7 +2983,8 @@ function DesignBlock(props) {
   var design = props.design,
     type = props.type,
     size = props.size,
-    sl = props.shieldLevel || 0;
+    sl = props.shieldLevel || 0,
+    uid = props.uid;
   var inner;
   if (type >= 11 && type <= 16) {
     var badgeBox = Math.max(11, size * 0.34);
@@ -2996,7 +2999,8 @@ function DesignBlock(props) {
       }
     }, /*#__PURE__*/React.createElement(BDBlockPreview, {
       design: design,
-      size: size
+      size: size,
+      uid: uid
     }), /*#__PURE__*/React.createElement("div", {
       style: {
         position: "absolute",
@@ -3016,12 +3020,14 @@ function DesignBlock(props) {
     // Force field shield level 2/1/0 maps to design phase 1/2/3.
     inner = /*#__PURE__*/React.createElement(BDBlockPreview, {
       design: getDesignForPhase(design, 3 - sl),
-      size: size
+      size: size,
+      uid: uid
     });
   } else {
     inner = /*#__PURE__*/React.createElement(BDBlockPreview, {
       design: design,
-      size: size
+      size: size,
+      uid: uid
     });
   }
   if (type === 10 && sl > 0) {
@@ -3057,7 +3063,8 @@ function BlockContent(props) {
     design: _design,
     type: type,
     size: size,
-    shieldLevel: sl
+    shieldLevel: sl,
+    uid: props.uid
   });
   if (type === 7) return /*#__PURE__*/React.createElement(DiamondPlateBlock, {
     size: size
@@ -4267,7 +4274,8 @@ function GameGrid(props) {
       type: grid[gi],
       size: blockSize,
       shieldLevel: sl,
-      animPhase: grid[gi] === 17 ? ufoPhase : undefined
+      animPhase: grid[gi] === 17 ? ufoPhase : undefined,
+      uid: gi
     }) : null));
   }
   return /*#__PURE__*/React.createElement("div", {
@@ -8065,7 +8073,7 @@ function CosmicDriftGame() {
       var oh = v.h,
         ox2 = v.x,
         oy2 = v.y;
-      var ow = oh * 1.05;
+      var ow = oh * 1.05 * ovW;
       var op = makeOozePath(oh + 8, oy2, blockSize + GAP, {
         widthMul: ovW,
         ampMul: ovWv,
@@ -8329,15 +8337,9 @@ function CosmicDriftGame() {
         "--endX": v.endX - v.startX + "px",
         "--endY": v.endY - v.startY + "px"
       }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        width: 32,
-        height: 32,
-        borderRadius: 6,
-        background: BLOCK_COLORS[v.spawnType] ? BLOCK_COLORS[v.spawnType].bg : "#7b5ea7",
-        border: "2px solid " + (BLOCK_COLORS[v.spawnType] ? BLOCK_COLORS[v.spawnType].border : "#6b4e97"),
-        boxShadow: "0 0 12px rgba(130,180,255,0.4)"
-      }
+    }, /*#__PURE__*/React.createElement(BlockContent, {
+      type: v.spawnType,
+      size: 32
     }));
     if (v.type === "bounceBall") return /*#__PURE__*/React.createElement("div", {
       key: v.id
