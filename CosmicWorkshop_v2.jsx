@@ -236,23 +236,21 @@ function getShapePath(shapeId) {
 
 var PATTERNS = [
   { id: "none", label: "None" },
-  { id: "dots", label: "Dots" },
   { id: "lines", label: "Lines" },
   { id: "crosshatch", label: "Crosshatch" },
   { id: "chevrons", label: "Chevrons" },
-  { id: "waves", label: "Waves" },
+  { id: "rings", label: "Rings" },
   { id: "circles", label: "Circles" },
   { id: "squares", label: "Squares" },
 ];
 
 var PATTERN_CAPS = {
-  dots:       { lineWidth: false, filled: false },
-  lines:      { lineWidth: true,  filled: false },
-  crosshatch: { lineWidth: true,  filled: false },
-  chevrons:   { lineWidth: true,  filled: false },
-  waves:      { lineWidth: true,  filled: false },
-  circles:    { lineWidth: true,  filled: true  },
-  squares:    { lineWidth: true,  filled: true  },
+  lines:      { lineWidth: true,  filled: false, ringSpacing: false },
+  crosshatch: { lineWidth: true,  filled: false, ringSpacing: false },
+  chevrons:   { lineWidth: true,  filled: false, ringSpacing: false },
+  rings:      { lineWidth: true,  filled: true,  ringSpacing: true  },
+  circles:    { lineWidth: true,  filled: true,  ringSpacing: false },
+  squares:    { lineWidth: true,  filled: true,  ringSpacing: false },
 };
 
 var CORNER_SHAPES = { square: true };
@@ -294,7 +292,7 @@ function bdDefaultDesign() {
     color: "#4488ff", borderColor: "#88bbff", borderWidth: 2, fillOpacity: 1, borderOpacity: 1,
     glowEnabled: false, glowColor: "#88bbff", glowIntensity: 6,
     pattern: "none", patternColor: "#ffffff", patternOpacity: 0.3,
-    patternScale: 1, patternRotation: 0, patternFilled: false, patternLineWidth: 1.5,
+    patternScale: 1, patternRotation: 0, patternFilled: false, patternLineWidth: 1.5, patternRingSpacing: 2,
     icon: "none", iconColor: "#ffffff", iconOpacity: 0.8, iconRotation: 0,
     iconGlow: false, iconGlowColor: "#ffffff", iconGlowIntensity: 6,
     assignedTo: "regular", phases: null,
@@ -503,11 +501,10 @@ function PatternDef(props) {
   if (patternId === "none") return null;
   var sz = 10, half = 5, strokeW = lineWidth, fill = filled ? color : "none", stroke = color, inner = null;
   switch (patternId) {
-    case "dots": inner = React.createElement("circle", { cx: half, cy: half, r: 2, fill: color, stroke: "none", opacity: opacity }); break;
     case "lines": inner = React.createElement("line", { x1: 0, y1: half, x2: sz, y2: half, stroke: stroke, strokeWidth: strokeW, opacity: opacity }); break;
     case "crosshatch": inner = React.createElement("g", { opacity: opacity }, React.createElement("line", { x1: 0, y1: 0, x2: sz, y2: sz, stroke: stroke, strokeWidth: strokeW }), React.createElement("line", { x1: sz, y1: 0, x2: 0, y2: sz, stroke: stroke, strokeWidth: strokeW })); break;
     case "chevrons": inner = React.createElement("polyline", { points: "0," + half + " " + half + ",0 " + sz + "," + half, fill: "none", stroke: stroke, strokeWidth: strokeW, opacity: opacity }); break;
-    case "waves": inner = React.createElement("path", { d: "M 0,5 Q 2.5,2 5,5 Q 7.5,8 10,5", fill: "none", stroke: stroke, strokeWidth: strokeW, opacity: opacity }); break;
+    case "rings": { var rMax = 4.5, rSpacing = Math.max(0.5, Math.min(rMax, props.ringSpacing == null ? 2 : props.ringSpacing)); var rings = [], rk = 0; for (var rr = rMax; rr > 0.4; rr -= rSpacing) { rings.push(React.createElement("circle", { key: rk++, cx: half, cy: half, r: rr, fill: filled ? color : "none", stroke: stroke, strokeWidth: strokeW, opacity: opacity })); } inner = React.createElement("g", null, rings); break; }
     case "circles": inner = React.createElement("circle", { cx: half, cy: half, r: 3.5, fill: fill, stroke: stroke, strokeWidth: strokeW, opacity: opacity }); break;
     case "squares": var sqSz = 3.5, sqOff = (sz - sqSz) / 2; inner = React.createElement("rect", { x: sqOff, y: sqOff, width: sqSz, height: sqSz, fill: fill, stroke: stroke, strokeWidth: strokeW, opacity: opacity }); break;
     default: return null;
@@ -560,7 +557,7 @@ function BDBlockPreview(props) {
   if (hasRotation) { groupProps.transform = "rotate(" + design.shapeRotation + " 50 50)"; }
   return React.createElement("div", { style: Object.assign({ width: size, height: size, display: "flex", alignItems: "center", justifyContent: "center" }, glowStyle) },
     React.createElement("svg", { viewBox: "0 0 100 100", width: size, height: size, xmlns: "http://www.w3.org/2000/svg" },
-      React.createElement("defs", null, React.createElement(PatternDef, { id: patId, patternId: design.pattern, color: design.patternColor, opacity: design.patternOpacity, scale: design.patternScale, rotation: design.patternRotation, filled: design.patternFilled, lineWidth: design.patternLineWidth }), iconGlowFilter),
+      React.createElement("defs", null, React.createElement(PatternDef, { id: patId, patternId: design.pattern, color: design.patternColor, opacity: design.patternOpacity, scale: design.patternScale, rotation: design.patternRotation, filled: design.patternFilled, lineWidth: design.patternLineWidth, ringSpacing: design.patternRingSpacing }), iconGlowFilter),
       React.createElement("g", groupProps, shapeElement, patternOverlay, iconElement)));
 }
 
@@ -2028,6 +2025,7 @@ export default function CosmicWorkshop() {
                     React.createElement(BDSlider, { label: "Scale", value: bdDesign.patternScale, onChange: function(v) { bdUpdateDesign("patternScale", v); }, min: 0.3, max: 3, step: 0.1, displayValue: bdDesign.patternScale.toFixed(1) + "x" }),
                     React.createElement(BDSlider, { label: "Rotation", value: bdDesign.patternRotation, onChange: function(v) { bdUpdateDesign("patternRotation", v); }, min: 0, max: 360, step: 5, displayValue: bdDesign.patternRotation + "\u00b0" }),
                     caps.lineWidth && React.createElement(BDSlider, { label: "Line Width", value: bdDesign.patternLineWidth, onChange: function(v) { bdUpdateDesign("patternLineWidth", v); }, min: 0.5, max: 4, step: 0.25 }),
+                    caps.ringSpacing && React.createElement(BDSlider, { label: "Ring Spacing", value: bdDesign.patternRingSpacing == null ? 2 : bdDesign.patternRingSpacing, onChange: function(v) { bdUpdateDesign("patternRingSpacing", v); }, min: 0.5, max: 5, step: 0.25, displayValue: (bdDesign.patternRingSpacing == null ? 2 : bdDesign.patternRingSpacing).toFixed(2) }),
                     caps.filled && React.createElement(BDToggle, { label: "Filled", value: bdDesign.patternFilled, onChange: function(v) { bdUpdateDesign("patternFilled", v); } }));
                 })()),
               bdActivePanel === "icon" && React.createElement(React.Fragment, null,
