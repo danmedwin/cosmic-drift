@@ -8700,17 +8700,15 @@ function CosmicWorkshop() {
         display: "flex",
         gap: 6
       }
-    }, ufoEditId && ufoEditId !== ufoActiveId && React.createElement("div", {
+    }, ufoEditId && React.createElement("div", {
       onClick: function () {
         ufoSetActive(ufoEditId);
       },
       style: Object.assign({}, BTN_TOPBAR, {
-        padding: "5px 10px",
-        fontSize: 10,
-        color: "#64dcb4",
-        border: "1px solid rgba(100,220,180,0.35)"
+        color: ufoEditId === ufoActiveId ? "#80dd90" : "rgba(200,210,220,0.7)",
+        border: ufoEditId === ufoActiveId ? "2px solid rgba(80,200,100,0.5)" : PNLB
       })
-    }, "Set Active"), React.createElement("div", {
+    }, ufoEditId === ufoActiveId ? "★ Active" : "Set Active"), React.createElement("div", {
       onClick: ufoSaveCurrent,
       style: Object.assign({}, BTN_TOPBAR_ACCENT, {
         background: "linear-gradient(180deg, #1a3a30, #0f2a22)",
