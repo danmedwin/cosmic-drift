@@ -295,7 +295,7 @@ var SCRNB = "2px solid #3a3a45";
 var SCRNS = "inset 0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.05)";
 
 // ── Animation CSS (subset needed for Workshop) ──
-var ANIM_CSS = "@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@400;600;700&display=swap');\n@keyframes starDrift{0%{transform:translateY(-50%)}100%{transform:translateY(0)}}\n@keyframes introFadeIn{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}\n@keyframes pulse{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}\n@keyframes ufoWarpOut{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}\n@keyframes ufoWarpIn{0%{transform:scale(0.05);opacity:0}60%{transform:scale(1.08);opacity:0.9}100%{transform:scale(1);opacity:1}}\n@keyframes ufoLightSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}\n@keyframes splashFloat{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}\n@keyframes splashGlow{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}\n* { box-sizing: border-box; }\ninput[type=range] { -webkit-appearance: none; appearance: none; background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; outline: none; }\ninput[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }\ninput[type=range]::-moz-range-thumb { width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }@keyframes vfxOozeDrip{0%{transform:scaleY(0);opacity:0}100%{transform:scaleY(1);opacity:0.85}}@keyframes vfxOozeWave{0%{transform:translateY(0)}100%{transform:translateY(50%)}}@keyframes vfxBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxRing{0%{transform:scale(0.1);opacity:1}100%{transform:scale(2.2);opacity:0}}@keyframes vfxFlash{0%{transform:scale(0.2);opacity:1}100%{transform:scale(1.8);opacity:0}}@keyframes vfxPop{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(1.2);filter:brightness(1.8)}100%{transform:scale(0);opacity:0}}@keyframes vfxBubble{0%{transform:translateY(0) scale(0.5);opacity:0}15%{opacity:0.55}85%{opacity:0.55}100%{transform:translateY(88px) scale(1);opacity:0}}@keyframes vfxSpark{0%{transform:translate(0,0) scale(1);opacity:1}35%{transform:translate(calc(var(--sx)*0.45),calc(var(--sy)*0.25 - 7px));opacity:0.9}100%{transform:translate(var(--sx),var(--sy)) scale(0.3);opacity:0}}@keyframes vfxBurnBlock{0%{opacity:1;filter:brightness(1)}10%{opacity:1;filter:brightness(2.3)}55%{opacity:0;filter:brightness(1)}100%{opacity:0;filter:brightness(1)}}";
+var ANIM_CSS = "@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@400;600;700&display=swap');\n@keyframes starDrift{0%{transform:translateY(-50%)}100%{transform:translateY(0)}}\n@keyframes introFadeIn{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}\n@keyframes pulse{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}\n@keyframes ufoWarpOut{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}\n@keyframes ufoWarpIn{0%{transform:scale(0.05);opacity:0}60%{transform:scale(1.08);opacity:0.9}100%{transform:scale(1);opacity:1}}\n@keyframes ufoLightSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}\n@keyframes splashFloat{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}\n@keyframes splashGlow{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}\n* { box-sizing: border-box; }\ninput[type=range] { -webkit-appearance: none; appearance: none; background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; outline: none; }\ninput[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }\ninput[type=range]::-moz-range-thumb { width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }@keyframes vfxOozeDrip{0%{transform:scaleY(0);opacity:0}100%{transform:scaleY(1);opacity:0.85}}@keyframes vfxOozeWave{0%{transform:translateY(0)}100%{transform:translateY(50%)}}@keyframes vfxBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxRing{0%{transform:scale(0.1);opacity:1}100%{transform:scale(2.2);opacity:0}}@keyframes vfxFlash{0%{transform:scale(0.2);opacity:1}100%{transform:scale(1.8);opacity:0}}@keyframes vfxPop{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(1.2);filter:brightness(1.8)}100%{transform:scale(0);opacity:0}}@keyframes vfxBubble{0%{transform:translateY(0) scale(0.5);opacity:0}15%{opacity:0.55}85%{opacity:0.55}100%{transform:translateY(88px) scale(1);opacity:0}}@keyframes vfxSpark{0%{transform:translate(0,0) scale(1);opacity:1}35%{transform:translate(calc(var(--sx)*0.45),calc(var(--sy)*0.25 - 7px));opacity:0.9}100%{transform:translate(var(--sx),var(--sy)) scale(0.3);opacity:0}}@keyframes vfxBurnBlock{0%{opacity:1;filter:brightness(1)}10%{opacity:1;filter:brightness(2.3)}55%{opacity:0;filter:brightness(1)}100%{opacity:0;filter:brightness(1)}}@keyframes vfxShatter{0%{transform:translate(0,0) scale(1);opacity:0}15%{opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxDroneShard{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0.2);opacity:0}}";
 
 // ═══════════════════════════════════════════════════════════════
 // SHARED VISUAL COMPONENTS
@@ -1404,7 +1404,8 @@ var BD_ICONS = [{
 }, {
   id: "barrel",
   label: "Barrel",
-  path: "M 35,22 Q 50,14 65,22 L 65,78 Q 50,86 35,78 Z M 36,32 L 64,32 L 64,35 L 36,35 Z M 36,65 L 64,65 L 64,68 L 36,68 Z M 46,46 A 5,5 0 1,1 46.01,46 Z"
+  scale: 0.125,
+  path: "M 399.384155 78.750061 C 457.310333 78.750061 509.848022 87.72522 546.4729 101.46582 C 564.793701 108.336182 579.073181 116.452576 587.930481 124.299561 C 596.787842 132.146545 599.768311 138.730591 599.768311 144.42218 C 599.768311 150.113708 596.787842 156.697815 587.930481 164.544739 C 579.073181 172.391724 564.793701 180.508118 546.4729 187.378479 C 509.848022 201.169617 457.310333 210.094299 399.384155 210.094299 C 341.457977 210.094299 288.920288 201.169617 252.379654 187.378479 C 234.025131 180.508118 219.711945 172.391724 210.787308 164.544739 C 202.030991 156.697815 199 150.113708 199 144.42218 C 199 138.730591 202.030991 132.146545 210.787308 124.299561 C 219.711945 116.452576 234.025131 108.336182 252.379654 101.46582 C 288.920288 87.72522 341.457977 78.750061 399.384155 78.750061 Z M 289.930634 125.899231 C 267.610779 125.899231 249.517014 131.930481 249.517014 139.370422 C 249.517014 146.810425 267.610779 152.841675 289.930634 152.841675 C 312.250458 152.841675 330.344238 146.810425 330.344238 139.370422 C 330.344238 131.930481 312.250458 125.899231 289.930634 125.899231 Z M 599.768311 193.844604 L 599.768311 333.018982 C 599.768311 336.38678 597.697144 340.764923 588.199951 346.826965 C 578.719543 352.889008 563.143494 358.95105 543.896484 363.834351 C 505.402527 373.432587 452.258636 378.484283 399.384155 378.484283 C 346.509674 378.484283 293.298431 373.432587 254.905502 363.834351 C 235.70903 358.95105 220.048752 352.889008 210.618912 346.826965 C 201.020706 340.764923 199 336.38678 199 333.018982 L 199 193.844604 C 210.787308 202.348328 225.100464 209.589111 241.602676 215.819519 C 283.026642 231.311401 338.258575 240.40448 399.384155 240.40448 C 460.509766 240.40448 515.741699 231.311401 557.115112 215.819519 C 573.684692 209.589111 588.048401 202.348328 599.768311 193.844604 Z M 599.768311 375.116486 L 599.768311 516.564148 C 599.768311 519.931946 597.697144 524.310059 588.199951 530.372192 C 578.719543 536.434143 563.143494 542.496216 543.896484 547.379517 C 505.402527 556.977783 452.258636 562.029419 399.384155 562.029419 C 346.509674 562.029419 293.298431 556.977783 254.905502 547.379517 C 235.70903 542.496216 220.048752 536.434143 210.618912 530.372192 C 201.020706 524.310059 199 519.931946 199 516.564148 L 199 375.116486 C 212.302811 382.862427 228.636642 388.419312 247.496338 393.134216 C 289.930634 403.742798 344.489014 408.794495 399.384155 408.794495 C 454.279327 408.794495 508.90506 403.742798 551.238342 393.134216 C 570.064331 388.419312 586.448669 382.694031 599.768311 375.116486 Z M 599.768311 558.661621 L 599.768311 656.327881 C 599.768311 664.747375 596.063721 671.988159 586.532837 680.239258 C 577.002014 688.322021 561.779541 696.236328 542.768311 702.635132 C 504.762665 715.264404 451.921844 722 399.384155 722 C 346.846466 722 293.971985 715.264404 255.915833 702.635132 C 237.056152 696.236328 221.732651 688.322021 212.302811 680.239258 C 202.70462 671.988159 199 664.747375 199 656.327881 L 199 558.661621 C 212.302811 566.407593 228.636642 571.964478 247.496338 576.679443 C 289.930634 587.287964 344.489014 592.339661 399.384155 592.339661 C 454.279327 592.339661 508.90506 587.287964 551.238342 576.679443 C 570.064331 571.964478 586.448669 566.239197 599.768311 558.661621 Z"
 }, {
   id: "crate_ic",
   label: "Crate",
@@ -1582,15 +1583,24 @@ var VFX_DEFAULTS = {
     emberSize: 1.0
   },
   block_destroy: {
+    burstColor: "#c8b8ff",
+    burstOpacity: 1.0,
     accentColor: "#80ddff",
+    accentOpacity: 1.0,
     speed: 1.0,
-    intensity: 1.0
+    spread: 1.0,
+    count: 1.0,
+    particleSize: 1.0
   },
   drone_explode: {
-    color1: "#ffe066",
-    color2: "#ff6633",
+    coreColor: "#ffe066",
+    coreOpacity: 1.0,
+    blastColor: "#ff6633",
+    blastOpacity: 1.0,
     speed: 1.0,
-    intensity: 1.0
+    spread: 1.0,
+    count: 1.0,
+    particleSize: 1.0
   }
 };
 
@@ -1626,18 +1636,27 @@ var VFX_FACTORY_PRESETS = [{
   name: "Default Block Destroy",
   effectType: "block_destroy",
   isFactory: true,
+  burstColor: "#c8b8ff",
+  burstOpacity: 1.0,
   accentColor: "#80ddff",
+  accentOpacity: 1.0,
   speed: 1.0,
-  intensity: 1.0
+  spread: 1.0,
+  count: 1.0,
+  particleSize: 1.0
 }, {
   id: "factory_drone_explode",
   name: "Default Drone Explode",
   effectType: "drone_explode",
   isFactory: true,
-  color1: "#ffe066",
-  color2: "#ff6633",
+  coreColor: "#ffe066",
+  coreOpacity: 1.0,
+  blastColor: "#ff6633",
+  blastOpacity: 1.0,
   speed: 1.0,
-  intensity: 1.0
+  spread: 1.0,
+  count: 1.0,
+  particleSize: 1.0
 }];
 function vfxFactoryFor(effectType) {
   for (var i = 0; i < VFX_FACTORY_PRESETS.length; i++) {
@@ -2323,6 +2342,11 @@ function BDBlockPreview(props) {
       opacity: design.iconOpacity,
       stroke: "none"
     }));
+    if (iconDef.scale && iconDef.scale !== 1) {
+      iconElement = React.createElement("g", {
+        transform: "scale(" + iconDef.scale + ")"
+      }, iconElement);
+    }
     if (design.iconRotation) {
       iconElement = React.createElement("g", {
         transform: "rotate(" + design.iconRotation + " 50 50)"
@@ -4043,6 +4067,13 @@ function CosmicWorkshop() {
       return next;
     });
     setVfxDirty(true);
+    // Bump the preview key so its whole subtree remounts and every particle
+    // animation restarts in sync. Without this, changing e.g. Count adds/removes
+    // particle nodes mid-flight while the survivors keep their old animation
+    // clock, so they drift out of phase. (Name changes don't affect the preview.)
+    if (key !== "name") setVfxPrevKey(function (k) {
+      return k + 1;
+    });
   }
   function vfxSaveCurrentDesign() {
     if (!vfxEditDesign.effectType) {
@@ -4183,6 +4214,9 @@ function CosmicWorkshop() {
       return next;
     });
     setVfxDirty(true);
+    setVfxPrevKey(function (k) {
+      return k + 1;
+    });
   }
   // Pick (or switch) the effect type in the editor. Switching resets the
   // type-specific params to that type's defaults, since each effect's controls
@@ -4280,6 +4314,77 @@ function CosmicWorkshop() {
     setVfxImportError("");
   }
   // Compact, non-animated icon for list cards (one per design, reflects its params).
+  // Color picker + opacity slider on one row -- compact form used by Burn,
+  // Block Destroy, and Drone Explode where each color has its own opacity.
+  function renderColorWithOpacity(colorLabel, colorKey, opLabel, opKey, opDefault) {
+    var opVal = vfxEditDesign[opKey] == null ? opDefault : vfxEditDesign[opKey];
+    return React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 14,
+        alignItems: "flex-end",
+        marginBottom: 12
+      }
+    }, React.createElement("div", {
+      style: {
+        flexShrink: 0
+      }
+    }, React.createElement("div", {
+      style: {
+        fontSize: 13,
+        color: "#889",
+        marginBottom: 6,
+        fontFamily: "'Exo 2', sans-serif"
+      }
+    }, colorLabel), React.createElement("input", {
+      type: "color",
+      value: vfxEditDesign[colorKey],
+      onChange: function (e) {
+        vfxUpdateDesign(colorKey, e.target.value);
+      },
+      style: {
+        width: 44,
+        height: 44,
+        border: "2px solid rgba(255,255,255,0.15)",
+        borderRadius: 8,
+        background: "none",
+        cursor: "pointer",
+        padding: 2,
+        fontSize: 16
+      }
+    })), React.createElement("div", {
+      style: {
+        flex: 1,
+        paddingBottom: 6
+      }
+    }, React.createElement("div", {
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        fontSize: 13,
+        color: "#889",
+        marginBottom: 4,
+        fontFamily: "'Exo 2', sans-serif"
+      }
+    }, React.createElement("span", null, opLabel), React.createElement("span", {
+      style: {
+        color: "#bbc"
+      }
+    }, Math.round(opVal * 100) + "%")), React.createElement("input", {
+      type: "range",
+      min: 0.1,
+      max: 1,
+      step: 0.05,
+      value: opVal,
+      onChange: function (e) {
+        vfxUpdateDesign(opKey, parseFloat(e.target.value));
+      },
+      style: {
+        width: "100%",
+        fontSize: 16
+      }
+    })));
+  }
   function renderVfxIcon(design) {
     var et = design.effectType;
     var box = {
@@ -4371,7 +4476,8 @@ function CosmicWorkshop() {
       }), idots);
     }
     if (et === "block_destroy") {
-      var idc = design.accentColor || "#80ddff";
+      var idbc = (design.burstColor || "#c8b8ff") + vfxAlphaHex(design.burstOpacity);
+      var idac = (design.accentColor || "#80ddff") + vfxAlphaHex(design.accentOpacity);
       var idots2 = [];
       var iang2 = [0, 60, 120, 180, 240, 300];
       for (var di2 = 0; di2 < 6; di2++) {
@@ -4385,7 +4491,7 @@ function CosmicWorkshop() {
             width: 4,
             height: 4,
             borderRadius: "50%",
-            background: di2 % 2 ? "rgba(200,200,255,0.7)" : idc
+            background: di2 % 2 ? idac : idbc
           }
         }));
       }
@@ -4399,25 +4505,25 @@ function CosmicWorkshop() {
           width: 12,
           height: 12,
           borderRadius: 3,
-          background: "#444",
-          border: "1px solid " + idc + "88"
+          background: "#3a3a4a",
+          border: "1px solid " + (design.burstColor || "#c8b8ff")
         }
       }), idots2);
     }
     if (et === "drone_explode") {
-      var ir1 = design.color1 || "#ffe066",
-        ir2 = design.color2 || "#ff6633";
+      var ir1 = (design.coreColor || "#ffe066") + vfxAlphaHex(design.coreOpacity);
+      var ir2 = (design.blastColor || "#ff6633") + vfxAlphaHex(design.blastOpacity);
       return React.createElement("div", {
         style: box
       }, React.createElement("div", {
         style: {
           position: "absolute",
-          left: 6,
-          top: 6,
-          width: 32,
-          height: 32,
+          left: 4,
+          top: 4,
+          width: 36,
+          height: 36,
           borderRadius: "50%",
-          border: "2px solid " + ir1 + "80"
+          background: "radial-gradient(circle, " + ir1 + " 0%, " + ir2 + "88 45%, transparent 72%)"
         }
       }), React.createElement("div", {
         style: {
@@ -4427,7 +4533,7 @@ function CosmicWorkshop() {
           width: 16,
           height: 16,
           borderRadius: "50%",
-          background: "radial-gradient(circle, #fff 0%, " + ir1 + " 40%, " + ir2 + " 80%, transparent 100%)"
+          background: "radial-gradient(circle, #fff 0%, " + (design.coreColor || "#ffe066") + " 35%, " + (design.blastColor || "#ff6633") + " 65%, transparent 85%)"
         }
       }));
     }
@@ -4660,25 +4766,36 @@ function CosmicWorkshop() {
       }, particles));
     }
     if (effect === "block_destroy") {
-      var destC = c.accentColor || "#80ddff";
-      var destDur = (0.65 / Math.max(0.5, Math.min(2, c.speed || 1))).toFixed(2) + "s";
-      var destDelay = parseFloat(destDur) / 8;
-      for (var di = 0; di < 8; di++) {
-        var drad = angles8[di] * Math.PI / 180;
-        var ddist = 38;
+      // Mimics the in-game block pop: the block flashes and shrinks while an
+      // even radial ring of uniform shards shoots straight out, alternating two
+      // colors, fading in then shrinking away (all fire at once, no stagger).
+      var bdBurst = c.burstColor || "#c8b8ff";
+      var bdAccent = c.accentColor || "#80ddff";
+      var bdBurstCol = bdBurst + vfxAlphaHex(c.burstOpacity);
+      var bdAccentCol = bdAccent + vfxAlphaHex(c.accentOpacity);
+      var bdSpeed = Math.max(0.5, Math.min(2, c.speed || 1));
+      var bdSpread = Math.max(0.5, Math.min(2, c.spread || 1));
+      var bdCount = Math.max(0.5, Math.min(2, c.count || 1));
+      var bdSize = Math.max(0.5, Math.min(2, c.particleSize || 1));
+      var destDur = (0.85 / bdSpeed).toFixed(2) + "s";
+      var bdN = Math.round(bdCount * 8);
+      for (var di = 0; di < bdN; di++) {
+        var drad = di / bdN * Math.PI * 2;
+        var ddist = 40 * bdSpread;
+        var dsz = 6 * bdSize;
         particles.push(React.createElement("div", {
           key: "d" + di,
           style: {
             position: "absolute",
             left: "50%",
             top: "50%",
-            width: 6,
-            height: 6,
+            width: dsz,
+            height: dsz,
+            marginLeft: -dsz / 2,
+            marginTop: -dsz / 2,
             borderRadius: "50%",
-            background: di % 2 === 0 ? destC : "rgba(200,200,255,0.7)",
-            marginLeft: -3,
-            marginTop: -3,
-            animation: "vfxBurst " + destDur + " ease-out " + (di * destDelay).toFixed(2) + "s infinite",
+            background: di % 2 === 0 ? bdBurstCol : bdAccentCol,
+            animation: "vfxShatter " + destDur + " ease-out infinite",
             "--bx": (Math.cos(drad) * ddist).toFixed(0) + "px",
             "--by": (Math.sin(drad) * ddist).toFixed(0) + "px"
           }
@@ -4693,45 +4810,57 @@ function CosmicWorkshop() {
           inset: 0,
           display: "flex",
           alignItems: "center",
-          justifyContent: "center"
+          justifyContent: "center",
+          pointerEvents: "none"
         }
       }, React.createElement("div", {
         style: {
           width: 28,
           height: 28,
           borderRadius: 5,
-          background: "#444",
-          border: "1.5px solid " + destC + "66",
+          background: "#3a3a4a",
+          border: "1.5px solid " + bdBurst,
           animation: "vfxPop " + destDur + " ease-out infinite"
         }
       }), particles));
     }
     if (effect === "drone_explode") {
-      var drC1 = c.color1 || "#ffe066";
-      var drC2 = c.color2 || "#ff6633";
-      var drDur = (0.7 / Math.max(0.5, Math.min(2, c.speed || 1))).toFixed(2) + "s";
-      var drDelay = parseFloat(drDur) / 8;
-      for (var dri = 0; dri < 8; dri++) {
-        var drrad = angles8[dri] * Math.PI / 180;
-        var drdist = 40;
+      // Mimics the in-game drone explosion: a layered blast -- an expanding
+      // shockwave ring, a white-hot core flash, and an even radial spray of
+      // shards in two sizes/colors that shrink as they fly out. All synced.
+      var deCore = c.coreColor || "#ffe066";
+      var deBlast = c.blastColor || "#ff6633";
+      var deCoreCol = deCore + vfxAlphaHex(c.coreOpacity);
+      var deBlastCol = deBlast + vfxAlphaHex(c.blastOpacity);
+      var deSpeed = Math.max(0.5, Math.min(2, c.speed || 1));
+      var deSpread = Math.max(0.5, Math.min(2, c.spread || 1));
+      var deCount = Math.max(0.5, Math.min(2, c.count || 1));
+      var deSize = Math.max(0.5, Math.min(2, c.particleSize || 1));
+      var drDur = (0.95 / deSpeed).toFixed(2) + "s";
+      var deN = Math.round(deCount * 12);
+      for (var dri = 0; dri < deN; dri++) {
+        var drrad = dri / deN * Math.PI * 2;
+        var drdist = (32 + dri % 3 * 9) * deSpread;
+        var drsz = (dri % 3 === 0 ? 9 : 6) * deSize;
         particles.push(React.createElement("div", {
           key: "r" + dri,
           style: {
             position: "absolute",
             left: "50%",
             top: "50%",
-            width: dri % 2 === 0 ? 8 : 6,
-            height: dri % 2 === 0 ? 8 : 6,
+            width: drsz,
+            height: drsz,
+            marginLeft: -drsz / 2,
+            marginTop: -drsz / 2,
             borderRadius: "50%",
-            background: dri % 2 === 0 ? drC1 : drC2,
-            marginLeft: -3,
-            marginTop: -3,
-            animation: "vfxBurst " + drDur + " ease-out " + (dri * drDelay).toFixed(2) + "s infinite",
+            background: dri % 3 === 0 ? deCoreCol : deBlastCol,
+            animation: "vfxDroneShard " + drDur + " ease-out infinite",
             "--bx": (Math.cos(drrad) * drdist).toFixed(0) + "px",
             "--by": (Math.sin(drrad) * drdist).toFixed(0) + "px"
           }
         }));
       }
+      var deRing = 80 * deSpread;
       return React.createElement("div", {
         key: prevKey + "-" + effect,
         style: previewStyle
@@ -4741,27 +4870,28 @@ function CosmicWorkshop() {
           inset: 0,
           display: "flex",
           alignItems: "center",
-          justifyContent: "center"
+          justifyContent: "center",
+          pointerEvents: "none"
         }
       }, React.createElement("div", {
         style: {
           position: "absolute",
-          width: 90,
-          height: 90,
+          width: deRing,
+          height: deRing,
           borderRadius: "50%",
-          border: "2px solid " + drC1 + "80",
+          background: "radial-gradient(circle, " + deCoreCol + " 0%, " + deBlastCol + "88 40%, transparent 70%)",
           animation: "vfxRing " + drDur + " ease-out infinite"
         }
-      }), React.createElement("div", {
+      }), particles, React.createElement("div", {
         style: {
           position: "absolute",
-          width: 24,
-          height: 24,
+          width: 44,
+          height: 44,
           borderRadius: "50%",
-          background: "radial-gradient(circle, #fff 0%, " + drC1 + " 40%, " + drC2 + " 80%, transparent 100%)",
+          background: "radial-gradient(circle, #fff 0%, " + deCore + " 30%, " + deBlast + " 60%, transparent 80%)",
           animation: "vfxFlash " + drDur + " ease-out infinite"
         }
-      }), particles));
+      })));
     }
     return React.createElement("div", {
       key: prevKey + "-" + effect,
@@ -7811,39 +7941,7 @@ function CosmicWorkshop() {
     max: 2,
     step: 0.1,
     displayValue: (vfxEditDesign.splash == null ? 1 : vfxEditDesign.splash).toFixed(1) + "x"
-  })), vfxEditDesign.effectType === "burn" && React.createElement(React.Fragment, null, React.createElement(BDColorPicker, {
-    label: "Ember Color",
-    value: vfxEditDesign.emberColor,
-    onChange: function (v) {
-      vfxUpdateDesign("emberColor", v);
-    }
-  }), React.createElement(BDSlider, {
-    label: "Ember Opacity",
-    value: vfxEditDesign.emberOpacity,
-    onChange: function (v) {
-      vfxUpdateDesign("emberOpacity", v);
-    },
-    min: 0.1,
-    max: 1,
-    step: 0.05,
-    displayValue: Math.round((vfxEditDesign.emberOpacity == null ? 1 : vfxEditDesign.emberOpacity) * 100) + "%"
-  }), React.createElement(BDColorPicker, {
-    label: "Spark Color",
-    value: vfxEditDesign.sparkColor,
-    onChange: function (v) {
-      vfxUpdateDesign("sparkColor", v);
-    }
-  }), React.createElement(BDSlider, {
-    label: "Spark Opacity",
-    value: vfxEditDesign.sparkOpacity,
-    onChange: function (v) {
-      vfxUpdateDesign("sparkOpacity", v);
-    },
-    min: 0.1,
-    max: 1,
-    step: 0.05,
-    displayValue: Math.round((vfxEditDesign.sparkOpacity == null ? 0.85 : vfxEditDesign.sparkOpacity) * 100) + "%"
-  }), React.createElement(BDSlider, {
+  })), vfxEditDesign.effectType === "burn" && React.createElement(React.Fragment, null, renderColorWithOpacity("Ember Color", "emberColor", "Ember Opacity", "emberOpacity", 1), renderColorWithOpacity("Spark Color", "sparkColor", "Spark Opacity", "sparkOpacity", 0.85), React.createElement(BDSlider, {
     label: "Speed",
     value: vfxEditDesign.speed,
     onChange: function (v) {
@@ -7883,13 +7981,7 @@ function CosmicWorkshop() {
     max: 2,
     step: 0.1,
     displayValue: (vfxEditDesign.emberSize || 1).toFixed(1) + "x"
-  })), vfxEditDesign.effectType === "block_destroy" && React.createElement(React.Fragment, null, React.createElement(BDColorPicker, {
-    label: "Burst Accent",
-    value: vfxEditDesign.accentColor,
-    onChange: function (v) {
-      vfxUpdateDesign("accentColor", v);
-    }
-  }), React.createElement(BDSlider, {
+  })), vfxEditDesign.effectType === "block_destroy" && React.createElement(React.Fragment, null, renderColorWithOpacity("Burst Color", "burstColor", "Burst Opacity", "burstOpacity", 1), renderColorWithOpacity("Accent Color", "accentColor", "Accent Opacity", "accentOpacity", 1), React.createElement(BDSlider, {
     label: "Speed",
     value: vfxEditDesign.speed,
     onChange: function (v) {
@@ -7899,29 +7991,37 @@ function CosmicWorkshop() {
     max: 2,
     step: 0.1,
     displayValue: (vfxEditDesign.speed || 1).toFixed(1) + "x"
+  }), React.createElement(BDSlider, {
+    label: "Spread",
+    value: vfxEditDesign.spread,
+    onChange: function (v) {
+      vfxUpdateDesign("spread", v);
+    },
+    min: 0.5,
+    max: 2,
+    step: 0.1,
+    displayValue: (vfxEditDesign.spread || 1).toFixed(1) + "x"
   }), React.createElement(BDSlider, {
     label: "Count",
-    value: vfxEditDesign.intensity,
+    value: vfxEditDesign.count,
     onChange: function (v) {
-      vfxUpdateDesign("intensity", v);
+      vfxUpdateDesign("count", v);
     },
     min: 0.5,
     max: 2,
     step: 0.1,
-    displayValue: (vfxEditDesign.intensity || 1).toFixed(1) + "x"
-  })), vfxEditDesign.effectType === "drone_explode" && React.createElement(React.Fragment, null, React.createElement(BDColorPicker, {
-    label: "Primary",
-    value: vfxEditDesign.color1,
-    onChange: function (v) {
-      vfxUpdateDesign("color1", v);
-    }
-  }), React.createElement(BDColorPicker, {
-    label: "Secondary",
-    value: vfxEditDesign.color2,
-    onChange: function (v) {
-      vfxUpdateDesign("color2", v);
-    }
+    displayValue: (vfxEditDesign.count || 1).toFixed(1) + "x"
   }), React.createElement(BDSlider, {
+    label: "Particle Size",
+    value: vfxEditDesign.particleSize,
+    onChange: function (v) {
+      vfxUpdateDesign("particleSize", v);
+    },
+    min: 0.5,
+    max: 2,
+    step: 0.1,
+    displayValue: (vfxEditDesign.particleSize || 1).toFixed(1) + "x"
+  })), vfxEditDesign.effectType === "drone_explode" && React.createElement(React.Fragment, null, renderColorWithOpacity("Core Color", "coreColor", "Core Opacity", "coreOpacity", 1), renderColorWithOpacity("Blast Color", "blastColor", "Blast Opacity", "blastOpacity", 1), React.createElement(BDSlider, {
     label: "Speed",
     value: vfxEditDesign.speed,
     onChange: function (v) {
@@ -7932,15 +8032,35 @@ function CosmicWorkshop() {
     step: 0.1,
     displayValue: (vfxEditDesign.speed || 1).toFixed(1) + "x"
   }), React.createElement(BDSlider, {
-    label: "Intensity",
-    value: vfxEditDesign.intensity,
+    label: "Spread",
+    value: vfxEditDesign.spread,
     onChange: function (v) {
-      vfxUpdateDesign("intensity", v);
+      vfxUpdateDesign("spread", v);
     },
     min: 0.5,
     max: 2,
     step: 0.1,
-    displayValue: (vfxEditDesign.intensity || 1).toFixed(1) + "x"
+    displayValue: (vfxEditDesign.spread || 1).toFixed(1) + "x"
+  }), React.createElement(BDSlider, {
+    label: "Count",
+    value: vfxEditDesign.count,
+    onChange: function (v) {
+      vfxUpdateDesign("count", v);
+    },
+    min: 0.5,
+    max: 2,
+    step: 0.1,
+    displayValue: (vfxEditDesign.count || 1).toFixed(1) + "x"
+  }), React.createElement(BDSlider, {
+    label: "Particle Size",
+    value: vfxEditDesign.particleSize,
+    onChange: function (v) {
+      vfxUpdateDesign("particleSize", v);
+    },
+    min: 0.5,
+    max: 2,
+    step: 0.1,
+    displayValue: (vfxEditDesign.particleSize || 1).toFixed(1) + "x"
   })), React.createElement("div", {
     style: {
       display: "flex",

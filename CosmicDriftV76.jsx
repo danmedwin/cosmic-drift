@@ -532,7 +532,7 @@ function BDDroneIcon(props) { var s = props.size, c = props.color || "#e8e8ff"; 
 function BDCrossIcon(props) { var s = props.size, c = props.color || "#ffffff"; return <svg width={s} height={s} viewBox="0 0 100 100"><path d="M 44,28 L 50,14 L 56,28 L 52,28 L 52,48 L 72,48 L 72,44 L 86,50 L 72,56 L 72,52 L 52,52 L 52,72 L 56,72 L 50,86 L 44,72 L 48,72 L 48,52 L 28,52 L 28,56 L 14,50 L 28,44 L 28,48 L 48,48 L 48,28 Z" fill={c} /></svg>; }
 // Shared Split (angle-bounce) icon, used for the inventory slot and the Convert Reactor Core card.
 function SplitIcon(props) { var s = props.size; return <svg width={s} height={s} viewBox="0 0 24 24"><path d="M4 4L12 20" stroke="#80ddff" strokeWidth="2.5" strokeLinecap="round" /><path d="M12 20L20 4" stroke="#80ddff" strokeWidth="2.5" strokeLinecap="round" strokeDasharray="3 2" /><circle cx="12" cy="20" r="3.5" fill="#80ddff" opacity="0.5" /><circle cx="4" cy="4" r="3" fill="#50c8ff" /><circle cx="20" cy="4" r="3" fill="#50c8ff" /></svg>; }
-function AcidBarrelIcon(props) { var s = props.size; return <svg width={s} height={s} viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="3" fill="#0a3a0a" stroke="#40b840" strokeWidth="1.2" /><rect x="7" y="5" width="10" height="3" rx="1" fill="#40b840" opacity="0.4" /><rect x="7" y="16" width="10" height="3" rx="1" fill="#40b840" opacity="0.4" /><line x1="6" y1="10" x2="18" y2="10" stroke="#40b840" strokeWidth="0.5" opacity="0.5" /><line x1="6" y1="14" x2="18" y2="14" stroke="#40b840" strokeWidth="0.5" opacity="0.5" /><circle cx="12" cy="12" r="2.5" fill="#80ff80" opacity="0.7" /><circle cx="12" cy="12" r="1" fill="#fff" opacity="0.9" /><rect x="5" y="2.5" width="14" height="1" rx="0.5" fill="#50cc50" opacity="0.6" /><rect x="5" y="20.5" width="14" height="1" rx="0.5" fill="#50cc50" opacity="0.6" /></svg>; }
+function AcidBarrelIcon(props) { var s = props.size; return <svg width={s} height={s} viewBox="0 0 800 800"><path fill="#2bb105" d="M 399.384155 78.750061 C 457.310333 78.750061 509.848022 87.72522 546.4729 101.46582 C 564.793701 108.336182 579.073181 116.452576 587.930481 124.299561 C 596.787842 132.146545 599.768311 138.730591 599.768311 144.42218 C 599.768311 150.113708 596.787842 156.697815 587.930481 164.544739 C 579.073181 172.391724 564.793701 180.508118 546.4729 187.378479 C 509.848022 201.169617 457.310333 210.094299 399.384155 210.094299 C 341.457977 210.094299 288.920288 201.169617 252.379654 187.378479 C 234.025131 180.508118 219.711945 172.391724 210.787308 164.544739 C 202.030991 156.697815 199 150.113708 199 144.42218 C 199 138.730591 202.030991 132.146545 210.787308 124.299561 C 219.711945 116.452576 234.025131 108.336182 252.379654 101.46582 C 288.920288 87.72522 341.457977 78.750061 399.384155 78.750061 Z M 289.930634 125.899231 C 267.610779 125.899231 249.517014 131.930481 249.517014 139.370422 C 249.517014 146.810425 267.610779 152.841675 289.930634 152.841675 C 312.250458 152.841675 330.344238 146.810425 330.344238 139.370422 C 330.344238 131.930481 312.250458 125.899231 289.930634 125.899231 Z M 599.768311 193.844604 L 599.768311 333.018982 C 599.768311 336.38678 597.697144 340.764923 588.199951 346.826965 C 578.719543 352.889008 563.143494 358.95105 543.896484 363.834351 C 505.402527 373.432587 452.258636 378.484283 399.384155 378.484283 C 346.509674 378.484283 293.298431 373.432587 254.905502 363.834351 C 235.70903 358.95105 220.048752 352.889008 210.618912 346.826965 C 201.020706 340.764923 199 336.38678 199 333.018982 L 199 193.844604 C 210.787308 202.348328 225.100464 209.589111 241.602676 215.819519 C 283.026642 231.311401 338.258575 240.40448 399.384155 240.40448 C 460.509766 240.40448 515.741699 231.311401 557.115112 215.819519 C 573.684692 209.589111 588.048401 202.348328 599.768311 193.844604 Z M 599.768311 375.116486 L 599.768311 516.564148 C 599.768311 519.931946 597.697144 524.310059 588.199951 530.372192 C 578.719543 536.434143 563.143494 542.496216 543.896484 547.379517 C 505.402527 556.977783 452.258636 562.029419 399.384155 562.029419 C 346.509674 562.029419 293.298431 556.977783 254.905502 547.379517 C 235.70903 542.496216 220.048752 536.434143 210.618912 530.372192 C 201.020706 524.310059 199 519.931946 199 516.564148 L 199 375.116486 C 212.302811 382.862427 228.636642 388.419312 247.496338 393.134216 C 289.930634 403.742798 344.489014 408.794495 399.384155 408.794495 C 454.279327 408.794495 508.90506 403.742798 551.238342 393.134216 C 570.064331 388.419312 586.448669 382.694031 599.768311 375.116486 Z M 599.768311 558.661621 L 599.768311 656.327881 C 599.768311 664.747375 596.063721 671.988159 586.532837 680.239258 C 577.002014 688.322021 561.779541 696.236328 542.768311 702.635132 C 504.762665 715.264404 451.921844 722 399.384155 722 C 346.846466 722 293.971985 715.264404 255.915833 702.635132 C 237.056152 696.236328 221.732651 688.322021 212.302811 680.239258 C 202.70462 671.988159 199 664.747375 199 656.327881 L 199 558.661621 C 212.302811 566.407593 228.636642 571.964478 247.496338 576.679443 C 289.930634 587.287964 344.489014 592.339661 399.384155 592.339661 C 454.279327 592.339661 508.90506 587.287964 551.238342 576.679443 C 570.064331 571.964478 586.448669 566.239197 599.768311 558.661621 Z" /></svg>; }
 function TreasureCrateIcon(props) { var s = props.size; return <svg width={s} height={s} viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="1" fill="#4a4a5a" stroke="#707088" strokeWidth="1" /><rect x="2" y="7" width="20" height="4" fill="#5a5a6a" rx="1" /><line x1="2" y1="11" x2="22" y2="11" stroke="#707088" strokeWidth="0.8" /><rect x="4" y="8.5" width="3" height="2" rx="0.5" fill="#606070" stroke="#808098" strokeWidth="0.3" /><rect x="17" y="8.5" width="3" height="2" rx="0.5" fill="#606070" stroke="#808098" strokeWidth="0.3" /><rect x="9" y="13" width="6" height="4" rx="1" fill="#2a2a3a" stroke="#ffe066" strokeWidth="0.8" /><circle cx="12" cy="15" r="1.2" fill="#ffe066" opacity="0.9" /><line x1="4" y1="17" x2="8" y2="17" stroke="#606070" strokeWidth="0.5" /><line x1="16" y1="17" x2="20" y2="17" stroke="#606070" strokeWidth="0.5" /><rect x="4" y="13" width="3" height="1" rx="0.3" fill="#606070" opacity="0.5" /><rect x="17" y="13" width="3" height="1" rx="0.3" fill="#606070" opacity="0.5" /></svg>; }
 function DiamondPlateBlock(props) { var ps = Math.max(8, props.size * 0.22), h = ps / 2; return <div style={{ width: props.size, height: props.size, borderRadius: 6, overflow: "hidden", border: "2px solid #555", position: "relative", boxSizing: "border-box" }}><svg width={props.size} height={props.size} style={{ position: "absolute", top: -2, left: -2 }}><defs><pattern id="dpat" x="0" y="0" width={ps} height={ps} patternUnits="userSpaceOnUse"><rect width={ps} height={ps} fill="#707580" /><path d={"M" + h + " 1L" + (ps - 1) + " " + h + "L" + h + " " + (ps - 1) + "L1 " + h + "Z"} fill="#888a90" stroke="#606368" strokeWidth="0.5" /></pattern></defs><rect width={props.size} height={props.size} fill="url(#dpat)" /></svg></div>; }
 function UFOBlockSvg(props) {
@@ -630,7 +630,7 @@ var BD_ICONS = [
   { id: "bolt", label: "Bolt", path: "M 55,15 L 30,52 L 46,52 L 38,85 L 72,42 L 54,42 Z" },
   { id: "dot", label: "Dot", path: "M 50,28 A 22,22 0 1,1 49.99,28 Z" },
   { id: "drone_ic", label: "Drone", fillRule: "nonzero", path: "M 62,34 L 62,66 A 12,12 0 1,1 38,66 L 38,34 A 12,12 0 1,1 62,34 Z M 42.5,35.0 L 39.5,39.0 L 18.5,24.0 L 21.5,20.0 Z M 21,32 A 10,10 0 1,1 21.01,32 Z M 60.5,39.0 L 57.5,35.0 L 78.5,20.0 L 81.5,24.0 Z M 79,32 A 10,10 0 1,1 79.01,32 Z M 39.6,60.9 L 42.4,65.1 L 21.4,79.1 L 18.6,74.9 Z M 21,84 A 10,10 0 1,1 21.01,84 Z M 57.6,65.1 L 60.4,60.9 L 81.4,74.9 L 78.6,79.1 Z M 79,84 A 10,10 0 1,1 79.01,84 Z" },
-  { id: "barrel", label: "Barrel", path: "M 35,22 Q 50,14 65,22 L 65,78 Q 50,86 35,78 Z M 36,32 L 64,32 L 64,35 L 36,35 Z M 36,65 L 64,65 L 64,68 L 36,68 Z M 46,46 A 5,5 0 1,1 46.01,46 Z" },
+  { id: "barrel", label: "Barrel", scale: 0.125, path: "M 399.384155 78.750061 C 457.310333 78.750061 509.848022 87.72522 546.4729 101.46582 C 564.793701 108.336182 579.073181 116.452576 587.930481 124.299561 C 596.787842 132.146545 599.768311 138.730591 599.768311 144.42218 C 599.768311 150.113708 596.787842 156.697815 587.930481 164.544739 C 579.073181 172.391724 564.793701 180.508118 546.4729 187.378479 C 509.848022 201.169617 457.310333 210.094299 399.384155 210.094299 C 341.457977 210.094299 288.920288 201.169617 252.379654 187.378479 C 234.025131 180.508118 219.711945 172.391724 210.787308 164.544739 C 202.030991 156.697815 199 150.113708 199 144.42218 C 199 138.730591 202.030991 132.146545 210.787308 124.299561 C 219.711945 116.452576 234.025131 108.336182 252.379654 101.46582 C 288.920288 87.72522 341.457977 78.750061 399.384155 78.750061 Z M 289.930634 125.899231 C 267.610779 125.899231 249.517014 131.930481 249.517014 139.370422 C 249.517014 146.810425 267.610779 152.841675 289.930634 152.841675 C 312.250458 152.841675 330.344238 146.810425 330.344238 139.370422 C 330.344238 131.930481 312.250458 125.899231 289.930634 125.899231 Z M 599.768311 193.844604 L 599.768311 333.018982 C 599.768311 336.38678 597.697144 340.764923 588.199951 346.826965 C 578.719543 352.889008 563.143494 358.95105 543.896484 363.834351 C 505.402527 373.432587 452.258636 378.484283 399.384155 378.484283 C 346.509674 378.484283 293.298431 373.432587 254.905502 363.834351 C 235.70903 358.95105 220.048752 352.889008 210.618912 346.826965 C 201.020706 340.764923 199 336.38678 199 333.018982 L 199 193.844604 C 210.787308 202.348328 225.100464 209.589111 241.602676 215.819519 C 283.026642 231.311401 338.258575 240.40448 399.384155 240.40448 C 460.509766 240.40448 515.741699 231.311401 557.115112 215.819519 C 573.684692 209.589111 588.048401 202.348328 599.768311 193.844604 Z M 599.768311 375.116486 L 599.768311 516.564148 C 599.768311 519.931946 597.697144 524.310059 588.199951 530.372192 C 578.719543 536.434143 563.143494 542.496216 543.896484 547.379517 C 505.402527 556.977783 452.258636 562.029419 399.384155 562.029419 C 346.509674 562.029419 293.298431 556.977783 254.905502 547.379517 C 235.70903 542.496216 220.048752 536.434143 210.618912 530.372192 C 201.020706 524.310059 199 519.931946 199 516.564148 L 199 375.116486 C 212.302811 382.862427 228.636642 388.419312 247.496338 393.134216 C 289.930634 403.742798 344.489014 408.794495 399.384155 408.794495 C 454.279327 408.794495 508.90506 403.742798 551.238342 393.134216 C 570.064331 388.419312 586.448669 382.694031 599.768311 375.116486 Z M 599.768311 558.661621 L 599.768311 656.327881 C 599.768311 664.747375 596.063721 671.988159 586.532837 680.239258 C 577.002014 688.322021 561.779541 696.236328 542.768311 702.635132 C 504.762665 715.264404 451.921844 722 399.384155 722 C 346.846466 722 293.971985 715.264404 255.915833 702.635132 C 237.056152 696.236328 221.732651 688.322021 212.302811 680.239258 C 202.70462 671.988159 199 664.747375 199 656.327881 L 199 558.661621 C 212.302811 566.407593 228.636642 571.964478 247.496338 576.679443 C 289.930634 587.287964 344.489014 592.339661 399.384155 592.339661 C 454.279327 592.339661 508.90506 587.287964 551.238342 576.679443 C 570.064331 571.964478 586.448669 566.239197 599.768311 558.661621 Z" },
   { id: "crate_ic", label: "Crate", path: "M 22,24 L 78,24 L 78,78 L 22,78 Z M 22,38 L 78,38 L 78,42 L 22,42 Z M 40,48 L 60,48 L 60,66 L 40,66 Z M 48,55 A 3,3 0 1,0 52,55 A 3,3 0 1,0 48,55 Z" },
   { id: "console_open", label: "Open", path: "M 22,44 L 78,44 L 78,80 L 22,80 Z M 28,38 L 72,38 L 68,22 L 32,22 Z M 38,52 L 62,52 L 62,68 L 38,68 Z M 47,58 A 4,4 0 1,0 53,58 A 4,4 0 1,0 47,58 Z" },
   { id: "skull", label: "Skull", path: "M 50,18 Q 78,18 78,45 Q 78,60 68,68 L 70,82 L 58,78 L 55,82 L 50,78 L 45,82 L 42,78 L 30,82 L 32,68 Q 22,60 22,45 Q 22,18 50,18 Z M 38,42 A 6,6 0 1,1 37.99,42 Z M 62,42 A 6,6 0 1,1 61.99,42 Z" },
@@ -710,6 +710,7 @@ function BDBlockPreview(props) {
       iconGlowPath = React.createElement("path", { d: iconDef.path, fill: design.iconGlowColor || design.iconColor, fillRule: iconDef.fillRule || "evenodd", opacity: Math.min(1, (design.iconOpacity || 0.8) + 0.15), stroke: "none", filter: "url(#" + glowFilterId + ")" });
     }
     iconElement = React.createElement(React.Fragment, null, iconGlowPath, React.createElement("path", { d: iconDef.path, fill: design.iconColor, fillRule: iconDef.fillRule || "evenodd", opacity: design.iconOpacity, stroke: "none" }));
+    if (iconDef.scale && iconDef.scale !== 1) { iconElement = React.createElement("g", { transform: "scale(" + iconDef.scale + ")" }, iconElement); }
     if (design.iconRotation) { iconElement = React.createElement("g", { transform: "rotate(" + design.iconRotation + " 50 50)" }, iconElement); }
   }
   var groupProps = {};
@@ -724,22 +725,56 @@ function BDBlockPreview(props) {
 var BD_STORAGE_KEY = "cosmic-drift-block-designs";
 var BD_ACTIVE_KEY = "cosmic-drift-active-blocks";
 
+// VFX Studio: the game reads saved designs + the active map from storage and
+// resolves per-effect params (parallel to bdResolveActiveDesign). When no
+// custom design is active for an effect type, the factory preset is used.
+// Defaults and factory values must stay in sync with the Workshop.
 var VFX_STORAGE_KEY = "cosmic-drift-vfx-designs";
-var GAME_VFX_CONFIG = null;
+var VFX_ACTIVE_KEY = "cosmic-drift-vfx-active";
+var GAME_VFX_DESIGNS = [];
+var GAME_VFX_ACTIVE = {};
 var VFX_DEFAULTS = {
-  acid_ooze:     { color1: "#1a6a1a", color2: "#35a035", speed: 1.0, intensity: 1.0 },
-  burn:          { color: "#ff6633",  sparkColor: "#ffffff", speed: 1.0, intensity: 1.0 },
-  block_destroy: { accentColor: "#80ddff", speed: 1.0, intensity: 1.0 },
-  drone_explode: { color1: "#ffe066", color2: "#ff6633", speed: 1.0, intensity: 1.0 }
+  acid_ooze:     { color1: "#1a6a1a", color2: "#35a035", width: 1.0, waveSize: 1.0, freq: 5, speed: 1.0, splash: 1.0 },
+  burn:          { emberColor: "#ff6633", emberOpacity: 1.0, sparkColor: "#ffffff", sparkOpacity: 0.85, speed: 1.0, spread: 1.0, density: 1.0, emberSize: 1.0 },
+  block_destroy: { burstColor: "#c8b8ff", burstOpacity: 1.0, accentColor: "#80ddff", accentOpacity: 1.0, speed: 1.0, spread: 1.0, count: 1.0, particleSize: 1.0 },
+  drone_explode: { coreColor: "#ffe066", coreOpacity: 1.0, blastColor: "#ff6633", blastOpacity: 1.0, speed: 1.0, spread: 1.0, count: 1.0, particleSize: 1.0 }
 };
-function vfxLoadConfig() {
+var VFX_FACTORY_PRESETS = {
+  acid_ooze:     { color1: "#1a6a1a", color2: "#35a035", width: 1.3, waveSize: 0.8, freq: 8, speed: 0.5, splash: 1.8 },
+  burn:          { emberColor: "#ff6633", emberOpacity: 1.0, sparkColor: "#ffffff", sparkOpacity: 0.85, speed: 1.0, spread: 1.0, density: 1.0, emberSize: 1.0 },
+  block_destroy: { burstColor: "#c8b8ff", burstOpacity: 1.0, accentColor: "#80ddff", accentOpacity: 1.0, speed: 1.0, spread: 1.0, count: 1.0, particleSize: 1.0 },
+  drone_explode: { coreColor: "#ffe066", coreOpacity: 1.0, blastColor: "#ff6633", blastOpacity: 1.0, speed: 1.0, spread: 1.0, count: 1.0, particleSize: 1.0 }
+};
+function vfxLoadDesigns() {
   return window.storage.get(VFX_STORAGE_KEY).then(function(r) {
+    if (!r) return [];
+    var parsed = JSON.parse(r.value);
+    return Array.isArray(parsed) ? parsed : [];
+  }).catch(function() { return []; });
+}
+function vfxLoadActive() {
+  return window.storage.get(VFX_ACTIVE_KEY).then(function(r) {
     return r ? JSON.parse(r.value) : {};
   }).catch(function() { return {}; });
 }
-function vfxGet(key) {
-  var stored = (GAME_VFX_CONFIG && GAME_VFX_CONFIG[key]) ? GAME_VFX_CONFIG[key] : {};
-  return Object.assign({}, VFX_DEFAULTS[key], stored);
+// Resolves the params for an effect type: the active custom design if set,
+// otherwise the factory preset. Always merged onto VFX_DEFAULTS so any missing
+// field stays sane.
+function vfxGet(effectType) {
+  var resolved = null;
+  var id = GAME_VFX_ACTIVE[effectType];
+  if (id) {
+    for (var i = 0; i < GAME_VFX_DESIGNS.length; i++) {
+      if (GAME_VFX_DESIGNS[i].id === id && GAME_VFX_DESIGNS[i].effectType === effectType) { resolved = GAME_VFX_DESIGNS[i]; break; }
+    }
+  }
+  if (!resolved) resolved = VFX_FACTORY_PRESETS[effectType];
+  return Object.assign({}, VFX_DEFAULTS[effectType], resolved || {});
+}
+// 0..1 opacity -> 2-char hex suffix, for baking opacity into a hex color.
+function vfxAlphaHex(o) {
+  var n = Math.round(Math.max(0, Math.min(1, o == null ? 1 : o)) * 255);
+  var h = n.toString(16); return h.length < 2 ? "0" + h : h;
 }
 
 function bdLoadDesigns() {
@@ -823,7 +858,33 @@ function DesignBlock(props) {
 function BlockContent(props) { var type = props.type, size = props.size, is = Math.max(18, size * 0.55), sl = props.shieldLevel || 0; if (type === 17) return <UFOBlockSvg size={size} animPhase={props.animPhase} />; var _design = bdResolveActiveDesign(type, GAME_ACTIVE_BLOCKS, GAME_BLOCK_DESIGNS); if (_design) return <DesignBlock design={_design} type={type} size={size} shieldLevel={sl} />; if (type === 7) return <DiamondPlateBlock size={size} />; var bc = BLOCK_COLORS[type]; var blockEl = <div style={{ width: size, height: size, background: bc.bg, border: "2px solid " + bc.border, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: bc.shadow, boxSizing: "border-box", position: "relative" }}>{type === 2 && <CrossShotIcon size={is} />}{type === 3 && <LightningIcon size={is} />}{type === 4 && <CoreIcon size={is} mode="lit" />}{type === 5 && <PlasmaIcon size={is} />}{type === 6 && <DroneIcon size={Math.max(24, size * 0.8)} />}{type === 8 && <AcidBarrelIcon size={Math.max(22, size * 0.75)} />}{type === 9 && <TreasureCrateIcon size={Math.max(24, size * 0.8)} />}{isCrate(type) && type !== 9 && <div style={{ position: "relative", width: Math.max(24, size * 0.8), height: Math.max(24, size * 0.8) }}><TreasureCrateIcon size={Math.max(24, size * 0.8)} /><div style={{ position: "absolute", bottom: -2, right: -2, width: Math.max(10, size * 0.3), height: Math.max(10, size * 0.3), borderRadius: "50%", background: "rgba(10,10,20,0.8)", border: "1px solid " + (CRATE_VARIANTS.filter(function(cv) { return cv.type === type; })[0] || {}).color, display: "flex", alignItems: "center", justifyContent: "center" }}>{type === 11 && <DroneIcon size={Math.max(7, size * 0.18)} />}{type === 12 && <LightningIcon size={Math.max(7, size * 0.2)} />}{type === 13 && <CrossShotIcon size={Math.max(7, size * 0.18)} />}{type === 14 && <svg width={Math.max(7, size * 0.18)} height={Math.max(7, size * 0.18)} viewBox="0 0 24 24"><path d="M4 20L12 4" stroke="#80ddff" strokeWidth="3" strokeLinecap="round" /><path d="M12 4L20 20" stroke="#80ddff" strokeWidth="3" strokeLinecap="round" /></svg>}{type === 15 && <svg width={Math.max(7, size * 0.18)} height={Math.max(7, size * 0.18)} viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="8" rx="2" fill="#7a7a88" /><rect x="10" y="8" width="4" height="12" rx="1" fill="#9a9aaa" /></svg>}{type === 16 && <CoreIcon size={Math.max(7, size * 0.2)} mode="lit" />}</div></div>}{type === 10 && sl > 0 && <svg width={is} height={is} viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="1.5" fill="#2a3a5a" stroke="rgba(130,180,255,0.6)" strokeWidth="1" /><rect x="3" y="8" width="18" height="4" fill="#3a4a6a" rx="1.5" /><line x1="3" y1="12" x2="21" y2="12" stroke="rgba(130,180,255,0.4)" strokeWidth="0.8" /><rect x="9" y="13" width="6" height="4" rx="1" fill="rgba(130,180,255,0.15)" stroke="rgba(130,180,255,0.5)" strokeWidth="0.7" /><circle cx="12" cy="15" r="1" fill="rgba(180,220,255,0.8)" /><rect x="5" y="9" width="3" height="2" rx="0.5" fill="rgba(130,180,255,0.2)" /><rect x="16" y="9" width="3" height="2" rx="0.5" fill="rgba(130,180,255,0.2)" /></svg>}{type === 10 && sl === 0 && <svg width={is} height={is} viewBox="0 0 24 24"><rect x="3" y="12" width="18" height="9" rx="1.5" fill="#2a3a5a" stroke="rgba(130,180,255,0.4)" strokeWidth="1" /><line x1="3" y1="15" x2="21" y2="15" stroke="rgba(130,180,255,0.3)" strokeWidth="0.5" /><path d="M4 12 L4 7 Q12 3 20 7 L20 12" fill="none" stroke="rgba(130,180,255,0.5)" strokeWidth="1" /><rect x="9" y="16" width="6" height="3" rx="1" fill="rgba(130,180,255,0.1)" stroke="rgba(130,180,255,0.3)" strokeWidth="0.5" /></svg>}</div>; if (type === 10 && sl > 0) return <div style={{ position: "relative" }}>{blockEl}<div style={{ position: "absolute", inset: sl === 2 ? -4 : -2, borderRadius: 10, border: sl === 2 ? "2px solid rgba(130,180,255,0.7)" : "1px solid rgba(130,180,255,0.35)", boxShadow: sl === 2 ? "0 0 16px rgba(130,180,255,0.5), 0 0 30px rgba(130,180,255,0.25), inset 0 0 10px rgba(130,180,255,0.3)" : "0 0 8px rgba(130,180,255,0.2), inset 0 0 4px rgba(130,180,255,0.1)", pointerEvents: "none", transition: "all 0.3s" }} /></div>; return blockEl; }
 function PlasmaContainer(props) { var pct = Math.min(1, Math.max(0, props.current / props.max)); var glowColor = pct > 0.5 ? "rgba(48,192,208,0.5)" : pct > 0.25 ? "rgba(255,170,50,0.4)" : "rgba(255,68,85,0.4)"; var glowSize = Math.round(4 + pct * 8); var fillH = 18 * pct; return <div style={{ filter: "drop-shadow(0 0 " + glowSize + "px " + glowColor + ")", transition: "filter 0.5s" }}><svg width="32" height="28" viewBox="0 0 32 28"><defs><clipPath id="hexClip"><polygon points="16,1 29,7.5 29,20.5 16,27 3,20.5 3,7.5" /></clipPath></defs><polygon points="16,1 29,7.5 29,20.5 16,27 3,20.5 3,7.5" fill="rgba(48,192,208,0.06)" stroke={"rgba(48,192,208," + (0.25 + pct * 0.35) + ")"} strokeWidth="1.2" /><rect x="3" y={25 - fillH} width="26" height={fillH + 2} fill="#30c0d0" opacity={0.3 + pct * 0.3} clipPath="url(#hexClip)" style={{ transition: "y 0.6s ease-in-out, height 0.6s ease-in-out, opacity 0.6s" }} /><text x="16" y="17.5" textAnchor="middle" fill="#fff" fontSize="10" fontWeight="700" fontFamily="Quicksand,sans-serif">{props.current}</text></svg></div>; }
 function makeLightningPath(h) { var seg = Math.max(6, Math.floor(h / 18)), segH = h / seg, d = "M15 " + h, pts = [{ x: 15, y: h }]; for (var i = 1; i <= seg; i++) { var y = h - i * segH, x = 15 + (i % 2 === 0 ? 1 : -1) * (4 + Math.sin(i * 2.7) * 6); pts.push({ x: x, y: y }); d += " L" + x + " " + y; } return { main: d, pts: pts }; }
-function makeOozePath(h, yStart, segSpacing) { var period = (segSpacing || 60) / 2, hw = 17, amp = 1, rPhase = 0.15, cx = 20, step = 3; var fullCycles = Math.max(2, Math.ceil(h / period)); var totalH = fullCycles * 2 * period; var lx = cx - hw, rx = cx + hw; var leftPts = []; var rightPts = []; for (var moy = 0; moy <= totalH; moy += step) { var absY = (yStart || 0) + moy; var lWave = amp * Math.sin(absY * 2 * Math.PI / period); leftPts.push((lx + lWave).toFixed(1) + "," + moy); } for (var moy2 = totalH; moy2 >= 0; moy2 -= step) { var absY2 = (yStart || 0) + moy2; var rWave = amp * Math.sin(absY2 * 2 * Math.PI / period + Math.PI * rPhase); rightPts.push((rx + rWave).toFixed(1) + "," + moy2); } var d = "M " + leftPts.join(" L ") + " L " + rightPts.join(" L ") + " Z"; return { path: d, svgH: totalH }; }
+function makeOozePath(h, yStart, segSpacing, opts) {
+  var o = opts || {};
+  var widthMul = o.widthMul != null ? o.widthMul : 1;
+  var ampMul = o.ampMul != null ? o.ampMul : 1;
+  var hw = 17 * widthMul, amp = 1 * ampMul;
+  // Default geometry (cx=20, vbW=40) is preserved at widthMul=1, ampMul=1.
+  // When width/amp grow, viewBox widens proportionally so the path never clips.
+  var pad = Math.max(3, Math.ceil(amp + 1));
+  var cx = hw + pad, vbW = 2 * (hw + pad);
+  var period = o.freq ? h / Math.max(2, Math.round(o.freq)) : (segSpacing || 60) / 2;
+  var rPhase = 0.15, step = 3;
+  var fullCycles = Math.max(2, Math.ceil(h / period));
+  var totalH = fullCycles * 2 * period;
+  var lx = cx - hw, rx = cx + hw;
+  var leftPts = [], rightPts = [];
+  for (var moy = 0; moy <= totalH; moy += step) {
+    var absY = (yStart || 0) + moy;
+    var lWave = amp * Math.sin(absY * 2 * Math.PI / period);
+    leftPts.push((lx + lWave).toFixed(1) + "," + moy);
+  }
+  for (var moy2 = totalH; moy2 >= 0; moy2 -= step) {
+    var absY2 = (yStart || 0) + moy2;
+    var rWave = amp * Math.sin(absY2 * 2 * Math.PI / period + Math.PI * rPhase);
+    rightPts.push((rx + rWave).toFixed(1) + "," + moy2);
+  }
+  return { path: "M " + leftPts.join(" L ") + " L " + rightPts.join(" L ") + " Z", svgH: totalH, vbW: vbW };
+}
 function Stars() { var items = []; for (var h = 0; h < 2; h++) { for (var i = 0; i < 50; i++) items.push(<div key={h + "_" + i} style={{ position: "absolute", width: i % 7 === 0 ? 3 : i % 4 === 0 ? 2 : 1, height: i % 7 === 0 ? 3 : i % 4 === 0 ? 2 : 1, borderRadius: "50%", background: i % 9 === 0 ? "#ffa8ff" : i % 6 === 0 ? "#a8c8ff" : "rgba(255,255,255,0.5)", left: ((i * 37 + 13) % 100) + "%", top: (((i * 53 + 7) % 100) / 2 + h * 50) + "%", opacity: 0.2 + (i % 5) * 0.15 }} />); } return <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 0 }}><div style={{ position: "absolute", left: 0, right: 0, top: 0, height: "200%", animation: "starDrift 40s linear infinite" }}>{items}</div></div>; }
 function LegendOverlay(props) {
   var _ex = useState(-1), expandedBlock = _ex[0], setExpandedBlock = _ex[1];
@@ -844,34 +905,43 @@ var MAX_PARTICLES = 150;
 function spawnBurnScatter(x, y, blockSz, color) {
   if (_cvfxParticles.length >= MAX_PARTICLES) return;
   var cfg = vfxGet("burn");
-  var pc = cfg.color || color;
-  var sc = cfg.sparkColor || "#ffffff";
+  var pc = (cfg.emberColor || "#ff6633") + vfxAlphaHex(cfg.emberOpacity);
+  var sc = (cfg.sparkColor || "#ffffff") + vfxAlphaHex(cfg.sparkOpacity == null ? 0.85 : cfg.sparkOpacity);
   var spd = Math.max(0.5, Math.min(2, cfg.speed || 1));
-  var cnt = Math.round(Math.max(6, Math.min(24, 12 * (cfg.intensity || 1))));
-  var scnt = Math.round(Math.max(3, Math.min(12, 6 * (cfg.intensity || 1))));
+  var sprd = Math.max(0.5, Math.min(2, cfg.spread || 1));
+  var dens = Math.max(0.5, Math.min(2, cfg.density || 1));
+  var esz = Math.max(0.5, Math.min(2, cfg.emberSize || 1));
+  var cnt = Math.round(Math.max(6, Math.min(24, 12 * dens)));
+  var scnt = Math.round(Math.max(3, Math.min(12, 6 * dens)));
   var now = Date.now();
   for (var i = 0; i < cnt; i++) {
     var angle = Math.random() * Math.PI * 2;
-    var dist = 20 + Math.random() * 50;
+    var dist = (20 + Math.random() * 50) * sprd;
     var frames = (350 + Math.random() * 350) / 16 / spd;
-    _cvfxParticles.push({ x: x, y: y, vx: Math.cos(angle) * dist / frames, vy: Math.sin(angle) * dist / frames, gravity: 0, life: 1, decay: 1 / frames, size: 3 + Math.random() * 5, color: pc, round: Math.random() > 0.5, startTime: now + Math.random() * 100 });
+    _cvfxParticles.push({ x: x, y: y, vx: Math.cos(angle) * dist / frames, vy: Math.sin(angle) * dist / frames, gravity: 0, life: 1, decay: 1 / frames, size: (3 + Math.random() * 5) * esz, color: pc, round: Math.random() > 0.5, startTime: now + Math.random() * 100 });
   }
   for (var j = 0; j < scnt; j++) {
     var frames2 = (350 + Math.random() * 250) / 16 / spd;
-    _cvfxParticles.push({ x: x + (Math.random() - 0.5) * blockSz, y: y + (Math.random() - 0.5) * blockSz, vx: (-40 + Math.random() * 80) / frames2, vy: (-3 + Math.random() * 10) / frames2, gravity: 0.08, life: 1, decay: 1 / frames2, size: 2 + Math.random() * 3, color: sc, round: true, startTime: now + 60 + Math.random() * 300 });
+    _cvfxParticles.push({ x: x + (Math.random() - 0.5) * blockSz, y: y + (Math.random() - 0.5) * blockSz, vx: ((-40 + Math.random() * 80) * sprd) / frames2, vy: (-3 + Math.random() * 10) / frames2, gravity: 0.08, life: 1, decay: 1 / frames2, size: 2 + Math.random() * 3, color: sc, round: true, startTime: now + 60 + Math.random() * 300 });
   }
   _kickCvfx();
 }
 function spawnPlasmaShatter(x, y, color) {
   if (_cvfxParticles.length >= MAX_PARTICLES) return;
   var cfg = vfxGet("block_destroy");
-  var ac = cfg.accentColor || "#80ddff";
+  // WYSIWYG: the saved design's burstColor replaces the per-block native color
+  // so the in-game effect matches what the user sees in the Studio.
+  var bc = (cfg.burstColor || color || "#c8b8ff") + vfxAlphaHex(cfg.burstOpacity);
+  var ac = (cfg.accentColor || "#80ddff") + vfxAlphaHex(cfg.accentOpacity);
   var spd = Math.max(0.5, Math.min(2, cfg.speed || 1));
-  var cnt = Math.round(Math.max(4, Math.min(16, 8 * (cfg.intensity || 1))));
+  var sprd = Math.max(0.5, Math.min(2, cfg.spread || 1));
+  var cntMul = Math.max(0.5, Math.min(2, cfg.count || 1));
+  var psz = Math.max(0.5, Math.min(2, cfg.particleSize || 1));
+  var cnt = Math.round(Math.max(4, Math.min(16, 8 * cntMul)));
   var now = Date.now(); var frames = 16 / spd;
   for (var i = 0; i < cnt; i++) {
     var angle = (i * Math.PI * 2) / cnt;
-    _cvfxParticles.push({ x: x, y: y, vx: Math.cos(angle) * 36 / frames, vy: Math.sin(angle) * 36 / frames, gravity: 0, life: 1, decay: 1 / frames, size: 6, color: i % 2 === 0 ? color : ac, round: true, fadeIn: true, startTime: now });
+    _cvfxParticles.push({ x: x, y: y, vx: Math.cos(angle) * 36 * sprd / frames, vy: Math.sin(angle) * 36 * sprd / frames, gravity: 0, life: 1, decay: 1 / frames, size: 6 * psz, color: i % 2 === 0 ? bc : ac, round: true, fadeIn: true, startTime: now });
   }
   _kickCvfx();
 }
@@ -879,9 +949,12 @@ function spawnOozeSplash(x, y, hw) {
   var cfg = vfxGet("acid_ooze");
   var c1 = cfg.color1 || "#1a6a1a";
   var c2 = cfg.color2 || "#35a035";
-  var now = Date.now(); var frames = 30;
-  for (var i = 0; i < 6; i++) {
-    var goLeft = i < 3;
+  var sp = Math.max(0, Math.min(2, cfg.splash == null ? 1 : cfg.splash));
+  var spd = Math.max(0.5, Math.min(2, cfg.speed || 1));
+  var cnt = Math.round(Math.max(0, Math.min(12, 6 * sp)));
+  var now = Date.now(); var frames = 30 / spd;
+  for (var i = 0; i < cnt; i++) {
+    var goLeft = i < cnt / 2;
     var flyX = (goLeft ? -1 : 1) * (6 + Math.random() * 12);
     var flyY = -6 + Math.random() * 18;
     _cvfxParticles.push({ x: x + (goLeft ? -hw : hw), y: y, vx: flyX / frames, vy: flyY / frames, gravity: 0.05, life: 1, decay: 1 / frames, size: 3 + Math.random() * 2, color: i % 2 === 0 ? c2 : c1, round: true, startTime: now + Math.random() * 50 });
@@ -1333,7 +1406,8 @@ export default function CosmicDriftGame() {
     }).catch(function () {});
   }, []);
   useEffect(function() {
-    vfxLoadConfig().then(function(cfg) { GAME_VFX_CONFIG = cfg; }).catch(function() {});
+    vfxLoadDesigns().then(function(d) { GAME_VFX_DESIGNS = d; }).catch(function() {});
+    vfxLoadActive().then(function(m) { GAME_VFX_ACTIVE = m; }).catch(function() {});
   }, []);
   // ?play=levelId deep link: auto-load and start a custom level (used by Workshop "Play" buttons).
   useEffect(function () {
@@ -2068,10 +2142,10 @@ function logUfo(msg) {
 
     if (v.type === "coreFly") return <div key={v.id} style={{ position: "absolute", left: v.startX - 10, top: v.startY - 10, animation: "coreFly 0.6s ease-in forwards", "--endX": (v.endX - v.startX) + "px", "--endY": (v.endY - v.startY) + "px" }}><CoreIcon size={20} mode="lit" /></div>;
     if (v.type === "plasmaZip") return <div key={v.id} style={{ position: "absolute", left: v.startX - 10, top: v.startY - 10, animation: "plasmaZip 0.6s ease-in forwards", "--endX": (v.endX - v.startX) + "px", "--endY": (v.endY - v.startY) + "px" }}><PlasmaIcon size={20} /></div>;
-    if (v.type === "ooze") { var _oc = vfxGet("acid_ooze"); var ovc1 = _oc.color1; var ovc2 = _oc.color2; var owaveDur = (1.2 / Math.max(0.5, Math.min(2, _oc.speed))).toFixed(2) + "s"; var oh = v.h, ox2 = v.x, oy2 = v.y; var ow = oh * 1.05; var op = makeOozePath(oh + 8, oy2, blockSize + GAP); var gid = "og" + v.id; var glowW = ow * 1.05; return <div key={v.id} style={{ position: "absolute", left: ox2 - ow / 2, top: oy2 - oh / 2 - 3, width: ow, height: oh + 8, overflow: "hidden", animation: "oozeFlow 0.22s ease-out forwards", transformOrigin: "top center" }}><div style={{ position: "absolute", left: "50%", top: 0, width: glowW, height: oh + 8, transform: "translateX(-50%)", background: "linear-gradient(to bottom, transparent 0%, " + ovc2 + "2e 10%, " + ovc2 + "2e 90%, transparent 100%)", filter: "blur(8px)", pointerEvents: "none" }} /><svg viewBox={"0 0 40 " + op.svgH} width={ow} height={(oh + 8) * 2} preserveAspectRatio="none" style={{ position: "absolute", top: -(oh + 8), left: 0, animation: "oozeWaveFlow " + owaveDur + " linear infinite" }}><defs><linearGradient id={gid} x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor={ovc1} stopOpacity="0.6" /><stop offset="35%" stopColor={ovc2} stopOpacity="0.9" /><stop offset="50%" stopColor={ovc2} /><stop offset="65%" stopColor={ovc2} stopOpacity="0.9" /><stop offset="100%" stopColor={ovc1} stopOpacity="0.6" /></linearGradient></defs><path d={op.path} fill={"url(#" + gid + ")"} /></svg></div>; }
+    if (v.type === "ooze") { var _oc = vfxGet("acid_ooze"); var ovc1 = _oc.color1; var ovc2 = _oc.color2; var ovW = Math.max(0.5, Math.min(2, _oc.width || 1)); var ovWv = Math.max(0.5, Math.min(2, _oc.waveSize || 1)); var ovFq = Math.max(2, Math.min(12, Math.round(_oc.freq == null ? 5 : _oc.freq))); var owaveDur = (1.2 / Math.max(0.5, Math.min(2, _oc.speed))).toFixed(2) + "s"; var oh = v.h, ox2 = v.x, oy2 = v.y; var ow = oh * 1.05; var op = makeOozePath(oh + 8, oy2, blockSize + GAP, { widthMul: ovW, ampMul: ovWv, freq: ovFq }); var gid = "og" + v.id; var glowW = ow * 1.05; return <div key={v.id} style={{ position: "absolute", left: ox2 - ow / 2, top: oy2 - oh / 2 - 3, width: ow, height: oh + 8, overflow: "hidden", animation: "oozeFlow 0.22s ease-out forwards", transformOrigin: "top center" }}><div style={{ position: "absolute", left: "50%", top: 0, width: glowW, height: oh + 8, transform: "translateX(-50%)", background: "linear-gradient(to bottom, transparent 0%, " + ovc2 + "2e 10%, " + ovc2 + "2e 90%, transparent 100%)", filter: "blur(8px)", pointerEvents: "none" }} /><svg viewBox={"0 0 " + op.vbW + " " + op.svgH} width={ow} height={(oh + 8) * 2} preserveAspectRatio="none" style={{ position: "absolute", top: -(oh + 8), left: 0, animation: "oozeWaveFlow " + owaveDur + " linear infinite" }}><defs><linearGradient id={gid} x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor={ovc1} stopOpacity="0.6" /><stop offset="35%" stopColor={ovc2} stopOpacity="0.9" /><stop offset="50%" stopColor={ovc2} /><stop offset="65%" stopColor={ovc2} stopOpacity="0.9" /><stop offset="100%" stopColor={ovc1} stopOpacity="0.6" /></linearGradient></defs><path d={op.path} fill={"url(#" + gid + ")"} /></svg></div>; }
     if (v.type === "oozePuddle") { var opc2 = vfxGet("acid_ooze").color2 || "#50ff50"; return <div key={v.id} style={{ position: "absolute", left: v.x - v.w * 0.6, top: v.y - 6, width: v.w * 1.2, height: 14, animation: "oozePuddleSpread 2s ease-out forwards" }}><div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "radial-gradient(ellipse, " + opc2 + "b3 0%, " + opc2 + "80 40%, " + opc2 + "33 75%, transparent 100%)", boxShadow: "0 0 10px " + opc2 + "66, 0 0 20px " + opc2 + "33" }} /></div>; }
     if (v.type === "oozeSplash") { var sp = []; var halfW = v.ow || 14; for (var si = 0; si < 6; si++) { var goLeft = si < 3; var edgeX = goLeft ? -halfW : halfW; var flyX = (goLeft ? -1 : 1) * (6 + Math.random() * 12); var flyY = -6 + Math.random() * 12; sp.push(<div key={si} style={{ position: "absolute", left: 18 + edgeX, top: 14 + (Math.random() * 8 - 4), width: 3 + Math.random() * 2, height: 3 + Math.random() * 2, borderRadius: "50%", background: si % 3 === 0 ? "#50dd50" : si % 3 === 1 ? "#30aa30" : "#40c840", opacity: 0.7, animation: "explodeParticle 0.5s ease-out forwards", "--px": flyX + "px", "--py": flyY + "px" }} />); } return <div key={v.id} style={{ position: "absolute", left: v.x - 18, top: v.y - 18, width: 36, height: 36, pointerEvents: "none" }}>{sp}</div>; }
-    if (v.type === "drone") { var dvc1 = vfxGet("drone_explode").color1 || "#ffe066"; var dvc2 = vfxGet("drone_explode").color2 || "#ff6633"; var ep = []; if (v.exploded) for (var i3 = 0; i3 < 12; i3++) { var a2 = (i3 * Math.PI * 2) / 12; var d2 = 40 + (i3 % 3) * 10; ep.push(<div key={i3} style={{ position: "absolute", left: 56, top: 56, width: i3 % 3 === 0 ? 10 : 7, height: i3 % 3 === 0 ? 10 : 7, borderRadius: "50%", background: i3 % 3 === 0 ? dvc1 : dvc2, animation: "explodeParticle 0.6s ease-out forwards", "--px": Math.cos(a2) * d2 + "px", "--py": Math.sin(a2) * d2 + "px" }} />); } return <div key={v.id}>{!v.exploded && <div style={{ position: "absolute", left: v.startX - 10, top: v.startY - 10, animation: "droneMoveX 0.65s linear forwards", "--dx": v.dx + "px" }}><div style={{ animation: "droneMoveY 0.65s ease-in forwards", "--peak": v.arcPeak + "px", "--dy": v.dy + "px", "--startRot": v.startRot, "--endRot": v.endRot }}><BDDroneIcon size={20} /></div></div>}{v.exploded && <div style={{ position: "absolute", left: v.endX - 60, top: v.endY - 60, width: 120, height: 120 }}><div style={{ position: "absolute", left: 10, top: 10, width: 100, height: 100, borderRadius: "50%", background: "radial-gradient(circle," + dvc1 + "99 0%," + dvc2 + "66 40%,transparent 70%)", animation: "explodeRing 0.6s ease-out forwards" }} />{ep}<div style={{ position: "absolute", left: 30, top: 30, width: 60, height: 60, borderRadius: "50%", background: "radial-gradient(circle,#fff 0%," + dvc1 + " 30%," + dvc2 + " 60%,transparent 80%)", animation: "explodeFlash 0.4s ease-out forwards" }} /></div>}</div>; }
+    if (v.type === "drone") { var _dc = vfxGet("drone_explode"); var dvc1 = _dc.coreColor || "#ffe066"; var dvc2 = _dc.blastColor || "#ff6633"; var dvCntMul = Math.max(0.5, Math.min(2, _dc.count || 1)); var dvSprMul = Math.max(0.5, Math.min(2, _dc.spread || 1)); var dvPszMul = Math.max(0.5, Math.min(2, _dc.particleSize || 1)); var dvCoreA = vfxAlphaHex(_dc.coreOpacity); var dvBlastA = vfxAlphaHex(_dc.blastOpacity); var ep = []; if (v.exploded) { var dvN = Math.round(12 * dvCntMul); for (var i3 = 0; i3 < dvN; i3++) { var a2 = (i3 * Math.PI * 2) / dvN; var d2 = (40 + (i3 % 3) * 10) * dvSprMul; var dsz = (i3 % 3 === 0 ? 10 : 7) * dvPszMul; ep.push(<div key={i3} style={{ position: "absolute", left: 56, top: 56, width: dsz, height: dsz, marginLeft: -dsz / 2, marginTop: -dsz / 2, borderRadius: "50%", background: (i3 % 3 === 0 ? dvc1 + dvCoreA : dvc2 + dvBlastA), animation: "explodeParticle 0.6s ease-out forwards", "--px": Math.cos(a2) * d2 + "px", "--py": Math.sin(a2) * d2 + "px" }} />); } } return <div key={v.id}>{!v.exploded && <div style={{ position: "absolute", left: v.startX - 10, top: v.startY - 10, animation: "droneMoveX 0.65s linear forwards", "--dx": v.dx + "px" }}><div style={{ animation: "droneMoveY 0.65s ease-in forwards", "--peak": v.arcPeak + "px", "--dy": v.dy + "px", "--startRot": v.startRot, "--endRot": v.endRot }}><BDDroneIcon size={20} /></div></div>}{v.exploded && <div style={{ position: "absolute", left: v.endX - 60, top: v.endY - 60, width: 120, height: 120 }}><div style={{ position: "absolute", left: 10, top: 10, width: 100, height: 100, borderRadius: "50%", background: "radial-gradient(circle," + dvc1 + "99 0%," + dvc2 + "66 40%,transparent 70%)", animation: "explodeRing 0.6s ease-out forwards" }} />{ep}<div style={{ position: "absolute", left: 30, top: 30, width: 60, height: 60, borderRadius: "50%", background: "radial-gradient(circle,#fff 0%," + dvc1 + " 30%," + dvc2 + " 60%,transparent 80%)", animation: "explodeFlash 0.4s ease-out forwards" }} /></div>}</div>; }
     if (v.type === "itemFly") return <div key={v.id} style={{ position: "absolute", left: v.startX - 10, top: v.startY - 10, animation: "itemFly 0.6s ease-in-out forwards", "--endX": (v.endX - v.startX) + "px", "--endY": (v.endY - v.startY) + "px" }}>{v.icon === "drone" ? <BDDroneIcon size={20} /> : v.icon === "crossshot" ? <BDCrossIcon size={20} /> : <LightningIcon size={20} />}</div>;
     if (v.type === "bonusCharge") return <div key={v.id} style={{ position: "absolute", left: v.startX - 6, top: v.startY - 6, width: 12, height: 12, borderRadius: "50%", background: "radial-gradient(circle,#fff 0%,#50c8ff 50%,transparent 100%)", boxShadow: "0 0 8px #50c8ff", animation: "bonusCharge 0.4s ease-in forwards", "--endX": (v.endX - v.startX) + "px", "--endY": (v.endY - v.startY) + "px" }} />;
     if (v.type === "blockErupt") return <div key={v.id} style={{ position: "absolute", left: v.startX - 16, top: v.startY - 16, width: 32, height: 32, animation: "blockErupt 0.5s ease-out forwards", "--endX": (v.endX - v.startX) + "px", "--endY": (v.endY - v.startY) + "px" }}><div style={{ width: 32, height: 32, borderRadius: 6, background: BLOCK_COLORS[v.spawnType] ? BLOCK_COLORS[v.spawnType].bg : "#7b5ea7", border: "2px solid " + (BLOCK_COLORS[v.spawnType] ? BLOCK_COLORS[v.spawnType].border : "#6b4e97"), boxShadow: "0 0 12px rgba(130,180,255,0.4)" }} /></div>;
