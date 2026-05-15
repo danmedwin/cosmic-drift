@@ -591,7 +591,18 @@ function UFOBlockSvg(props) {
 function squarePath() { return "M 4,4 L 96,4 L 96,96 L 4,96 Z"; }
 function circlePath() { return null; }
 function octagonPath() { return "M 30,4 L 70,4 L 96,30 L 96,70 L 70,96 L 30,96 L 4,70 L 4,30 Z"; }
+var ASTEROID_VERTS = [[50,3],[62,8],[78,5],[85,18],[97,28],[92,42],[98,58],[88,68],[90,82],[76,88],[65,97],[50,90],[35,97],[24,88],[10,82],[12,68],[2,58],[8,42],[3,28],[15,18],[22,5],[38,8]];
 function asteroidPath() { return "M 50,3 L 62,8 L 78,5 L 85,18 L 97,28 L 92,42 L 98,58 L 88,68 L 90,82 L 76,88 L 65,97 L 50,90 L 35,97 L 24,88 L 10,82 L 12,68 L 2,58 L 8,42 L 3,28 L 15,18 L 22,5 L 38,8 Z"; }
+function craterPath(cx, cy, r, rotationDeg) {
+  var s = r / 50, rad = (rotationDeg || 0) * Math.PI / 180, co = Math.cos(rad), si = Math.sin(rad);
+  var d = "";
+  for (var i = 0; i < ASTEROID_VERTS.length; i++) {
+    var lx = (ASTEROID_VERTS[i][0] - 50) * s, ly = (ASTEROID_VERTS[i][1] - 50) * s;
+    var rx = co * lx - si * ly, ry = si * lx + co * ly;
+    d += (i === 0 ? "M " : "L ") + (cx + rx).toFixed(2) + "," + (cy + ry).toFixed(2) + " ";
+  }
+  return d + "Z";
+}
 function starPath() { var points = []; for (var i = 0; i < 10; i++) { var angle = (Math.PI / 2) * -1 + (Math.PI / 5) * i; var r = i % 2 === 0 ? 48 : 20; points.push((50 + r * Math.cos(angle)).toFixed(1) + "," + (50 + r * Math.sin(angle)).toFixed(1)); } return "M " + points.join(" L ") + " Z"; }
 function hexagonPath() { var points = []; for (var i = 0; i < 6; i++) { var angle = (Math.PI / 3) * i - Math.PI / 6; points.push((50 + 48 * Math.cos(angle)).toFixed(1) + "," + (50 + 48 * Math.sin(angle)).toFixed(1)); } return "M " + points.join(" L ") + " Z"; }
 function crossShapePath() { return "M 34,4 L 66,4 L 66,34 L 96,34 L 96,66 L 66,66 L 66,96 L 34,96 L 34,66 L 4,66 L 4,34 L 34,34 Z"; }
@@ -667,19 +678,11 @@ function PatternDef(props) {
     case "circles": inner = React.createElement("circle", { cx: half, cy: half, r: 3.5, fill: fill, stroke: stroke, strokeWidth: strokeW, opacity: opacity }); break;
     case "squares": var sqSz = 3.5, sqOff = (sz - sqSz) / 2; inner = React.createElement("rect", { x: sqOff, y: sqOff, width: sqSz, height: sqSz, fill: fill, stroke: stroke, strokeWidth: strokeW, opacity: opacity }); break;
     case "craters": {
-      var craterDefs = [[2.5, 3.0, 1.8, 7, 0.3], [6.7, 2.3, 1.2, 6, 1.4], [3.2, 7.2, 2.4, 8, 2.1], [7.6, 7.4, 1.5, 7, 0.9]];
+      var craterDefs = [[2.0, 2.5, 1.4, 15], [6.0, 1.5, 1.0, -30], [8.5, 3.3, 1.6, 50], [4.0, 4.0, 1.5, 25], [7.8, 5.5, 1.0, -45], [1.8, 6.5, 1.2, 80], [5.5, 7.5, 1.8, -15], [3.5, 9.0, 1.3, 110]];
       var craterEls = [];
       for (var cri = 0; cri < craterDefs.length; cri++) {
-        var cdef = craterDefs[cri];
-        var ccx = cdef[0], ccy = cdef[1], baseR = cdef[2], nPts = cdef[3], cseed = cdef[4];
-        var cPts = [];
-        for (var cpi = 0; cpi < nPts; cpi++) {
-          var cang = (cpi / nPts) * Math.PI * 2 + Math.sin(cpi * 1.7 + cseed) * 0.15;
-          var cjr = 0.72 + 0.45 * Math.sin(cpi * 2.3 + cseed * 5);
-          var crr = baseR * cjr;
-          cPts.push((ccx + Math.cos(cang) * crr).toFixed(2) + "," + (ccy + Math.sin(cang) * crr).toFixed(2));
-        }
-        craterEls.push(React.createElement("polygon", { key: cri, points: cPts.join(" "), fill: fill, stroke: stroke, strokeWidth: strokeW, opacity: opacity }));
+        var cd = craterDefs[cri];
+        craterEls.push(React.createElement("path", { key: cri, d: craterPath(cd[0], cd[1], cd[2], cd[3]), fill: fill, stroke: stroke, strokeWidth: strokeW, opacity: opacity }));
       }
       inner = React.createElement("g", null, craterEls);
       break;
