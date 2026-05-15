@@ -1862,6 +1862,10 @@ function UFOBlockSvg(props) {
   var hullDark = ufoAdjustColor(d.hullColor, 0.4);
   var lightDark = ufoAdjustColor(d.lightColor, 0.55);
   var lightBright = ufoAdjustColor(d.lightColor, 1.6);
+  var pCount = Math.round(d.particleCount || 3);
+  var pSize = d.particleSize || 1.0;
+  var glowOp = d.glowOpacity || 0;
+  var showAlien = !!d.showAlien;
   var hx = 70,
     hy = 80;
   var dRx = 22,
@@ -1881,12 +1885,12 @@ function UFOBlockSvg(props) {
   }
   var stealthColors = [d.lightColor, lightDark, lightBright];
   var lights = [];
-  for (var li = 0; li < 3; li++) {
-    var la = li / 3 * Math.PI * 2;
+  for (var li = 0; li < pCount; li++) {
+    var la = li / pCount * Math.PI * 2;
     lights.push({
       x: hx + 45 * Math.cos(la),
       y: hy + 8.12 * Math.sin(la),
-      c: stealthColors[li]
+      c: stealthColors[li % 3]
     });
   }
   return /*#__PURE__*/React.createElement("svg", {
@@ -1926,6 +1930,22 @@ function UFOBlockSvg(props) {
     offset: "100%",
     stopColor: hullDark,
     stopOpacity: "0.22"
+  })), glowOp > 0 && /*#__PURE__*/React.createElement("radialGradient", {
+    id: "ufo-g",
+    cx: "50%",
+    cy: "30%"
+  }, /*#__PURE__*/React.createElement("stop", {
+    offset: "0%",
+    stopColor: d.hullColor,
+    stopOpacity: glowOp * 0.7
+  }), /*#__PURE__*/React.createElement("stop", {
+    offset: "55%",
+    stopColor: d.hullColor,
+    stopOpacity: glowOp * 0.15
+  }), /*#__PURE__*/React.createElement("stop", {
+    offset: "100%",
+    stopColor: d.hullColor,
+    stopOpacity: 0
   })), /*#__PURE__*/React.createElement("clipPath", {
     id: "ufo-dc"
   }, /*#__PURE__*/React.createElement("rect", {
@@ -1935,7 +1955,13 @@ function UFOBlockSvg(props) {
     height: hy
   }))), /*#__PURE__*/React.createElement("g", {
     style: gStyle
-  }, /*#__PURE__*/React.createElement("ellipse", {
+  }, glowOp > 0 && /*#__PURE__*/React.createElement("ellipse", {
+    cx: hx,
+    cy: hy + 10,
+    rx: 58,
+    ry: 22,
+    fill: "url(#ufo-g)"
+  }), /*#__PURE__*/React.createElement("ellipse", {
     cx: hx,
     cy: hy,
     rx: 48,
@@ -1951,7 +1977,7 @@ function UFOBlockSvg(props) {
       key: li2,
       cx: lp.x,
       cy: lp.y,
-      r: "3.5",
+      r: 3.5 * pSize,
       fill: lp.c,
       style: {
         animation: "pulse " + (1.8 + li2 * 0.4) + "s ease-in-out infinite"
@@ -1963,7 +1989,39 @@ function UFOBlockSvg(props) {
     rx: 46.5,
     ry: 10,
     fill: "url(#ufo-h)"
+  }), showAlien && /*#__PURE__*/React.createElement("g", {
+    clipPath: "url(#ufo-dc)"
+  }, /*#__PURE__*/React.createElement("ellipse", {
+    cx: hx,
+    cy: hy - 10,
+    rx: 5,
+    ry: 5.5,
+    fill: "#70b870",
+    opacity: "0.9"
   }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: hx,
+    cy: hy - 22,
+    rx: 9,
+    ry: 9,
+    fill: "#70b870",
+    opacity: "0.9"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: hx - 4,
+    cy: hy - 23,
+    rx: 3.5,
+    ry: 2.5,
+    fill: "#152215",
+    opacity: "0.95",
+    transform: "rotate(-15," + (hx - 4) + "," + (hy - 23) + ")"
+  }), /*#__PURE__*/React.createElement("ellipse", {
+    cx: hx + 4,
+    cy: hy - 23,
+    rx: 3.5,
+    ry: 2.5,
+    fill: "#152215",
+    opacity: "0.95",
+    transform: "rotate(15," + (hx + 4) + "," + (hy - 23) + ")"
+  })), /*#__PURE__*/React.createElement("ellipse", {
     cx: hx,
     cy: dY,
     rx: dRx,
@@ -2768,7 +2826,11 @@ var UFO_DEFAULT_DESIGN = {
   hullColor: "#b86020",
   domeColor: "#44ffee",
   lightColor: "#4488ff",
-  lightSpeed: 8
+  lightSpeed: 8,
+  particleCount: 3,
+  particleSize: 1.0,
+  glowOpacity: 0.0,
+  showAlien: false
 };
 var GAME_UFO_DESIGN = Object.assign({}, UFO_DEFAULT_DESIGN);
 var GAME_VFX_ACTIVE = {};

@@ -543,6 +543,10 @@ function UFOBlockSvg(props) {
   var hullDark = ufoAdjustColor(d.hullColor, 0.4);
   var lightDark = ufoAdjustColor(d.lightColor, 0.55);
   var lightBright = ufoAdjustColor(d.lightColor, 1.6);
+  var pCount = Math.round(d.particleCount || 3);
+  var pSize = d.particleSize || 1.0;
+  var glowOp = d.glowOpacity || 0;
+  var showAlien = !!d.showAlien;
   var hx = 70, hy = 80;
   var dRx = 22, dRy = 23, dY = hy - 16;
   var gStyle = {};
@@ -550,9 +554,9 @@ function UFOBlockSvg(props) {
   else if (animPhase === "warpIn") { gStyle = { animation: "ufoWarpIn 0.6s ease-out forwards", transformOrigin: hx + "px " + hy + "px" }; }
   var stealthColors = [d.lightColor, lightDark, lightBright];
   var lights = [];
-  for (var li = 0; li < 3; li++) {
-    var la = (li / 3) * Math.PI * 2;
-    lights.push({ x: hx + 45 * Math.cos(la), y: hy + 8.12 * Math.sin(la), c: stealthColors[li] });
+  for (var li = 0; li < pCount; li++) {
+    var la = (li / pCount) * Math.PI * 2;
+    lights.push({ x: hx + 45 * Math.cos(la), y: hy + 8.12 * Math.sin(la), c: stealthColors[li % 3] });
   }
   return (
     <svg viewBox="20 25 100 100" width={size} height={size} style={{ display: "block", overflow: "visible" }}>
@@ -567,18 +571,30 @@ function UFOBlockSvg(props) {
           <stop offset="38%" stopColor={d.domeColor} stopOpacity="0.55" />
           <stop offset="100%" stopColor={hullDark} stopOpacity="0.22" />
         </radialGradient>
+        {glowOp > 0 && <radialGradient id="ufo-g" cx="50%" cy="30%">
+          <stop offset="0%" stopColor={d.hullColor} stopOpacity={glowOp * 0.7} />
+          <stop offset="55%" stopColor={d.hullColor} stopOpacity={glowOp * 0.15} />
+          <stop offset="100%" stopColor={d.hullColor} stopOpacity={0} />
+        </radialGradient>}
         <clipPath id="ufo-dc">
           <rect x={hx - dRx - 3} y={0} width={dRx * 2 + 6} height={hy} />
         </clipPath>
       </defs>
       <g style={gStyle}>
+        {glowOp > 0 && <ellipse cx={hx} cy={hy + 10} rx={58} ry={22} fill="url(#ufo-g)" />}
         <ellipse cx={hx} cy={hy} rx={48} ry={14} fill="url(#ufo-h)" />
         <g style={{ animation: "ufoLightSpin " + d.lightSpeed + "s linear infinite", transformOrigin: hx + "px " + hy + "px" }}>
           {lights.map(function(lp, li2) {
-            return <circle key={li2} cx={lp.x} cy={lp.y} r="3.5" fill={lp.c} style={{ animation: "pulse " + (1.8 + li2 * 0.4) + "s ease-in-out infinite" }} />;
+            return <circle key={li2} cx={lp.x} cy={lp.y} r={3.5 * pSize} fill={lp.c} style={{ animation: "pulse " + (1.8 + li2 * 0.4) + "s ease-in-out infinite" }} />;
           })}
         </g>
         <ellipse cx={hx} cy={hy - 1} rx={46.5} ry={10} fill="url(#ufo-h)" />
+        {showAlien && <g clipPath="url(#ufo-dc)">
+          <ellipse cx={hx} cy={hy - 10} rx={5} ry={5.5} fill="#70b870" opacity="0.9" />
+          <ellipse cx={hx} cy={hy - 22} rx={9} ry={9} fill="#70b870" opacity="0.9" />
+          <ellipse cx={hx - 4} cy={hy - 23} rx={3.5} ry={2.5} fill="#152215" opacity="0.95" transform={"rotate(-15," + (hx - 4) + "," + (hy - 23) + ")"} />
+          <ellipse cx={hx + 4} cy={hy - 23} rx={3.5} ry={2.5} fill="#152215" opacity="0.95" transform={"rotate(15," + (hx + 4) + "," + (hy - 23) + ")"} />
+        </g>}
         <ellipse cx={hx} cy={dY} rx={dRx} ry={dRy} fill="url(#ufo-d)" clipPath="url(#ufo-dc)" />
         <ellipse cx={hx - dRx * 0.22} cy={dY - dRy * 0.28} rx={dRx * 0.27} ry={dRy * 0.22} fill="white" opacity="0.25"
           transform={"rotate(-20," + (hx - dRx * 0.22) + "," + (dY - dRy * 0.28) + ")"}
@@ -778,7 +794,7 @@ var VFX_STORAGE_KEY = "cosmic-drift-vfx-designs";
 var VFX_ACTIVE_KEY = "cosmic-drift-vfx-active";
 var GAME_VFX_DESIGNS = [];
 var UFO_STORAGE_KEY = "cosmic-drift-ufo-design";
-var UFO_DEFAULT_DESIGN = { hullColor: "#b86020", domeColor: "#44ffee", lightColor: "#4488ff", lightSpeed: 8 };
+var UFO_DEFAULT_DESIGN = { hullColor: "#b86020", domeColor: "#44ffee", lightColor: "#4488ff", lightSpeed: 8, particleCount: 3, particleSize: 1.0, glowOpacity: 0.0, showAlien: false };
 var GAME_UFO_DESIGN = Object.assign({}, UFO_DEFAULT_DESIGN);
 var GAME_VFX_ACTIVE = {};
 var VFX_DEFAULTS = {
