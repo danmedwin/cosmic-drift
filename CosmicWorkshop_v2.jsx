@@ -1984,25 +1984,29 @@ export default function CosmicWorkshop() {
     React.createElement("div", { style: { position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" } }, React.createElement(Stars, null)),
 
     // ═══ SPLASH SCREEN ═══
-    screen === "splash" && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", background: "radial-gradient(ellipse 90% 60% at 50% 28%, #142436 0%, #0e1826 45%, #08101a 100%)" } },
+    screen === "splash" && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", background: "radial-gradient(ellipse 90% 60% at 50% 28%, #0e0820 0%, #0a0618 45%, #06040f 100%)" } },
 
       // ── TOP STATUS STRIP ──
-      React.createElement("div", { style: { flexShrink: 0, background: WS.brushed, backgroundBlendMode: "overlay", borderBottom: WS.pb, boxShadow: "0 3px 6px rgba(0,0,0,0.4)", padding: "8px 10px", display: "flex", alignItems: "center", gap: 6 } },
+      React.createElement("div", { style: { flexShrink: 0, background: WS.brushed, backgroundBlendMode: "overlay", borderBottom: "1px solid rgba(120,80,200,0.3)", boxShadow: "0 3px 8px rgba(0,0,0,0.5)", padding: "8px 10px", display: "flex", alignItems: "center", gap: 6 } },
         React.createElement(WsLED, { color: WS.green, size: 5 }),
-        React.createElement(WsLED, { color: WS.blue, size: 5 }),
-        React.createElement(WsMono, { size: 8, ls: 1.5, color: "rgba(200,220,240,0.5)" }, "SVC-MODE"),
-        React.createElement("span", { style: { color: "rgba(200,220,240,0.2)", fontSize: 7 } }, "|"),
+        React.createElement(WsLED, { color: "#b060ff", size: 5 }),
+        React.createElement(WsMono, { size: 8, ls: 1.5, color: "rgba(200,170,255,0.55)" }, "SVC-MODE"),
+        React.createElement("span", { style: { color: "rgba(180,140,255,0.25)", fontSize: 7 } }, "|"),
         React.createElement(WsMono, { size: 8, ls: 1.5, color: WS.green }, "GRANTED"),
-        React.createElement("span", { style: { color: "rgba(200,220,240,0.2)", fontSize: 7 } }, "|"),
-        React.createElement(WsMono, { size: 8, ls: 1.5, color: "rgba(200,220,240,0.3)" }, WORKSHOP_VERSION),
+        React.createElement("span", { style: { color: "rgba(180,140,255,0.25)", fontSize: 7 } }, "|"),
+        React.createElement(WsMono, { size: 8, ls: 1.5, color: "rgba(200,170,255,0.35)" }, WORKSHOP_VERSION),
         React.createElement("div", { style: { flex: 1 } }),
-        React.createElement("div", { style: { width: 26, height: 26, borderRadius: 5, background: "linear-gradient(180deg, #4a5462 0%, #353d49 100%)", border: WS.pbl, boxShadow: "inset 0 1px 0 rgba(200,230,240,0.14), 0 2px 3px rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 } },
-          React.createElement("span", { style: { fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "rgba(200,220,240,0.5)", fontWeight: 700 } }, "?")
+        React.createElement("div", { style: { width: 28, height: 28, borderRadius: 6, background: "linear-gradient(180deg, #3a2060 0%, #261040 100%)", border: "1px solid rgba(160,100,255,0.35)", boxShadow: "inset 0 1px 0 rgba(200,160,255,0.18), 0 2px 4px rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 } },
+          React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "rgba(200,170,255,0.6)", strokeWidth: "2" },
+            React.createElement("circle", { cx: "12", cy: "12", r: "9" }),
+            React.createElement("path", { d: "M9.5 9.5a2.5 2.5 0 1 1 4.4 1.7c-.6.6-1.4.9-1.4 2.3" }),
+            React.createElement("circle", { cx: "12", cy: "17", r: "0.6", fill: "rgba(200,170,255,0.6)" })
+          )
         ),
-        React.createElement("div", { onClick: function() { navigateToGame(); }, style: { width: 26, height: 26, borderRadius: 5, background: "linear-gradient(180deg, #4a5462 0%, #353d49 100%)", border: WS.pbl, boxShadow: "inset 0 1px 0 rgba(200,230,240,0.14), 0 2px 3px rgba(0,0,0,0.4)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, cursor: "pointer", flexShrink: 0 } },
-          React.createElement("div", { style: { width: 11, height: 1.5, borderRadius: 1, background: "rgba(200,210,220,0.55)" } }),
-          React.createElement("div", { style: { width: 11, height: 1.5, borderRadius: 1, background: "rgba(200,210,220,0.55)" } }),
-          React.createElement("div", { style: { width: 11, height: 1.5, borderRadius: 1, background: "rgba(200,210,220,0.55)" } })
+        React.createElement("div", { style: { width: 28, height: 28, borderRadius: 6, background: "linear-gradient(180deg, #3a2060 0%, #261040 100%)", border: "1px solid rgba(160,100,255,0.35)", boxShadow: "inset 0 1px 0 rgba(200,160,255,0.18), 0 2px 4px rgba(0,0,0,0.5)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, cursor: "pointer", flexShrink: 0 } },
+          React.createElement("div", { style: { width: 12, height: 1.5, borderRadius: 1, background: "rgba(200,170,255,0.6)" } }),
+          React.createElement("div", { style: { width: 12, height: 1.5, borderRadius: 1, background: "rgba(200,170,255,0.6)" } }),
+          React.createElement("div", { style: { width: 12, height: 1.5, borderRadius: 1, background: "rgba(200,170,255,0.6)" } })
         )
       ),
 
@@ -2010,15 +2014,15 @@ export default function CosmicWorkshop() {
       React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "8px 10px 6px", display: "flex", flexDirection: "column", gap: 8 } },
 
         // TITLE PANEL
-        React.createElement(WsPanel, { style: { padding: "12px 14px 10px", overflow: "hidden", position: "relative" } },
-          React.createElement("div", { style: { position: "absolute", left: 0, top: 0, bottom: 0, width: 5, background: "repeating-linear-gradient(135deg, #ffcc00 0 4px, #111 4px 8px)", opacity: 0.7, borderRadius: "10px 0 0 10px" } }),
-          React.createElement("div", { style: { position: "absolute", right: 0, top: 0, bottom: 0, width: 5, background: "repeating-linear-gradient(135deg, #ffcc00 0 4px, #111 4px 8px)", opacity: 0.7, borderRadius: "0 10px 10px 0" } }),
-          React.createElement("div", { style: { textAlign: "center", paddingLeft: 8, paddingRight: 8 } },
-            React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,220,240,0.2)" }, "COSMIC DRIFT"),
-            React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 30, fontWeight: 700, letterSpacing: 5, color: "#80ddff", textTransform: "uppercase", textShadow: "0 0 18px rgba(80,200,255,0.5), 0 0 36px rgba(80,200,255,0.2)", lineHeight: 1.1, marginTop: 2 } }, "WORKSHOP"),
-            React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 5 } },
-              React.createElement(WsLED, { color: WS.green, size: 4 }),
-              React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,220,240,0.28)" }, "SERVICE PANEL  ·  OPEN")
+        React.createElement(WsPanel, { style: { padding: "14px 14px 12px", overflow: "hidden", position: "relative" } },
+          React.createElement("div", { style: { position: "absolute", left: 0, top: 0, bottom: 0, width: 5, background: "repeating-linear-gradient(135deg, #ffcc00 0 4px, #111 4px 8px)", opacity: 0.65, borderRadius: "10px 0 0 10px" } }),
+          React.createElement("div", { style: { position: "absolute", right: 0, top: 0, bottom: 0, width: 5, background: "repeating-linear-gradient(135deg, #ffcc00 0 4px, #111 4px 8px)", opacity: 0.65, borderRadius: "0 10px 10px 0" } }),
+          React.createElement("div", { style: { textAlign: "center", paddingLeft: 10, paddingRight: 10 } },
+            React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 33, fontWeight: 700, letterSpacing: 7, color: "#ede8ff", textTransform: "uppercase", textShadow: "0 0 22px rgba(160,100,255,0.55), 0 0 44px rgba(120,60,220,0.25)", lineHeight: 1.1 } }, "WORKSHOP"),
+            React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 6 } },
+              React.createElement("div", { style: { height: 1, flex: 1, background: "linear-gradient(90deg, transparent, rgba(160,100,255,0.25))" } }),
+              React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,170,255,0.32)" }, "SERVICE PANEL  ·  OPEN"),
+              React.createElement("div", { style: { height: 1, flex: 1, background: "linear-gradient(270deg, transparent, rgba(160,100,255,0.25))" } })
             )
           )
         ),
@@ -2026,143 +2030,157 @@ export default function CosmicWorkshop() {
         // MODULES PANEL
         React.createElement(WsPanel, { style: { padding: "10px" } },
           React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, paddingLeft: 2, paddingRight: 2 } },
-            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
-              React.createElement(WsLED, { color: WS.blue, size: 5 }),
-              React.createElement(WsMono, { size: 9, ls: 2, color: "rgba(200,220,240,0.55)" }, "MODULES")
-            ),
-            React.createElement(WsMono, { size: 8, ls: 1, color: "rgba(200,220,240,0.22)" }, "04 / 04")
+            React.createElement(WsMono, { size: 8, ls: 2.5, color: "rgba(180,140,255,0.65)" }, "MODULES"),
+            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8 } },
+              React.createElement(WsMono, { size: 7, ls: 1, color: "rgba(180,140,255,0.3)" }, "04 / 04"),
+              React.createElement(WsMono, { size: 7, ls: 1.5, color: WS.green + "88" }, "✓ AUTOSAVE")
+            )
           ),
           React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 } },
-            React.createElement("div", { onClick: function() { loadSavedLevels(); setScreen("builder"); setLbScreen("list"); }, style: { background: "linear-gradient(180deg, rgba(80,200,255,0.07) 0%, rgba(80,200,255,0.02) 100%)", border: "1px solid rgba(80,200,255,0.18)", borderRadius: 8, padding: "10px 10px 8px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 5, position: "relative", overflow: "hidden" } },
-              React.createElement("div", { style: { position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "#80ddff", opacity: 0.5, borderRadius: "8px 8px 0 0" } }),
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 7 } },
-                React.createElement("svg", { width: "18", height: "18", viewBox: "0 0 24 24" },
+            React.createElement("div", { onClick: function() { loadSavedLevels(); setScreen("builder"); setLbScreen("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(80,200,255,0.12)", borderLeft: "3px solid #80ddff", borderRadius: 8, padding: "10px 10px 10px 10px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 6 } },
+              React.createElement("div", { style: { display: "flex", alignItems: "flex-start", justifyContent: "space-between" } },
+                React.createElement("svg", { width: "20", height: "20", viewBox: "0 0 24 24" },
                   React.createElement("rect", { x: "3", y: "3", width: "7", height: "7", rx: "1", fill: "none", stroke: "#80ddff", strokeWidth: "1.5" }),
-                  React.createElement("rect", { x: "14", y: "3", width: "7", height: "7", rx: "1", fill: "#80ddff", opacity: "0.4" }),
-                  React.createElement("rect", { x: "3", y: "14", width: "7", height: "7", rx: "1", fill: "#80ddff", opacity: "0.4" }),
+                  React.createElement("rect", { x: "14", y: "3", width: "7", height: "7", rx: "1", fill: "#80ddff", opacity: "0.45" }),
+                  React.createElement("rect", { x: "3", y: "14", width: "7", height: "7", rx: "1", fill: "#80ddff", opacity: "0.45" }),
                   React.createElement("rect", { x: "14", y: "14", width: "7", height: "7", rx: "1", fill: "none", stroke: "#80ddff", strokeWidth: "1.5", strokeDasharray: "2 2" })
                 ),
-                React.createElement("div", { style: { color: "#80ddff", fontSize: 11, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", lineHeight: 1.2 } }, "Level", React.createElement("br", null), "Builder")
+                React.createElement(WsMono, { size: 7, ls: 0.5, color: "rgba(128,221,255,0.45)" }, savedLevels.length + " SAVED")
               ),
-              React.createElement(WsMono, { size: 7, ls: 0.8, color: "rgba(200,220,240,0.3)" }, savedLevels.length > 0 ? savedLevels.length + " LEVELS" : "NO LEVELS")
+              React.createElement("div", { style: { color: "#ddf0ff", fontSize: 12, fontWeight: 700, letterSpacing: 0.6, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Level Builder"),
+              React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 10 } }, "Design custom grids")
             ),
-            React.createElement("div", { onClick: function() { setScreen("designer"); setBdCurrentView("list"); }, style: { background: "linear-gradient(180deg, rgba(200,184,255,0.07) 0%, rgba(200,184,255,0.02) 100%)", border: "1px solid rgba(200,184,255,0.18)", borderRadius: 8, padding: "10px 10px 8px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 5, position: "relative", overflow: "hidden" } },
-              React.createElement("div", { style: { position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "#c8b8ff", opacity: 0.5, borderRadius: "8px 8px 0 0" } }),
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 7 } },
-                React.createElement("svg", { width: "18", height: "18", viewBox: "0 0 24 24" },
+            React.createElement("div", { onClick: function() { setScreen("designer"); setBdCurrentView("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(200,184,255,0.12)", borderLeft: "3px solid #c8b8ff", borderRadius: 8, padding: "10px 10px 10px 10px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 6 } },
+              React.createElement("div", { style: { display: "flex", alignItems: "flex-start", justifyContent: "space-between" } },
+                React.createElement("svg", { width: "20", height: "20", viewBox: "0 0 24 24" },
                   React.createElement("rect", { x: "4", y: "4", width: "16", height: "16", rx: "3", fill: "none", stroke: "#c8b8ff", strokeWidth: "1.5" }),
                   React.createElement("circle", { cx: "12", cy: "12", r: "4", fill: "#c8b8ff", opacity: "0.4" }),
                   React.createElement("path", { d: "M8 4v16M16 4v16M4 8h16M4 16h16", stroke: "#c8b8ff", strokeWidth: "0.5", opacity: "0.2" })
                 ),
-                React.createElement("div", { style: { color: "#c8b8ff", fontSize: 11, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", lineHeight: 1.2 } }, "Block", React.createElement("br", null), "Designer")
+                React.createElement(WsMono, { size: 7, ls: 0.5, color: "rgba(200,184,255,0.45)" }, bdSaved.length + " SAVED")
               ),
-              React.createElement(WsMono, { size: 7, ls: 0.8, color: "rgba(200,220,240,0.3)" }, bdSaved.length > 0 ? bdSaved.length + " DESIGNS" : "NO DESIGNS")
+              React.createElement("div", { style: { color: "#ede8ff", fontSize: 12, fontWeight: 700, letterSpacing: 0.6, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Block Designer"),
+              React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 10 } }, "Custom block skins")
             ),
-            React.createElement("div", { onClick: function() { setScreen("vfx"); }, style: { background: "linear-gradient(180deg, rgba(255,180,60,0.07) 0%, rgba(255,140,40,0.02) 100%)", border: "1px solid rgba(255,180,60,0.18)", borderRadius: 8, padding: "10px 10px 8px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 5, position: "relative", overflow: "hidden" } },
-              React.createElement("div", { style: { position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "#ffb43c", opacity: 0.5, borderRadius: "8px 8px 0 0" } }),
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 7 } },
-                React.createElement("svg", { width: "18", height: "18", viewBox: "0 0 24 24" },
+            React.createElement("div", { onClick: function() { setScreen("vfx"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(255,180,60,0.12)", borderLeft: "3px solid #ffb43c", borderRadius: 8, padding: "10px 10px 10px 10px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 6 } },
+              React.createElement("div", { style: { display: "flex", alignItems: "flex-start", justifyContent: "space-between" } },
+                React.createElement("svg", { width: "20", height: "20", viewBox: "0 0 24 24" },
                   React.createElement("circle", { cx: "12", cy: "12", r: "3", fill: "#ffb43c" }),
                   React.createElement("path", { d: "M12 2v3M12 19v3M2 12h3M19 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M16.3 7.7l-2.1 2.1M7.7 16.3l-2.1 2.1", stroke: "#ffb43c", strokeWidth: "1.8", strokeLinecap: "round" })
                 ),
-                React.createElement("div", { style: { color: "#ffb43c", fontSize: 11, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", lineHeight: 1.2 } }, "VFX", React.createElement("br", null), "Studio")
+                React.createElement(WsMono, { size: 7, ls: 0.5, color: "rgba(255,180,60,0.45)" }, vfxSaved.length + " SAVED")
               ),
-              React.createElement(WsMono, { size: 7, ls: 0.8, color: "rgba(200,220,240,0.3)" }, vfxSaved.length > 0 ? vfxSaved.length + " EFFECTS" : "NO EFFECTS")
+              React.createElement("div", { style: { color: "#fff3dd", fontSize: 12, fontWeight: 700, letterSpacing: 0.6, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "VFX Studio"),
+              React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 10 } }, "Tune visual effects")
             ),
-            React.createElement("div", { onClick: function() { setScreen("ufo"); }, style: { background: "linear-gradient(180deg, rgba(100,220,180,0.07) 0%, rgba(60,200,160,0.02) 100%)", border: "1px solid rgba(100,220,180,0.18)", borderRadius: 8, padding: "10px 10px 8px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 5, position: "relative", overflow: "hidden" } },
-              React.createElement("div", { style: { position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "#64dcb4", opacity: 0.5, borderRadius: "8px 8px 0 0" } }),
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 7 } },
-                React.createElement(UFOBlockSvg, { size: 26, design: ufoGetActiveDesign(), uid: "splash-tile" }),
-                React.createElement("div", { style: { color: "#64dcb4", fontSize: 11, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", lineHeight: 1.2 } }, "UFO", React.createElement("br", null), "Customizer")
+            React.createElement("div", { onClick: function() { setScreen("ufo"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(100,220,180,0.12)", borderLeft: "3px solid #64dcb4", borderRadius: 8, padding: "10px 10px 10px 10px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 6 } },
+              React.createElement("div", { style: { display: "flex", alignItems: "flex-start", justifyContent: "space-between" } },
+                React.createElement(UFOBlockSvg, { size: 20, design: ufoGetActiveDesign(), uid: "splash-tile" }),
+                React.createElement(WsMono, { size: 7, ls: 0.5, color: "rgba(100,220,180,0.45)" }, ufoSaved.length + " ACTIVE")
               ),
-              React.createElement(WsMono, { size: 7, ls: 0.8, color: "rgba(200,220,240,0.3)" }, ufoSaved.length > 0 ? ufoSaved.length + " DESIGNS" : "DEFAULT")
+              React.createElement("div", { style: { color: "#ddffee", fontSize: 12, fontWeight: 700, letterSpacing: 0.6, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "UFO Customizer"),
+              React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 10 } }, "Configure the alien hull")
             )
           ),
-          React.createElement("div", { style: { display: "flex", justifyContent: "space-between", marginTop: 8, paddingTop: 6, borderTop: "1px solid rgba(255,255,255,0.06)", paddingLeft: 2, paddingRight: 2 } },
-            React.createElement(WsMono, { size: 7, ls: 1.5, color: "rgba(200,220,240,0.18)" }, "SVC V2.0"),
-            React.createElement(WsMono, { size: 7, ls: 1.5, color: "rgba(200,220,240,0.18)" }, "AUTOSAVE")
+          React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8, paddingTop: 6, borderTop: "1px solid rgba(160,100,255,0.08)", paddingLeft: 2, paddingRight: 2 } },
+            React.createElement(WsMono, { size: 7, ls: 1.5, color: "rgba(180,140,255,0.2)" }, "SVC V2.0"),
+            React.createElement(WsMono, { size: 7, ls: 1.5, color: WS.green + "55" }, "AUTOSAVE ✓")
           )
         ),
 
         // ACTIVE LOADOUT
         React.createElement(WsPanel, { style: { padding: "8px 10px" } },
-          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 5, marginBottom: 7 } },
-            React.createElement(WsLED, { color: "#ffb43c", size: 5 }),
-            React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,220,240,0.5)" }, "ACTIVE LOADOUT")
+          React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 } },
+            React.createElement(WsMono, { size: 8, ls: 2.5, color: "rgba(180,140,255,0.65)" }, "ACTIVE LOADOUT"),
+            React.createElement(WsMono, { size: 7, ls: 1, color: WS.green + "99" }, "- SYNCED")
           ),
-          React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 6 } },
-            React.createElement("div", { style: { background: WS.inset, border: WS.ib, borderRadius: 5, padding: "5px 6px", boxShadow: WS.is } },
-              React.createElement(WsMono, { size: 7, ls: 0.8, color: "rgba(128,221,255,0.45)" }, "GRID"),
-              React.createElement("div", { style: { color: "#80ddff", fontFamily: "'JetBrains Mono', monospace", fontSize: 13, fontWeight: 700, marginTop: 3, letterSpacing: 0.5, lineHeight: 1 } }, savedLevels.length > 0 ? savedLevels.length + " LVL" : "—")
+          React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 5 } },
+            React.createElement("div", { style: { background: "linear-gradient(180deg, rgba(80,200,255,0.1) 0%, rgba(60,160,210,0.05) 100%)", border: "1px solid rgba(80,200,255,0.22)", borderRadius: 7, padding: "7px 8px" } },
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 3, marginBottom: 4 } },
+                React.createElement(WsLED, { color: "#80ddff", size: 4 }),
+                React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(128,221,255,0.6)" }, "GRID")
+              ),
+              React.createElement("div", { style: { color: "#a8d8f0", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, savedLevels.length > 0 ? (savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0].name || "Untitled") : "Default")
             ),
-            React.createElement("div", { style: { background: WS.inset, border: WS.ib, borderRadius: 5, padding: "5px 6px", boxShadow: WS.is } },
-              React.createElement(WsMono, { size: 7, ls: 0.8, color: "rgba(200,184,255,0.45)" }, "BLKS"),
-              React.createElement("div", { style: { color: "#c8b8ff", fontFamily: "'JetBrains Mono', monospace", fontSize: 13, fontWeight: 700, marginTop: 3, letterSpacing: 0.5, lineHeight: 1 } }, bdSaved.length > 0 ? bdSaved.length + " DSN" : "DFLT")
+            React.createElement("div", { style: { background: "linear-gradient(180deg, rgba(200,184,255,0.1) 0%, rgba(160,140,220,0.05) 100%)", border: "1px solid rgba(200,184,255,0.22)", borderRadius: 7, padding: "7px 8px" } },
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 3, marginBottom: 4 } },
+                React.createElement(WsLED, { color: "#c8b8ff", size: 4 }),
+                React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(200,184,255,0.6)" }, "BLOCKS")
+              ),
+              React.createElement("div", { style: { color: "#c8b8ff", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, (function() { var keys = Object.keys(bdActiveMap); for (var i = 0; i < keys.length; i++) { var did = bdActiveMap[keys[i]]; if (did) { for (var j = 0; j < bdSaved.length; j++) { if (bdSaved[j].id === did) return bdSaved[j].name || "Custom"; } } } return "Default"; }()))
             ),
-            React.createElement("div", { style: { background: WS.inset, border: WS.ib, borderRadius: 5, padding: "5px 6px", boxShadow: WS.is } },
-              React.createElement(WsMono, { size: 7, ls: 0.8, color: "rgba(255,180,60,0.45)" }, "VFX"),
-              React.createElement("div", { style: { color: "#ffb43c", fontFamily: "'JetBrains Mono', monospace", fontSize: 13, fontWeight: 700, marginTop: 3, letterSpacing: 0.5, lineHeight: 1 } }, vfxSaved.length > 0 ? vfxSaved.length + " FX" : "DFLT")
+            React.createElement("div", { style: { background: "linear-gradient(180deg, rgba(255,180,60,0.1) 0%, rgba(220,140,30,0.05) 100%)", border: "1px solid rgba(255,180,60,0.22)", borderRadius: 7, padding: "7px 8px" } },
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 3, marginBottom: 4 } },
+                React.createElement(WsLED, { color: "#ffb43c", size: 4 }),
+                React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(255,180,60,0.6)" }, "VFX")
+              ),
+              React.createElement("div", { style: { color: "#ffd080", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, (function() { var keys = Object.keys(vfxActiveMap); for (var i = 0; i < keys.length; i++) { var did = vfxActiveMap[keys[i]]; if (did) { for (var j = 0; j < vfxSaved.length; j++) { if (vfxSaved[j].id === did) return vfxSaved[j].name || "Custom"; } } } return "Default"; }()))
             ),
-            React.createElement("div", { style: { background: WS.inset, border: WS.ib, borderRadius: 5, padding: "5px 6px", boxShadow: WS.is } },
-              React.createElement(WsMono, { size: 7, ls: 0.8, color: "rgba(100,220,180,0.45)" }, "HULL"),
-              React.createElement("div", { style: { color: "#64dcb4", fontFamily: "'JetBrains Mono', monospace", fontSize: 12, fontWeight: 700, marginTop: 3, letterSpacing: 0, lineHeight: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, ufoSaved.length > 0 ? (ufoGetActiveDesign().name || "ACTIVE").toUpperCase().substring(0, 6) : "DFLT")
+            React.createElement("div", { style: { background: "linear-gradient(180deg, rgba(100,220,180,0.1) 0%, rgba(60,180,140,0.05) 100%)", border: "1px solid rgba(100,220,180,0.22)", borderRadius: 7, padding: "7px 8px" } },
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 3, marginBottom: 4 } },
+                React.createElement(WsLED, { color: "#64dcb4", size: 4 }),
+                React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(100,220,180,0.6)" }, "HULL")
+              ),
+              React.createElement("div", { style: { color: "#80e8c4", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, ufoSaved.length > 0 ? (ufoGetActiveDesign().name || "Active") : "Default")
             )
           )
         ),
 
-        // RECENT PROJECT + PLAY BUTTON ROW
-        React.createElement("div", { style: { display: "flex", gap: 8, alignItems: "stretch" } },
-          React.createElement(WsPanel, { style: { flex: 1, padding: "8px 10px" } },
-            React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 } },
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 5 } },
-                React.createElement(WsLED, { color: "#c8b8ff", size: 5 }),
-                React.createElement(WsMono, { size: 7, ls: 1.5, color: "rgba(200,220,240,0.42)" }, "RECENT PROJECT")
-              ),
-              savedLevels.length > 0 && React.createElement("span", { onClick: function() { var rec = savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0]; if (rec) { openBuilder(rec); } }, style: { color: "rgba(200,220,240,0.35)", fontSize: 16, fontWeight: 700, cursor: "pointer" } }, "›")
-            ),
-            savedLevels.length > 0 ? (function() {
-              var rec = savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0];
-              return React.createElement("div", null,
-                React.createElement("div", { style: { color: "#b0c8d8", fontWeight: 700, fontSize: 13, fontFamily: "'Exo 2', sans-serif", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, rec.name || "Untitled"),
-                React.createElement(WsMono, { size: 7, ls: 1, color: "rgba(200,220,240,0.28)" }, rec.savedAt ? new Date(rec.savedAt).toLocaleDateString() : "")
-              );
-            }()) : React.createElement(WsMono, { size: 9, ls: 1, color: "rgba(200,220,240,0.18)" }, "—  no levels")
+        // RECENT PROJECT
+        React.createElement(WsPanel, { style: { padding: "8px 10px" } },
+          React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 } },
+            React.createElement(WsMono, { size: 8, ls: 2.5, color: "rgba(180,140,255,0.65)" }, "RECENT PROJECT"),
+            React.createElement(WsMono, { size: 7, ls: 1, color: WS.green + "99" }, "- SYNCED")
           ),
-          React.createElement("div", { onClick: function() { navigateToGame(); }, style: { width: 86, flexShrink: 0, background: "linear-gradient(180deg, #3a2a5a 0%, #2a1a4a 40%, #1e1238 100%)", border: "1px solid rgba(200,180,255,0.28)", borderRadius: 10, boxShadow: "0 0 16px rgba(160,120,255,0.18), inset 0 1px 0 rgba(200,184,255,0.15), inset 0 -2px 4px rgba(0,0,0,0.5)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", gap: 6, padding: "10px 8px" } },
-            React.createElement("div", { style: { width: 34, height: 34, borderRadius: 17, background: "radial-gradient(circle at 40% 35%, #f0e8ff 0%, #c8b8ff 35%, #8060c0 65%, #3a2060 100%)", boxShadow: "0 0 14px rgba(200,184,255,0.55), 0 0 5px rgba(200,184,255,0.35)", display: "flex", alignItems: "center", justifyContent: "center" } },
-              React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" },
-                React.createElement("path", { d: "M7 4L20 12L7 20Z", fill: "rgba(255,255,255,0.9)" })
-              )
-            ),
-            React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: 2, color: "#c8b8ff", textTransform: "uppercase", textShadow: "0 0 8px rgba(200,184,255,0.45)" } }, "PLAY")
-          )
+          savedLevels.length > 0 ? (function() {
+            var rec = savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0];
+            var dateStr = rec.savedAt ? new Date(rec.savedAt).toLocaleDateString() : "";
+            return React.createElement("div", { onClick: function() { openBuilder(rec); }, style: { display: "flex", alignItems: "center", gap: 10, cursor: "pointer" } },
+              React.createElement("div", { style: { width: 36, height: 36, borderRadius: 6, background: "rgba(80,50,140,0.3)", border: "1px solid rgba(160,100,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } },
+                React.createElement("svg", { width: "22", height: "22", viewBox: "0 0 24 24" },
+                  React.createElement("rect", { x: "2", y: "2", width: "9", height: "9", rx: "1", fill: "rgba(128,221,255,0.35)", stroke: "rgba(128,221,255,0.5)", strokeWidth: "0.5" }),
+                  React.createElement("rect", { x: "13", y: "2", width: "9", height: "9", rx: "1", fill: "rgba(200,184,255,0.25)", stroke: "rgba(200,184,255,0.4)", strokeWidth: "0.5" }),
+                  React.createElement("rect", { x: "2", y: "13", width: "9", height: "9", rx: "1", fill: "rgba(255,255,255,0.06)", stroke: "rgba(255,255,255,0.12)", strokeWidth: "0.5" }),
+                  React.createElement("rect", { x: "13", y: "13", width: "9", height: "9", rx: "1", fill: "rgba(255,180,60,0.2)", stroke: "rgba(255,180,60,0.35)", strokeWidth: "0.5" })
+                )
+              ),
+              React.createElement("div", { style: { flex: 1, minWidth: 0 } },
+                React.createElement("div", { style: { color: "#c8d8e8", fontWeight: 700, fontSize: 14, fontFamily: "'Exo 2', sans-serif", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, rec.name || "Untitled"),
+                React.createElement(WsMono, { size: 7.5, ls: 0.8, color: "rgba(200,180,255,0.35)" }, "LEVEL  ·  8×6  ·  " + dateStr)
+              ),
+              React.createElement("span", { style: { color: "rgba(200,170,255,0.35)", fontSize: 18, fontWeight: 300, flexShrink: 0 } }, "›")
+            );
+          }()) : React.createElement(WsMono, { size: 9, ls: 1, color: "rgba(200,180,255,0.2)" }, "—  no levels saved")
+        ),
+
+        // RESUME BUTTON
+        React.createElement("div", { onClick: function() { navigateToGame(); }, style: { background: "linear-gradient(180deg, #3e1870 0%, #2e1058 40%, #1e0840 100%)", border: "1px solid rgba(180,110,255,0.38)", borderRadius: 10, boxShadow: "0 0 24px rgba(140,60,255,0.22), inset 0 1px 0 rgba(220,170,255,0.2), inset 0 -2px 5px rgba(0,0,0,0.55)", padding: "15px 18px", display: "flex", alignItems: "center", cursor: "pointer", gap: 14 } },
+          React.createElement("svg", { width: "18", height: "18", viewBox: "0 0 24 24", fill: "none" },
+            React.createElement("circle", { cx: "8", cy: "15", r: "4", stroke: "rgba(210,170,255,0.75)", strokeWidth: "1.8" }),
+            React.createElement("path", { d: "M12 15h8M17 15v-3", stroke: "rgba(210,170,255,0.75)", strokeWidth: "1.8", strokeLinecap: "round" })
+          ),
+          React.createElement("div", { style: { flex: 1, fontFamily: "'Exo 2', sans-serif", fontSize: 17, fontWeight: 700, letterSpacing: 5, color: "#f0e8ff", textTransform: "uppercase", textShadow: "0 0 14px rgba(200,140,255,0.55)" } }, "RESUME"),
+          React.createElement(WsMono, { size: 8, ls: 1.5, color: "rgba(200,160,255,0.4)" }, "L · 8×6")
         ),
 
         // CREDIT
         React.createElement("div", { style: { textAlign: "center", paddingBottom: 2 } },
-          React.createElement(WsMono, { size: 7, ls: 1, color: "rgba(200,220,240,0.12)" }, "Created by Dan Medwin and Claude")
+          React.createElement(WsMono, { size: 7, ls: 1, color: "rgba(200,180,255,0.1)" }, "Created by Dan Medwin and Claude")
         )
 
       ),
 
       // ── BOTTOM BRIDGE BAR ──
-      React.createElement("div", { style: { flexShrink: 0, background: WS.brushed, backgroundBlendMode: "overlay", borderTop: WS.pb, padding: "7px 12px", display: "flex", alignItems: "center", gap: 8 } },
-        React.createElement("svg", { width: "15", height: "15", viewBox: "0 0 24 24" },
-          React.createElement("path", { d: "M12 2v6", stroke: WS.green, strokeWidth: "2.5", strokeLinecap: "round" }),
-          React.createElement("path", { d: "M6.3 5.3A8 8 0 1 0 17.7 5.3", stroke: WS.green, strokeWidth: "1.8", fill: "none", strokeLinecap: "round" })
+      React.createElement("div", { style: { flexShrink: 0, background: WS.brushed, backgroundBlendMode: "overlay", borderTop: "1px solid rgba(120,80,200,0.3)", padding: "6px 12px 6px 10px", display: "flex", alignItems: "center", gap: 10 } },
+        React.createElement("div", { style: { position: "relative", width: 48, height: 26, borderRadius: 13, background: "linear-gradient(180deg, #0a0e18 0%, #060910 100%)", border: "1px solid #2a3040", boxShadow: "inset 0 2px 6px rgba(0,0,0,0.7), inset 0 0 10px rgba(0,0,0,0.4)" } },
+          React.createElement("div", { style: { position: "absolute", top: 4, right: 4, width: 18, height: 18, borderRadius: 9, background: "radial-gradient(circle at 35% 30%, #6b7787 0%, #2a323c 70%, #15191f 100%)", boxShadow: "0 1px 4px rgba(0,0,0,0.6), inset 0 1px 0 rgba(200,230,240,0.18)" } })
         ),
-        React.createElement("span", { style: { color: "rgba(200,220,240,0.2)", fontSize: 10, fontWeight: 700, letterSpacing: -1 } }, ">>"),
-        React.createElement(WsMono, { size: 8, ls: 3, color: "rgba(200,220,240,0.32)" }, "BRIDGE"),
+        React.createElement("span", { style: { color: "rgba(200,180,255,0.25)", fontSize: 11, fontWeight: 700, letterSpacing: -1 } }, ">>"),
         React.createElement("div", { style: { flex: 1 } }),
-        React.createElement("div", { style: { display: "flex", gap: 5, alignItems: "center" } },
-          React.createElement(WsLED, { color: WS.blue, size: 5 }),
-          React.createElement(WsLED, { color: WS.green, size: 5 }),
-          React.createElement(WsLED, { color: "#ffb43c", size: 5, on: false })
-        )
+        React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 14, fontWeight: 700, letterSpacing: 4, color: "rgba(200,180,255,0.45)", textTransform: "uppercase" } }, "BRIDGE")
       )
 
     ),
-
     // ═══ LEVEL BUILDER ═══
     screen === "builder" && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%" } },
 
