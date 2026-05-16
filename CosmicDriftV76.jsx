@@ -1413,6 +1413,7 @@ export default function CosmicDriftGame() {
   var _devJump = useState(false), devJumpOpen = _devJump[0], setDevJumpOpen = _devJump[1];
   var _devLvl = useState(""), devJumpLevel = _devLvl[0], setDevJumpLevel = _devLvl[1];
   var _testerMenu = useState(false), showTesterMenu = _testerMenu[0], setShowTesterMenu = _testerMenu[1];
+  var _smenu = useState(false), splashMenuOpen = _smenu[0], setSplashMenuOpen = _smenu[1];
   var _tutsReset = useState(false), tutsReset = _tutsReset[0], setTutsReset = _tutsReset[1];
   var _ufoDbg = useState(null), ufoDebugText = _ufoDbg[0], setUfoDebugText = _ufoDbg[1];
   var _deadlock = useState(false), showDeadlock = _deadlock[0], setShowDeadlock = _deadlock[1];
@@ -2447,7 +2448,7 @@ function logUfo(msg) {
           <GsIconBtn onClick={function() { setLegendOpen(true); }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M9.5 9.5a2.5 2.5 0 1 1 4.4 1.7c-.6.6-1.4.9-1.4 2.3" /><circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none" /></svg>
           </GsIconBtn>
-          <GsIconBtn onClick={function() { loadSavedLevels(); setScreen("mylevels"); }}>
+          <GsIconBtn onClick={function() { setSplashMenuOpen(true); }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><line x1="4" y1="7" x2="20" y2="7" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="17" x2="20" y2="17" /></svg>
           </GsIconBtn>
         </div>
@@ -2575,23 +2576,6 @@ function logUfo(msg) {
           </div>
         </div>
 
-        {/* SFX / Music row */}
-        <div style={{ display: "flex", gap: 8, justifyContent: "center", flexShrink: 0, zIndex: 1 }}>
-          <div onClick={toggleSfxMute} style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 14px", borderRadius: 5, background: sfxMute ? "rgba(20,20,35,0.5)" : "rgba(30,25,50,0.6)", border: "1px solid " + (sfxMute ? "rgba(60,60,80,0.3)" : "rgba(180,140,255,0.35)"), color: sfxMute ? "rgba(180,200,220,0.25)" : "rgba(200,170,255,0.8)", fontSize: 9, fontWeight: 700, letterSpacing: 1.5, cursor: "pointer", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>
-            <svg width="11" height="11" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z" fill="currentColor" opacity="0.7" />{sfxMute && <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2" opacity="0.7" />}</svg>
-            SFX {sfxMute ? "OFF" : "ON"}
-          </div>
-          <div onClick={toggleMusicMute} style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 14px", borderRadius: 5, background: musicMute ? "rgba(20,20,35,0.5)" : "rgba(30,25,50,0.6)", border: "1px solid " + (musicMute ? "rgba(60,60,80,0.3)" : "rgba(180,140,255,0.35)"), color: musicMute ? "rgba(180,200,220,0.25)" : "rgba(200,170,255,0.8)", fontSize: 9, fontWeight: 700, letterSpacing: 1.5, cursor: "pointer", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>
-            <svg width="11" height="11" viewBox="0 0 24 24"><path d="M12 3v18l-7-5H2V8h3l7-5z" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.7" />{!musicMute && <path d="M16 8.5a4 4 0 010 7M19 5a9 9 0 010 14" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.5" />}{musicMute && <line x1="20" y1="6" x2="8" y2="18" stroke="currentColor" strokeWidth="2" opacity="0.7" />}</svg>
-            MUSIC {musicMute ? "OFF" : "ON"}
-          </div>
-        </div>
-
-        {/* For Testers */}
-        <div onClick={function() { setShowTesterMenu(true); setDevJumpLevel(""); }} style={{ textAlign: "center", flexShrink: 0, paddingBottom: 4, zIndex: 1, cursor: "pointer" }}>
-          <GsMono size={9} ls={2} color="rgba(180,200,220,0.2)">FOR TESTERS</GsMono>
-        </div>
-
         {/* iOS install prompt */}
         {isIosSafari && !iosPromptDismissed && <div style={{ flexShrink: 0, background: "rgba(8,8,20,0.75)", border: "1px solid rgba(80,200,255,0.15)", borderRadius: 10, padding: "10px 12px 10px 10px", display: "flex", gap: 10, alignItems: "flex-start", zIndex: 1 }}>
           <svg width="16" height="20" viewBox="0 0 16 20" style={{ flexShrink: 0, marginTop: 2 }}><path d="M8 1v11M5 4l3-3 3 3" fill="none" stroke="rgba(80,200,255,0.75)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /><path d="M2 9v9a1 1 0 001 1h10a1 1 0 001-1V9" fill="none" stroke="rgba(80,200,255,0.4)" strokeWidth="1.5" strokeLinecap="round" /></svg>
@@ -2600,6 +2584,40 @@ function logUfo(msg) {
             <div style={{ color: "rgba(160,180,200,0.5)", fontSize: 10, lineHeight: 1.55 }}>{"Tap "}<span style={{ color: "rgba(80,200,255,0.7)", fontWeight: 700 }}>Share</span>{" → "}<span style={{ color: "rgba(80,200,255,0.7)", fontWeight: 700 }}>Add to Home Screen</span>{" to play full-screen without the URL bar."}</div>
           </div>
           <div onClick={function() { setIosPromptDismissed(true); try { window.storage.set("cosmic_drift_ios_prompt_dismissed", "true"); } catch(e) {} }} style={{ color: "rgba(180,200,220,0.25)", fontSize: 20, fontWeight: 300, cursor: "pointer", lineHeight: 1, flexShrink: 0, paddingLeft: 2, marginTop: -2 }}>{"×"}</div>
+        </div>}
+
+        {/* Splash menu overlay */}
+        {splashMenuOpen && <div onClick={function() { setSplashMenuOpen(false); }} style={{ position: "absolute", inset: 0, zIndex: 20, display: "flex", alignItems: "flex-end", justifyContent: "center", background: "rgba(5,5,15,0.75)", backdropFilter: "blur(5px)" }}>
+          <div onClick={function(e) { e.stopPropagation(); }} style={{ width: "100%", maxWidth: 440, background: "linear-gradient(180deg, #0d1022, #080d1a)", borderTop: "1px solid rgba(80,120,200,0.25)", borderRadius: "16px 16px 0 0", padding: "20px 20px 36px", fontFamily: "'Quicksand', sans-serif" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+              <GsMono size={10} ls={2.5} color="rgba(128,221,255,0.6)">MENU</GsMono>
+              <div onClick={function() { setSplashMenuOpen(false); }} style={{ color: "rgba(180,200,220,0.3)", fontSize: 20, fontWeight: 300, cursor: "pointer", lineHeight: 1, padding: "2px 4px" }}>{"×"}</div>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 2, marginBottom: 16 }}>
+              <div onClick={function() { loadSavedLevels(); setScreen("mylevels"); setSplashMenuOpen(false); }} style={{ display: "flex", alignItems: "center", gap: 14, padding: "13px 16px", borderRadius: 8, cursor: "pointer", background: "rgba(255,255,255,0.03)" }}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="2.5" rx="0.5" fill="rgba(180,200,220,0.6)" /><rect x="2" y="6.5" width="12" height="2.5" rx="0.5" fill="rgba(180,200,220,0.45)" /><rect x="2" y="11" width="12" height="2.5" rx="0.5" fill="rgba(180,200,220,0.3)" /></svg>
+                <span style={{ fontSize: 15, fontWeight: 700, color: "rgba(180,200,220,0.85)", letterSpacing: 0.3 }}>My Levels</span>
+              </div>
+              <div onClick={function() { setLegendOpen(true); setSplashMenuOpen(false); }} style={{ display: "flex", alignItems: "center", gap: 14, padding: "13px 16px", borderRadius: 8, cursor: "pointer", background: "rgba(255,255,255,0.03)" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(180,200,220,0.6)" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="9" /><path d="M9.5 9.5a2.5 2.5 0 1 1 4.4 1.7c-.6.6-1.4.9-1.4 2.3" /><circle cx="12" cy="17" r="0.6" fill="rgba(180,200,220,0.6)" stroke="none" /></svg>
+                <span style={{ fontSize: 15, fontWeight: 700, color: "rgba(180,200,220,0.85)", letterSpacing: 0.3 }}>Guide</span>
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+              <div onClick={toggleSfxMute} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "10px 0", borderRadius: 8, cursor: "pointer", background: sfxMute ? "rgba(40,40,60,0.4)" : "rgba(40,30,60,0.5)", border: "1px solid " + (sfxMute ? "rgba(60,60,80,0.3)" : "rgba(180,140,255,0.3)"), color: sfxMute ? "rgba(180,200,220,0.3)" : "rgba(200,170,255,0.8)", fontSize: 11, fontWeight: 700, letterSpacing: 1 }}>
+                <svg width="13" height="13" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z" fill="currentColor" opacity="0.8" />{sfxMute && <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2" />}</svg>
+                SFX {sfxMute ? "OFF" : "ON"}
+              </div>
+              <div onClick={toggleMusicMute} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "10px 0", borderRadius: 8, cursor: "pointer", background: musicMute ? "rgba(40,40,60,0.4)" : "rgba(40,30,60,0.5)", border: "1px solid " + (musicMute ? "rgba(60,60,80,0.3)" : "rgba(180,140,255,0.3)"), color: musicMute ? "rgba(180,200,220,0.3)" : "rgba(200,170,255,0.8)", fontSize: 11, fontWeight: 700, letterSpacing: 1 }}>
+                <svg width="13" height="13" viewBox="0 0 24 24"><path d="M12 3v18l-7-5H2V8h3l7-5z" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.8" />{!musicMute && <path d="M16 8.5a4 4 0 010 7M19 5a9 9 0 010 14" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.5" />}{musicMute && <line x1="20" y1="6" x2="8" y2="18" stroke="currentColor" strokeWidth="2" />}</svg>
+                MUSIC {musicMute ? "OFF" : "ON"}
+              </div>
+            </div>
+            <div onClick={function() { setShowTesterMenu(true); setDevJumpLevel(""); setSplashMenuOpen(false); }} style={{ display: "flex", alignItems: "center", gap: 14, padding: "11px 16px", borderRadius: 8, cursor: "pointer" }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(180,200,220,0.3)" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="9" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+              <span style={{ fontSize: 13, fontWeight: 700, color: "rgba(180,200,220,0.3)", letterSpacing: 0.3 }}>For Testers</span>
+            </div>
+          </div>
         </div>}
 
         {/* Signature Levels popup */}

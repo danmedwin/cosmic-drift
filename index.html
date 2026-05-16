@@ -5340,6 +5340,9 @@ function CosmicDriftGame() {
   var _testerMenu = useState(false),
     showTesterMenu = _testerMenu[0],
     setShowTesterMenu = _testerMenu[1];
+  var _smenu = useState(false),
+    splashMenuOpen = _smenu[0],
+    setSplashMenuOpen = _smenu[1];
   var _tutsReset = useState(false),
     tutsReset = _tutsReset[0],
     setTutsReset = _tutsReset[1];
@@ -9955,8 +9958,7 @@ function CosmicDriftGame() {
     stroke: "none"
   }))), /*#__PURE__*/React.createElement(GsIconBtn, {
     onClick: function () {
-      loadSavedLevels();
-      setScreen("mylevels");
+      setSplashMenuOpen(true);
     }
   }, /*#__PURE__*/React.createElement("svg", {
     width: "14",
@@ -10753,107 +10755,7 @@ function CosmicDriftGame() {
       background: GS.green,
       boxShadow: "0 0 6px " + GS.green
     }
-  })))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 8,
-      justifyContent: "center",
-      flexShrink: 0,
-      zIndex: 1
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    onClick: toggleSfxMute,
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 5,
-      padding: "5px 14px",
-      borderRadius: 5,
-      background: sfxMute ? "rgba(20,20,35,0.5)" : "rgba(30,25,50,0.6)",
-      border: "1px solid " + (sfxMute ? "rgba(60,60,80,0.3)" : "rgba(180,140,255,0.35)"),
-      color: sfxMute ? "rgba(180,200,220,0.25)" : "rgba(200,170,255,0.8)",
-      fontSize: 9,
-      fontWeight: 700,
-      letterSpacing: 1.5,
-      cursor: "pointer",
-      textTransform: "uppercase",
-      fontFamily: "'JetBrains Mono', monospace"
-    }
-  }, /*#__PURE__*/React.createElement("svg", {
-    width: "11",
-    height: "11",
-    viewBox: "0 0 24 24"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M3 9v6h4l5 5V4L7 9H3z",
-    fill: "currentColor",
-    opacity: "0.7"
-  }), sfxMute && /*#__PURE__*/React.createElement("line", {
-    x1: "18",
-    y1: "6",
-    x2: "6",
-    y2: "18",
-    stroke: "currentColor",
-    strokeWidth: "2",
-    opacity: "0.7"
-  })), "SFX ", sfxMute ? "OFF" : "ON"), /*#__PURE__*/React.createElement("div", {
-    onClick: toggleMusicMute,
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 5,
-      padding: "5px 14px",
-      borderRadius: 5,
-      background: musicMute ? "rgba(20,20,35,0.5)" : "rgba(30,25,50,0.6)",
-      border: "1px solid " + (musicMute ? "rgba(60,60,80,0.3)" : "rgba(180,140,255,0.35)"),
-      color: musicMute ? "rgba(180,200,220,0.25)" : "rgba(200,170,255,0.8)",
-      fontSize: 9,
-      fontWeight: 700,
-      letterSpacing: 1.5,
-      cursor: "pointer",
-      textTransform: "uppercase",
-      fontFamily: "'JetBrains Mono', monospace"
-    }
-  }, /*#__PURE__*/React.createElement("svg", {
-    width: "11",
-    height: "11",
-    viewBox: "0 0 24 24"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M12 3v18l-7-5H2V8h3l7-5z",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: "2",
-    opacity: "0.7"
-  }), !musicMute && /*#__PURE__*/React.createElement("path", {
-    d: "M16 8.5a4 4 0 010 7M19 5a9 9 0 010 14",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: "1.5",
-    opacity: "0.5"
-  }), musicMute && /*#__PURE__*/React.createElement("line", {
-    x1: "20",
-    y1: "6",
-    x2: "8",
-    y2: "18",
-    stroke: "currentColor",
-    strokeWidth: "2",
-    opacity: "0.7"
-  })), "MUSIC ", musicMute ? "OFF" : "ON")), /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      setShowTesterMenu(true);
-      setDevJumpLevel("");
-    },
-    style: {
-      textAlign: "center",
-      flexShrink: 0,
-      paddingBottom: 4,
-      zIndex: 1,
-      cursor: "pointer"
-    }
-  }, /*#__PURE__*/React.createElement(GsMono, {
-    size: 9,
-    ls: 2,
-    color: "rgba(180,200,220,0.2)"
-  }, "FOR TESTERS")), isIosSafari && !iosPromptDismissed && /*#__PURE__*/React.createElement("div", {
+  })))), isIosSafari && !iosPromptDismissed && /*#__PURE__*/React.createElement("div", {
     style: {
       flexShrink: 0,
       background: "rgba(8,8,20,0.75)",
@@ -10931,7 +10833,276 @@ function CosmicDriftGame() {
       paddingLeft: 2,
       marginTop: -2
     }
-  }, "×")), sigLevelsOpen && /*#__PURE__*/React.createElement("div", {
+  }, "×")), splashMenuOpen && /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      setSplashMenuOpen(false);
+    },
+    style: {
+      position: "absolute",
+      inset: 0,
+      zIndex: 20,
+      display: "flex",
+      alignItems: "flex-end",
+      justifyContent: "center",
+      background: "rgba(5,5,15,0.75)",
+      backdropFilter: "blur(5px)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    onClick: function (e) {
+      e.stopPropagation();
+    },
+    style: {
+      width: "100%",
+      maxWidth: 440,
+      background: "linear-gradient(180deg, #0d1022, #080d1a)",
+      borderTop: "1px solid rgba(80,120,200,0.25)",
+      borderRadius: "16px 16px 0 0",
+      padding: "20px 20px 36px",
+      fontFamily: "'Quicksand', sans-serif"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 18
+    }
+  }, /*#__PURE__*/React.createElement(GsMono, {
+    size: 10,
+    ls: 2.5,
+    color: "rgba(128,221,255,0.6)"
+  }, "MENU"), /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      setSplashMenuOpen(false);
+    },
+    style: {
+      color: "rgba(180,200,220,0.3)",
+      fontSize: 20,
+      fontWeight: 300,
+      cursor: "pointer",
+      lineHeight: 1,
+      padding: "2px 4px"
+    }
+  }, "×")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 2,
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      loadSavedLevels();
+      setScreen("mylevels");
+      setSplashMenuOpen(false);
+    },
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 14,
+      padding: "13px 16px",
+      borderRadius: 8,
+      cursor: "pointer",
+      background: "rgba(255,255,255,0.03)"
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "16",
+    height: "16",
+    viewBox: "0 0 16 16",
+    fill: "none"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "2",
+    y: "2",
+    width: "12",
+    height: "2.5",
+    rx: "0.5",
+    fill: "rgba(180,200,220,0.6)"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "2",
+    y: "6.5",
+    width: "12",
+    height: "2.5",
+    rx: "0.5",
+    fill: "rgba(180,200,220,0.45)"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "2",
+    y: "11",
+    width: "12",
+    height: "2.5",
+    rx: "0.5",
+    fill: "rgba(180,200,220,0.3)"
+  })), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 15,
+      fontWeight: 700,
+      color: "rgba(180,200,220,0.85)",
+      letterSpacing: 0.3
+    }
+  }, "My Levels")), /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      setLegendOpen(true);
+      setSplashMenuOpen(false);
+    },
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 14,
+      padding: "13px 16px",
+      borderRadius: 8,
+      cursor: "pointer",
+      background: "rgba(255,255,255,0.03)"
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "16",
+    height: "16",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "rgba(180,200,220,0.6)",
+    strokeWidth: "2",
+    strokeLinecap: "round"
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "9"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M9.5 9.5a2.5 2.5 0 1 1 4.4 1.7c-.6.6-1.4.9-1.4 2.3"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "17",
+    r: "0.6",
+    fill: "rgba(180,200,220,0.6)",
+    stroke: "none"
+  })), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 15,
+      fontWeight: 700,
+      color: "rgba(180,200,220,0.85)",
+      letterSpacing: 0.3
+    }
+  }, "Guide"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    onClick: toggleSfxMute,
+    style: {
+      flex: 1,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+      padding: "10px 0",
+      borderRadius: 8,
+      cursor: "pointer",
+      background: sfxMute ? "rgba(40,40,60,0.4)" : "rgba(40,30,60,0.5)",
+      border: "1px solid " + (sfxMute ? "rgba(60,60,80,0.3)" : "rgba(180,140,255,0.3)"),
+      color: sfxMute ? "rgba(180,200,220,0.3)" : "rgba(200,170,255,0.8)",
+      fontSize: 11,
+      fontWeight: 700,
+      letterSpacing: 1
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "13",
+    height: "13",
+    viewBox: "0 0 24 24"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M3 9v6h4l5 5V4L7 9H3z",
+    fill: "currentColor",
+    opacity: "0.8"
+  }), sfxMute && /*#__PURE__*/React.createElement("line", {
+    x1: "18",
+    y1: "6",
+    x2: "6",
+    y2: "18",
+    stroke: "currentColor",
+    strokeWidth: "2"
+  })), "SFX ", sfxMute ? "OFF" : "ON"), /*#__PURE__*/React.createElement("div", {
+    onClick: toggleMusicMute,
+    style: {
+      flex: 1,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+      padding: "10px 0",
+      borderRadius: 8,
+      cursor: "pointer",
+      background: musicMute ? "rgba(40,40,60,0.4)" : "rgba(40,30,60,0.5)",
+      border: "1px solid " + (musicMute ? "rgba(60,60,80,0.3)" : "rgba(180,140,255,0.3)"),
+      color: musicMute ? "rgba(180,200,220,0.3)" : "rgba(200,170,255,0.8)",
+      fontSize: 11,
+      fontWeight: 700,
+      letterSpacing: 1
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "13",
+    height: "13",
+    viewBox: "0 0 24 24"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M12 3v18l-7-5H2V8h3l7-5z",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    opacity: "0.8"
+  }), !musicMute && /*#__PURE__*/React.createElement("path", {
+    d: "M16 8.5a4 4 0 010 7M19 5a9 9 0 010 14",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "1.5",
+    opacity: "0.5"
+  }), musicMute && /*#__PURE__*/React.createElement("line", {
+    x1: "20",
+    y1: "6",
+    x2: "8",
+    y2: "18",
+    stroke: "currentColor",
+    strokeWidth: "2"
+  })), "MUSIC ", musicMute ? "OFF" : "ON")), /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      setShowTesterMenu(true);
+      setDevJumpLevel("");
+      setSplashMenuOpen(false);
+    },
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 14,
+      padding: "11px 16px",
+      borderRadius: 8,
+      cursor: "pointer"
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "16",
+    height: "16",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "rgba(180,200,220,0.3)",
+    strokeWidth: "2",
+    strokeLinecap: "round"
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "9"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "12",
+    y1: "8",
+    x2: "12",
+    y2: "12"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "12",
+    y1: "16",
+    x2: "12.01",
+    y2: "16"
+  })), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      fontWeight: 700,
+      color: "rgba(180,200,220,0.3)",
+      letterSpacing: 0.3
+    }
+  }, "For Testers")))), sigLevelsOpen && /*#__PURE__*/React.createElement("div", {
     onClick: function () {
       setSigLevelsOpen(false);
     },
