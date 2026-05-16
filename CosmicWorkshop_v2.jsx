@@ -58,7 +58,7 @@ var SCRNB = "2px solid #3a3a45";
 var SCRNS = "inset 0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.05)";
 
 // ── Animation CSS (subset needed for Workshop) ──
-var ANIM_CSS = "@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@400;600;700&display=swap');\n@keyframes starDrift{0%{transform:translateY(-50%)}100%{transform:translateY(0)}}\n@keyframes introFadeIn{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}\n@keyframes pulse{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}\n@keyframes ufoWarpOut{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}\n@keyframes ufoWarpIn{0%{transform:scale(0.05);opacity:0}60%{transform:scale(1.08);opacity:0.9}100%{transform:scale(1);opacity:1}}\n@keyframes ufoLightSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}\n@keyframes splashFloat{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}\n@keyframes splashGlow{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}\n* { box-sizing: border-box; }\ninput[type=range] { -webkit-appearance: none; appearance: none; background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; outline: none; }\ninput[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }\ninput[type=range]::-moz-range-thumb { width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }@keyframes vfxOozeDrip{0%{transform:scaleY(0);opacity:0}100%{transform:scaleY(1);opacity:0.85}}@keyframes vfxOozeWave{0%{transform:translateY(0)}100%{transform:translateY(50%)}}@keyframes vfxBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxRing{0%{transform:scale(0.1);opacity:1}100%{transform:scale(2.2);opacity:0}}@keyframes vfxFlash{0%{transform:scale(0.2);opacity:1}100%{transform:scale(1.8);opacity:0}}@keyframes vfxPop{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(1.2);filter:brightness(1.8)}100%{transform:scale(0);opacity:0}}@keyframes vfxBubble{0%{transform:translateY(0) scale(0.5);opacity:0}15%{opacity:0.55}85%{opacity:0.55}100%{transform:translateY(88px) scale(1);opacity:0}}@keyframes vfxSpark{0%{transform:translate(0,0) scale(1);opacity:1}35%{transform:translate(calc(var(--sx)*0.45),calc(var(--sy)*0.25 - 7px));opacity:0.9}100%{transform:translate(var(--sx),var(--sy)) scale(0.3);opacity:0}}@keyframes vfxBurnBlock{0%{opacity:1;filter:brightness(1)}10%{opacity:1;filter:brightness(2.3)}55%{opacity:0;filter:brightness(1)}100%{opacity:0;filter:brightness(1)}}@keyframes vfxShatter{0%{transform:translate(0,0) scale(1);opacity:0}15%{opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxDroneShard{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0.2);opacity:0}}";
+var ANIM_CSS = "@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');\n@keyframes starDrift{0%{transform:translateY(-50%)}100%{transform:translateY(0)}}\n@keyframes introFadeIn{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}\n@keyframes pulse{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}\n@keyframes ufoWarpOut{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}\n@keyframes ufoWarpIn{0%{transform:scale(0.05);opacity:0}60%{transform:scale(1.08);opacity:0.9}100%{transform:scale(1);opacity:1}}\n@keyframes ufoLightSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}\n@keyframes splashFloat{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}\n@keyframes splashGlow{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}\n* { box-sizing: border-box; }\ninput[type=range] { -webkit-appearance: none; appearance: none; background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; outline: none; }\ninput[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }\ninput[type=range]::-moz-range-thumb { width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }@keyframes vfxOozeDrip{0%{transform:scaleY(0);opacity:0}100%{transform:scaleY(1);opacity:0.85}}@keyframes vfxOozeWave{0%{transform:translateY(0)}100%{transform:translateY(50%)}}@keyframes vfxBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxRing{0%{transform:scale(0.1);opacity:1}100%{transform:scale(2.2);opacity:0}}@keyframes vfxFlash{0%{transform:scale(0.2);opacity:1}100%{transform:scale(1.8);opacity:0}}@keyframes vfxPop{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(1.2);filter:brightness(1.8)}100%{transform:scale(0);opacity:0}}@keyframes vfxBubble{0%{transform:translateY(0) scale(0.5);opacity:0}15%{opacity:0.55}85%{opacity:0.55}100%{transform:translateY(88px) scale(1);opacity:0}}@keyframes vfxSpark{0%{transform:translate(0,0) scale(1);opacity:1}35%{transform:translate(calc(var(--sx)*0.45),calc(var(--sy)*0.25 - 7px));opacity:0.9}100%{transform:translate(var(--sx),var(--sy)) scale(0.3);opacity:0}}@keyframes vfxBurnBlock{0%{opacity:1;filter:brightness(1)}10%{opacity:1;filter:brightness(2.3)}55%{opacity:0;filter:brightness(1)}100%{opacity:0;filter:brightness(1)}}@keyframes vfxShatter{0%{transform:translate(0,0) scale(1);opacity:0}15%{opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxDroneShard{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0.2);opacity:0}}";
 
 // ═══════════════════════════════════════════════════════════════
 // SHARED VISUAL COMPONENTS
@@ -817,6 +817,36 @@ var SAMPLE_LEVEL = {
   savedAt: "Sample Level",
   isSample: true
 };
+
+// ── Workshop cockpit design tokens + helpers ──
+var WS = {
+  brushed: "linear-gradient(180deg, #3a4250 0%, #2c333f 35%, #1f2530 70%, #1a1f2a 100%), repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 3px)",
+  inset: "linear-gradient(180deg, #060810 0%, #0a0e16 60%, #050810 100%)",
+  pb: "1px solid #404a58", pbl: "1px solid #525c6c",
+  ps: "inset 0 1px 0 rgba(200,230,240,0.10), inset 0 -2px 4px rgba(0,0,0,0.55), 0 3px 6px rgba(0,0,0,0.5)",
+  ib: "1px solid #14202e", is: "inset 0 2px 8px rgba(0,0,0,0.7)",
+  green: "#50ffae", blue: "#80ddff",
+};
+function WsRivet(pos) {
+  return React.createElement("span", { style: Object.assign({ position: "absolute", width: 6, height: 6, borderRadius: 6, background: "radial-gradient(circle at 30% 30%, #6b7787 0%, #2a323c 70%, #15191f 100%)", boxShadow: "inset 0 1px 0 rgba(200,230,240,0.18), 0 1px 1px rgba(0,0,0,0.6)" }, pos || {}) });
+}
+function WsPanel(props) {
+  var isInset = props.inset;
+  var noRivets = props.riveted === false || isInset;
+  return React.createElement("div", { onClick: props.onClick, style: Object.assign({ position: "relative", background: isInset ? WS.inset : WS.brushed, backgroundBlendMode: isInset ? "normal" : "overlay", border: isInset ? WS.ib : WS.pb, borderRadius: 10, boxShadow: isInset ? WS.is : WS.ps }, props.style || {}) },
+    !noRivets && React.createElement(React.Fragment, null, WsRivet({ top: 5, left: 5 }), WsRivet({ top: 5, right: 5 }), WsRivet({ bottom: 5, left: 5 }), WsRivet({ bottom: 5, right: 5 })),
+    props.children
+  );
+}
+function WsLED(props) {
+  var color = props.color || WS.green;
+  var sz = props.size || 6;
+  var on = props.on !== false;
+  return React.createElement("span", { style: { display: "inline-block", width: sz, height: sz, borderRadius: sz, background: on ? "radial-gradient(circle at 35% 30%, " + color + ", " + color + "aa 60%, " + color + "33 100%)" : "rgba(80,90,100,0.3)", boxShadow: on ? "0 0 8px " + color : "none", flexShrink: 0 } });
+}
+function WsMono(props) {
+  return React.createElement("span", { style: Object.assign({ fontFamily: "'JetBrains Mono', monospace", fontSize: props.size || 8, letterSpacing: props.ls !== undefined ? props.ls : 2, color: props.color || "rgba(200,220,240,0.55)", textTransform: "uppercase" }, props.style || {}) }, props.children);
+}
 
 // ═══════════════════════════════════════════════════════════════
 // MAIN WORKSHOP COMPONENT
@@ -1954,55 +1984,184 @@ export default function CosmicWorkshop() {
     React.createElement("div", { style: { position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" } }, React.createElement(Stars, null)),
 
     // ═══ SPLASH SCREEN ═══
-    screen === "splash" && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", padding: 24 } },
-      React.createElement("div", { style: { textAlign: "center", marginBottom: 40 } },
-        React.createElement("div", { style: { fontSize: 11, fontWeight: 700, letterSpacing: 4, color: "rgba(180,200,220,0.3)", textTransform: "uppercase", marginBottom: 8 } }, "COSMIC DRIFT"),
-        React.createElement("div", { style: { fontSize: 28, fontWeight: 700, letterSpacing: 3, color: "#80ddff", textTransform: "uppercase", textShadow: "0 0 20px rgba(80,200,255,0.3)" } }, "WORKSHOP"),
-        React.createElement("div", { style: { fontSize: 10, color: "rgba(180,200,220,0.2)", marginTop: 8, letterSpacing: 1 } }, WORKSHOP_VERSION)),
-      React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 16, width: "100%", maxWidth: 320 } },
-        // Play card
-        React.createElement("div", { onClick: function() { navigateToGame(); }, style: { background: "linear-gradient(135deg, rgba(80,220,120,0.1), rgba(80,220,120,0.02))", border: "1px solid rgba(80,220,120,0.3)", borderRadius: 12, padding: "20px 20px", cursor: "pointer" } },
-          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 14 } },
-            React.createElement("div", { style: { width: 48, height: 48, borderRadius: 10, background: "rgba(80,220,120,0.1)", border: "1px solid rgba(80,220,120,0.25)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } },
-              React.createElement("svg", { width: "24", height: "24", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M7 4 L20 12 L7 20 Z", fill: "#80dd90" }))),
-            React.createElement("div", null,
-              React.createElement("div", { style: { color: "#80dd90", fontSize: 16, fontWeight: 700, letterSpacing: 1 } }, "Play Cosmic Drift"),
-              React.createElement("div", { style: { color: "rgba(180,200,220,0.35)", fontSize: 11, marginTop: 3 } }, "Jump into the game")))),
-        // Level Builder card
-        React.createElement("div", { onClick: function() { loadSavedLevels(); setScreen("builder"); setLbScreen("list"); }, style: { background: "linear-gradient(135deg, rgba(80,200,255,0.08), rgba(80,200,255,0.02))", border: "1px solid rgba(80,200,255,0.2)", borderRadius: 12, padding: "20px 20px", cursor: "pointer" } },
-          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 14 } },
-            React.createElement("div", { style: { width: 48, height: 48, borderRadius: 10, background: "rgba(80,200,255,0.1)", border: "1px solid rgba(80,200,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } },
-              React.createElement("svg", { width: "24", height: "24", viewBox: "0 0 24 24" }, React.createElement("rect", { x: "3", y: "3", width: "7", height: "7", rx: "1", fill: "none", stroke: "#80ddff", strokeWidth: "1.5" }), React.createElement("rect", { x: "14", y: "3", width: "7", height: "7", rx: "1", fill: "#80ddff", opacity: "0.4" }), React.createElement("rect", { x: "3", y: "14", width: "7", height: "7", rx: "1", fill: "#80ddff", opacity: "0.4" }), React.createElement("rect", { x: "14", y: "14", width: "7", height: "7", rx: "1", fill: "none", stroke: "#80ddff", strokeWidth: "1.5", strokeDasharray: "2 2" }))),
-            React.createElement("div", null,
-              React.createElement("div", { style: { color: "#80ddff", fontSize: 16, fontWeight: 700, letterSpacing: 1 } }, "Level Builder"),
-              React.createElement("div", { style: { color: "rgba(180,200,220,0.35)", fontSize: 11, marginTop: 3 } }, savedLevels.length > 0 ? savedLevels.length + " saved level" + (savedLevels.length !== 1 ? "s" : "") : "Design custom levels")))),
-        // Block Designer card
-        React.createElement("div", { onClick: function() { setScreen("designer"); setBdCurrentView("list"); }, style: { background: "linear-gradient(135deg, rgba(200,184,255,0.08), rgba(200,184,255,0.02))", border: "1px solid rgba(200,184,255,0.2)", borderRadius: 12, padding: "20px 20px", cursor: "pointer" } },
-          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 14 } },
-            React.createElement("div", { style: { width: 48, height: 48, borderRadius: 10, background: "rgba(200,184,255,0.1)", border: "1px solid rgba(200,184,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } },
-              React.createElement("svg", { width: "24", height: "24", viewBox: "0 0 24 24" }, React.createElement("rect", { x: "4", y: "4", width: "16", height: "16", rx: "3", fill: "none", stroke: "#c8b8ff", strokeWidth: "1.5" }), React.createElement("circle", { cx: "12", cy: "12", r: "4", fill: "#c8b8ff", opacity: "0.4" }), React.createElement("path", { d: "M8 4v16M16 4v16M4 8h16M4 16h16", stroke: "#c8b8ff", strokeWidth: "0.5", opacity: "0.2" }))),
-            React.createElement("div", null,
-              React.createElement("div", { style: { color: "#c8b8ff", fontSize: 16, fontWeight: 700, letterSpacing: 1 } }, "Block Designer"),
-              React.createElement("div", { style: { color: "rgba(180,200,220,0.35)", fontSize: 11, marginTop: 3 } }, bdSaved.length > 0 ? bdSaved.length + " saved design" + (bdSaved.length !== 1 ? "s" : "") : "Create custom block skins")))),
-        // Coming soon
-        React.createElement("div", { onClick: function() { setScreen("vfx"); }, style: { background: "linear-gradient(135deg, rgba(255,180,60,0.08), rgba(255,140,40,0.02))", border: "1px solid rgba(255,180,60,0.2)", borderRadius: 12, padding: "20px 20px", cursor: "pointer" } },
-          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 14 } },
-            React.createElement("div", { style: { width: 48, height: 48, borderRadius: 10, background: "rgba(255,180,60,0.1)", border: "1px solid rgba(255,180,60,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } },
-              React.createElement("svg", { width: "24", height: "24", viewBox: "0 0 24 24" },
-                React.createElement("circle", { cx: "12", cy: "12", r: "3", fill: "#ffb43c" }),
-                React.createElement("path", { d: "M12 2v3M12 19v3M2 12h3M19 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M16.3 7.7l-2.1 2.1M7.7 16.3l-2.1 2.1", stroke: "#ffb43c", strokeWidth: "1.8", strokeLinecap: "round" }))),
-            React.createElement("div", null,
-              React.createElement("div", { style: { color: "#ffb43c", fontSize: 16, fontWeight: 700, letterSpacing: 1 } }, "VFX Studio"),
-              React.createElement("div", { style: { color: "rgba(180,200,220,0.35)", fontSize: 11, marginTop: 3 } }, "Customize visual effects")))),
-        // UFO Customizer card
-        React.createElement("div", { onClick: function() { setScreen("ufo"); }, style: { background: "linear-gradient(135deg, rgba(100,220,180,0.08), rgba(60,200,160,0.02))", border: "1px solid rgba(100,220,180,0.2)", borderRadius: 12, padding: "20px 20px", cursor: "pointer" } },
-          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 14 } },
-            React.createElement("div", { style: { width: 48, height: 48, borderRadius: 10, background: "rgba(100,220,180,0.1)", border: "1px solid rgba(100,220,180,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } },
-              React.createElement(UFOBlockSvg, { size: 38, design: ufoGetActiveDesign(), uid: "splash" })),
-            React.createElement("div", null,
-              React.createElement("div", { style: { color: "#64dcb4", fontSize: 16, fontWeight: 700, letterSpacing: 1 } }, "UFO Customizer"),
-              React.createElement("div", { style: { color: "rgba(180,200,220,0.35)", fontSize: 11, marginTop: 3 } }, "Customize your UFO's appearance")))),
-      React.createElement("div", { style: { position: "absolute", bottom: 16, color: "rgba(180,200,220,0.15)", fontSize: 9, letterSpacing: 1 } }, "Created by Dan Medwin and Claude"))),
+    screen === "splash" && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", background: "radial-gradient(ellipse 90% 60% at 50% 28%, #142436 0%, #0e1826 45%, #08101a 100%)" } },
+
+      // ── TOP STATUS STRIP ──
+      React.createElement("div", { style: { flexShrink: 0, background: WS.brushed, backgroundBlendMode: "overlay", borderBottom: WS.pb, boxShadow: "0 3px 6px rgba(0,0,0,0.4)", padding: "8px 10px", display: "flex", alignItems: "center", gap: 6 } },
+        React.createElement(WsLED, { color: WS.green, size: 5 }),
+        React.createElement(WsLED, { color: WS.blue, size: 5 }),
+        React.createElement(WsMono, { size: 8, ls: 1.5, color: "rgba(200,220,240,0.5)" }, "SVC-MODE"),
+        React.createElement("span", { style: { color: "rgba(200,220,240,0.2)", fontSize: 7 } }, "|"),
+        React.createElement(WsMono, { size: 8, ls: 1.5, color: WS.green }, "GRANTED"),
+        React.createElement("span", { style: { color: "rgba(200,220,240,0.2)", fontSize: 7 } }, "|"),
+        React.createElement(WsMono, { size: 8, ls: 1.5, color: "rgba(200,220,240,0.3)" }, WORKSHOP_VERSION),
+        React.createElement("div", { style: { flex: 1 } }),
+        React.createElement("div", { style: { width: 26, height: 26, borderRadius: 5, background: "linear-gradient(180deg, #4a5462 0%, #353d49 100%)", border: WS.pbl, boxShadow: "inset 0 1px 0 rgba(200,230,240,0.14), 0 2px 3px rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 } },
+          React.createElement("span", { style: { fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "rgba(200,220,240,0.5)", fontWeight: 700 } }, "?")
+        ),
+        React.createElement("div", { onClick: function() { navigateToGame(); }, style: { width: 26, height: 26, borderRadius: 5, background: "linear-gradient(180deg, #4a5462 0%, #353d49 100%)", border: WS.pbl, boxShadow: "inset 0 1px 0 rgba(200,230,240,0.14), 0 2px 3px rgba(0,0,0,0.4)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, cursor: "pointer", flexShrink: 0 } },
+          React.createElement("div", { style: { width: 11, height: 1.5, borderRadius: 1, background: "rgba(200,210,220,0.55)" } }),
+          React.createElement("div", { style: { width: 11, height: 1.5, borderRadius: 1, background: "rgba(200,210,220,0.55)" } }),
+          React.createElement("div", { style: { width: 11, height: 1.5, borderRadius: 1, background: "rgba(200,210,220,0.55)" } })
+        )
+      ),
+
+      // ── SCROLLABLE BODY ──
+      React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "8px 10px 6px", display: "flex", flexDirection: "column", gap: 8 } },
+
+        // TITLE PANEL
+        React.createElement(WsPanel, { style: { padding: "12px 14px 10px", overflow: "hidden", position: "relative" } },
+          React.createElement("div", { style: { position: "absolute", left: 0, top: 0, bottom: 0, width: 5, background: "repeating-linear-gradient(135deg, #ffcc00 0 4px, #111 4px 8px)", opacity: 0.7, borderRadius: "10px 0 0 10px" } }),
+          React.createElement("div", { style: { position: "absolute", right: 0, top: 0, bottom: 0, width: 5, background: "repeating-linear-gradient(135deg, #ffcc00 0 4px, #111 4px 8px)", opacity: 0.7, borderRadius: "0 10px 10px 0" } }),
+          React.createElement("div", { style: { textAlign: "center", paddingLeft: 8, paddingRight: 8 } },
+            React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,220,240,0.2)" }, "COSMIC DRIFT"),
+            React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 30, fontWeight: 700, letterSpacing: 5, color: "#80ddff", textTransform: "uppercase", textShadow: "0 0 18px rgba(80,200,255,0.5), 0 0 36px rgba(80,200,255,0.2)", lineHeight: 1.1, marginTop: 2 } }, "WORKSHOP"),
+            React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 5 } },
+              React.createElement(WsLED, { color: WS.green, size: 4 }),
+              React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,220,240,0.28)" }, "SERVICE PANEL  ·  OPEN")
+            )
+          )
+        ),
+
+        // MODULES PANEL
+        React.createElement(WsPanel, { style: { padding: "10px" } },
+          React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, paddingLeft: 2, paddingRight: 2 } },
+            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
+              React.createElement(WsLED, { color: WS.blue, size: 5 }),
+              React.createElement(WsMono, { size: 9, ls: 2, color: "rgba(200,220,240,0.55)" }, "MODULES")
+            ),
+            React.createElement(WsMono, { size: 8, ls: 1, color: "rgba(200,220,240,0.22)" }, "04 / 04")
+          ),
+          React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 } },
+            React.createElement("div", { onClick: function() { loadSavedLevels(); setScreen("builder"); setLbScreen("list"); }, style: { background: "linear-gradient(180deg, rgba(80,200,255,0.07) 0%, rgba(80,200,255,0.02) 100%)", border: "1px solid rgba(80,200,255,0.18)", borderRadius: 8, padding: "10px 10px 8px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 5, position: "relative", overflow: "hidden" } },
+              React.createElement("div", { style: { position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "#80ddff", opacity: 0.5, borderRadius: "8px 8px 0 0" } }),
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 7 } },
+                React.createElement("svg", { width: "18", height: "18", viewBox: "0 0 24 24" },
+                  React.createElement("rect", { x: "3", y: "3", width: "7", height: "7", rx: "1", fill: "none", stroke: "#80ddff", strokeWidth: "1.5" }),
+                  React.createElement("rect", { x: "14", y: "3", width: "7", height: "7", rx: "1", fill: "#80ddff", opacity: "0.4" }),
+                  React.createElement("rect", { x: "3", y: "14", width: "7", height: "7", rx: "1", fill: "#80ddff", opacity: "0.4" }),
+                  React.createElement("rect", { x: "14", y: "14", width: "7", height: "7", rx: "1", fill: "none", stroke: "#80ddff", strokeWidth: "1.5", strokeDasharray: "2 2" })
+                ),
+                React.createElement("div", { style: { color: "#80ddff", fontSize: 11, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", lineHeight: 1.2 } }, "Level", React.createElement("br", null), "Builder")
+              ),
+              React.createElement(WsMono, { size: 7, ls: 0.8, color: "rgba(200,220,240,0.3)" }, savedLevels.length > 0 ? savedLevels.length + " LEVELS" : "NO LEVELS")
+            ),
+            React.createElement("div", { onClick: function() { setScreen("designer"); setBdCurrentView("list"); }, style: { background: "linear-gradient(180deg, rgba(200,184,255,0.07) 0%, rgba(200,184,255,0.02) 100%)", border: "1px solid rgba(200,184,255,0.18)", borderRadius: 8, padding: "10px 10px 8px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 5, position: "relative", overflow: "hidden" } },
+              React.createElement("div", { style: { position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "#c8b8ff", opacity: 0.5, borderRadius: "8px 8px 0 0" } }),
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 7 } },
+                React.createElement("svg", { width: "18", height: "18", viewBox: "0 0 24 24" },
+                  React.createElement("rect", { x: "4", y: "4", width: "16", height: "16", rx: "3", fill: "none", stroke: "#c8b8ff", strokeWidth: "1.5" }),
+                  React.createElement("circle", { cx: "12", cy: "12", r: "4", fill: "#c8b8ff", opacity: "0.4" }),
+                  React.createElement("path", { d: "M8 4v16M16 4v16M4 8h16M4 16h16", stroke: "#c8b8ff", strokeWidth: "0.5", opacity: "0.2" })
+                ),
+                React.createElement("div", { style: { color: "#c8b8ff", fontSize: 11, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", lineHeight: 1.2 } }, "Block", React.createElement("br", null), "Designer")
+              ),
+              React.createElement(WsMono, { size: 7, ls: 0.8, color: "rgba(200,220,240,0.3)" }, bdSaved.length > 0 ? bdSaved.length + " DESIGNS" : "NO DESIGNS")
+            ),
+            React.createElement("div", { onClick: function() { setScreen("vfx"); }, style: { background: "linear-gradient(180deg, rgba(255,180,60,0.07) 0%, rgba(255,140,40,0.02) 100%)", border: "1px solid rgba(255,180,60,0.18)", borderRadius: 8, padding: "10px 10px 8px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 5, position: "relative", overflow: "hidden" } },
+              React.createElement("div", { style: { position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "#ffb43c", opacity: 0.5, borderRadius: "8px 8px 0 0" } }),
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 7 } },
+                React.createElement("svg", { width: "18", height: "18", viewBox: "0 0 24 24" },
+                  React.createElement("circle", { cx: "12", cy: "12", r: "3", fill: "#ffb43c" }),
+                  React.createElement("path", { d: "M12 2v3M12 19v3M2 12h3M19 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M16.3 7.7l-2.1 2.1M7.7 16.3l-2.1 2.1", stroke: "#ffb43c", strokeWidth: "1.8", strokeLinecap: "round" })
+                ),
+                React.createElement("div", { style: { color: "#ffb43c", fontSize: 11, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", lineHeight: 1.2 } }, "VFX", React.createElement("br", null), "Studio")
+              ),
+              React.createElement(WsMono, { size: 7, ls: 0.8, color: "rgba(200,220,240,0.3)" }, vfxSaved.length > 0 ? vfxSaved.length + " EFFECTS" : "NO EFFECTS")
+            ),
+            React.createElement("div", { onClick: function() { setScreen("ufo"); }, style: { background: "linear-gradient(180deg, rgba(100,220,180,0.07) 0%, rgba(60,200,160,0.02) 100%)", border: "1px solid rgba(100,220,180,0.18)", borderRadius: 8, padding: "10px 10px 8px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 5, position: "relative", overflow: "hidden" } },
+              React.createElement("div", { style: { position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "#64dcb4", opacity: 0.5, borderRadius: "8px 8px 0 0" } }),
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 7 } },
+                React.createElement(UFOBlockSvg, { size: 26, design: ufoGetActiveDesign(), uid: "splash-tile" }),
+                React.createElement("div", { style: { color: "#64dcb4", fontSize: 11, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", lineHeight: 1.2 } }, "UFO", React.createElement("br", null), "Customizer")
+              ),
+              React.createElement(WsMono, { size: 7, ls: 0.8, color: "rgba(200,220,240,0.3)" }, ufoSaved.length > 0 ? ufoSaved.length + " DESIGNS" : "DEFAULT")
+            )
+          ),
+          React.createElement("div", { style: { display: "flex", justifyContent: "space-between", marginTop: 8, paddingTop: 6, borderTop: "1px solid rgba(255,255,255,0.06)", paddingLeft: 2, paddingRight: 2 } },
+            React.createElement(WsMono, { size: 7, ls: 1.5, color: "rgba(200,220,240,0.18)" }, "SVC V2.0"),
+            React.createElement(WsMono, { size: 7, ls: 1.5, color: "rgba(200,220,240,0.18)" }, "AUTOSAVE")
+          )
+        ),
+
+        // ACTIVE LOADOUT
+        React.createElement(WsPanel, { style: { padding: "8px 10px" } },
+          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 5, marginBottom: 7 } },
+            React.createElement(WsLED, { color: "#ffb43c", size: 5 }),
+            React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,220,240,0.5)" }, "ACTIVE LOADOUT")
+          ),
+          React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 6 } },
+            React.createElement("div", { style: { background: WS.inset, border: WS.ib, borderRadius: 5, padding: "5px 6px", boxShadow: WS.is } },
+              React.createElement(WsMono, { size: 7, ls: 0.8, color: "rgba(128,221,255,0.45)" }, "GRID"),
+              React.createElement("div", { style: { color: "#80ddff", fontFamily: "'JetBrains Mono', monospace", fontSize: 13, fontWeight: 700, marginTop: 3, letterSpacing: 0.5, lineHeight: 1 } }, savedLevels.length > 0 ? savedLevels.length + " LVL" : "—")
+            ),
+            React.createElement("div", { style: { background: WS.inset, border: WS.ib, borderRadius: 5, padding: "5px 6px", boxShadow: WS.is } },
+              React.createElement(WsMono, { size: 7, ls: 0.8, color: "rgba(200,184,255,0.45)" }, "BLKS"),
+              React.createElement("div", { style: { color: "#c8b8ff", fontFamily: "'JetBrains Mono', monospace", fontSize: 13, fontWeight: 700, marginTop: 3, letterSpacing: 0.5, lineHeight: 1 } }, bdSaved.length > 0 ? bdSaved.length + " DSN" : "DFLT")
+            ),
+            React.createElement("div", { style: { background: WS.inset, border: WS.ib, borderRadius: 5, padding: "5px 6px", boxShadow: WS.is } },
+              React.createElement(WsMono, { size: 7, ls: 0.8, color: "rgba(255,180,60,0.45)" }, "VFX"),
+              React.createElement("div", { style: { color: "#ffb43c", fontFamily: "'JetBrains Mono', monospace", fontSize: 13, fontWeight: 700, marginTop: 3, letterSpacing: 0.5, lineHeight: 1 } }, vfxSaved.length > 0 ? vfxSaved.length + " FX" : "DFLT")
+            ),
+            React.createElement("div", { style: { background: WS.inset, border: WS.ib, borderRadius: 5, padding: "5px 6px", boxShadow: WS.is } },
+              React.createElement(WsMono, { size: 7, ls: 0.8, color: "rgba(100,220,180,0.45)" }, "HULL"),
+              React.createElement("div", { style: { color: "#64dcb4", fontFamily: "'JetBrains Mono', monospace", fontSize: 12, fontWeight: 700, marginTop: 3, letterSpacing: 0, lineHeight: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, ufoSaved.length > 0 ? (ufoGetActiveDesign().name || "ACTIVE").toUpperCase().substring(0, 6) : "DFLT")
+            )
+          )
+        ),
+
+        // RECENT PROJECT + PLAY BUTTON ROW
+        React.createElement("div", { style: { display: "flex", gap: 8, alignItems: "stretch" } },
+          React.createElement(WsPanel, { style: { flex: 1, padding: "8px 10px" } },
+            React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 5 } },
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 5 } },
+                React.createElement(WsLED, { color: "#c8b8ff", size: 5 }),
+                React.createElement(WsMono, { size: 7, ls: 1.5, color: "rgba(200,220,240,0.42)" }, "RECENT PROJECT")
+              ),
+              savedLevels.length > 0 && React.createElement("span", { onClick: function() { var rec = savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0]; if (rec) { openBuilder(rec); } }, style: { color: "rgba(200,220,240,0.35)", fontSize: 16, fontWeight: 700, cursor: "pointer" } }, "›")
+            ),
+            savedLevels.length > 0 ? (function() {
+              var rec = savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0];
+              return React.createElement("div", null,
+                React.createElement("div", { style: { color: "#b0c8d8", fontWeight: 700, fontSize: 13, fontFamily: "'Exo 2', sans-serif", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, rec.name || "Untitled"),
+                React.createElement(WsMono, { size: 7, ls: 1, color: "rgba(200,220,240,0.28)" }, rec.savedAt ? new Date(rec.savedAt).toLocaleDateString() : "")
+              );
+            }()) : React.createElement(WsMono, { size: 9, ls: 1, color: "rgba(200,220,240,0.18)" }, "—  no levels")
+          ),
+          React.createElement("div", { onClick: function() { navigateToGame(); }, style: { width: 86, flexShrink: 0, background: "linear-gradient(180deg, #3a2a5a 0%, #2a1a4a 40%, #1e1238 100%)", border: "1px solid rgba(200,180,255,0.28)", borderRadius: 10, boxShadow: "0 0 16px rgba(160,120,255,0.18), inset 0 1px 0 rgba(200,184,255,0.15), inset 0 -2px 4px rgba(0,0,0,0.5)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", gap: 6, padding: "10px 8px" } },
+            React.createElement("div", { style: { width: 34, height: 34, borderRadius: 17, background: "radial-gradient(circle at 40% 35%, #f0e8ff 0%, #c8b8ff 35%, #8060c0 65%, #3a2060 100%)", boxShadow: "0 0 14px rgba(200,184,255,0.55), 0 0 5px rgba(200,184,255,0.35)", display: "flex", alignItems: "center", justifyContent: "center" } },
+              React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" },
+                React.createElement("path", { d: "M7 4L20 12L7 20Z", fill: "rgba(255,255,255,0.9)" })
+              )
+            ),
+            React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: 2, color: "#c8b8ff", textTransform: "uppercase", textShadow: "0 0 8px rgba(200,184,255,0.45)" } }, "PLAY")
+          )
+        ),
+
+        // CREDIT
+        React.createElement("div", { style: { textAlign: "center", paddingBottom: 2 } },
+          React.createElement(WsMono, { size: 7, ls: 1, color: "rgba(200,220,240,0.12)" }, "Created by Dan Medwin and Claude")
+        )
+
+      ),
+
+      // ── BOTTOM BRIDGE BAR ──
+      React.createElement("div", { style: { flexShrink: 0, background: WS.brushed, backgroundBlendMode: "overlay", borderTop: WS.pb, padding: "7px 12px", display: "flex", alignItems: "center", gap: 8 } },
+        React.createElement("svg", { width: "15", height: "15", viewBox: "0 0 24 24" },
+          React.createElement("path", { d: "M12 2v6", stroke: WS.green, strokeWidth: "2.5", strokeLinecap: "round" }),
+          React.createElement("path", { d: "M6.3 5.3A8 8 0 1 0 17.7 5.3", stroke: WS.green, strokeWidth: "1.8", fill: "none", strokeLinecap: "round" })
+        ),
+        React.createElement("span", { style: { color: "rgba(200,220,240,0.2)", fontSize: 10, fontWeight: 700, letterSpacing: -1 } }, ">>"),
+        React.createElement(WsMono, { size: 8, ls: 3, color: "rgba(200,220,240,0.32)" }, "BRIDGE"),
+        React.createElement("div", { style: { flex: 1 } }),
+        React.createElement("div", { style: { display: "flex", gap: 5, alignItems: "center" } },
+          React.createElement(WsLED, { color: WS.blue, size: 5 }),
+          React.createElement(WsLED, { color: WS.green, size: 5 }),
+          React.createElement(WsLED, { color: "#ffb43c", size: 5, on: false })
+        )
+      )
+
+    ),
 
     // ═══ LEVEL BUILDER ═══
     screen === "builder" && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%" } },
