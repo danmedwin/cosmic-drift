@@ -58,7 +58,7 @@ var SCRNB = "2px solid #3a3a45";
 var SCRNS = "inset 0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.05)";
 
 // ── Animation CSS (subset needed for Workshop) ──
-var ANIM_CSS = "@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');\n@keyframes starDrift{0%{transform:translateY(-50%)}100%{transform:translateY(0)}}\n@keyframes introFadeIn{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}\n@keyframes pulse{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}\n@keyframes ufoWarpOut{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}\n@keyframes ufoWarpIn{0%{transform:scale(0.05);opacity:0}60%{transform:scale(1.08);opacity:0.9}100%{transform:scale(1);opacity:1}}\n@keyframes ufoLightSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}\n@keyframes splashFloat{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}\n@keyframes splashGlow{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}\n* { box-sizing: border-box; }\ninput[type=range] { -webkit-appearance: none; appearance: none; background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; outline: none; }\ninput[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }\ninput[type=range]::-moz-range-thumb { width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }@keyframes vfxOozeDrip{0%{transform:scaleY(0);opacity:0}100%{transform:scaleY(1);opacity:0.85}}@keyframes vfxOozeWave{0%{transform:translateY(0)}100%{transform:translateY(50%)}}@keyframes vfxBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxRing{0%{transform:scale(0.1);opacity:1}100%{transform:scale(2.2);opacity:0}}@keyframes vfxFlash{0%{transform:scale(0.2);opacity:1}100%{transform:scale(1.8);opacity:0}}@keyframes vfxPop{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(1.2);filter:brightness(1.8)}100%{transform:scale(0);opacity:0}}@keyframes vfxBubble{0%{transform:translateY(0) scale(0.5);opacity:0}15%{opacity:0.55}85%{opacity:0.55}100%{transform:translateY(88px) scale(1);opacity:0}}@keyframes vfxSpark{0%{transform:translate(0,0) scale(1);opacity:1}35%{transform:translate(calc(var(--sx)*0.45),calc(var(--sy)*0.25 - 7px));opacity:0.9}100%{transform:translate(var(--sx),var(--sy)) scale(0.3);opacity:0}}@keyframes vfxBurnBlock{0%{opacity:1;filter:brightness(1)}10%{opacity:1;filter:brightness(2.3)}55%{opacity:0;filter:brightness(1)}100%{opacity:0;filter:brightness(1)}}@keyframes vfxShatter{0%{transform:translate(0,0) scale(1);opacity:0}15%{opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxDroneShard{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0.2);opacity:0}}";
+var ANIM_CSS = "@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');\n@keyframes starDrift{0%{transform:translateY(-50%)}100%{transform:translateY(0)}}\n@keyframes introFadeIn{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}\n@keyframes pulse{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}\n@keyframes ufoWarpOut{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}\n@keyframes ufoWarpIn{0%{transform:scale(0.05);opacity:0}60%{transform:scale(1.08);opacity:0.9}100%{transform:scale(1);opacity:1}}\n@keyframes ufoLightSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}\n@keyframes splashFloat{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}\n@keyframes splashGlow{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}@keyframes cdSplashEnterFromGame{0%{transform:scale(0.93);filter:brightness(0.55)}100%{transform:scale(1);filter:brightness(1)}}@keyframes cdSplashExitShrink{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(0.93);filter:brightness(0.55)}100%{transform:scale(0.93);filter:brightness(0.55)}}\n* { box-sizing: border-box; }\ninput[type=range] { -webkit-appearance: none; appearance: none; background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; outline: none; }\ninput[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }\ninput[type=range]::-moz-range-thumb { width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }@keyframes vfxOozeDrip{0%{transform:scaleY(0);opacity:0}100%{transform:scaleY(1);opacity:0.85}}@keyframes vfxOozeWave{0%{transform:translateY(0)}100%{transform:translateY(50%)}}@keyframes vfxBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxRing{0%{transform:scale(0.1);opacity:1}100%{transform:scale(2.2);opacity:0}}@keyframes vfxFlash{0%{transform:scale(0.2);opacity:1}100%{transform:scale(1.8);opacity:0}}@keyframes vfxPop{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(1.2);filter:brightness(1.8)}100%{transform:scale(0);opacity:0}}@keyframes vfxBubble{0%{transform:translateY(0) scale(0.5);opacity:0}15%{opacity:0.55}85%{opacity:0.55}100%{transform:translateY(88px) scale(1);opacity:0}}@keyframes vfxSpark{0%{transform:translate(0,0) scale(1);opacity:1}35%{transform:translate(calc(var(--sx)*0.45),calc(var(--sy)*0.25 - 7px));opacity:0.9}100%{transform:translate(var(--sx),var(--sy)) scale(0.3);opacity:0}}@keyframes vfxBurnBlock{0%{opacity:1;filter:brightness(1)}10%{opacity:1;filter:brightness(2.3)}55%{opacity:0;filter:brightness(1)}100%{opacity:0;filter:brightness(1)}}@keyframes vfxShatter{0%{transform:translate(0,0) scale(1);opacity:0}15%{opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxDroneShard{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0.2);opacity:0}}";
 
 // ═══════════════════════════════════════════════════════════════
 // SHARED VISUAL COMPONENTS
@@ -856,6 +856,11 @@ export default function CosmicWorkshop() {
   // ── Screen state ──
   var _scr = useState("splash"), screen = _scr[0], setScreen = _scr[1];
 
+  // ── Splash transition state ──
+  var _spTr = useState(null), splashTransition = _spTr[0], setSplashTransition = _spTr[1];
+  var _spEn = useState(false), splashEntering = _spEn[0], setSplashEntering = _spEn[1];
+  var splashTouchRef = useRef(null);
+
   // ══ BLOCK DESIGNER STATE ══
   var _bdDesign = useState(function() { return bdDefaultDesign(); }), bdDesign = _bdDesign[0], setBdDesign = _bdDesign[1];
   var _bdSaved = useState([]), bdSaved = _bdSaved[0], setBdSaved = _bdSaved[1];
@@ -1000,6 +1005,18 @@ export default function CosmicWorkshop() {
         }).catch(function() {}); } catch(e) {}
       }
     });
+  }, []);
+
+  // Entry animation when arriving from game splash
+  useEffect(function() {
+    try {
+      var from = sessionStorage.getItem("cd_transition_from");
+      if (from === "game") {
+        sessionStorage.removeItem("cd_transition_from");
+        setSplashEntering(true);
+        setTimeout(function() { setSplashEntering(false); }, 480);
+      }
+    } catch(e) {}
   }, []);
 
   // ?builder=1 handoff: the game wrote a level to storage; open it in the Level Builder.
@@ -1976,6 +1993,31 @@ export default function CosmicWorkshop() {
     setUfoShowImport(false); setUfoImportText(""); setUfoImportError("");
   }
 
+  function handleSplashToGame() {
+    try {
+      var h = window.location.hostname;
+      if (!(h === "localhost" || h === "127.0.0.1" || h.indexOf("cosmicdriftapp.com") >= 0)) {
+        alert("Play is available at your hosted site: cosmicdriftapp.com");
+        return;
+      }
+    } catch(e) {}
+    setSplashTransition("exit");
+    try { sessionStorage.setItem("cd_transition_from", "workshop"); } catch(e2) {}
+    setTimeout(function() { window.location.href = "index.html"; }, 620);
+  }
+  function handleSplashTouchStart(e) {
+    splashTouchRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  }
+  function handleSplashTouchEnd(e) {
+    if (!splashTouchRef.current) return;
+    var dx = e.changedTouches[0].clientX - splashTouchRef.current.x;
+    var dy = e.changedTouches[0].clientY - splashTouchRef.current.y;
+    splashTouchRef.current = null;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5 && dx > 0) {
+      handleSplashToGame();
+    }
+  }
+
   // RENDER
   // ═══════════════════════════════════════
 
@@ -1984,7 +2026,7 @@ export default function CosmicWorkshop() {
     React.createElement("div", { style: { position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" } }, React.createElement(Stars, null)),
 
     // ═══ SPLASH SCREEN ═══
-    screen === "splash" && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", background: "radial-gradient(ellipse 90% 60% at 50% 28%, #0e0820 0%, #0a0618 45%, #06040f 100%)" } },
+    screen === "splash" && React.createElement("div", { onTouchStart: handleSplashTouchStart, onTouchEnd: handleSplashTouchEnd, style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", background: "radial-gradient(ellipse 90% 60% at 50% 28%, #0e0820 0%, #0a0618 45%, #06040f 100%)", animation: splashEntering ? "cdSplashEnterFromGame 0.48s ease-out both" : (splashTransition === "exit" ? "cdSplashExitShrink 0.62s ease-in both" : "none"), willChange: "transform, filter" } },
 
       // ── TOP STATUS STRIP ──
       React.createElement("div", { style: { flexShrink: 0, background: WS.brushed, backgroundBlendMode: "overlay", borderBottom: "1px solid rgba(120,80,200,0.3)", boxShadow: "0 3px 8px rgba(0,0,0,0.5)", padding: "8px 10px", display: "flex", alignItems: "center", gap: 6 } },
@@ -2156,25 +2198,32 @@ export default function CosmicWorkshop() {
           }()) : React.createElement(WsMono, { size: 9, ls: 1, color: "rgba(200,180,255,0.2)" }, "—  no levels saved")
         ),
 
-        // RESUME BUTTON
-        React.createElement("div", { onClick: function() { navigateToGame(); }, style: { background: "linear-gradient(180deg, #3e1870 0%, #2e1058 40%, #1e0840 100%)", border: "1px solid rgba(180,110,255,0.38)", borderRadius: 10, boxShadow: "0 0 24px rgba(140,60,255,0.22), inset 0 1px 0 rgba(220,170,255,0.2), inset 0 -2px 5px rgba(0,0,0,0.55)", padding: "15px 18px", display: "flex", alignItems: "center", cursor: "pointer", gap: 14 } },
-          React.createElement("svg", { width: "18", height: "18", viewBox: "0 0 24 24", fill: "none" },
-            React.createElement("circle", { cx: "8", cy: "15", r: "4", stroke: "rgba(210,170,255,0.75)", strokeWidth: "1.8" }),
-            React.createElement("path", { d: "M12 15h8M17 15v-3", stroke: "rgba(210,170,255,0.75)", strokeWidth: "1.8", strokeLinecap: "round" })
-          ),
-          React.createElement("div", { style: { flex: 1, fontFamily: "'Exo 2', sans-serif", fontSize: 17, fontWeight: 700, letterSpacing: 5, color: "#f0e8ff", textTransform: "uppercase", textShadow: "0 0 14px rgba(200,140,255,0.55)" } }, "RESUME"),
-          React.createElement(WsMono, { size: 8, ls: 1.5, color: "rgba(200,160,255,0.4)" }, "L · 8×6")
-        ),
-
         // CREDIT
-        React.createElement("div", { style: { textAlign: "center", paddingBottom: 2 } },
+        React.createElement("div", { style: { textAlign: "center", paddingBottom: 4 } },
           React.createElement(WsMono, { size: 7, ls: 1, color: "rgba(200,180,255,0.1)" }, "Created by Dan Medwin and Claude")
         )
 
       ),
 
+      // ── RESUME BUTTON (Play-button style, purple — outside scroll so it's flush with BRIDGE) ──
+      React.createElement("div", { onClick: function() { handleSplashToGame(); }, style: { position: "relative", height: 64, background: WS.brushed, backgroundBlendMode: "overlay", border: WS.pbl, borderTop: "1px solid rgba(120,80,200,0.3)", borderBottom: "none", borderRadius: 0, boxShadow: "none", padding: 6, flexShrink: 0, cursor: "pointer" } },
+        WsRivet({ top: 5, left: 5 }),
+        WsRivet({ top: 5, right: 5 }),
+        WsRivet({ bottom: 5, left: 5 }),
+        WsRivet({ bottom: 5, right: 5 }),
+        React.createElement("div", { style: { position: "absolute", inset: 6, borderRadius: 7, background: "linear-gradient(180deg, #5a2480 0%, #3a1260 100%)", border: "1px solid rgba(180,100,255,0.8)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.28), inset 0 -2px 4px rgba(0,0,0,0.4), 0 0 26px rgba(160,80,255,0.4), 0 0 0 1px rgba(160,80,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center", gap: 14 } },
+          React.createElement("div", { style: { position: "absolute", top: 0, left: 0, right: 0, height: "45%", borderRadius: "7px 7px 100% 100%", background: "linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%)", pointerEvents: "none" } }),
+          React.createElement("svg", { width: "18", height: "18", viewBox: "0 0 24 24", fill: "none" },
+            React.createElement("circle", { cx: "8", cy: "15", r: "4", stroke: "rgba(240,220,255,0.9)", strokeWidth: "2" }),
+            React.createElement("path", { d: "M12 15h8M17 15v-3", stroke: "rgba(240,220,255,0.9)", strokeWidth: "2", strokeLinecap: "round" })
+          ),
+          React.createElement("span", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 22, fontWeight: 800, letterSpacing: 6, color: "#f0e8ff", textShadow: "0 0 14px rgba(200,140,255,0.7), 0 1px 0 rgba(0,0,0,0.4)" } }, "RESUME"),
+          React.createElement(WsMono, { size: 9, ls: 1.5, color: "rgba(200,160,255,0.4)" }, "L · 8×6")
+        )
+      ),
+
       // ── BOTTOM BRIDGE BAR (mirrors game-splash Workshop lever) ──
-      React.createElement(WsPanel, { onClick: function() { navigateToGame(); }, style: { flexShrink: 0, borderRadius: 10, padding: "8px 14px", height: 60, display: "flex", alignItems: "center", gap: 10, overflow: "hidden", cursor: "pointer" } },
+      React.createElement(WsPanel, { onClick: function() { handleSplashToGame(); }, style: { flexShrink: 0, borderRadius: "0 0 10px 10px", borderTop: "none", padding: "8px 14px", height: 60, display: "flex", alignItems: "center", gap: 10, overflow: "hidden", cursor: "pointer" } },
         // Mechanical toggle — knob on LEFT (bridge/off position)
         React.createElement("div", { style: { position: "relative", width: 64, height: 32, borderRadius: 18, background: WS.inset, border: WS.ib, boxShadow: WS.is + ", inset 0 0 6px rgba(0,0,0,0.6)", flexShrink: 0 } },
           React.createElement("div", { style: { position: "absolute", top: 4, bottom: 4, left: 8, right: 8, borderRadius: 999, background: "repeating-linear-gradient(90deg, rgba(160,100,255,0.15) 0 1px, transparent 1px 9px)", opacity: 0.7 } }),
@@ -2183,7 +2232,8 @@ export default function CosmicWorkshop() {
               React.createElement("span", { style: { width: 2, height: 11, borderRadius: 1, background: "#1a1f2a" } }),
               React.createElement("span", { style: { width: 2, height: 11, borderRadius: 1, background: "#1a1f2a" } }),
               React.createElement("span", { style: { width: 2, height: 11, borderRadius: 1, background: "#1a1f2a" } })
-            )
+            ),
+            React.createElement("div", { style: { position: "absolute", top: 3, left: "50%", transform: "translateX(-50%)", width: 4, height: 4, borderRadius: 4, background: WS.green, boxShadow: "0 0 6px " + WS.green } })
           )
         ),
         // Right-pointing chevrons (fading outward: dim → bright)
