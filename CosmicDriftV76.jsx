@@ -1415,7 +1415,7 @@ export default function CosmicDriftGame() {
   var _testerMenu = useState(false), showTesterMenu = _testerMenu[0], setShowTesterMenu = _testerMenu[1];
   var _smenu = useState(false), splashMenuOpen = _smenu[0], setSplashMenuOpen = _smenu[1];
   var _spTr = useState(null), splashTransition = _spTr[0], setSplashTransition = _spTr[1];
-  var _spEn = useState(false), splashEntering = _spEn[0], setSplashEntering = _spEn[1];
+  var _spEn = useState(function() { try { return sessionStorage.getItem("cd_transition_from") === "workshop"; } catch(e) { return false; } }), splashEntering = _spEn[0], setSplashEntering = _spEn[1];
   var splashTouchRef = useRef(null);
   var _tutsReset = useState(false), tutsReset = _tutsReset[0], setTutsReset = _tutsReset[1];
   var _ufoDbg = useState(null), ufoDebugText = _ufoDbg[0], setUfoDebugText = _ufoDbg[1];
@@ -1533,7 +1533,6 @@ export default function CosmicDriftGame() {
       var from = sessionStorage.getItem("cd_transition_from");
       if (from === "workshop") {
         sessionStorage.removeItem("cd_transition_from");
-        setSplashEntering(true);
         setTimeout(function() { setSplashEntering(false); }, 480);
       }
     } catch(e) {}

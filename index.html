@@ -5346,7 +5346,13 @@ function CosmicDriftGame() {
   var _spTr = useState(null),
     splashTransition = _spTr[0],
     setSplashTransition = _spTr[1];
-  var _spEn = useState(false),
+  var _spEn = useState(function () {
+      try {
+        return sessionStorage.getItem("cd_transition_from") === "workshop";
+      } catch (e) {
+        return false;
+      }
+    }),
     splashEntering = _spEn[0],
     setSplashEntering = _spEn[1];
   var splashTouchRef = useRef(null);
@@ -5666,7 +5672,6 @@ function CosmicDriftGame() {
       var from = sessionStorage.getItem("cd_transition_from");
       if (from === "workshop") {
         sessionStorage.removeItem("cd_transition_from");
-        setSplashEntering(true);
         setTimeout(function () {
           setSplashEntering(false);
         }, 480);
