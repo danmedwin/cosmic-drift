@@ -976,7 +976,7 @@ function LegendOverlay(props) {
 }
 function ConfirmOverlay(props) { if (!props.open) return null; return <div style={{ position: "fixed", inset: 0, zIndex: 250, background: "rgba(5,5,20,0.7)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Quicksand',sans-serif" }}><div style={{ background: "linear-gradient(170deg,#151040,#1a0a2e)", border: "1px solid rgba(120,80,255,0.3)", borderRadius: 16, padding: "20px 24px", textAlign: "center", maxWidth: 300 }}><div style={{ color: "#c8b8ff", fontSize: 15, fontWeight: 700, marginBottom: 6 }}>Restart Level?</div><div style={{ color: "rgba(200,184,255,0.5)", fontSize: 12, marginBottom: 18 }}>This will use one reactor core.</div><div style={{ display: "flex", gap: 12, justifyContent: "center" }}><div onClick={props.onCancel} style={{ padding: "8px 20px", borderRadius: 16, border: "1px solid rgba(120,80,255,0.3)", color: "#c8b8ff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Cancel</div><div onClick={props.onConfirm} style={{ padding: "8px 20px", borderRadius: 16, background: "linear-gradient(135deg,#7b5ea7,#9f7fd0)", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Restart</div></div></div></div>; }
 
-var ANIM_CSS = "@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap');\n@keyframes plasmaZip{0%{transform:translate(0,0) scale(1);opacity:1}80%{opacity:1}100%{transform:translate(var(--endX),var(--endY)) scale(0.5);opacity:0}}\n@keyframes csPlasma{0%{transform:translate(0,0) scale(1);opacity:1}70%{opacity:0.8}100%{transform:translate(var(--endX),var(--endY)) scale(0.5);opacity:0}}\n@keyframes lightningFlash{0%{opacity:0}10%{opacity:1}50%{opacity:1}60%{opacity:0.3}70%{opacity:1}100%{opacity:0}}\n@keyframes explodeParticle{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--px),var(--py)) scale(0.2);opacity:0}}\n@keyframes explodeRing{0%{transform:scale(0.2);opacity:1}100%{transform:scale(1.8);opacity:0}}\n@keyframes explodeFlash{0%{transform:scale(0.5);opacity:1}50%{transform:scale(1);opacity:0.8}100%{transform:scale(1.5);opacity:0}}\n@keyframes blockPop{0%{transform:scale(1);opacity:1}30%{transform:scale(1.1);filter:brightness(1.8)}100%{transform:scale(0);opacity:0}}\n@keyframes blockShake{0%{transform:translateX(0)}15%{transform:translateX(-4px)}30%{transform:translateX(4px)}45%{transform:translateX(-3px)}60%{transform:translateX(3px)}75%{transform:translateX(-1px)}100%{transform:translateX(0)}}\n@keyframes shipPulse{0%{filter:drop-shadow(0 0 10px rgba(255,168,255,0.5))}50%{filter:drop-shadow(0 0 20px rgba(80,200,255,0.8)) brightness(1.3)}100%{filter:drop-shadow(0 0 10px rgba(255,168,255,0.5))}}\n@keyframes plasmaImpact{0%{transform:scale(0.3);opacity:1}50%{transform:scale(1.2);opacity:0.8}100%{transform:scale(1.8);opacity:0}}\n@keyframes plasmaShatter{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--px),var(--py)) scale(0);opacity:0}}\n@keyframes fizzle{0%{transform:scale(1,1);opacity:1}30%{transform:scale(1.4,0.4);opacity:0.8}60%{transform:scale(1.6,0.2);opacity:0.5}100%{transform:scale(2,0);opacity:0}}\n@keyframes fizzleSpark{0%{transform:translate(0,0);opacity:1}100%{transform:translate(var(--sx),var(--sy));opacity:0}}\n@keyframes bonusCharge{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--endX),var(--endY)) scale(0.3);opacity:0}}\n@keyframes scoreFlash{0%{transform:scale(1)}50%{transform:scale(1.15);color:#50c8ff}100%{transform:scale(1)}}\n@keyframes coreFly{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--endX),var(--endY)) scale(0.8);opacity:0.5}}\n@keyframes droneMoveX{0%{transform:translateX(0)}100%{transform:translateX(var(--dx))}}\n@keyframes droneMoveY{0%{transform:translateY(0) rotate(var(--startRot)) scale(1)}35%{transform:translateY(var(--peak)) rotate(0deg) scale(1.6)}100%{transform:translateY(var(--dy)) rotate(var(--endRot)) scale(1)}}\n@keyframes shipOozeHit{0%{filter:drop-shadow(0 0 10px rgba(255,168,255,0.5))}15%{filter:drop-shadow(0 0 20px rgba(80,255,80,0.9)) brightness(1.4) hue-rotate(90deg)}30%{filter:drop-shadow(0 0 8px rgba(80,255,80,0.3))}45%{filter:drop-shadow(0 0 20px rgba(80,255,80,0.8)) brightness(1.3) hue-rotate(90deg)}60%{filter:drop-shadow(0 0 6px rgba(80,255,80,0.2))}75%{filter:drop-shadow(0 0 15px rgba(80,255,80,0.6)) brightness(1.2) hue-rotate(60deg)}100%{filter:drop-shadow(0 0 10px rgba(255,168,255,0.5))}}\n@keyframes oozeDrip{0%{transform:scaleY(0);opacity:0.8}100%{transform:scaleY(1);opacity:0.6}}\n@keyframes oozeFlow{0%{transform:scaleY(0)}40%{transform:scaleY(0.6)}100%{transform:scaleY(1)}}\n@keyframes oozeWaveFlow{0%{transform:translateY(0)}100%{transform:translateY(50%)}}\n@keyframes oozePuddleSpread{0%{transform:scaleX(0.3) scaleY(0.2);opacity:0}20%{transform:scaleX(1.1) scaleY(0.9);opacity:0.8}40%{transform:scaleX(1) scaleY(1);opacity:0.7}100%{transform:scaleX(0.8) scaleY(0.6);opacity:0}}\n@keyframes blockBurn{0%{transform:scale(1);opacity:1}100%{transform:scale(1);opacity:0}}\n@keyframes burnPixel{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--px),var(--py)) scale(0);opacity:0}}\n@keyframes burnSpark{0%{transform:translate(0,0);opacity:0.8}100%{transform:translate(var(--vx),var(--vy));opacity:0}}\n@keyframes itemFly{0%{transform:translate(0,0) scale(1);opacity:1}50%{transform:translate(calc(var(--endX)*0.5),calc(var(--endY)*0.5 - 20px)) scale(1.2)}100%{transform:translate(var(--endX),var(--endY)) scale(0.8);opacity:0.5}}\n@keyframes blockErupt{0%{transform:translate(0,0) scale(0.3);opacity:0.8}40%{transform:translate(calc(var(--endX)*0.3),calc(var(--endY)*0.3 - 30px)) scale(1.2);opacity:1}100%{transform:translate(var(--endX),var(--endY)) scale(1);opacity:0.6}}\n@keyframes tutFadeIn{0%{opacity:0;transform:translateX(-50%) translateY(-8px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}\n@keyframes introFadeIn{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}\n@keyframes convertGlow{0%{box-shadow:0 0 4px rgba(48,192,208,0.3)}30%{box-shadow:0 0 20px rgba(48,192,208,0.8),inset 0 0 10px rgba(48,192,208,0.3)}100%{box-shadow:0 0 4px rgba(48,192,208,0)}}\n@keyframes tutPulseGlow{0%{box-shadow:0 0 8px rgba(80,200,255,0.3),inset 0 0 4px rgba(80,200,255,0.1)}50%{box-shadow:0 0 20px rgba(80,200,255,0.6),inset 0 0 8px rgba(80,200,255,0.2)}100%{box-shadow:0 0 8px rgba(80,200,255,0.3),inset 0 0 4px rgba(80,200,255,0.1)}}\n@keyframes targetPulse{0%{transform:scale(1);opacity:0.5;box-shadow:0 0 8px rgba(80,200,255,0.4)}50%{transform:scale(1.08);opacity:1;box-shadow:0 0 20px rgba(80,200,255,0.7)}100%{transform:scale(1);opacity:0.5;box-shadow:0 0 8px rgba(80,200,255,0.4)}}\n@keyframes targetArrow{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}\n@keyframes rechargePulse{0%{box-shadow:0 0 6px rgba(48,192,208,0.3),inset 0 0 4px rgba(48,192,208,0.1)}50%{box-shadow:0 0 20px rgba(48,192,208,0.8),inset 0 0 12px rgba(48,192,208,0.3)}100%{box-shadow:0 0 6px rgba(48,192,208,0.3),inset 0 0 4px rgba(48,192,208,0.1)}}\n@keyframes starDrift{0%{transform:translateY(-50%)}100%{transform:translateY(0)}}\n@keyframes splashShipDrift{0%{transform:translateX(-100px)}50%{transform:translateX(100px)}100%{transform:translateX(-100px)}}\n@keyframes confettiBurst{0%{transform:translate(0,0) rotate(0deg);opacity:1}100%{transform:translate(var(--cx),var(--cy)) rotate(var(--cr));opacity:0}}\n@keyframes splashPlasma{0%{transform:translateY(0);opacity:0}2%{transform:translateY(0);opacity:1}22%{transform:translateY(-120px);opacity:0}100%{transform:translateY(-120px);opacity:0}}\n@keyframes hammerSwing{0%{transform:rotate(0deg);opacity:1}8%{transform:rotate(5deg);opacity:1}65%{transform:rotate(-90deg);opacity:1}80%{transform:rotate(-78deg);opacity:0.7}92%{transform:rotate(-84deg);opacity:0.3}100%{transform:rotate(-86deg);opacity:0}}\n@keyframes crosshairPulse{0%{opacity:0.5;transform:translate(-50%,-50%) scale(0.9)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}100%{opacity:0.5;transform:translate(-50%,-50%) scale(0.9)}}\n@keyframes crosshairFadeIn{0%{opacity:0;transform:translate(-50%,-50%) scale(0.3)}100%{opacity:0.7;transform:translate(-50%,-50%) scale(1)}}\n@keyframes wallFieldPulse{0%{opacity:0;transform:scaleX(0)}15%{opacity:0.8;transform:scaleX(1.1)}30%{opacity:0.7;transform:scaleX(1)}70%{opacity:0.6;transform:scaleX(1)}100%{opacity:0;transform:scaleX(0)}}@keyframes ufoWarpOut{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}@keyframes ufoWarpIn{0%{transform:scale(0.05);opacity:0}60%{transform:scale(1.08);opacity:0.9}100%{transform:scale(1);opacity:1}}@keyframes ufoLightSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}@keyframes empFallDown{from{transform:translateY(0)}to{transform:translateY(var(--empDist))}}@keyframes empBloomExp{0%{transform:scale(0.1);opacity:0.95}28%{transform:scale(1);opacity:0.82}100%{transform:scale(1);opacity:0}}@keyframes empCellGlow{0%,100%{opacity:0}15%,80%{opacity:1}}";
+var ANIM_CSS = "@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@700;800&family=JetBrains+Mono:wght@400;700&display=swap');\n@keyframes plasmaZip{0%{transform:translate(0,0) scale(1);opacity:1}80%{opacity:1}100%{transform:translate(var(--endX),var(--endY)) scale(0.5);opacity:0}}\n@keyframes csPlasma{0%{transform:translate(0,0) scale(1);opacity:1}70%{opacity:0.8}100%{transform:translate(var(--endX),var(--endY)) scale(0.5);opacity:0}}\n@keyframes lightningFlash{0%{opacity:0}10%{opacity:1}50%{opacity:1}60%{opacity:0.3}70%{opacity:1}100%{opacity:0}}\n@keyframes explodeParticle{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--px),var(--py)) scale(0.2);opacity:0}}\n@keyframes explodeRing{0%{transform:scale(0.2);opacity:1}100%{transform:scale(1.8);opacity:0}}\n@keyframes explodeFlash{0%{transform:scale(0.5);opacity:1}50%{transform:scale(1);opacity:0.8}100%{transform:scale(1.5);opacity:0}}\n@keyframes blockPop{0%{transform:scale(1);opacity:1}30%{transform:scale(1.1);filter:brightness(1.8)}100%{transform:scale(0);opacity:0}}\n@keyframes blockShake{0%{transform:translateX(0)}15%{transform:translateX(-4px)}30%{transform:translateX(4px)}45%{transform:translateX(-3px)}60%{transform:translateX(3px)}75%{transform:translateX(-1px)}100%{transform:translateX(0)}}\n@keyframes shipPulse{0%{filter:drop-shadow(0 0 10px rgba(255,168,255,0.5))}50%{filter:drop-shadow(0 0 20px rgba(80,200,255,0.8)) brightness(1.3)}100%{filter:drop-shadow(0 0 10px rgba(255,168,255,0.5))}}\n@keyframes plasmaImpact{0%{transform:scale(0.3);opacity:1}50%{transform:scale(1.2);opacity:0.8}100%{transform:scale(1.8);opacity:0}}\n@keyframes plasmaShatter{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--px),var(--py)) scale(0);opacity:0}}\n@keyframes fizzle{0%{transform:scale(1,1);opacity:1}30%{transform:scale(1.4,0.4);opacity:0.8}60%{transform:scale(1.6,0.2);opacity:0.5}100%{transform:scale(2,0);opacity:0}}\n@keyframes fizzleSpark{0%{transform:translate(0,0);opacity:1}100%{transform:translate(var(--sx),var(--sy));opacity:0}}\n@keyframes bonusCharge{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--endX),var(--endY)) scale(0.3);opacity:0}}\n@keyframes scoreFlash{0%{transform:scale(1)}50%{transform:scale(1.15);color:#50c8ff}100%{transform:scale(1)}}\n@keyframes coreFly{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--endX),var(--endY)) scale(0.8);opacity:0.5}}\n@keyframes droneMoveX{0%{transform:translateX(0)}100%{transform:translateX(var(--dx))}}\n@keyframes droneMoveY{0%{transform:translateY(0) rotate(var(--startRot)) scale(1)}35%{transform:translateY(var(--peak)) rotate(0deg) scale(1.6)}100%{transform:translateY(var(--dy)) rotate(var(--endRot)) scale(1)}}\n@keyframes shipOozeHit{0%{filter:drop-shadow(0 0 10px rgba(255,168,255,0.5))}15%{filter:drop-shadow(0 0 20px rgba(80,255,80,0.9)) brightness(1.4) hue-rotate(90deg)}30%{filter:drop-shadow(0 0 8px rgba(80,255,80,0.3))}45%{filter:drop-shadow(0 0 20px rgba(80,255,80,0.8)) brightness(1.3) hue-rotate(90deg)}60%{filter:drop-shadow(0 0 6px rgba(80,255,80,0.2))}75%{filter:drop-shadow(0 0 15px rgba(80,255,80,0.6)) brightness(1.2) hue-rotate(60deg)}100%{filter:drop-shadow(0 0 10px rgba(255,168,255,0.5))}}\n@keyframes oozeDrip{0%{transform:scaleY(0);opacity:0.8}100%{transform:scaleY(1);opacity:0.6}}\n@keyframes oozeFlow{0%{transform:scaleY(0)}40%{transform:scaleY(0.6)}100%{transform:scaleY(1)}}\n@keyframes oozeWaveFlow{0%{transform:translateY(0)}100%{transform:translateY(50%)}}\n@keyframes oozePuddleSpread{0%{transform:scaleX(0.3) scaleY(0.2);opacity:0}20%{transform:scaleX(1.1) scaleY(0.9);opacity:0.8}40%{transform:scaleX(1) scaleY(1);opacity:0.7}100%{transform:scaleX(0.8) scaleY(0.6);opacity:0}}\n@keyframes blockBurn{0%{transform:scale(1);opacity:1}100%{transform:scale(1);opacity:0}}\n@keyframes burnPixel{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--px),var(--py)) scale(0);opacity:0}}\n@keyframes burnSpark{0%{transform:translate(0,0);opacity:0.8}100%{transform:translate(var(--vx),var(--vy));opacity:0}}\n@keyframes itemFly{0%{transform:translate(0,0) scale(1);opacity:1}50%{transform:translate(calc(var(--endX)*0.5),calc(var(--endY)*0.5 - 20px)) scale(1.2)}100%{transform:translate(var(--endX),var(--endY)) scale(0.8);opacity:0.5}}\n@keyframes blockErupt{0%{transform:translate(0,0) scale(0.3);opacity:0.8}40%{transform:translate(calc(var(--endX)*0.3),calc(var(--endY)*0.3 - 30px)) scale(1.2);opacity:1}100%{transform:translate(var(--endX),var(--endY)) scale(1);opacity:0.6}}\n@keyframes tutFadeIn{0%{opacity:0;transform:translateX(-50%) translateY(-8px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}\n@keyframes introFadeIn{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}\n@keyframes convertGlow{0%{box-shadow:0 0 4px rgba(48,192,208,0.3)}30%{box-shadow:0 0 20px rgba(48,192,208,0.8),inset 0 0 10px rgba(48,192,208,0.3)}100%{box-shadow:0 0 4px rgba(48,192,208,0)}}\n@keyframes tutPulseGlow{0%{box-shadow:0 0 8px rgba(80,200,255,0.3),inset 0 0 4px rgba(80,200,255,0.1)}50%{box-shadow:0 0 20px rgba(80,200,255,0.6),inset 0 0 8px rgba(80,200,255,0.2)}100%{box-shadow:0 0 8px rgba(80,200,255,0.3),inset 0 0 4px rgba(80,200,255,0.1)}}\n@keyframes targetPulse{0%{transform:scale(1);opacity:0.5;box-shadow:0 0 8px rgba(80,200,255,0.4)}50%{transform:scale(1.08);opacity:1;box-shadow:0 0 20px rgba(80,200,255,0.7)}100%{transform:scale(1);opacity:0.5;box-shadow:0 0 8px rgba(80,200,255,0.4)}}\n@keyframes targetArrow{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}\n@keyframes rechargePulse{0%{box-shadow:0 0 6px rgba(48,192,208,0.3),inset 0 0 4px rgba(48,192,208,0.1)}50%{box-shadow:0 0 20px rgba(48,192,208,0.8),inset 0 0 12px rgba(48,192,208,0.3)}100%{box-shadow:0 0 6px rgba(48,192,208,0.3),inset 0 0 4px rgba(48,192,208,0.1)}}\n@keyframes starDrift{0%{transform:translateY(-50%)}100%{transform:translateY(0)}}\n@keyframes splashShipDrift{0%{transform:translateX(-100px)}50%{transform:translateX(100px)}100%{transform:translateX(-100px)}}\n@keyframes confettiBurst{0%{transform:translate(0,0) rotate(0deg);opacity:1}100%{transform:translate(var(--cx),var(--cy)) rotate(var(--cr));opacity:0}}\n@keyframes splashPlasma{0%{transform:translateY(0);opacity:0}2%{transform:translateY(0);opacity:1}22%{transform:translateY(-120px);opacity:0}100%{transform:translateY(-120px);opacity:0}}\n@keyframes hammerSwing{0%{transform:rotate(0deg);opacity:1}8%{transform:rotate(5deg);opacity:1}65%{transform:rotate(-90deg);opacity:1}80%{transform:rotate(-78deg);opacity:0.7}92%{transform:rotate(-84deg);opacity:0.3}100%{transform:rotate(-86deg);opacity:0}}\n@keyframes crosshairPulse{0%{opacity:0.5;transform:translate(-50%,-50%) scale(0.9)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}100%{opacity:0.5;transform:translate(-50%,-50%) scale(0.9)}}\n@keyframes crosshairFadeIn{0%{opacity:0;transform:translate(-50%,-50%) scale(0.3)}100%{opacity:0.7;transform:translate(-50%,-50%) scale(1)}}\n@keyframes wallFieldPulse{0%{opacity:0;transform:scaleX(0)}15%{opacity:0.8;transform:scaleX(1.1)}30%{opacity:0.7;transform:scaleX(1)}70%{opacity:0.6;transform:scaleX(1)}100%{opacity:0;transform:scaleX(0)}}@keyframes ufoWarpOut{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}@keyframes ufoWarpIn{0%{transform:scale(0.05);opacity:0}60%{transform:scale(1.08);opacity:0.9}100%{transform:scale(1);opacity:1}}@keyframes ufoLightSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}@keyframes empFallDown{from{transform:translateY(0)}to{transform:translateY(var(--empDist))}}@keyframes empBloomExp{0%{transform:scale(0.1);opacity:0.95}28%{transform:scale(1);opacity:0.82}100%{transform:scale(1);opacity:0}}@keyframes empCellGlow{0%,100%{opacity:0}15%,80%{opacity:1}}";
 
 // ── CANVAS PARTICLE SYSTEM ──
 var _cvfxParticles = [];
@@ -1278,6 +1278,66 @@ function EMPBloomOverlay(props) {
     </div>
   );
 }
+// ── Cockpit-splash helpers (Gray Cockpit redesign) ──────────────────
+var GS = {
+  bg: "radial-gradient(ellipse 90% 60% at 50% 28%, #142436 0%, #0e1826 45%, #08101a 100%), radial-gradient(ellipse 70% 40% at 50% 100%, rgba(120,80,40,0.22) 0%, transparent 70%)",
+  brushedSolid: "linear-gradient(180deg, #3a4250 0%, #2c333f 35%, #1f2530 70%, #1a1f2a 100%)",
+  brushed: "linear-gradient(180deg, #3a4250 0%, #2c333f 35%, #1f2530 70%, #1a1f2a 100%), repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 3px)",
+  inset: "linear-gradient(180deg, #060810 0%, #0a0e16 60%, #050810 100%)",
+  pb: "1px solid #404a58",
+  pbl: "1px solid #525c6c",
+  ps: "inset 0 1px 0 rgba(200,230,240,0.10), inset 0 -2px 4px rgba(0,0,0,0.55), 0 3px 6px rgba(0,0,0,0.5)",
+  ib: "1px solid #14202e",
+  is: "inset 0 2px 8px rgba(0,0,0,0.7)",
+  green: "#50ffae",
+  blue: "#80ddff",
+};
+function GsRivet(props) {
+  var sz = props.size || 6;
+  return <span style={Object.assign({ position: "absolute", width: sz, height: sz, borderRadius: sz, background: "radial-gradient(circle at 30% 30%, #6b7787 0%, #2a323c 70%, #15191f 100%)", boxShadow: "inset 0 1px 0 rgba(200,230,240,0.18), 0 1px 1px rgba(0,0,0,0.6)" }, props.pos || {})} />;
+}
+function GsPanel(props) {
+  var isInset = props.inset;
+  var noRivets = props.riveted === false || isInset;
+  return <div style={Object.assign({ position: "relative", background: isInset ? GS.inset : GS.brushed, backgroundBlendMode: isInset ? "normal" : "overlay", border: isInset ? GS.ib : GS.pb, borderRadius: 10, boxShadow: isInset ? GS.is : GS.ps }, props.style || {})}>
+    {!noRivets && <><GsRivet pos={{ top: 5, left: 5 }} /><GsRivet pos={{ top: 5, right: 5 }} /><GsRivet pos={{ bottom: 5, left: 5 }} /><GsRivet pos={{ bottom: 5, right: 5 }} /></>}
+    {props.children}
+  </div>;
+}
+function GsLED(props) {
+  var color = props.color || GS.green;
+  var sz = props.size || 6;
+  var on = props.on !== false;
+  return <span style={{ display: "inline-block", width: sz, height: sz, borderRadius: sz, background: on ? "radial-gradient(circle at 35% 30%, " + color + ", " + color + "aa 60%, " + color + "33 100%)" : "rgba(80,90,100,0.3)", boxShadow: on ? "0 0 8px " + color : "none", flexShrink: 0 }} />;
+}
+function GsMono(props) {
+  return <span style={Object.assign({ fontFamily: "'JetBrains Mono', monospace", fontSize: props.size || 8, letterSpacing: props.ls !== undefined ? props.ls : 2, color: props.color || "rgba(200,220,240,0.55)", textTransform: "uppercase" }, props.style || {})}>{props.children}</span>;
+}
+function GsIconBtn(props) {
+  return <div onClick={props.onClick} style={{ position: "relative", width: 36, height: 36, borderRadius: 8, background: GS.brushedSolid, border: GS.pbl, boxShadow: "inset 0 1px 0 rgba(200,230,240,0.14), inset 0 -2px 3px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.5)", padding: 3, cursor: "pointer", flexShrink: 0 }}>
+    <span style={{ position: "absolute", top: 3, left: 3, width: 3, height: 3, borderRadius: 3, background: "radial-gradient(circle at 30% 30%, #6b7787 0%, #2a323c 70%)" }} />
+    <span style={{ position: "absolute", top: 3, right: 3, width: 3, height: 3, borderRadius: 3, background: "radial-gradient(circle at 30% 30%, #6b7787 0%, #2a323c 70%)" }} />
+    <div style={{ position: "relative", width: "100%", height: "100%", borderRadius: 5, background: "linear-gradient(180deg, #4a5462 0%, #353d49 45%, #252b35 100%)", boxShadow: "inset 0 1px 0 rgba(220,235,245,0.22), inset 0 -2px 3px rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center", color: "#cfe6f3", overflow: "hidden", border: "1px solid rgba(123,212,245,0.6)" }}>
+      <span style={{ position: "absolute", top: 0, left: 1, right: 1, height: "45%", borderRadius: "5px 5px 100% 100%", background: "linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 100%)", pointerEvents: "none" }} />
+      <span style={{ position: "relative", filter: "drop-shadow(0 0 4px rgba(128,221,255,0.55))", color: "#dff1fb", display: "inline-flex" }}>{props.children}</span>
+    </div>
+  </div>;
+}
+function GsStatReadout(props) {
+  var s = props.s;
+  return <div style={{ position: "relative", height: 54, borderRadius: 6, background: "linear-gradient(180deg, #02050a 0%, #050810 60%, #02050a 100%)", border: "1px solid #0d141d", boxShadow: "inset 0 2px 6px rgba(0,0,0,0.85), inset 0 0 18px rgba(0,0,0,0.6)", padding: "5px 8px 4px", overflow: "hidden", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+    <span style={{ position: "absolute", inset: 1, borderRadius: 5, background: "repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 3px)", pointerEvents: "none" }} />
+    <span style={{ position: "absolute", top: 0, left: 4, right: 4, height: 6, background: "linear-gradient(180deg, rgba(255,255,255,0.10) 0%, transparent 100%)", borderRadius: "5px 5px 0 0", pointerEvents: "none" }} />
+    <span style={{ position: "absolute", inset: 0, borderRadius: 5, background: "radial-gradient(ellipse 80% 60% at 50% 70%, " + s.glow + "1a 0%, transparent 70%)", pointerEvents: "none" }} />
+    <div style={{ display: "flex", alignItems: "center", gap: 4, position: "relative" }}>
+      <GsLED color={s.glow} size={4} />
+      <GsMono size={7.5} ls={1.6} color={s.glow + "bb"}>{s.label}</GsMono>
+    </div>
+    <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 16, fontWeight: 700, letterSpacing: 1.4, color: s.glow, textShadow: "0 0 10px " + s.glow + ", 0 0 4px " + s.glow + "cc", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", position: "relative", lineHeight: 1 }}>{s.value}</div>
+  </div>;
+}
+// ────────────────────────────────────────────────────────────────────
+
 export default function CosmicDriftGame() {
   var _sc = useState(3), shipCol = _sc[0], setShipCol = _sc[1];
   // Bumped once block designs finish loading, so memoized grid re-renders.
@@ -2365,102 +2425,207 @@ function logUfo(msg) {
       </div>}
 
       {/* ═══ SPLASH SCREEN ═══ */}
-      {screen === "splash" && <div style={{ position: "fixed", inset: 0, zIndex: 400, background: "#0b0c1a", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", fontFamily: "'Quicksand',sans-serif" }}>
-        <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}><Stars /></div>
-        <div style={{ position: "relative", zIndex: 1, textAlign: "center", padding: "0 24px" }}>
-          <div style={{ position: "relative", marginBottom: 16, height: 70 }}>
-            <div style={{ animation: "splashShipDrift 12s ease-in-out infinite", display: "flex", justifyContent: "center", position: "relative" }}>
-              <div style={{ position: "absolute", top: -6, left: "50%", width: 6, height: 6, borderRadius: "50%", background: "#50c8ff", boxShadow: "0 0 10px rgba(80,200,255,0.9), 0 0 20px rgba(80,200,255,0.4)", opacity: 0, animation: "splashPlasma 5s linear infinite 2s", marginLeft: -3 }} />
-              <svg viewBox="0 0 36 40" width="48" height="54" style={{ filter: "drop-shadow(0 0 20px rgba(255,168,255,0.6))" }}><defs><linearGradient id="sgs" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ffd0ff" /><stop offset="100%" stopColor="#cc70cc" /></linearGradient></defs><path d="M18 0L4 32L12 27L18 40L24 27L32 32Z" fill="url(#sgs)" /></svg>
-            </div>
-          </div>
-          <div style={{ fontSize: 36, fontWeight: 700, color: "#b0c8d8", letterSpacing: 6, textTransform: "uppercase", textShadow: "0 0 30px rgba(80,200,255,0.4), 0 0 60px rgba(80,200,255,0.2)", marginBottom: 8 }}>Cosmic Drift</div>
-          <div style={{ fontSize: 14, color: "rgba(180,200,220,0.5)", letterSpacing: 3, textTransform: "uppercase", marginBottom: 16 }}>Block Shooter</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "center" }}>
-            <div style={{ background: "linear-gradient(180deg, rgba(10,10,20,0.7), rgba(18,18,30,0.7))", border: "1px solid rgba(60,60,80,0.5)", borderRadius: 10, padding: hasSaveGame ? "16px 20px 0" : "16px 20px 12px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, boxShadow: "inset 0 2px 6px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.03)", overflow: "hidden" }}>
-              <div onClick={function () { if (gameModeRef.current === "highlights") { fullRestart(); startMusic(); setScreen("game"); return; } if (npSavedChoice === "skip") { fullRestart(); setLevel(10); levelRef.current = 10; gridRef2.current = generateGrid(10); shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); seenPowerUpsRef.current = { crossshot: true, drone: true, lightning: true, anglebounce: true, hammer: true }; startMusic(); setScreen("game"); return; } if (npSavedChoice === "training") { fullRestart(); startMusic(); setScreen("game"); return; } setShowNewPlayerPopup(true); }} style={{ padding: "14px 48px", borderRadius: 6, background: "linear-gradient(180deg, #3d3d4a, #2a2a35)", border: "2px solid #505058", color: "#b0c8d8", fontSize: 16, fontWeight: 700, letterSpacing: 2, cursor: "pointer", boxShadow: "0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)", textTransform: "uppercase", display: "flex", alignItems: "center", gap: 10 }}><svg width="18" height="20" viewBox="0 0 36 40"><defs><linearGradient id="splShipG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#d0e8f0" /><stop offset="100%" stopColor="#80a8b8" /></linearGradient></defs><path d="M18 0L4 32L12 27L18 40L24 27L32 32Z" fill="url(#splShipG)" /></svg>{hasSaveGame ? "New Game" : "Play Game"}</div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: hasSaveGame ? 0 : 0 }}>
-                <div onClick={function () { gameModeRef.current = "campaign"; setGameMode("campaign"); }} style={{ color: gameMode === "campaign" ? "#80ddff" : "rgba(180,200,220,0.25)", fontSize: 10, fontWeight: 700, letterSpacing: 0.5, cursor: "pointer", textTransform: "uppercase", transition: "color 0.3s" }}>Campaign</div>
-                <div onClick={function () { var nm = gameMode === "campaign" ? "highlights" : "campaign"; gameModeRef.current = nm; setGameMode(nm); }} style={{ width: 44, height: 24, borderRadius: 12, background: gameMode === "highlights" ? "linear-gradient(180deg, #3a2a6a, #2a1a4a)" : "linear-gradient(180deg, #1a2a3a, #0f1a28)", border: "1.5px solid " + (gameMode === "highlights" ? "rgba(200,160,255,0.4)" : "rgba(80,200,255,0.25)"), cursor: "pointer", position: "relative", transition: "background 0.3s, border-color 0.3s", boxShadow: "inset 0 1px 3px rgba(0,0,0,0.4)" }}>
-                  <div style={{ position: "absolute", top: 2, left: gameMode === "campaign" ? 2 : 20, width: 18, height: 18, borderRadius: 9, background: gameMode === "highlights" ? "linear-gradient(180deg, #c8b8ff, #9a80dd)" : "linear-gradient(180deg, #80ddff, #50a8cc)", boxShadow: "0 1px 4px rgba(0,0,0,0.4)", transition: "left 0.25s ease-in-out, background 0.3s" }} />
-                </div>
-                <div onClick={function () { gameModeRef.current = "highlights"; setGameMode("highlights"); }} style={{ color: gameMode === "highlights" ? "#c8b8ff" : "rgba(180,200,220,0.25)", fontSize: 10, fontWeight: 700, letterSpacing: 0.5, cursor: "pointer", textTransform: "uppercase", transition: "color 0.3s" }}>Signature</div>
-              </div>
-              {/* Difficulty selector */}
-              <div style={{ display: "flex", alignItems: "center", gap: 0, background: "rgba(5,5,15,0.6)", borderRadius: 6, border: "1px solid rgba(60,60,80,0.5)", overflow: "hidden", boxShadow: "inset 0 1px 4px rgba(0,0,0,0.5)" }}>
-                {["easy", "regular", "hard"].map(function (d, di) {
-                  var isActive = difficulty === d;
-                  var col = DIFF_COLORS[d];
-                  return <div key={d} onClick={function () { difficultyRef.current = d; setDifficulty(d); try { window.storage.set("cosmic_drift_difficulty", d); } catch (e) {} }} style={{ padding: "6px 14px", fontSize: 9, fontWeight: 700, letterSpacing: 1.5, cursor: "pointer", textTransform: "uppercase", fontFamily: "'Courier New', monospace", color: isActive ? col : "rgba(140,140,160,0.3)", background: isActive ? "rgba(255,255,255,0.05)" : "transparent", borderLeft: di > 0 ? "1px solid rgba(60,60,80,0.4)" : "none", textShadow: isActive ? "0 0 8px " + col : "none", transition: "color 0.2s, text-shadow 0.2s" }}>{DIFF_LABELS[d]}</div>;
-                })}
-              </div>
-              {hasSaveGame && <div onClick={loadSaveGame} style={{ margin: "0 -20px", padding: "10px 24px", background: (function () { var sc = (saveGameInfo && saveGameInfo.difficulty) || "regular"; var c = DIFF_COLORS[sc] || DIFF_COLORS.regular; return "linear-gradient(180deg, rgba(30,30,40,0.9), rgba(20,20,30,0.9))"; })(), borderTop: "1px solid " + (DIFF_COLORS[(saveGameInfo && saveGameInfo.difficulty) || "regular"] || DIFF_COLORS.regular) + "44", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, width: "calc(100% + 40px)" }}>
-                <svg width="12" height="12" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="rgba(80,200,255,0.8)" /></svg>
-                <span style={{ color: "#80ddff", fontSize: 11, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase" }}>Continue</span>
-                {saveGameInfo && <span style={{ fontSize: 9, color: "rgba(128,200,255,0.4)", fontWeight: 600, letterSpacing: 0.5 }}>{"\u00B7 Level " + saveGameInfo.level + " \u00B7 " + (saveGameInfo.score || 0).toLocaleString() + " pts"}</span>}
-                {saveGameInfo && saveGameInfo.difficulty && <span style={{ fontSize: 8, fontWeight: 700, fontFamily: "'Courier New', monospace", letterSpacing: 1, color: DIFF_COLORS[saveGameInfo.difficulty] || DIFF_COLORS.regular, opacity: 0.6 }}>{"\u00B7 " + (saveGameInfo.difficulty || "regular").toUpperCase()}</span>}
-              </div>}
-            </div>
-            <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
+      {screen === "splash" && <div style={{ position: "fixed", inset: 0, zIndex: 400, background: GS.bg, color: "#e8f4fb", fontFamily: "'Quicksand', sans-serif", overflow: "hidden", display: "flex", flexDirection: "column", gap: 6, padding: 8 }}>
+        {/* Starfield */}
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(1.2px 1.2px at 12% 18%, rgba(255,255,255,0.4), transparent 60%),radial-gradient(1px 1px at 78% 9%, rgba(255,255,255,0.35), transparent 60%),radial-gradient(1px 1px at 42% 24%, rgba(255,255,255,0.35), transparent 60%),radial-gradient(1.2px 1.2px at 88% 38%, rgba(200,184,255,0.5), transparent 60%),radial-gradient(1px 1px at 28% 52%, rgba(255,255,255,0.3), transparent 60%),radial-gradient(1.2px 1.2px at 18% 78%, rgba(128,221,255,0.5), transparent 60%)", pointerEvents: "none", opacity: 0.7 }} />
+        {/* Wear overlay */}
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80px 18px at 10% 8%, rgba(255,255,255,0.04) 0%, transparent 70%),radial-gradient(ellipse 60px 14px at 88% 92%, rgba(0,0,0,0.25) 0%, transparent 70%),radial-gradient(circle 2px at 30% 80%, rgba(180,200,220,0.18) 0%, transparent 70%),radial-gradient(circle 1.5px at 72% 18%, rgba(180,200,220,0.15) 0%, transparent 70%)", pointerEvents: "none", mixBlendMode: "overlay", opacity: 0.6 }} />
 
-              <div onClick={function () { loadSavedLevels(); setScreen("mylevels"); }} style={{ padding: "8px 16px", borderRadius: 5, background: "linear-gradient(180deg, #3d3d4a, #2a2a35)", border: "1px solid rgba(200,184,255,0.25)", color: "rgba(200,184,255,0.7)", fontSize: 11, fontWeight: 700, letterSpacing: 1.5, cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)", textTransform: "uppercase", display: "flex", alignItems: "center", gap: 6 }}><svg width="12" height="12" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="2.5" rx="0.5" fill="currentColor" opacity="0.8" /><rect x="2" y="6.5" width="12" height="2.5" rx="0.5" fill="currentColor" opacity="0.6" /><rect x="2" y="11" width="12" height="2.5" rx="0.5" fill="currentColor" opacity="0.4" /></svg>My Levels</div>
-
-              <div onClick={navigateToWorkshop} style={{ padding: "8px 16px", borderRadius: 5, background: "linear-gradient(180deg, #1a3a4a, #0f2a38)", border: "2px solid rgba(80,200,255,0.3)", color: "#80ddff", fontSize: 11, fontWeight: 700, letterSpacing: 1.5, cursor: "pointer", boxShadow: "0 0 8px rgba(80,200,255,0.25), 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)", textTransform: "uppercase", display: "flex", alignItems: "center", gap: 6 }}><svg width="12" height="12" viewBox="0 0 16 16"><rect x="2" y="2" width="5" height="5" rx="1" fill="none" stroke="currentColor" strokeWidth="1.5" /><rect x="9" y="2" width="5" height="5" rx="1" fill="currentColor" opacity="0.4" /><rect x="2" y="9" width="5" height="5" rx="1" fill="currentColor" opacity="0.4" /><rect x="9" y="9" width="5" height="5" rx="1" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="1.5 1.5" /></svg>Workshop</div>
-            </div>
-            <div onClick={function () { setLegendOpen(true); }} style={{ marginTop: 8, padding: "7px 22px", borderRadius: 5, background: "linear-gradient(180deg, #3d3d4a, #2a2a35)", border: "1px solid rgba(180,200,220,0.15)", color: "rgba(180,200,220,0.5)", fontSize: 11, fontWeight: 700, letterSpacing: 1.5, cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06)", textTransform: "uppercase", display: "flex", alignItems: "center", gap: 6 }}><svg width="12" height="12" viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.7" /><text x="8" y="12" textAnchor="middle" fill="currentColor" fontSize="10" fontWeight="700" opacity="0.7">?</text></svg>Guide</div>
-            <div style={{ marginTop: 12, background: "rgba(10,10,20,0.5)", border: "1px solid rgba(60,60,80,0.4)", borderRadius: 8, padding: "8px 14px", display: "flex", gap: 10, justifyContent: "center", boxShadow: "inset 0 1px 4px rgba(0,0,0,0.3)" }}>
-              <div onClick={toggleSfxMute} style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 5, background: sfxMute ? "rgba(30,30,45,0.5)" : "rgba(40,30,60,0.5)", border: "1px solid " + (sfxMute ? "rgba(60,60,80,0.3)" : "rgba(180,140,255,0.3)"), color: sfxMute ? "rgba(180,200,220,0.25)" : "rgba(200,170,255,0.7)", fontSize: 9, fontWeight: 700, letterSpacing: 1, cursor: "pointer" }}>
-                <svg width="12" height="12" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z" fill="currentColor" opacity="0.7" />{sfxMute && <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2" opacity="0.7" />}</svg>
-                SFX {sfxMute ? "OFF" : "ON"}
-              </div>
-              <div onClick={toggleMusicMute} style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 5, background: musicMute ? "rgba(30,30,45,0.5)" : "rgba(40,30,60,0.5)", border: "1px solid " + (musicMute ? "rgba(60,60,80,0.3)" : "rgba(180,140,255,0.3)"), color: musicMute ? "rgba(180,200,220,0.25)" : "rgba(200,170,255,0.7)", fontSize: 9, fontWeight: 700, letterSpacing: 1, cursor: "pointer" }}>
-                <svg width="12" height="12" viewBox="0 0 24 24"><path d="M12 3v18l-7-5H2V8h3l7-5z" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.7" />{!musicMute && <path d="M16 8.5a4 4 0 010 7M19 5a9 9 0 010 14" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.5" />}{musicMute && <line x1="20" y1="6" x2="8" y2="18" stroke="currentColor" strokeWidth="2" opacity="0.7" />}</svg>
-                MUSIC {musicMute ? "OFF" : "ON"}
-              </div>
-            </div>
-          </div>
-          <div style={{ marginTop: 24, display: "flex", gap: 8, justifyContent: "center" }}>{[1,2,3,5,6,7].map(function (t) { return <div key={t} style={{ width: 24, height: 24, opacity: 0.5 }}><BlockContent type={t} size={24} shieldLevel={0} /></div>; })}</div>
-          {(bestScore > 0 || bestLevel > 0) && <div style={{ marginTop: 16, textAlign: "center" }}>
-            {bestScore > 0 && <div style={{ fontSize: 11, color: "rgba(255,200,60,0.5)", fontWeight: 700, letterSpacing: 1.5 }}>HIGH SCORE: {bestScore.toLocaleString()}</div>}
-            {bestLevel > 0 && <div style={{ fontSize: 10, color: "rgba(180,200,220,0.3)", fontWeight: 600, letterSpacing: 1, marginTop: 3 }}>LEVEL REACHED: {bestLevel}</div>}
-          </div>}
-          <div onClick={function () { setShowTesterMenu(true); setDevJumpLevel(""); }} style={{ marginTop: 20, padding: "6px 18px", borderRadius: 20, border: "1px solid rgba(180,200,220,0.15)", background: "rgba(255,255,255,0.04)", cursor: "pointer", display: "inline-block" }}><div style={{ fontSize: 10, color: "rgba(180,200,220,0.35)", letterSpacing: 2, fontWeight: 600 }}>FOR TESTERS</div></div>
-          {isIosSafari && !iosPromptDismissed && <div style={{ marginTop: 16, background: "rgba(8,8,20,0.75)", border: "1px solid rgba(80,200,255,0.15)", borderRadius: 10, padding: "10px 12px 10px 10px", width: "100%", maxWidth: 300, display: "flex", gap: 10, alignItems: "flex-start", boxShadow: "inset 0 1px 4px rgba(0,0,0,0.3)" }}>
-            <svg width="16" height="20" viewBox="0 0 16 20" style={{ flexShrink: 0, marginTop: 2 }}><path d="M8 1v11M5 4l3-3 3 3" fill="none" stroke="rgba(80,200,255,0.75)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /><path d="M2 9v9a1 1 0 001 1h10a1 1 0 001-1V9" fill="none" stroke="rgba(80,200,255,0.4)" strokeWidth="1.5" strokeLinecap="round" /></svg>
-            <div style={{ flex: 1 }}>
-              <div style={{ color: "rgba(180,200,220,0.8)", fontSize: 11, fontWeight: 700, letterSpacing: 0.3, marginBottom: 3 }}>Make this an app</div>
-              <div style={{ color: "rgba(160,180,200,0.5)", fontSize: 10, lineHeight: 1.55 }}>{"Tap "}<span style={{ color: "rgba(80,200,255,0.7)", fontWeight: 700 }}>Share</span>{" \u2192 "}<span style={{ color: "rgba(80,200,255,0.7)", fontWeight: 700 }}>Add to Home Screen</span>{" to play full-screen without the URL bar."}</div>
-            </div>
-            <div onClick={function () { setIosPromptDismissed(true); try { window.storage.set("cosmic_drift_ios_prompt_dismissed", "true"); } catch (e) {} }} style={{ color: "rgba(180,200,220,0.25)", fontSize: 20, fontWeight: 300, cursor: "pointer", lineHeight: 1, flexShrink: 0, paddingLeft: 2, marginTop: -2 }}>{"\u00D7"}</div>
-          </div>}
+        {/* Top strip */}
+        <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0, height: 36, position: "relative", zIndex: 1 }}>
+          <GsPanel style={{ flex: 1, height: "100%", display: "flex", alignItems: "center", padding: "0 12px 0 18px", gap: 10 }}>
+            <GsLED color={GS.green} />
+            <GsMono size={9} ls={2.5} color="rgba(128,221,255,0.7)" style={{ whiteSpace: "nowrap" }}>CD&#xb7;76</GsMono>
+            <span style={{ width: 1, height: 12, background: "rgba(80,221,255,0.18)", flexShrink: 0 }} />
+            <GsMono size={9} ls={2} style={{ whiteSpace: "nowrap" }}>DRIFTER</GsMono>
+            <span style={{ width: 1, height: 12, background: "rgba(80,221,255,0.18)", flexShrink: 0 }} />
+            <GsMono size={9} ls={2} style={{ whiteSpace: "nowrap" }}>NOMINAL</GsMono>
+            <div style={{ flex: 1 }} />
+            <GsLED color="#ffb43c" size={5} />
+            <GsLED color={GS.green} size={5} />
+          </GsPanel>
+          <GsIconBtn onClick={function() { setLegendOpen(true); }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M9.5 9.5a2.5 2.5 0 1 1 4.4 1.7c-.6.6-1.4.9-1.4 2.3" /><circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none" /></svg>
+          </GsIconBtn>
+          <GsIconBtn onClick={function() { loadSavedLevels(); setScreen("mylevels"); }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><line x1="4" y1="7" x2="20" y2="7" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="17" x2="20" y2="17" /></svg>
+          </GsIconBtn>
         </div>
+
+        {/* Title panel */}
+        <GsPanel style={{ flexShrink: 0, padding: "8px 18px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, overflow: "hidden", height: 68, position: "relative", zIndex: 1 }}>
+          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, background: "repeating-linear-gradient(135deg, #ffb43c 0 5px, #1a1f2a 5px 10px)", opacity: 0.55 }} />
+          <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: 3, background: "repeating-linear-gradient(135deg, #ffb43c 0 5px, #1a1f2a 5px 10px)", opacity: 0.55 }} />
+          <h1 style={{ margin: 0, lineHeight: 1, fontFamily: "'Exo 2', sans-serif", fontSize: 28, fontWeight: 800, letterSpacing: 6, color: "#dfe9f3", textShadow: "0 1px 0 rgba(255,255,255,0.12), 0 -1px 0 rgba(0,0,0,0.6), 0 0 14px rgba(128,221,255,0.35)", whiteSpace: "nowrap" }}>COSMIC DRIFT</h1>
+          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, letterSpacing: 3, color: "rgba(200,220,240,0.5)", display: "inline-flex", alignItems: "center", gap: 10 }}>
+            <span style={{ width: 22, height: 1, background: "rgba(80,221,255,0.25)" }} />
+            <span>BLOCK SHOOTER</span>
+            <span style={{ width: 22, height: 1, background: "rgba(80,221,255,0.25)" }} />
+          </div>
+        </GsPanel>
+
+        {/* Radar / tactical scope */}
+        <GsPanel style={{ flex: 1, minHeight: 100, padding: 12, position: "relative", overflow: "hidden", zIndex: 1 }}>
+          <div style={{ position: "absolute", inset: 18, background: GS.inset, border: GS.ib, borderRadius: 8, boxShadow: GS.is + ", inset 0 0 80px rgba(0,0,0,0.65)", overflow: "hidden" }}>
+            <svg width="100%" height="100%" viewBox="0 0 320 320" preserveAspectRatio="xMidYMid meet" style={{ position: "absolute", inset: 0 }}>
+              <defs>
+                <radialGradient id="gsScopeGlow"><stop offset="0%" stopColor="rgba(80,221,255,0)" /><stop offset="85%" stopColor="rgba(80,221,255,0.05)" /><stop offset="100%" stopColor="rgba(80,221,255,0)" /></radialGradient>
+                <linearGradient id="gsShipGrad" x1="0.5" y1="0" x2="0.5" y2="1"><stop offset="0%" stopColor="#ffd0ee" /><stop offset="55%" stopColor="#e9a8e0" /><stop offset="100%" stopColor="#b87ac4" /></linearGradient>
+              </defs>
+              <line x1="0" y1="160" x2="320" y2="160" stroke="rgba(80,221,255,0.14)" strokeWidth="1" />
+              <line x1="160" y1="0" x2="160" y2="320" stroke="rgba(80,221,255,0.14)" strokeWidth="1" />
+              <circle cx="160" cy="160" r="148" fill="url(#gsScopeGlow)" />
+              <circle cx="160" cy="160" r="148" fill="none" stroke="rgba(80,221,255,0.32)" strokeWidth="1" strokeDasharray="2 4" />
+              <circle cx="160" cy="160" r="105" fill="none" stroke="rgba(80,221,255,0.20)" strokeWidth="1" />
+              <circle cx="160" cy="160" r="62" fill="none" stroke="rgba(80,221,255,0.18)" strokeWidth="1" />
+              <path d="M 160 12 A 148 148 0 0 1 280 70" stroke="rgba(80,255,210,0.55)" strokeWidth="1" fill="none" />
+              {Array.from({ length: 24 }).map(function(_, i) { var a = i / 24 * Math.PI * 2 - Math.PI / 2; var r1 = 146, r2 = i % 6 === 0 ? 134 : 140; return <line key={i} x1={160 + r1 * Math.cos(a)} y1={160 + r1 * Math.sin(a)} x2={160 + r2 * Math.cos(a)} y2={160 + r2 * Math.sin(a)} stroke="rgba(80,221,255,0.35)" strokeWidth="1" />; })}
+              {[[10,10,1,1],[310,10,-1,1],[10,310,1,-1],[310,310,-1,-1]].map(function(br, i) { var cx = br[0], cy = br[1], sx = br[2], sy = br[3]; return <g key={"br" + i} stroke="rgba(80,221,255,0.55)" strokeWidth="1.5" strokeLinecap="round"><line x1={cx} y1={cy} x2={cx + 14 * sx} y2={cy} /><line x1={cx} y1={cy} x2={cx} y2={cy + 14 * sy} /></g>; })}
+              <g transform="translate(56, 82)">{[[1,0,0],[2,0,1],[3,0,2],[5,0,3],[6,0,1],[0,1,1],[1,1,3],[2,1,0],[4,1,2],[6,1,0],[2,2,0],[3,2,1],[4,2,4],[5,2,1],[1,3,2],[3,3,4],[4,3,0],[5,3,2],[2,4,1],[4,4,2]].map(function(blk, i) { var pal = ["#80ddff","#c8b8ff","#ffb43c","#64dcb4","#e0457b","#7b5ea7"]; var c = blk[0], r = blk[1], p = blk[2]; return <rect key={i} x={c * 26} y={r * 26} width={22} height={22} rx={3} fill={pal[p]} opacity="0.95" style={{ filter: "drop-shadow(0 0 6px " + pal[p] + "aa)" }} />; })}</g>
+              <g transform="translate(160, 248)"><g transform="scale(0.32) translate(-50, -50)"><path d="M 50 6 L 86 78 L 64 68 L 50 88 L 36 68 L 14 78 Z" fill="url(#gsShipGrad)" stroke="#3a1a44" strokeWidth="3" strokeLinejoin="round" style={{ filter: "drop-shadow(0 0 10px #e9a8e0)" }} /></g></g>
+              <g fontFamily="'JetBrains Mono', monospace" fontSize="8" letterSpacing="1.5" fill="rgba(80,221,255,0.55)"><text x="22" y="26">N {"·"} 000</text><text x="252" y="26">SECTOR 7</text><text x="22" y="304">RNG 8x6</text><text x="246" y="304">{"↑"} HOSTILE</text></g>
+            </svg>
+          </div>
+        </GsPanel>
+
+        {/* Stats strip */}
+        <GsPanel style={{ flexShrink: 0, padding: "8px 10px 10px", position: "relative", zIndex: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6, paddingLeft: 5 }}>
+            <GsLED color={GS.blue} size={5} />
+            <GsMono size={8} ls={2} color="rgba(80,221,255,0.7)">FLIGHT RECORD</GsMono>
+            <div style={{ flex: 1 }} />
+            <GsMono size={7} ls={1.5} color="rgba(80,255,210,0.7)">{"·"} LIVE</GsMono>
+          </div>
+          <div style={{ background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: 4, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4 }}>
+            <GsStatReadout s={{ label: "BEST", value: bestScore > 0 ? bestScore.toLocaleString() : "—", glow: GS.blue }} />
+            <GsStatReadout s={{ label: "LEVEL", value: bestLevel > 0 ? "L·" + bestLevel : "—", glow: "#ffb43c" }} />
+            <GsStatReadout s={{ label: "DIFF", value: (DIFF_LABELS[difficulty] || difficulty).toUpperCase(), glow: DIFF_COLORS[difficulty] || GS.green }} />
+          </div>
+        </GsPanel>
+
+        {/* Mode / Difficulty */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, flexShrink: 0, position: "relative", zIndex: 1 }}>
+          <GsPanel style={{ padding: "8px 10px 10px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6, paddingLeft: 5 }}>
+              <GsLED color={GS.blue} size={5} />
+              <GsMono size={8} ls={2} color="rgba(80,221,255,0.65)">MODE</GsMono>
+            </div>
+            <div style={{ background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: 3, display: "flex", gap: 3 }}>
+              <div onClick={function() { gameModeRef.current = "campaign"; setGameMode("campaign"); }} style={{ flex: 1, padding: "7px 0", textAlign: "center", fontFamily: "'Exo 2', sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: 1.5, cursor: "pointer", color: gameMode === "campaign" ? "#0a0c12" : "rgba(200,220,240,0.55)", background: gameMode === "campaign" ? "linear-gradient(180deg, " + GS.blue + " 0%, " + GS.blue + "cc 100%)" : "transparent", boxShadow: gameMode === "campaign" ? "inset 0 1px 0 rgba(255,255,255,0.3), 0 0 10px " + GS.blue + "66" : "none", textTransform: "uppercase", borderRadius: 4 }}>Campaign</div>
+              <div onClick={function() { gameModeRef.current = "highlights"; setGameMode("highlights"); }} style={{ flex: 1, padding: "7px 0", textAlign: "center", fontFamily: "'Exo 2', sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: 1.5, cursor: "pointer", color: gameMode === "highlights" ? "#0a0c12" : "rgba(200,220,240,0.55)", background: gameMode === "highlights" ? "linear-gradient(180deg, #c8b8ff 0%, #c8b8ffcc 100%)" : "transparent", boxShadow: gameMode === "highlights" ? "inset 0 1px 0 rgba(255,255,255,0.3), 0 0 10px #c8b8ff66" : "none", textTransform: "uppercase", borderRadius: 4 }}>Signature</div>
+            </div>
+          </GsPanel>
+          <GsPanel style={{ padding: "8px 10px 10px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6, paddingLeft: 5 }}>
+              <GsLED color="#ffb43c" size={5} />
+              <GsMono size={8} ls={2} color="rgba(255,180,60,0.7)">DIFFICULTY</GsMono>
+            </div>
+            <div style={{ background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: 3, display: "flex", gap: 3 }}>
+              {["easy","regular","hard"].map(function(d) { var dcol = DIFF_COLORS[d]; var isAct = difficulty === d; return <div key={d} onClick={function() { difficultyRef.current = d; setDifficulty(d); try { window.storage.set("cosmic_drift_difficulty", d); } catch(e) {} }} style={{ flex: 1, padding: "7px 0", textAlign: "center", fontFamily: "'Exo 2', sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: 1.5, cursor: "pointer", color: isAct ? "#0a0c12" : "rgba(200,220,240,0.55)", background: isAct ? "linear-gradient(180deg, " + dcol + " 0%, " + dcol + "cc 100%)" : "transparent", boxShadow: isAct ? "inset 0 1px 0 rgba(255,255,255,0.3), 0 0 10px " + dcol + "66" : "none", textTransform: "uppercase", borderRadius: 4 }}>{DIFF_LABELS[d]}</div>; })}
+            </div>
+          </GsPanel>
+        </div>
+
+        {/* PLAY button */}
+        <div onClick={function() { if (gameModeRef.current === "highlights") { fullRestart(); startMusic(); setScreen("game"); return; } if (npSavedChoice === "skip") { fullRestart(); setLevel(10); levelRef.current = 10; gridRef2.current = generateGrid(10); shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); seenPowerUpsRef.current = { crossshot: true, drone: true, lightning: true, anglebounce: true, hammer: true }; startMusic(); setScreen("game"); return; } if (npSavedChoice === "training") { fullRestart(); startMusic(); setScreen("game"); return; } setShowNewPlayerPopup(true); }} style={{ position: "relative", height: 64, borderRadius: 12, background: GS.brushedSolid, border: GS.pbl, boxShadow: GS.ps, padding: 6, flexShrink: 0, cursor: "pointer", zIndex: 1 }}>
+          <GsRivet pos={{ top: 5, left: 5 }} size={5} />
+          <GsRivet pos={{ top: 5, right: 5 }} size={5} />
+          <GsRivet pos={{ bottom: 5, left: 5 }} size={5} />
+          <GsRivet pos={{ bottom: 5, right: 5 }} size={5} />
+          <div style={{ position: "absolute", inset: 6, borderRadius: 8, background: "linear-gradient(180deg, #2c8a4a 0%, #1a5a32 100%)", border: "1px solid #50ffae", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.4), 0 0 26px rgba(80,255,180,0.45), 0 0 0 1px rgba(80,255,180,0.3)", display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "45%", borderRadius: "8px 8px 100% 100%", background: "linear-gradient(180deg, rgba(255,255,255,0.22) 0%, transparent 100%)", pointerEvents: "none" }} />
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#eaffe8"><polygon points="6,4 20,12 6,20" /></svg>
+            <span style={{ fontFamily: "'Exo 2', sans-serif", fontSize: 22, fontWeight: 800, letterSpacing: 6, color: "#eaffe8", textShadow: "0 0 12px rgba(128,221,255,0.7), 0 1px 0 rgba(0,0,0,0.4)" }}>{hasSaveGame ? "NEW GAME" : "PLAY"}</span>
+          </div>
+        </div>
+
+        {/* Continue row */}
+        {hasSaveGame && <div onClick={loadSaveGame} style={{ flexShrink: 0, padding: "8px 16px", background: "linear-gradient(180deg, rgba(20,20,35,0.9), rgba(12,12,22,0.9))", border: "1px solid " + (DIFF_COLORS[(saveGameInfo && saveGameInfo.difficulty) || "regular"] || GS.green) + "44", borderRadius: 8, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, zIndex: 1 }}>
+          <svg width="12" height="12" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="rgba(80,200,255,0.8)" /></svg>
+          <GsMono size={10} ls={1.5} color="#80ddff" style={{ fontWeight: 700 }}>CONTINUE</GsMono>
+          {saveGameInfo && <GsMono size={8} ls={0.5} color="rgba(128,200,255,0.4)">{"· Level " + saveGameInfo.level + " · " + (saveGameInfo.score || 0).toLocaleString() + " pts"}</GsMono>}
+          {saveGameInfo && saveGameInfo.difficulty && <GsMono size={7} ls={1} color={(DIFF_COLORS[saveGameInfo.difficulty] || GS.green) + "99"}>{"· " + (saveGameInfo.difficulty || "regular").toUpperCase()}</GsMono>}
+        </div>}
+
+        {/* Workshop lever */}
+        <div onClick={navigateToWorkshop} style={{ position: "relative", height: 60, borderRadius: 10, background: GS.brushedSolid, border: GS.pbl, boxShadow: GS.ps, padding: "8px 14px", display: "flex", alignItems: "center", gap: 10, overflow: "hidden", cursor: "pointer", flexShrink: 0, zIndex: 1 }}>
+          <GsRivet pos={{ top: 5, left: 5 }} size={5} />
+          <GsRivet pos={{ top: 5, right: 5 }} size={5} />
+          <GsRivet pos={{ bottom: 5, left: 5 }} size={5} />
+          <GsRivet pos={{ bottom: 5, right: 5 }} size={5} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 4, marginLeft: 8 }}>
+            <div style={{ fontFamily: "'Exo 2', sans-serif", fontSize: 13, fontWeight: 700, letterSpacing: 2.5, color: "#dfe9f3", textShadow: "0 0 10px rgba(128,221,255,0.4), 0 -1px 0 rgba(0,0,0,0.5)" }}>WORKSHOP</div>
+            <div style={{ display: "flex", gap: 4 }}>
+              <GsLED color={GS.blue} size={4} />
+              <GsLED color="#c8b8ff" size={4} />
+              <GsLED color="#ffb43c" size={4} />
+              <GsLED color="#64dcb4" size={4} />
+            </div>
+          </div>
+          <div style={{ flex: 1 }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+            {[0.9,0.55,0.25].map(function(op, i) { return <svg key={i} width="10" height="14" viewBox="0 0 10 14" style={{ opacity: op, filter: op > 0.7 ? "drop-shadow(0 0 4px rgba(128,221,255,0.7))" : "none" }}><path d="M 8 1 L 2 7 L 8 13" stroke={GS.blue} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" /></svg>; })}
+          </div>
+          <div style={{ position: "relative", width: 64, height: 32, borderRadius: 18, background: GS.inset, border: GS.ib, boxShadow: GS.is + ", inset 0 0 6px rgba(0,0,0,0.6)" }}>
+            <div style={{ position: "absolute", top: 4, bottom: 4, left: 8, right: 8, borderRadius: 999, background: "repeating-linear-gradient(90deg, rgba(80,221,255,0.15) 0 1px, transparent 1px 9px)", opacity: 0.7 }} />
+            <div style={{ position: "absolute", top: 2, right: 2, width: 28, height: 28, borderRadius: 14, background: "radial-gradient(circle at 30% 25%, #7a8494 0%, #4a525e 50%, #2a323c 100%)", border: "1px solid #6a7484", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 3px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.7), 0 0 6px rgba(80,221,255,0.35)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ display: "flex", gap: 2 }}><span style={{ width: 2, height: 11, borderRadius: 1, background: "#1a1f2a" }} /><span style={{ width: 2, height: 11, borderRadius: 1, background: "#1a1f2a" }} /><span style={{ width: 2, height: 11, borderRadius: 1, background: "#1a1f2a" }} /></div>
+              <div style={{ position: "absolute", top: 3, left: "50%", transform: "translateX(-50%)", width: 4, height: 4, borderRadius: 4, background: GS.green, boxShadow: "0 0 6px " + GS.green }} />
+            </div>
+          </div>
+        </div>
+
+        {/* SFX / Music row */}
+        <div style={{ display: "flex", gap: 8, justifyContent: "center", flexShrink: 0, zIndex: 1 }}>
+          <div onClick={toggleSfxMute} style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 14px", borderRadius: 5, background: sfxMute ? "rgba(20,20,35,0.5)" : "rgba(30,25,50,0.6)", border: "1px solid " + (sfxMute ? "rgba(60,60,80,0.3)" : "rgba(180,140,255,0.35)"), color: sfxMute ? "rgba(180,200,220,0.25)" : "rgba(200,170,255,0.8)", fontSize: 9, fontWeight: 700, letterSpacing: 1.5, cursor: "pointer", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>
+            <svg width="11" height="11" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z" fill="currentColor" opacity="0.7" />{sfxMute && <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2" opacity="0.7" />}</svg>
+            SFX {sfxMute ? "OFF" : "ON"}
+          </div>
+          <div onClick={toggleMusicMute} style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 14px", borderRadius: 5, background: musicMute ? "rgba(20,20,35,0.5)" : "rgba(30,25,50,0.6)", border: "1px solid " + (musicMute ? "rgba(60,60,80,0.3)" : "rgba(180,140,255,0.35)"), color: musicMute ? "rgba(180,200,220,0.25)" : "rgba(200,170,255,0.8)", fontSize: 9, fontWeight: 700, letterSpacing: 1.5, cursor: "pointer", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>
+            <svg width="11" height="11" viewBox="0 0 24 24"><path d="M12 3v18l-7-5H2V8h3l7-5z" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.7" />{!musicMute && <path d="M16 8.5a4 4 0 010 7M19 5a9 9 0 010 14" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.5" />}{musicMute && <line x1="20" y1="6" x2="8" y2="18" stroke="currentColor" strokeWidth="2" opacity="0.7" />}</svg>
+            MUSIC {musicMute ? "OFF" : "ON"}
+          </div>
+        </div>
+
+        {/* For Testers */}
+        <div onClick={function() { setShowTesterMenu(true); setDevJumpLevel(""); }} style={{ textAlign: "center", flexShrink: 0, paddingBottom: 4, zIndex: 1, cursor: "pointer" }}>
+          <GsMono size={9} ls={2} color="rgba(180,200,220,0.2)">FOR TESTERS</GsMono>
+        </div>
+
+        {/* iOS install prompt */}
+        {isIosSafari && !iosPromptDismissed && <div style={{ flexShrink: 0, background: "rgba(8,8,20,0.75)", border: "1px solid rgba(80,200,255,0.15)", borderRadius: 10, padding: "10px 12px 10px 10px", display: "flex", gap: 10, alignItems: "flex-start", zIndex: 1 }}>
+          <svg width="16" height="20" viewBox="0 0 16 20" style={{ flexShrink: 0, marginTop: 2 }}><path d="M8 1v11M5 4l3-3 3 3" fill="none" stroke="rgba(80,200,255,0.75)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /><path d="M2 9v9a1 1 0 001 1h10a1 1 0 001-1V9" fill="none" stroke="rgba(80,200,255,0.4)" strokeWidth="1.5" strokeLinecap="round" /></svg>
+          <div style={{ flex: 1 }}>
+            <div style={{ color: "rgba(180,200,220,0.8)", fontSize: 11, fontWeight: 700, letterSpacing: 0.3, marginBottom: 3 }}>Make this an app</div>
+            <div style={{ color: "rgba(160,180,200,0.5)", fontSize: 10, lineHeight: 1.55 }}>{"Tap "}<span style={{ color: "rgba(80,200,255,0.7)", fontWeight: 700 }}>Share</span>{" → "}<span style={{ color: "rgba(80,200,255,0.7)", fontWeight: 700 }}>Add to Home Screen</span>{" to play full-screen without the URL bar."}</div>
+          </div>
+          <div onClick={function() { setIosPromptDismissed(true); try { window.storage.set("cosmic_drift_ios_prompt_dismissed", "true"); } catch(e) {} }} style={{ color: "rgba(180,200,220,0.25)", fontSize: 20, fontWeight: 300, cursor: "pointer", lineHeight: 1, flexShrink: 0, paddingLeft: 2, marginTop: -2 }}>{"×"}</div>
+        </div>}
+
         {/* Signature Levels popup */}
-        {sigLevelsOpen && <div onClick={function () { setSigLevelsOpen(false); }} style={{ position: "absolute", inset: 0, zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(5,5,15,0.7)", backdropFilter: "blur(4px)" }}>
-          <div onClick={function (e) { e.stopPropagation(); }} style={{ background: "rgba(25,25,40,0.95)", border: "1px solid rgba(80,200,255,0.2)", borderRadius: 10, padding: "16px 0 8px", width: 220, boxShadow: "0 8px 32px rgba(0,0,0,0.6)" }}>
+        {sigLevelsOpen && <div onClick={function() { setSigLevelsOpen(false); }} style={{ position: "absolute", inset: 0, zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(5,5,15,0.7)", backdropFilter: "blur(4px)" }}>
+          <div onClick={function(e) { e.stopPropagation(); }} style={{ background: "rgba(25,25,40,0.95)", border: "1px solid rgba(80,200,255,0.2)", borderRadius: 10, padding: "16px 0 8px", width: 220, boxShadow: "0 8px 32px rgba(0,0,0,0.6)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 16px 12px", borderBottom: "1px solid rgba(60,60,80,0.4)" }}>
               <span style={{ color: "#b0c8d8", fontSize: 12, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase" }}>Signature Levels</span>
-              <div onClick={function () { setSigLevelsOpen(false); }} style={{ color: "rgba(180,200,220,0.4)", fontSize: 16, fontWeight: 700, cursor: "pointer", padding: "0 2px" }}>{"\u2715"}</div>
+              <div onClick={function() { setSigLevelsOpen(false); }} style={{ color: "rgba(180,200,220,0.4)", fontSize: 16, fontWeight: 700, cursor: "pointer", padding: "0 2px" }}>{"✕"}</div>
             </div>
-            {Object.keys(FIXED_LEVELS).sort(function (a, b) { return Number(a) - Number(b); }).map(function (k) {
-              var fl = FIXED_LEVELS[k];
-              return <div key={k} onClick={function () { playSignatureLevel(Number(k)); }} style={{ padding: "12px 16px", cursor: "pointer", borderBottom: "1px solid rgba(60,60,80,0.25)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ color: "#b0c8d8", fontSize: 13, fontWeight: 700 }}>{fl.name}</span>
-                <span style={{ color: "rgba(180,200,220,0.3)", fontSize: 10 }}>Lvl {k}</span>
-              </div>;
-            })}
+            {Object.keys(FIXED_LEVELS).sort(function(a, b) { return Number(a) - Number(b); }).map(function(k) { var fl = FIXED_LEVELS[k]; return <div key={k} onClick={function() { playSignatureLevel(Number(k)); }} style={{ padding: "12px 16px", cursor: "pointer", borderBottom: "1px solid rgba(60,60,80,0.25)", display: "flex", justifyContent: "space-between", alignItems: "center" }}><span style={{ color: "#b0c8d8", fontSize: 13, fontWeight: 700 }}>{fl.name}</span><span style={{ color: "rgba(180,200,220,0.3)", fontSize: 10 }}>Lvl {k}</span></div>; })}
           </div>
         </div>}
-        {showNewPlayerPopup && <div onClick={function () { setShowNewPlayerPopup(false); }} style={{ position: "absolute", inset: 0, zIndex: 15, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(5,5,15,0.7)", backdropFilter: "blur(4px)" }}>
-          <div onClick={function (e) { e.stopPropagation(); }} style={{ background: "linear-gradient(170deg, #151040, #1a0a2e)", border: "1px solid rgba(120,80,255,0.3)", borderRadius: 16, padding: "24px 28px", textAlign: "center", maxWidth: 280, boxShadow: "0 8px 32px rgba(0,0,0,0.6)" }}>
+
+        {/* New player popup */}
+        {showNewPlayerPopup && <div onClick={function() { setShowNewPlayerPopup(false); }} style={{ position: "absolute", inset: 0, zIndex: 15, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(5,5,15,0.7)", backdropFilter: "blur(4px)" }}>
+          <div onClick={function(e) { e.stopPropagation(); }} style={{ background: "linear-gradient(170deg, #151040, #1a0a2e)", border: "1px solid rgba(120,80,255,0.3)", borderRadius: 16, padding: "24px 28px", textAlign: "center", maxWidth: 280, boxShadow: "0 8px 32px rgba(0,0,0,0.6)" }}>
             <div style={{ color: "#c8b8ff", fontSize: 16, fontWeight: 700, marginBottom: 20, letterSpacing: 0.5 }}>Welcome to Cosmic Drift</div>
-            <div onClick={function () { setShowNewPlayerPopup(false); if (npDontShow) { setNpSavedChoice("training"); try { window.storage.set("cosmic_drift_skip_popup", "training"); } catch (e) {} } fullRestart(); startMusic(); setScreen("game"); }} style={{ padding: "12px 24px", borderRadius: 6, background: "linear-gradient(180deg, #2a3a5a, #1a2a3a)", border: "2px solid rgba(80,200,255,0.4)", color: "#80ddff", fontWeight: 700, fontSize: 14, cursor: "pointer", marginBottom: 12, letterSpacing: 0.5, lineHeight: 1.5 }}>New Player?<br />Show me how!</div>
-            <div onClick={function () { setShowNewPlayerPopup(false); if (npDontShow) { setNpSavedChoice("skip"); try { window.storage.set("cosmic_drift_skip_popup", "skip"); } catch (e) {} } gameModeRef.current = "campaign"; setGameMode("campaign"); fullRestart(); setLevel(10); levelRef.current = 10; gridRef2.current = generateGrid(10); shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); seenPowerUpsRef.current = { crossshot: true, drone: true, lightning: true, anglebounce: true, hammer: true }; startMusic(); setScreen("game"); }} style={{ padding: "10px 24px", borderRadius: 6, background: PNL, border: PNLB, color: "rgba(200,184,255,0.7)", fontWeight: 600, fontSize: 12, cursor: "pointer", marginBottom: 18, letterSpacing: 0.5 }}>Skip Training Levels</div>
-            <div onClick={function () { setNpDontShow(function (v) { return !v; }); }} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, cursor: "pointer" }}>
-              <div style={{ width: 16, height: 16, borderRadius: 3, border: "1.5px solid " + (npDontShow ? "rgba(80,200,255,0.5)" : "rgba(120,140,160,0.3)"), background: npDontShow ? "rgba(80,200,255,0.15)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>{npDontShow && <div style={{ color: "#80ddff", fontSize: 11, fontWeight: 700 }}>{"\u2713"}</div>}</div>
+            <div onClick={function() { setShowNewPlayerPopup(false); if (npDontShow) { setNpSavedChoice("training"); try { window.storage.set("cosmic_drift_skip_popup", "training"); } catch(e) {} } fullRestart(); startMusic(); setScreen("game"); }} style={{ padding: "12px 24px", borderRadius: 6, background: "linear-gradient(180deg, #2a3a5a, #1a2a3a)", border: "2px solid rgba(80,200,255,0.4)", color: "#80ddff", fontWeight: 700, fontSize: 14, cursor: "pointer", marginBottom: 12, letterSpacing: 0.5, lineHeight: 1.5 }}>New Player?<br />Show me how!</div>
+            <div onClick={function() { setShowNewPlayerPopup(false); if (npDontShow) { setNpSavedChoice("skip"); try { window.storage.set("cosmic_drift_skip_popup", "skip"); } catch(e) {} } gameModeRef.current = "campaign"; setGameMode("campaign"); fullRestart(); setLevel(10); levelRef.current = 10; gridRef2.current = generateGrid(10); shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); seenPowerUpsRef.current = { crossshot: true, drone: true, lightning: true, anglebounce: true, hammer: true }; startMusic(); setScreen("game"); }} style={{ padding: "10px 24px", borderRadius: 6, background: PNL, border: PNLB, color: "rgba(200,184,255,0.7)", fontWeight: 600, fontSize: 12, cursor: "pointer", marginBottom: 18, letterSpacing: 0.5 }}>Skip Training Levels</div>
+            <div onClick={function() { setNpDontShow(function(v) { return !v; }); }} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, cursor: "pointer" }}>
+              <div style={{ width: 16, height: 16, borderRadius: 3, border: "1.5px solid " + (npDontShow ? "rgba(80,200,255,0.5)" : "rgba(120,140,160,0.3)"), background: npDontShow ? "rgba(80,200,255,0.15)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>{npDontShow && <div style={{ color: "#80ddff", fontSize: 11, fontWeight: 700 }}>{"✓"}</div>}</div>
               <div style={{ color: "rgba(180,200,220,0.4)", fontSize: 10, fontWeight: 600 }}>Don't show this again</div>
             </div>
           </div>
         </div>}
+
       </div>}
 
       {/* ═══ BUILDER SCREEN ═══ */}
