@@ -2590,8 +2590,8 @@ function logUfo(msg) {
 
         {/* Splash menu — dim backdrop + corner glow */}
         {splashMenuOpen && <div onClick={function() { setSplashMenuOpen(false); }} style={{ position: "absolute", inset: 0, zIndex: 20, background: "radial-gradient(circle 220px at calc(100% - 26px) 26px, rgba(80,200,255,0.10) 0%, transparent 70%), rgba(5,5,15,0.55)" }} />}
-        {/* Splash menu dropdown panel */}
-        {splashMenuOpen && <div style={{ position: "absolute", top: 52, right: 8, background: "linear-gradient(180deg, #3a3a4a, #28283a)", border: "2px solid rgba(80,200,255,0.2)", borderRadius: 8, padding: "4px 0", minWidth: 190, boxShadow: "0 8px 24px rgba(0,0,0,0.6), 0 0 12px rgba(80,200,255,0.08)", zIndex: 21 }}>
+        {/* Splash menu dropdown — brushed steel panel with rivets */}
+        {splashMenuOpen && <GsPanel style={{ position: "absolute", top: 52, right: 8, zIndex: 21, minWidth: 210, padding: "4px 0" }}>
           <div onClick={function() { setSplashMenuOpen(false); setLegendOpen(true); }} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 }}>
             <svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="rgba(200,210,220,0.5)" strokeWidth="2" /><text x="12" y="17" textAnchor="middle" fill="rgba(200,210,220,0.6)" fontSize="14" fontWeight="700">?</text></svg>
             Guide
@@ -2604,6 +2604,15 @@ function logUfo(msg) {
           <div onClick={function() { setSplashMenuOpen(false); loadSavedLevels(); setScreen("mylevels"); }} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="3" rx="1" fill="rgba(200,210,220,0.5)" /><rect x="3" y="10.5" width="18" height="3" rx="1" fill="rgba(200,210,220,0.4)" /><rect x="3" y="16" width="18" height="3" rx="1" fill="rgba(200,210,220,0.3)" /></svg>
             <span style={{ flex: 1 }}>My Levels</span>
+          </div>
+          <div onClick={function() { setSplashMenuOpen(false); fullRestart(); startMusic(); setScreen("game"); }} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M17.65 6.35A7.96 7.96 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="rgba(200,210,220,0.5)" /></svg>
+            Restart
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", color: "rgba(80,200,100,0.4)", fontSize: 12, fontWeight: 600, opacity: 0.4, cursor: "default" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M17 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V7l-4-4zm-5 16a3 3 0 110-6 3 3 0 010 6zm3-10H7V5h8v4z" fill="rgba(80,200,100,0.6)" /></svg>
+            <span style={{ flex: 1 }}>Save + Quit</span>
+            <span style={{ width: 6, height: 6, borderRadius: 6, background: "#50ffae", boxShadow: "0 0 6px #50ffae", flexShrink: 0 }} />
           </div>
           <div style={{ display: "flex", gap: 6, padding: "6px 16px" }}>
             <div onClick={function() { toggleSfxMute(); }} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, padding: "6px 0", borderRadius: 4, background: sfxMute ? "rgba(60,60,80,0.3)" : "rgba(40,30,60,0.4)", border: "1px solid " + (sfxMute ? "rgba(60,60,80,0.3)" : "rgba(180,140,255,0.3)"), cursor: "pointer", fontSize: 9, fontWeight: 700, color: sfxMute ? "rgba(180,200,220,0.3)" : "rgba(200,170,255,0.7)" }}>
@@ -2621,7 +2630,13 @@ function logUfo(msg) {
             <span style={{ flex: 1 }}>For Testers</span>
             <span style={{ width: 6, height: 6, borderRadius: 6, background: GS.green, boxShadow: "0 0 6px " + GS.green, flexShrink: 0 }} />
           </div>
-        </div>}
+          <div style={{ height: 1, background: "rgba(80,100,140,0.2)", margin: "2px 12px" }} />
+          <div onClick={function() { setSplashMenuOpen(false); try { window.close(); } catch(e) {} }} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "#ff8866", fontSize: 12, fontWeight: 600 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5a2 2 0 00-2 2v4h2V5h14v14H5v-4H3v4a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z" fill="rgba(255,100,80,0.7)" /></svg>
+            <span style={{ flex: 1 }}>Exit</span>
+            <span style={{ width: 6, height: 6, borderRadius: 6, background: "#ff8866", boxShadow: "0 0 6px #ff8866", flexShrink: 0 }} />
+          </div>
+        </GsPanel>}
 
         {/* Signature Levels popup */}
         {sigLevelsOpen && <div onClick={function() { setSigLevelsOpen(false); }} style={{ position: "absolute", inset: 0, zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(5,5,15,0.7)", backdropFilter: "blur(4px)" }}>
