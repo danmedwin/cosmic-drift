@@ -2126,6 +2126,9 @@ export default function CosmicWorkshop() {
           )
         ),
 
+        // FLEX SPACER — pushes Recent Project / Resume / Bridge to bottom
+        React.createElement("div", { style: { flex: 1, minHeight: 8 } }),
+
         // RECENT PROJECT
         React.createElement(WsPanel, { style: { padding: "8px 10px" } },
           React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 } },
@@ -2170,14 +2173,36 @@ export default function CosmicWorkshop() {
 
       ),
 
-      // ── BOTTOM BRIDGE BAR ──
-      React.createElement("div", { style: { flexShrink: 0, background: WS.brushed, backgroundBlendMode: "overlay", borderTop: "1px solid rgba(120,80,200,0.3)", padding: "6px 12px 6px 10px", display: "flex", alignItems: "center", gap: 10 } },
-        React.createElement("div", { style: { position: "relative", width: 48, height: 26, borderRadius: 13, background: "linear-gradient(180deg, #0a0e18 0%, #060910 100%)", border: "1px solid #2a3040", boxShadow: "inset 0 2px 6px rgba(0,0,0,0.7), inset 0 0 10px rgba(0,0,0,0.4)" } },
-          React.createElement("div", { style: { position: "absolute", top: 4, right: 4, width: 18, height: 18, borderRadius: 9, background: "radial-gradient(circle at 35% 30%, #6b7787 0%, #2a323c 70%, #15191f 100%)", boxShadow: "0 1px 4px rgba(0,0,0,0.6), inset 0 1px 0 rgba(200,230,240,0.18)" } })
+      // ── BOTTOM BRIDGE BAR (mirrors game-splash Workshop lever) ──
+      React.createElement(WsPanel, { onClick: function() { navigateToGame(); }, style: { flexShrink: 0, borderRadius: 10, padding: "8px 14px", height: 60, display: "flex", alignItems: "center", gap: 10, overflow: "hidden", cursor: "pointer" } },
+        // Mechanical toggle — knob on LEFT (bridge/off position)
+        React.createElement("div", { style: { position: "relative", width: 64, height: 32, borderRadius: 18, background: WS.inset, border: WS.ib, boxShadow: WS.is + ", inset 0 0 6px rgba(0,0,0,0.6)", flexShrink: 0 } },
+          React.createElement("div", { style: { position: "absolute", top: 4, bottom: 4, left: 8, right: 8, borderRadius: 999, background: "repeating-linear-gradient(90deg, rgba(160,100,255,0.15) 0 1px, transparent 1px 9px)", opacity: 0.7 } }),
+          React.createElement("div", { style: { position: "absolute", top: 2, left: 2, width: 28, height: 28, borderRadius: 14, background: "radial-gradient(circle at 30% 25%, #7a8494 0%, #4a525e 50%, #2a323c 100%)", border: "1px solid #6a7484", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 3px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center" } },
+            React.createElement("div", { style: { display: "flex", gap: 2 } },
+              React.createElement("span", { style: { width: 2, height: 11, borderRadius: 1, background: "#1a1f2a" } }),
+              React.createElement("span", { style: { width: 2, height: 11, borderRadius: 1, background: "#1a1f2a" } }),
+              React.createElement("span", { style: { width: 2, height: 11, borderRadius: 1, background: "#1a1f2a" } })
+            )
+          )
         ),
-        React.createElement("span", { style: { color: "rgba(200,180,255,0.25)", fontSize: 11, fontWeight: 700, letterSpacing: -1 } }, ">>"),
+        // Right-pointing chevrons (fading outward: dim → bright)
+        React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 1 } },
+          React.createElement("svg", { width: "10", height: "14", viewBox: "0 0 10 14", style: { opacity: 0.25 } }, React.createElement("path", { d: "M 2 1 L 8 7 L 2 13", stroke: "#b060ff", strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round", fill: "none" })),
+          React.createElement("svg", { width: "10", height: "14", viewBox: "0 0 10 14", style: { opacity: 0.55 } }, React.createElement("path", { d: "M 2 1 L 8 7 L 2 13", stroke: "#b060ff", strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round", fill: "none" })),
+          React.createElement("svg", { width: "10", height: "14", viewBox: "0 0 10 14", style: { opacity: 0.9, filter: "drop-shadow(0 0 4px rgba(180,100,255,0.7))" } }, React.createElement("path", { d: "M 2 1 L 8 7 L 2 13", stroke: "#b060ff", strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round", fill: "none" }))
+        ),
         React.createElement("div", { style: { flex: 1 } }),
-        React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 14, fontWeight: 700, letterSpacing: 4, color: "rgba(200,180,255,0.45)", textTransform: "uppercase" } }, "BRIDGE")
+        // BRIDGE label + section LEDs (right side)
+        React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-end", marginRight: 8 } },
+          React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 13, fontWeight: 700, letterSpacing: 2.5, color: "#dfe9f3", textShadow: "0 0 10px rgba(180,100,255,0.45), 0 -1px 0 rgba(0,0,0,0.5)" } }, "BRIDGE"),
+          React.createElement("div", { style: { display: "flex", gap: 4 } },
+            React.createElement(WsLED, { color: "#80ddff", size: 4 }),
+            React.createElement(WsLED, { color: "#c8b8ff", size: 4 }),
+            React.createElement(WsLED, { color: "#ffb43c", size: 4 }),
+            React.createElement(WsLED, { color: "#64dcb4", size: 4 })
+          )
+        )
       )
 
     ),
