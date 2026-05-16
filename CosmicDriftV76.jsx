@@ -2247,9 +2247,6 @@ function logUfo(msg) {
   }
 
   function navigateToWorkshop() {
-    try {
-      if (!isHostedContext()) { alert("Workshop is available at your hosted site: /workshop.html"); return; }
-    } catch(e) { alert("Workshop is available at your hosted site: /workshop.html"); return; }
     if (screen === "splash" && splashTransition === null) {
       setSplashTransition("exit");
       try { sessionStorage.setItem("cd_transition_from", "game"); } catch(e2) {}

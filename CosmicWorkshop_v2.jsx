@@ -769,21 +769,10 @@ var BTN_SETACTIVE = Object.assign({}, BTN_BASE, { padding: "5px 10px", backgroun
 var BTN_ISACTIVE = Object.assign({}, BTN_BASE, { padding: "5px 10px", background: "linear-gradient(180deg, #2a5a3a, #1a3a28)", border: "1px solid rgba(80,220,120,0.7)", color: "#80dd90" });
 
 // Navigate to the game, optionally auto-playing a custom level by id.
-// Hosted detection matches cosmicdriftapp.com (and localhost); the Claude
-// artifact sandbox has no real origin, so there we just inform the user.
 function navigateToGame(levelId) {
   var url = "index.html";
   if (levelId != null) url = url + "?play=" + encodeURIComponent(levelId);
-  try {
-    var h = window.location.hostname;
-    if (h === "localhost" || h === "127.0.0.1" || h.indexOf("cosmicdriftapp.com") >= 0) {
-      window.location.href = url;
-    } else {
-      alert("Play is available at your hosted site: cosmicdriftapp.com");
-    }
-  } catch (e) {
-    alert("Play is available at your hosted site: cosmicdriftapp.com");
-  }
+  window.location.href = url;
 }
 
 // Unified card style for list items
@@ -1994,13 +1983,6 @@ export default function CosmicWorkshop() {
   }
 
   function handleSplashToGame() {
-    try {
-      var h = window.location.hostname;
-      if (!(h === "localhost" || h === "127.0.0.1" || h.indexOf("cosmicdriftapp.com") >= 0)) {
-        alert("Play is available at your hosted site: cosmicdriftapp.com");
-        return;
-      }
-    } catch(e) {}
     setSplashTransition("exit");
     try { sessionStorage.setItem("cd_transition_from", "workshop"); } catch(e2) {}
     setTimeout(function() { window.location.href = "index.html"; }, 620);
