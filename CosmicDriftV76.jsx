@@ -2448,9 +2448,11 @@ function logUfo(msg) {
           <GsIconBtn onClick={function() { setLegendOpen(true); }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M9.5 9.5a2.5 2.5 0 1 1 4.4 1.7c-.6.6-1.4.9-1.4 2.3" /><circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none" /></svg>
           </GsIconBtn>
-          <GsIconBtn onClick={function() { setSplashMenuOpen(true); }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><line x1="4" y1="7" x2="20" y2="7" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="17" x2="20" y2="17" /></svg>
-          </GsIconBtn>
+          <div onClick={function() { setSplashMenuOpen(!splashMenuOpen); }} style={{ width: 36, height: 36, borderRadius: 8, background: splashMenuOpen ? "rgba(40,40,55,0.9)" : GS.brushedSolid, border: splashMenuOpen ? "2px solid rgba(80,200,255,0.3)" : GS.pbl, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, cursor: "pointer", flexShrink: 0, boxShadow: splashMenuOpen ? "0 0 12px rgba(80,200,255,0.25), 0 2px 4px rgba(0,0,0,0.5)" : "inset 0 1px 0 rgba(200,230,240,0.14), inset 0 -2px 3px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.5)" }}>
+            <div style={{ width: 14, height: 2, borderRadius: 1, background: splashMenuOpen ? "#80ddff" : "rgba(200,210,220,0.6)" }} />
+            <div style={{ width: 14, height: 2, borderRadius: 1, background: splashMenuOpen ? "#80ddff" : "rgba(200,210,220,0.6)" }} />
+            <div style={{ width: 14, height: 2, borderRadius: 1, background: splashMenuOpen ? "#80ddff" : "rgba(200,210,220,0.6)" }} />
+          </div>
         </div>
 
         {/* Title panel */}
@@ -2586,37 +2588,38 @@ function logUfo(msg) {
           <div onClick={function() { setIosPromptDismissed(true); try { window.storage.set("cosmic_drift_ios_prompt_dismissed", "true"); } catch(e) {} }} style={{ color: "rgba(180,200,220,0.25)", fontSize: 20, fontWeight: 300, cursor: "pointer", lineHeight: 1, flexShrink: 0, paddingLeft: 2, marginTop: -2 }}>{"×"}</div>
         </div>}
 
-        {/* Splash menu overlay */}
-        {splashMenuOpen && <div onClick={function() { setSplashMenuOpen(false); }} style={{ position: "absolute", inset: 0, zIndex: 20, display: "flex", alignItems: "flex-end", justifyContent: "center", background: "rgba(5,5,15,0.75)", backdropFilter: "blur(5px)" }}>
-          <div onClick={function(e) { e.stopPropagation(); }} style={{ width: "100%", maxWidth: 440, background: "linear-gradient(180deg, #0d1022, #080d1a)", borderTop: "1px solid rgba(80,120,200,0.25)", borderRadius: "16px 16px 0 0", padding: "20px 20px 36px", fontFamily: "'Quicksand', sans-serif" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
-              <GsMono size={10} ls={2.5} color="rgba(128,221,255,0.6)">MENU</GsMono>
-              <div onClick={function() { setSplashMenuOpen(false); }} style={{ color: "rgba(180,200,220,0.3)", fontSize: 20, fontWeight: 300, cursor: "pointer", lineHeight: 1, padding: "2px 4px" }}>{"×"}</div>
+        {/* Splash menu — dim backdrop + corner glow */}
+        {splashMenuOpen && <div onClick={function() { setSplashMenuOpen(false); }} style={{ position: "absolute", inset: 0, zIndex: 20, background: "radial-gradient(circle 220px at calc(100% - 26px) 26px, rgba(80,200,255,0.10) 0%, transparent 70%), rgba(5,5,15,0.55)" }} />}
+        {/* Splash menu dropdown panel */}
+        {splashMenuOpen && <div style={{ position: "absolute", top: 52, right: 8, background: "linear-gradient(180deg, #3a3a4a, #28283a)", border: "2px solid rgba(80,200,255,0.2)", borderRadius: 8, padding: "4px 0", minWidth: 190, boxShadow: "0 8px 24px rgba(0,0,0,0.6), 0 0 12px rgba(80,200,255,0.08)", zIndex: 21 }}>
+          <div onClick={function() { setSplashMenuOpen(false); setLegendOpen(true); }} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="rgba(200,210,220,0.5)" strokeWidth="2" /><text x="12" y="17" textAnchor="middle" fill="rgba(200,210,220,0.6)" fontSize="14" fontWeight="700">?</text></svg>
+            Guide
+          </div>
+          <div onClick={function() { setSplashMenuOpen(false); navigateToWorkshop(); }} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="rgba(200,210,220,0.5)" /></svg>
+            <span style={{ flex: 1 }}>Open in Workshop</span>
+            <span style={{ width: 6, height: 6, borderRadius: 6, background: "#c8b8ff", boxShadow: "0 0 6px #c8b8ff", flexShrink: 0 }} />
+          </div>
+          <div onClick={function() { setSplashMenuOpen(false); loadSavedLevels(); setScreen("mylevels"); }} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="3" rx="1" fill="rgba(200,210,220,0.5)" /><rect x="3" y="10.5" width="18" height="3" rx="1" fill="rgba(200,210,220,0.4)" /><rect x="3" y="16" width="18" height="3" rx="1" fill="rgba(200,210,220,0.3)" /></svg>
+            <span style={{ flex: 1 }}>My Levels</span>
+          </div>
+          <div style={{ display: "flex", gap: 6, padding: "6px 16px" }}>
+            <div onClick={function() { toggleSfxMute(); }} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, padding: "6px 0", borderRadius: 4, background: sfxMute ? "rgba(60,60,80,0.3)" : "rgba(40,30,60,0.4)", border: "1px solid " + (sfxMute ? "rgba(60,60,80,0.3)" : "rgba(180,140,255,0.3)"), cursor: "pointer", fontSize: 9, fontWeight: 700, color: sfxMute ? "rgba(180,200,220,0.3)" : "rgba(200,170,255,0.7)" }}>
+              <svg width="10" height="10" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z" fill="currentColor" />{sfxMute && <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2.5" />}</svg>
+              SFX
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 2, marginBottom: 16 }}>
-              <div onClick={function() { loadSavedLevels(); setScreen("mylevels"); setSplashMenuOpen(false); }} style={{ display: "flex", alignItems: "center", gap: 14, padding: "13px 16px", borderRadius: 8, cursor: "pointer", background: "rgba(255,255,255,0.03)" }}>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="2.5" rx="0.5" fill="rgba(180,200,220,0.6)" /><rect x="2" y="6.5" width="12" height="2.5" rx="0.5" fill="rgba(180,200,220,0.45)" /><rect x="2" y="11" width="12" height="2.5" rx="0.5" fill="rgba(180,200,220,0.3)" /></svg>
-                <span style={{ fontSize: 15, fontWeight: 700, color: "rgba(180,200,220,0.85)", letterSpacing: 0.3 }}>My Levels</span>
-              </div>
-              <div onClick={function() { setLegendOpen(true); setSplashMenuOpen(false); }} style={{ display: "flex", alignItems: "center", gap: 14, padding: "13px 16px", borderRadius: 8, cursor: "pointer", background: "rgba(255,255,255,0.03)" }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(180,200,220,0.6)" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="9" /><path d="M9.5 9.5a2.5 2.5 0 1 1 4.4 1.7c-.6.6-1.4.9-1.4 2.3" /><circle cx="12" cy="17" r="0.6" fill="rgba(180,200,220,0.6)" stroke="none" /></svg>
-                <span style={{ fontSize: 15, fontWeight: 700, color: "rgba(180,200,220,0.85)", letterSpacing: 0.3 }}>Guide</span>
-              </div>
+            <div onClick={function() { toggleMusicMute(); }} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, padding: "6px 0", borderRadius: 4, background: musicMute ? "rgba(60,60,80,0.3)" : "rgba(40,30,60,0.4)", border: "1px solid " + (musicMute ? "rgba(60,60,80,0.3)" : "rgba(180,140,255,0.3)"), cursor: "pointer", fontSize: 9, fontWeight: 700, color: musicMute ? "rgba(180,200,220,0.3)" : "rgba(200,170,255,0.7)" }}>
+              <svg width="10" height="10" viewBox="0 0 24 24"><path d="M12 3v18l-7-5H2V8h3l7-5z" fill="none" stroke="currentColor" strokeWidth="2.5" />{musicMute && <line x1="20" y1="6" x2="8" y2="18" stroke="currentColor" strokeWidth="2.5" />}</svg>
+              Music
             </div>
-            <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-              <div onClick={toggleSfxMute} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "10px 0", borderRadius: 8, cursor: "pointer", background: sfxMute ? "rgba(40,40,60,0.4)" : "rgba(40,30,60,0.5)", border: "1px solid " + (sfxMute ? "rgba(60,60,80,0.3)" : "rgba(180,140,255,0.3)"), color: sfxMute ? "rgba(180,200,220,0.3)" : "rgba(200,170,255,0.8)", fontSize: 11, fontWeight: 700, letterSpacing: 1 }}>
-                <svg width="13" height="13" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z" fill="currentColor" opacity="0.8" />{sfxMute && <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2" />}</svg>
-                SFX {sfxMute ? "OFF" : "ON"}
-              </div>
-              <div onClick={toggleMusicMute} style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "10px 0", borderRadius: 8, cursor: "pointer", background: musicMute ? "rgba(40,40,60,0.4)" : "rgba(40,30,60,0.5)", border: "1px solid " + (musicMute ? "rgba(60,60,80,0.3)" : "rgba(180,140,255,0.3)"), color: musicMute ? "rgba(180,200,220,0.3)" : "rgba(200,170,255,0.8)", fontSize: 11, fontWeight: 700, letterSpacing: 1 }}>
-                <svg width="13" height="13" viewBox="0 0 24 24"><path d="M12 3v18l-7-5H2V8h3l7-5z" fill="none" stroke="currentColor" strokeWidth="2" opacity="0.8" />{!musicMute && <path d="M16 8.5a4 4 0 010 7M19 5a9 9 0 010 14" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.5" />}{musicMute && <line x1="20" y1="6" x2="8" y2="18" stroke="currentColor" strokeWidth="2" />}</svg>
-                MUSIC {musicMute ? "OFF" : "ON"}
-              </div>
-            </div>
-            <div onClick={function() { setShowTesterMenu(true); setDevJumpLevel(""); setSplashMenuOpen(false); }} style={{ display: "flex", alignItems: "center", gap: 14, padding: "11px 16px", borderRadius: 8, cursor: "pointer" }}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(180,200,220,0.3)" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="9" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-              <span style={{ fontSize: 13, fontWeight: 700, color: "rgba(180,200,220,0.3)", letterSpacing: 0.3 }}>For Testers</span>
-            </div>
+          </div>
+          <div style={{ height: 1, background: "rgba(80,100,140,0.2)", margin: "2px 12px" }} />
+          <div onClick={function() { setSplashMenuOpen(false); setShowTesterMenu(true); setDevJumpLevel(""); }} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(100,180,255,0.6)", fontSize: 12, fontWeight: 600 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" fill="rgba(100,180,255,0.5)" /></svg>
+            <span style={{ flex: 1 }}>For Testers</span>
+            <span style={{ width: 6, height: 6, borderRadius: 6, background: GS.green, boxShadow: "0 0 6px " + GS.green, flexShrink: 0 }} />
           </div>
         </div>}
 
