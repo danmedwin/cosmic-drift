@@ -2246,8 +2246,14 @@ function logUfo(msg) {
   }
 
   function navigateToWorkshop() {
-    try { sessionStorage.setItem("cd_transition_from", "game"); } catch(e) {}
-    window.location.href = "workshop.html";
+    if (screen === "splash" && splashTransition === null) {
+      setSplashTransition("exit");
+      try { sessionStorage.setItem("cd_transition_from", "game"); } catch(e2) {}
+      setTimeout(function() { window.location.href = "workshop.html"; }, 680);
+    } else {
+      try { sessionStorage.setItem("cd_transition_from", "game"); } catch(e2) {}
+      window.location.href = "workshop.html";
+    }
   }
   function handleSplashTouchStartGame(e) {
     splashTouchRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -2444,7 +2450,8 @@ function logUfo(msg) {
       </div>}
 
       {/* ═══ SPLASH SCREEN ═══ */}
-      {screen === "splash" && <div onTouchStart={handleSplashTouchStartGame} onTouchEnd={handleSplashTouchEndGame} style={{ position: "fixed", inset: 0, zIndex: 400, overflow: "hidden", background: "radial-gradient(ellipse 90% 60% at 50% 28%, #0e0820 0%, #0a0618 45%, #06040f 100%)" }}><div style={{ position: "absolute", inset: 0, background: GS.bg, color: "#e8f4fb", fontFamily: "'Quicksand', sans-serif", display: "flex", flexDirection: "column", gap: 6, padding: 8, animation: splashEntering ? "cdSplashEnterFromWs 0.48s ease-out both" : (splashTransition === "exit" ? "cdSplashExitLeft 0.68s ease-in both" : "none"), willChange: "transform, filter" }}>
+      {screen === "splash" && <iframe src="workshop.html" style={{ position: "fixed", inset: 0, zIndex: 399, border: "none", width: "100%", height: "100%", transform: "scale(0.95)", filter: "brightness(0.5)", pointerEvents: "none" }} />}
+      {screen === "splash" && <div onTouchStart={handleSplashTouchStartGame} onTouchEnd={handleSplashTouchEndGame} style={{ position: "fixed", inset: 0, zIndex: 400, overflow: "hidden", background: "transparent" }}><div style={{ position: "absolute", inset: 0, background: GS.bg, color: "#e8f4fb", fontFamily: "'Quicksand', sans-serif", display: "flex", flexDirection: "column", gap: 6, padding: 8, animation: splashEntering ? "cdSplashEnterFromWs 0.48s ease-out both" : (splashTransition === "exit" ? "cdSplashExitLeft 0.68s ease-in both" : "none"), willChange: "transform, filter" }}>
         {/* Starfield */}
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(1.2px 1.2px at 12% 18%, rgba(255,255,255,0.4), transparent 60%),radial-gradient(1px 1px at 78% 9%, rgba(255,255,255,0.35), transparent 60%),radial-gradient(1px 1px at 42% 24%, rgba(255,255,255,0.35), transparent 60%),radial-gradient(1.2px 1.2px at 88% 38%, rgba(200,184,255,0.5), transparent 60%),radial-gradient(1px 1px at 28% 52%, rgba(255,255,255,0.3), transparent 60%),radial-gradient(1.2px 1.2px at 18% 78%, rgba(128,221,255,0.5), transparent 60%)", pointerEvents: "none", opacity: 0.7 }} />
         {/* Wear overlay */}

@@ -8215,10 +8215,20 @@ function CosmicDriftGame() {
     return h === "localhost" || h === "127.0.0.1" || h.indexOf("cosmicdriftapp.com") >= 0;
   }
   function navigateToWorkshop() {
-    try {
-      sessionStorage.setItem("cd_transition_from", "game");
-    } catch (e) {}
-    window.location.href = "workshop.html";
+    if (screen === "splash" && splashTransition === null) {
+      setSplashTransition("exit");
+      try {
+        sessionStorage.setItem("cd_transition_from", "game");
+      } catch (e2) {}
+      setTimeout(function () {
+        window.location.href = "workshop.html";
+      }, 680);
+    } else {
+      try {
+        sessionStorage.setItem("cd_transition_from", "game");
+      } catch (e2) {}
+      window.location.href = "workshop.html";
+    }
   }
   function handleSplashTouchStartGame(e) {
     splashTouchRef.current = {
@@ -9871,7 +9881,20 @@ function CosmicDriftGame() {
       cursor: "pointer",
       boxShadow: PNLS
     }
-  }, "Got It"))), screen === "splash" && /*#__PURE__*/React.createElement("div", {
+  }, "Got It"))), screen === "splash" && /*#__PURE__*/React.createElement("iframe", {
+    src: "workshop.html",
+    style: {
+      position: "fixed",
+      inset: 0,
+      zIndex: 399,
+      border: "none",
+      width: "100%",
+      height: "100%",
+      transform: "scale(0.95)",
+      filter: "brightness(0.5)",
+      pointerEvents: "none"
+    }
+  }), screen === "splash" && /*#__PURE__*/React.createElement("div", {
     onTouchStart: handleSplashTouchStartGame,
     onTouchEnd: handleSplashTouchEndGame,
     style: {
@@ -9879,7 +9902,7 @@ function CosmicDriftGame() {
       inset: 0,
       zIndex: 400,
       overflow: "hidden",
-      background: "radial-gradient(ellipse 90% 60% at 50% 28%, #0e0820 0%, #0a0618 45%, #06040f 100%)"
+      background: "transparent"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
