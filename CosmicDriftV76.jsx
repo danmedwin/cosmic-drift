@@ -2246,13 +2246,8 @@ function logUfo(msg) {
   }
 
   function navigateToWorkshop() {
-    if (screen === "splash" && splashTransition === null) {
-      setSplashTransition("exit");
-      try { sessionStorage.setItem("cd_transition_from", "game"); } catch(e2) {}
-      setTimeout(function() { window.location.href = "workshop.html"; }, 680);
-    } else {
-      window.location.href = "workshop.html";
-    }
+    try { sessionStorage.setItem("cd_transition_from", "game"); } catch(e) {}
+    window.location.href = "workshop.html";
   }
   function handleSplashTouchStartGame(e) {
     splashTouchRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };

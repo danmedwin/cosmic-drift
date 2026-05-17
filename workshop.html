@@ -295,7 +295,7 @@ var SCRNB = "2px solid #3a3a45";
 var SCRNS = "inset 0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.05)";
 
 // ── Animation CSS (subset needed for Workshop) ──
-var ANIM_CSS = "@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');\n@keyframes starDrift{0%{transform:translateY(-50%)}100%{transform:translateY(0)}}\n@keyframes introFadeIn{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}\n@keyframes pulse{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}\n@keyframes ufoWarpOut{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}\n@keyframes ufoWarpIn{0%{transform:scale(0.05);opacity:0}60%{transform:scale(1.08);opacity:0.9}100%{transform:scale(1);opacity:1}}\n@keyframes ufoLightSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}\n@keyframes splashFloat{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}\n@keyframes splashGlow{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}@keyframes cdSplashEnterFromGame{0%{transform:scale(0.95);filter:brightness(0.5)}100%{transform:scale(1);filter:brightness(1)}}@keyframes cdSplashExitShrink{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(0.93);filter:brightness(0.55)}100%{transform:scale(0.93);filter:brightness(0.55)}}\n* { box-sizing: border-box; }\ninput[type=range] { -webkit-appearance: none; appearance: none; background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; outline: none; }\ninput[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }\ninput[type=range]::-moz-range-thumb { width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }@keyframes vfxOozeDrip{0%{transform:scaleY(0);opacity:0}100%{transform:scaleY(1);opacity:0.85}}@keyframes vfxOozeWave{0%{transform:translateY(0)}100%{transform:translateY(50%)}}@keyframes vfxBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxRing{0%{transform:scale(0.1);opacity:1}100%{transform:scale(2.2);opacity:0}}@keyframes vfxFlash{0%{transform:scale(0.2);opacity:1}100%{transform:scale(1.8);opacity:0}}@keyframes vfxPop{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(1.2);filter:brightness(1.8)}100%{transform:scale(0);opacity:0}}@keyframes vfxBubble{0%{transform:translateY(0) scale(0.5);opacity:0}15%{opacity:0.55}85%{opacity:0.55}100%{transform:translateY(88px) scale(1);opacity:0}}@keyframes vfxSpark{0%{transform:translate(0,0) scale(1);opacity:1}35%{transform:translate(calc(var(--sx)*0.45),calc(var(--sy)*0.25 - 7px));opacity:0.9}100%{transform:translate(var(--sx),var(--sy)) scale(0.3);opacity:0}}@keyframes vfxBurnBlock{0%{opacity:1;filter:brightness(1)}10%{opacity:1;filter:brightness(2.3)}55%{opacity:0;filter:brightness(1)}100%{opacity:0;filter:brightness(1)}}@keyframes vfxShatter{0%{transform:translate(0,0) scale(1);opacity:0}15%{opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxDroneShard{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0.2);opacity:0}}";
+var ANIM_CSS = "@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');\n@keyframes starDrift{0%{transform:translateY(-50%)}100%{transform:translateY(0)}}\n@keyframes introFadeIn{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}\n@keyframes pulse{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}\n@keyframes ufoWarpOut{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}\n@keyframes ufoWarpIn{0%{transform:scale(0.05);opacity:0}60%{transform:scale(1.08);opacity:0.9}100%{transform:scale(1);opacity:1}}\n@keyframes ufoLightSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}\n@keyframes splashFloat{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}\n@keyframes splashGlow{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}@keyframes cdSplashEnterFromGame{0%{transform:scale(0.95);filter:brightness(0.5)}100%{transform:scale(1);filter:brightness(1)}}@keyframes cdSplashExitShrink{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(0.93);filter:brightness(0.55)}100%{transform:scale(0.93);filter:brightness(0.55)}}\n* { box-sizing: border-box; }\ninput[type=range] { -webkit-appearance: none; appearance: none; background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; outline: none; }\ninput[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }\ninput[type=range]::-moz-range-thumb { width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }@keyframes vfxOozeDrip{0%{transform:scaleY(0);opacity:0}100%{transform:scaleY(1);opacity:0.85}}@keyframes vfxOozeWave{0%{transform:translateY(0)}100%{transform:translateY(50%)}}@keyframes vfxBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxRing{0%{transform:scale(0.1);opacity:1}100%{transform:scale(2.2);opacity:0}}@keyframes vfxFlash{0%{transform:scale(0.2);opacity:1}100%{transform:scale(1.8);opacity:0}}@keyframes vfxPop{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(1.2);filter:brightness(1.8)}100%{transform:scale(0);opacity:0}}@keyframes vfxBubble{0%{transform:translateY(0) scale(0.5);opacity:0}15%{opacity:0.55}85%{opacity:0.55}100%{transform:translateY(88px) scale(1);opacity:0}}@keyframes vfxSpark{0%{transform:translate(0,0) scale(1);opacity:1}35%{transform:translate(calc(var(--sx)*0.45),calc(var(--sy)*0.25 - 7px));opacity:0.9}100%{transform:translate(var(--sx),var(--sy)) scale(0.3);opacity:0}}@keyframes vfxBurnBlock{0%{opacity:1;filter:brightness(1)}10%{opacity:1;filter:brightness(2.3)}55%{opacity:0;filter:brightness(1)}100%{opacity:0;filter:brightness(1)}}@keyframes vfxShatter{0%{transform:translate(0,0) scale(1);opacity:0}15%{opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxDroneShard{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0.2);opacity:0}}@keyframes cdGameOverlayExit{0%{transform:scale(1) translateX(0)}22%{transform:scale(1.05) translateX(0)}100%{transform:scale(1.05) translateX(-106vw)}}";
 
 // ═══════════════════════════════════════════════════════════════
 // SHARED VISUAL COMPONENTS
@@ -3191,6 +3191,15 @@ function CosmicWorkshop() {
     }),
     splashEntering = _spEn[0],
     setSplashEntering = _spEn[1];
+  var _goOv = useState(function () {
+      try {
+        return sessionStorage.getItem("cd_transition_from") === "game";
+      } catch (e) {
+        return false;
+      }
+    }),
+    showGameOverlay = _goOv[0],
+    setShowGameOverlay = _goOv[1];
   var splashTouchRef = useRef(null);
 
   // ══ BLOCK DESIGNER STATE ══
@@ -3551,7 +3560,7 @@ function CosmicWorkshop() {
         sessionStorage.removeItem("cd_transition_from");
         setTimeout(function () {
           setSplashEntering(false);
-        }, 480);
+        }, 900);
       }
     } catch (e) {}
   }, []);
@@ -5873,7 +5882,24 @@ function CosmicWorkshop() {
       overflow: "hidden",
       pointerEvents: "none"
     }
-  }, React.createElement(Stars, null)),
+  }, React.createElement(Stars, null)), showGameOverlay && React.createElement("div", {
+    style: {
+      position: "fixed",
+      inset: 0,
+      zIndex: 100,
+      overflow: "hidden"
+    }
+  }, React.createElement("div", {
+    style: {
+      position: "absolute",
+      inset: 0,
+      background: "#0b0c1a",
+      animation: "cdGameOverlayExit 0.68s ease-in both"
+    },
+    onAnimationEnd: function () {
+      setShowGameOverlay(false);
+    }
+  })),
   // ═══ SPLASH SCREEN ═══
   screen === "splash" && React.createElement("div", {
     onTouchStart: handleSplashTouchStart,
@@ -5885,7 +5911,7 @@ function CosmicWorkshop() {
       flexDirection: "column",
       height: "100%",
       background: "radial-gradient(ellipse 90% 60% at 50% 28%, #0e0820 0%, #0a0618 45%, #06040f 100%)",
-      animation: splashEntering ? "cdSplashEnterFromGame 0.48s ease-out both" : splashTransition === "exit" ? "cdSplashExitShrink 0.62s ease-in both" : "none",
+      animation: splashEntering ? "cdSplashEnterFromGame 0.4s ease-out 0.5s both" : splashTransition === "exit" ? "cdSplashExitShrink 0.62s ease-in both" : "none",
       willChange: "transform, filter"
     }
   },
