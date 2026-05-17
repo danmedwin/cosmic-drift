@@ -2171,6 +2171,17 @@ export default function CosmicWorkshop() {
               ),
               React.createElement("div", { style: { color: "#80e8c4", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, ufoSaved.length > 0 ? (ufoGetActiveDesign().name || "Active") : "Default")
             )
+          ),
+          React.createElement("div", { style: { marginTop: 6, textAlign: "right" } },
+            React.createElement(WsMono, { size: 7, ls: 1, color: "rgba(180,140,255,0.3)" }, (function() {
+              var ts = [];
+              if (savedLevels.length > 0) { var lv = savedLevels.slice().sort(function(a,b){return(b.modified||0)-(a.modified||0);})[0]; if (lv.modified) ts.push(lv.modified); else if (lv.savedAt) ts.push(new Date(lv.savedAt).getTime()); }
+              var bkeys = Object.keys(bdActiveMap); for (var bi=0; bi<bkeys.length; bi++) { var bdid = bdActiveMap[bkeys[bi]]; if (bdid) { for (var bj=0; bj<bdSaved.length; bj++) { if (bdSaved[bj].id === bdid && bdSaved[bj].modifiedAt) { ts.push(new Date(bdSaved[bj].modifiedAt).getTime()); break; } } } }
+              var vkeys = Object.keys(vfxActiveMap); for (var vi=0; vi<vkeys.length; vi++) { var vdid = vfxActiveMap[vkeys[vi]]; if (vdid) { for (var vj=0; vj<vfxSaved.length; vj++) { if (vfxSaved[vj].id === vdid && vfxSaved[vj].modifiedAt) { ts.push(new Date(vfxSaved[vj].modifiedAt).getTime()); break; } } } }
+              var ad = ufoGetActiveDesign(); if (ad && ad.savedAt) ts.push(new Date(ad.savedAt).getTime());
+              if (ts.length === 0) return "LAST EDIT: --";
+              return "LAST EDIT: " + new Date(Math.max.apply(null, ts)).toLocaleDateString();
+            }()))
           )
         ),
 
@@ -2223,7 +2234,7 @@ export default function CosmicWorkshop() {
             React.createElement("circle", { cx: "8", cy: "15", r: "4", stroke: "rgba(240,220,255,0.9)", strokeWidth: "2" }),
             React.createElement("path", { d: "M12 15h8M17 15v-3", stroke: "rgba(240,220,255,0.9)", strokeWidth: "2", strokeLinecap: "round" })
           ),
-          React.createElement("span", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 22, fontWeight: 800, letterSpacing: 6, color: "#f0e8ff", textShadow: "0 0 14px rgba(200,140,255,0.7), 0 1px 0 rgba(0,0,0,0.4)" } }, "RESUME"),
+          React.createElement("span", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 22, fontWeight: 800, letterSpacing: 6, color: "#f0e8ff", textShadow: "0 0 14px rgba(200,140,255,0.7), 0 1px 0 rgba(0,0,0,0.4)" } }, "CONTINUE"),
           React.createElement(WsMono, { size: 9, ls: 1.5, color: "rgba(200,160,255,0.4)" }, "L · 8×6")
         )
       ),
