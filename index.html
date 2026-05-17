@@ -3990,32 +3990,29 @@ function ConfirmOverlay(props) {
       backdropFilter: "blur(4px)",
       display: "flex",
       alignItems: "center",
-      justifyContent: "center",
-      fontFamily: "'Quicksand',sans-serif"
+      justifyContent: "center"
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(GsPanel, {
     style: {
-      background: "linear-gradient(170deg,#151040,#1a0a2e)",
-      border: "1px solid rgba(120,80,255,0.3)",
-      borderRadius: 16,
+      maxWidth: 300,
       padding: "20px 24px",
-      textAlign: "center",
-      maxWidth: 300
+      textAlign: "center"
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(GsMono, {
+    size: 12,
+    ls: 1,
     style: {
-      color: "#c8b8ff",
-      fontSize: 15,
-      fontWeight: 700,
+      display: "block",
       marginBottom: 6
     }
-  }, "Restart Level?"), /*#__PURE__*/React.createElement("div", {
+  }, "RESTART LEVEL?"), /*#__PURE__*/React.createElement(GsMono, {
+    size: 10,
+    color: GS.green + "66",
     style: {
-      color: "rgba(200,184,255,0.5)",
-      fontSize: 12,
+      display: "block",
       marginBottom: 18
     }
-  }, "This will use one reactor core."), /*#__PURE__*/React.createElement("div", {
+  }, "USES 1 REACTOR CORE"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 12,
@@ -4025,23 +4022,27 @@ function ConfirmOverlay(props) {
     onClick: props.onCancel,
     style: {
       padding: "8px 20px",
-      borderRadius: 16,
-      border: "1px solid rgba(120,80,255,0.3)",
-      color: "#c8b8ff",
+      borderRadius: 6,
+      background: GS.brushedSolid,
+      border: GS.pbl,
+      color: "#b0c8d8",
       fontSize: 12,
       fontWeight: 600,
-      cursor: "pointer"
+      cursor: "pointer",
+      boxShadow: GS.ps
     }
   }, "Cancel"), /*#__PURE__*/React.createElement("div", {
     onClick: props.onConfirm,
     style: {
       padding: "8px 20px",
-      borderRadius: 16,
-      background: "linear-gradient(135deg,#7b5ea7,#9f7fd0)",
+      borderRadius: 6,
+      background: "linear-gradient(135deg,#6a4a9a,#8a60c0)",
+      border: "1px solid rgba(160,120,255,0.4)",
       color: "#fff",
       fontSize: 12,
       fontWeight: 700,
-      cursor: "pointer"
+      cursor: "pointer",
+      boxShadow: "0 2px 8px rgba(120,80,255,0.3)"
     }
   }, "Restart"))));
 }
@@ -9203,37 +9204,30 @@ function CosmicDriftGame() {
         alignItems: "center",
         justifyContent: "center"
       }
-    }, /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement(GsPanel, {
       style: {
         textAlign: "center",
         padding: "28px 32px",
-        borderRadius: 10,
-        background: "linear-gradient(180deg,#1a1a2e,#0f0f1e)",
-        border: "1px solid rgba(255,140,60,0.25)",
         maxWidth: 300,
-        boxShadow: "0 8px 32px rgba(0,0,0,0.6)"
+        border: "1px solid rgba(255,140,60,0.3)"
       }
-    }, /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement(GsMono, {
+      size: 14,
+      ls: 1,
+      color: "#ffaa6699",
       style: {
-        fontSize: 22,
+        display: "block",
         marginBottom: 8
       }
-    }, "\uD83D\uDEF8"), /*#__PURE__*/React.createElement("div", {
+    }, "NO PATH FORWARD"), /*#__PURE__*/React.createElement(GsMono, {
+      size: 10,
+      color: GS.blue + "88",
       style: {
-        fontSize: 17,
-        fontWeight: 700,
-        color: "#ffaa66",
-        marginBottom: 8,
-        letterSpacing: 1
+        display: "block",
+        marginBottom: 22,
+        lineHeight: 1.6
       }
-    }, "No Path Forward"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 13,
-        color: "rgba(180,200,220,0.6)",
-        lineHeight: 1.6,
-        marginBottom: 22
-      }
-    }, "The remaining blocks can't be reached with your current arsenal."), /*#__PURE__*/React.createElement("div", {
+    }, "REMAINING BLOCKS CAN'T BE REACHED"), /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
         flexDirection: "column",
@@ -9246,9 +9240,9 @@ function CosmicDriftGame() {
       },
       style: {
         padding: "11px 0",
-        borderRadius: 7,
-        background: "rgba(255,100,60,0.15)",
-        border: "1px solid rgba(255,100,60,0.3)",
+        borderRadius: 6,
+        background: "rgba(200,80,40,0.2)",
+        border: "1px solid rgba(255,100,60,0.35)",
         color: "#ff9966",
         fontWeight: 700,
         fontSize: 14,
@@ -9260,13 +9254,14 @@ function CosmicDriftGame() {
       },
       style: {
         padding: "11px 0",
-        borderRadius: 7,
-        background: "rgba(40,40,60,0.5)",
-        border: "1px solid rgba(100,120,160,0.2)",
-        color: "rgba(180,200,220,0.5)",
+        borderRadius: 6,
+        background: GS.brushedSolid,
+        border: GS.pbl,
+        color: "#b0c8d8",
         fontWeight: 600,
         fontSize: 13,
-        cursor: "pointer"
+        cursor: "pointer",
+        boxShadow: GS.ps
       }
     }, "Keep Trying"))));
   }
@@ -9876,33 +9871,32 @@ function CosmicDriftGame() {
       backdropFilter: "blur(4px)",
       display: "flex",
       alignItems: "center",
-      justifyContent: "center",
-      fontFamily: "'Quicksand',sans-serif"
+      justifyContent: "center"
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(GsPanel, {
     style: {
-      background: "linear-gradient(170deg,#151040,#1a0a2e)",
-      border: "1px solid rgba(255,100,80,0.3)",
-      borderRadius: 16,
+      maxWidth: 280,
       padding: "20px 24px",
       textAlign: "center",
-      maxWidth: 280,
-      animation: "introFadeIn 0.25s ease-out"
+      animation: "introFadeIn 0.25s ease-out",
+      border: "1px solid rgba(255,100,80,0.3)"
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(GsMono, {
+    size: 12,
+    ls: 1,
+    color: "#ff886699",
     style: {
-      color: "#ff8866",
-      fontSize: 15,
-      fontWeight: 700,
+      display: "block",
       marginBottom: 8
     }
-  }, "Exit to Menu?"), /*#__PURE__*/React.createElement("div", {
+  }, "EXIT TO MENU?"), /*#__PURE__*/React.createElement(GsMono, {
+    size: 10,
+    color: GS.blue + "88",
     style: {
-      color: "rgba(200,184,255,0.5)",
-      fontSize: 12,
+      display: "block",
       marginBottom: 18
     }
-  }, "Your score won\u2019t be saved as a checkpoint until you start the next level."), /*#__PURE__*/React.createElement("div", {
+  }, "SCORE NOT SAVED UNTIL NEXT LEVEL"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 12,
@@ -9914,12 +9908,14 @@ function CosmicDriftGame() {
     },
     style: {
       padding: "8px 20px",
-      borderRadius: 16,
-      border: "1px solid rgba(120,80,255,0.3)",
-      color: "#c8b8ff",
+      borderRadius: 6,
+      background: GS.brushedSolid,
+      border: GS.pbl,
+      color: "#b0c8d8",
       fontSize: 12,
       fontWeight: 600,
-      cursor: "pointer"
+      cursor: "pointer",
+      boxShadow: GS.ps
     }
   }, "Cancel"), /*#__PURE__*/React.createElement("div", {
     onClick: function () {
@@ -9934,8 +9930,8 @@ function CosmicDriftGame() {
     },
     style: {
       padding: "8px 20px",
-      borderRadius: 16,
-      background: "rgba(255,60,60,0.3)",
+      borderRadius: 6,
+      background: "rgba(200,50,50,0.25)",
       border: "1px solid rgba(255,80,80,0.35)",
       color: "#ff8866",
       fontSize: 12,
@@ -9992,30 +9988,32 @@ function CosmicDriftGame() {
       marginBottom: 12,
       animation: "introFadeIn 0.5s ease-out"
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(GsMono, {
+    size: 9,
+    ls: 3,
+    color: "#ffcc4499",
     style: {
-      fontSize: 11,
-      fontWeight: 700,
-      color: "rgba(255,200,60,0.6)",
-      letterSpacing: 3,
-      textTransform: "uppercase",
+      display: "block",
       marginBottom: 4
     }
-  }, "New High Score!"), /*#__PURE__*/React.createElement("div", {
+  }, "NEW HIGH SCORE"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 28,
       fontWeight: 700,
       color: "#ffcc44",
       textShadow: "0 0 20px rgba(255,200,60,0.5), 0 0 40px rgba(255,200,60,0.2)",
-      letterSpacing: 2
+      letterSpacing: 2,
+      fontFamily: "'Exo 2', sans-serif"
     }
   }, score.toLocaleString())), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 32,
-      fontWeight: 700,
+      fontWeight: 800,
       color: "#ff4455",
       marginBottom: 8,
-      letterSpacing: 2
+      letterSpacing: 3,
+      fontFamily: "'Exo 2', sans-serif",
+      textShadow: "0 0 20px rgba(255,60,80,0.4)"
     }
   }, "GAME OVER"), customLevelMode && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -10025,11 +10023,18 @@ function CosmicDriftGame() {
     }
   }, customLevelName), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 16,
-      color: "#c8b8ff",
-      marginBottom: 24
+      display: "inline-block",
+      background: GS.inset,
+      border: GS.ib,
+      borderRadius: 6,
+      padding: "6px 20px",
+      marginBottom: 24,
+      boxShadow: GS.is
     }
-  }, "Score: ", score), !customLevelMode && /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(GsMono, {
+    size: 14,
+    color: GS.blue
+  }, score.toLocaleString())), !customLevelMode && /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 10,
@@ -10043,26 +10048,26 @@ function CosmicDriftGame() {
     style: {
       padding: "12px 24px",
       borderRadius: 6,
-      background: PNL,
-      border: PNLB,
+      background: GS.brushedSolid,
+      border: GS.pbl,
       color: "#c8d8ff",
       fontWeight: 700,
       fontSize: 14,
       cursor: "pointer",
-      boxShadow: PNLS
+      boxShadow: GS.ps
     }
   }, "Retry Level"), /*#__PURE__*/React.createElement("div", {
     onClick: fullRestart,
     style: {
       padding: "12px 24px",
       borderRadius: 6,
-      background: PNL,
-      border: PNLB,
+      background: GS.brushedSolid,
+      border: GS.pbl,
       color: gameModeRef.current === "highlights" ? "rgba(200,184,255,0.6)" : "#c8d8ff",
       fontWeight: 700,
       fontSize: gameModeRef.current === "highlights" ? 12 : 14,
       cursor: "pointer",
-      boxShadow: PNLS
+      boxShadow: GS.ps
     }
   }, gameModeRef.current === "highlights" ? "Start Over" : "Try Again"), /*#__PURE__*/React.createElement("div", {
     onClick: function () {
@@ -10073,13 +10078,13 @@ function CosmicDriftGame() {
     style: {
       padding: "12px 24px",
       borderRadius: 6,
-      background: PNL,
-      border: PNLB,
+      background: GS.brushedSolid,
+      border: GS.pbl,
       color: "rgba(180,200,220,0.5)",
       fontWeight: 700,
       fontSize: 12,
       cursor: "pointer",
-      boxShadow: PNLS
+      boxShadow: GS.ps
     }
   }, "Main Menu")), customLevelMode && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -10093,13 +10098,13 @@ function CosmicDriftGame() {
     style: {
       padding: "12px 20px",
       borderRadius: 6,
-      background: PNL,
-      border: PNLB,
+      background: GS.brushedSolid,
+      border: GS.pbl,
       color: "#c8b8ff",
       fontWeight: 700,
       fontSize: 13,
       cursor: "pointer",
-      boxShadow: PNLS
+      boxShadow: GS.ps
     }
   }, "My Levels"), /*#__PURE__*/React.createElement("div", {
     onClick: function () {
@@ -10113,13 +10118,13 @@ function CosmicDriftGame() {
     style: {
       padding: "12px 20px",
       borderRadius: 6,
-      background: PNL,
-      border: PNLB,
+      background: GS.brushedSolid,
+      border: GS.pbl,
       color: "#c8d8ff",
       fontWeight: 700,
       fontSize: 13,
       cursor: "pointer",
-      boxShadow: PNLS
+      boxShadow: GS.ps
     }
   }, "Retry"), /*#__PURE__*/React.createElement("div", {
     onClick: function () {
@@ -10133,13 +10138,13 @@ function CosmicDriftGame() {
     style: {
       padding: "12px 20px",
       borderRadius: 6,
-      background: PNL,
+      background: GS.brushedSolid,
       border: "2px solid rgba(80,200,255,0.3)",
       color: "#80ddff",
       fontWeight: 700,
       fontSize: 13,
       cursor: "pointer",
-      boxShadow: PNLS
+      boxShadow: GS.ps
     }
   }, "Edit")))), /*#__PURE__*/React.createElement(LegendOverlay, {
     open: legendOpen,
@@ -10155,18 +10160,13 @@ function CosmicDriftGame() {
       backdropFilter: "blur(4px)",
       display: "flex",
       alignItems: "center",
-      justifyContent: "center",
-      fontFamily: "'Quicksand',sans-serif"
+      justifyContent: "center"
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(GsPanel, {
     style: {
-      background: "linear-gradient(170deg, #1a1a2e, #12121e)",
-      border: "1px solid rgba(80,200,255,0.25)",
-      borderRadius: 16,
+      maxWidth: 260,
       padding: "28px 32px",
       textAlign: "center",
-      maxWidth: 260,
-      boxShadow: "0 8px 32px rgba(0,0,0,0.6), 0 0 40px rgba(80,200,255,0.08)",
       animation: "introFadeIn 0.3s ease-out"
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -10191,9 +10191,10 @@ function CosmicDriftGame() {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "rgba(80,200,255,0.08)",
-      borderRadius: 12,
-      border: "1px solid rgba(80,200,255,0.2)"
+      background: GS.inset,
+      borderRadius: 10,
+      border: GS.ib,
+      boxShadow: GS.is
     }
   }, introCard.key === "drone" && /*#__PURE__*/React.createElement(BDDroneIcon, {
     size: 32
@@ -10223,20 +10224,22 @@ function CosmicDriftGame() {
     fill: "#5a5a68",
     stroke: "#6a6a78",
     strokeWidth: "1"
-  })))), /*#__PURE__*/React.createElement("div", {
+  })))), /*#__PURE__*/React.createElement(GsMono, {
+    size: 10,
+    ls: 2,
+    color: GS.blue + "aa",
     style: {
-      color: "#b0c8d8",
-      fontSize: 18,
-      fontWeight: 700,
-      marginBottom: 8,
-      letterSpacing: 0.5
-    }
-  }, introCard.type === "powerup" ? "New Power-Up" : "New Block"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: "#80ddff",
-      fontSize: 15,
-      fontWeight: 600,
+      display: "block",
       marginBottom: 6
+    }
+  }, introCard.type === "powerup" ? "NEW POWER-UP" : "NEW BLOCK"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: GS.blue,
+      fontSize: 15,
+      fontWeight: 700,
+      marginBottom: 6,
+      fontFamily: "'Exo 2', sans-serif",
+      letterSpacing: 0.5
     }
   }, introCard.name), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -10255,13 +10258,13 @@ function CosmicDriftGame() {
       display: "inline-block",
       padding: "10px 36px",
       borderRadius: 6,
-      background: PNL,
-      border: PNLB,
+      background: GS.brushedSolid,
+      border: GS.pbl,
       color: "#b0c8d8",
       fontWeight: 700,
       fontSize: 13,
       cursor: "pointer",
-      boxShadow: PNLS
+      boxShadow: GS.ps
     }
   }, "Got It"))), screen === "splash" && /*#__PURE__*/React.createElement("iframe", {
     src: "workshop.html",
@@ -12063,33 +12066,32 @@ function CosmicDriftGame() {
       backdropFilter: "blur(4px)",
       display: "flex",
       alignItems: "center",
-      justifyContent: "center",
-      fontFamily: "'Quicksand',sans-serif"
+      justifyContent: "center"
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(GsPanel, {
     style: {
-      background: "linear-gradient(170deg,#151040,#1a0a2e)",
-      border: "1px solid rgba(255,100,80,0.3)",
-      borderRadius: 16,
+      maxWidth: 280,
       padding: "20px 24px",
       textAlign: "center",
-      maxWidth: 280,
-      animation: "introFadeIn 0.25s ease-out"
+      animation: "introFadeIn 0.25s ease-out",
+      border: "1px solid rgba(255,100,80,0.3)"
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(GsMono, {
+    size: 12,
+    ls: 1,
+    color: "#ff886699",
     style: {
-      color: "#ff8866",
-      fontSize: 15,
-      fontWeight: 700,
+      display: "block",
       marginBottom: 8
     }
-  }, "Exit Game?"), /*#__PURE__*/React.createElement("div", {
+  }, "EXIT GAME?"), /*#__PURE__*/React.createElement(GsMono, {
+    size: 10,
+    color: GS.blue + "88",
     style: {
-      color: "rgba(200,184,255,0.5)",
-      fontSize: 12,
+      display: "block",
       marginBottom: 18
     }
-  }, "Progress in this level will be lost."), /*#__PURE__*/React.createElement("div", {
+  }, "PROGRESS IN THIS LEVEL WILL BE LOST"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 12,
@@ -12101,12 +12103,14 @@ function CosmicDriftGame() {
     },
     style: {
       padding: "8px 20px",
-      borderRadius: 16,
-      border: "1px solid rgba(120,80,255,0.3)",
-      color: "#c8b8ff",
+      borderRadius: 6,
+      background: GS.brushedSolid,
+      border: GS.pbl,
+      color: "#b0c8d8",
       fontSize: 12,
       fontWeight: 600,
-      cursor: "pointer"
+      cursor: "pointer",
+      boxShadow: GS.ps
     }
   }, "Cancel"), /*#__PURE__*/React.createElement("div", {
     onClick: function () {
@@ -12122,8 +12126,8 @@ function CosmicDriftGame() {
     },
     style: {
       padding: "8px 20px",
-      borderRadius: 16,
-      background: "rgba(255,60,60,0.3)",
+      borderRadius: 6,
+      background: "rgba(200,50,50,0.25)",
       border: "1px solid rgba(255,80,80,0.35)",
       color: "#ff8866",
       fontSize: 12,
@@ -12139,27 +12143,23 @@ function CosmicDriftGame() {
       backdropFilter: "blur(4px)",
       display: "flex",
       alignItems: "center",
-      justifyContent: "center",
-      fontFamily: "'Quicksand',sans-serif"
+      justifyContent: "center"
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(GsPanel, {
     style: {
-      background: "linear-gradient(170deg,#151040,#1a0a2e)",
-      border: "1px solid rgba(120,80,255,0.3)",
-      borderRadius: 16,
+      maxWidth: 280,
       padding: "20px 24px",
       textAlign: "center",
-      maxWidth: 280,
       animation: "introFadeIn 0.25s ease-out"
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(GsMono, {
+    size: 12,
+    ls: 1,
     style: {
-      color: "#c8b8ff",
-      fontSize: 14,
-      fontWeight: 700,
+      display: "block",
       marginBottom: 14
     }
-  }, "Convert Reactor Core?"), /*#__PURE__*/React.createElement("div", {
+  }, "CONVERT REACTOR CORE?"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
@@ -12174,9 +12174,10 @@ function CosmicDriftGame() {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "rgba(48,192,208,0.1)",
-      borderRadius: 10,
-      border: "1px solid rgba(48,192,208,0.3)"
+      background: GS.inset,
+      borderRadius: 8,
+      border: GS.ib,
+      boxShadow: GS.is
     }
   }, /*#__PURE__*/React.createElement(CoreIcon, {
     size: 28,
@@ -12188,7 +12189,7 @@ function CosmicDriftGame() {
   }, /*#__PURE__*/React.createElement("path", {
     d: "M2 8h18M16 3l6 5-6 5",
     fill: "none",
-    stroke: "rgba(200,184,255,0.5)",
+    stroke: GS.green + "88",
     strokeWidth: "2",
     strokeLinecap: "round",
     strokeLinejoin: "round"
@@ -12199,9 +12200,10 @@ function CosmicDriftGame() {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "rgba(80,200,255,0.08)",
-      borderRadius: 10,
-      border: "1px solid rgba(80,200,255,0.25)"
+      background: GS.inset,
+      borderRadius: 8,
+      border: GS.ib,
+      boxShadow: GS.is
     }
   }, convertOffer === "drone" && /*#__PURE__*/React.createElement(BDDroneIcon, {
     size: 28
@@ -12231,13 +12233,14 @@ function CosmicDriftGame() {
     fill: "#5a5a68",
     stroke: "#6a6a78",
     strokeWidth: "1"
-  })))), /*#__PURE__*/React.createElement("div", {
+  })))), /*#__PURE__*/React.createElement(GsMono, {
+    size: 10,
+    color: GS.green + "66",
     style: {
-      color: "rgba(200,184,255,0.45)",
-      fontSize: 11,
+      display: "block",
       marginBottom: 16
     }
-  }, "Uses 1 reactor core"), /*#__PURE__*/React.createElement("div", {
+  }, "USES 1 REACTOR CORE"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 12,
@@ -12249,23 +12252,27 @@ function CosmicDriftGame() {
     },
     style: {
       padding: "8px 20px",
-      borderRadius: 16,
-      border: "1px solid rgba(120,80,255,0.3)",
-      color: "#c8b8ff",
+      borderRadius: 6,
+      background: GS.brushedSolid,
+      border: GS.pbl,
+      color: "#b0c8d8",
       fontSize: 12,
       fontWeight: 600,
-      cursor: "pointer"
+      cursor: "pointer",
+      boxShadow: GS.ps
     }
   }, "Cancel"), /*#__PURE__*/React.createElement("div", {
     onClick: doConvert,
     style: {
       padding: "8px 20px",
-      borderRadius: 16,
-      background: "linear-gradient(135deg,#7b5ea7,#9f7fd0)",
+      borderRadius: 6,
+      background: "linear-gradient(135deg,#6a4a9a,#8a60c0)",
+      border: "1px solid rgba(160,120,255,0.4)",
       color: "#fff",
       fontSize: 12,
       fontWeight: 700,
-      cursor: "pointer"
+      cursor: "pointer",
+      boxShadow: "0 2px 8px rgba(120,80,255,0.3)"
     }
   }, "Convert")))), deadlockModal, ufoDebugOverlay, empFallEl, empBloomEl, /*#__PURE__*/React.createElement("div", {
     style: {
