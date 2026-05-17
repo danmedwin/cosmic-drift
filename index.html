@@ -12598,12 +12598,12 @@ function CosmicDriftGame() {
     }
   }, /*#__PURE__*/React.createElement(GsRivet, {
     pos: {
-      bottom: 4,
+      top: 4,
       left: 4
     }
   }), /*#__PURE__*/React.createElement(GsRivet, {
     pos: {
-      bottom: 4,
+      top: 4,
       right: 4
     }
   }), /*#__PURE__*/React.createElement("div", {
@@ -13028,13 +13028,11 @@ function CosmicDriftGame() {
       display: "flex",
       flexDirection: "column",
       position: "relative",
-      borderLeft: "6px solid " + (frameGlow ? "rgba(255,60,60,0.5)" : "#3a4250"),
-      borderRight: "6px solid " + (frameGlow ? "rgba(255,60,60,0.5)" : "#3a4250"),
       borderTop: frameGlow ? "1px solid rgba(255,60,60,0.3)" : "none",
       borderBottom: frameGlow ? "1px solid rgba(255,60,60,0.3)" : "none",
       background: "linear-gradient(180deg, rgba(10,10,20,0.4) 0%, transparent 8%, transparent 92%, rgba(10,10,20,0.4) 100%)",
-      boxShadow: frameGlow ? "inset 0 0 30px rgba(255,40,40,0.15), inset 0 0 60px rgba(255,40,40,0.08)" : "none",
-      transition: "border-color 0.3s, box-shadow 0.3s"
+      boxShadow: frameGlow ? "inset 6px 0 0 rgba(255,60,60,0.5), inset -6px 0 0 rgba(255,60,60,0.5), inset 0 0 30px rgba(255,40,40,0.15), inset 0 0 60px rgba(255,40,40,0.08)" : "inset 6px 0 0 #3a4250, inset -6px 0 0 #3a4250",
+      transition: "box-shadow 0.3s"
     }
   }, /*#__PURE__*/React.createElement("div", {
     ref: gridAreaRef,
@@ -13361,12 +13359,12 @@ function CosmicDriftGame() {
     }
   }, /*#__PURE__*/React.createElement(GsRivet, {
     pos: {
-      top: 4,
+      bottom: 4,
       left: 4
     }
   }), /*#__PURE__*/React.createElement(GsRivet, {
     pos: {
-      top: 4,
+      bottom: 4,
       right: 4
     }
   }), /*#__PURE__*/React.createElement(HudPanelMemo, {

@@ -2932,8 +2932,8 @@ function logUfo(msg) {
 
         {/* ═══ TOP NAV - COCKPIT BAR ═══ */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 6px", position: "relative", zIndex: 10, background: GS.brushed, backgroundBlendMode: "overlay", borderBottom: GS.pb, boxShadow: "0 3px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(200,230,240,0.08)" }}>
-          <GsRivet pos={{ bottom: 4, left: 4 }} />
-          <GsRivet pos={{ bottom: 4, right: 4 }} />
+          <GsRivet pos={{ top: 4, left: 4 }} />
+          <GsRivet pos={{ top: 4, right: 4 }} />
           <div style={{ background: GS.inset, border: GS.ib, borderRadius: 6, padding: "5px 12px", boxShadow: GS.is, display: "flex", alignItems: "center", gap: 8, flex: 1, marginRight: 6 }}>
             <GsLED color={customLevelMode ? "#c8b8ff" : GS.blue} size={5} />
             <span style={{ fontFamily: "'JetBrains Mono', monospace", color: customLevelMode ? "#c8b8ff" : GS.blue, fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textShadow: "0 0 8px " + (customLevelMode ? "rgba(200,184,255,0.35)" : "rgba(128,221,255,0.35)") }}>{customLevelMode ? customLevelName : (getLevelName(level) ? "Lvl " + level + " \u00B7 " + getLevelName(level) : "Level " + level)}</span>
@@ -2998,7 +2998,7 @@ function logUfo(msg) {
         {gameMenuOpen && <div onClick={function () { setGameMenuOpen(false); }} style={{ position: "fixed", inset: 0, zIndex: 5 }} />}
 
         {/* ═══ GAME AREA - COCKPIT WINDOW ═══ */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", position: "relative", borderLeft: "6px solid " + (frameGlow ? "rgba(255,60,60,0.5)" : "#3a4250"), borderRight: "6px solid " + (frameGlow ? "rgba(255,60,60,0.5)" : "#3a4250"), borderTop: frameGlow ? "1px solid rgba(255,60,60,0.3)" : "none", borderBottom: frameGlow ? "1px solid rgba(255,60,60,0.3)" : "none", background: "linear-gradient(180deg, rgba(10,10,20,0.4) 0%, transparent 8%, transparent 92%, rgba(10,10,20,0.4) 100%)", boxShadow: frameGlow ? "inset 0 0 30px rgba(255,40,40,0.15), inset 0 0 60px rgba(255,40,40,0.08)" : "none", transition: "border-color 0.3s, box-shadow 0.3s" }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", position: "relative", borderTop: frameGlow ? "1px solid rgba(255,60,60,0.3)" : "none", borderBottom: frameGlow ? "1px solid rgba(255,60,60,0.3)" : "none", background: "linear-gradient(180deg, rgba(10,10,20,0.4) 0%, transparent 8%, transparent 92%, rgba(10,10,20,0.4) 100%)", boxShadow: frameGlow ? "inset 6px 0 0 rgba(255,60,60,0.5), inset -6px 0 0 rgba(255,60,60,0.5), inset 0 0 30px rgba(255,40,40,0.15), inset 0 0 60px rgba(255,40,40,0.08)" : "inset 6px 0 0 #3a4250, inset -6px 0 0 #3a4250", transition: "box-shadow 0.3s" }}>
           {/* Grid with faint lines */}
           <div ref={gridAreaRef} onTouchStart={handleGridTS} onTouchMove={handleGridTM} onTouchEnd={handleGridTE} onClick={handleGridTap} style={{ padding: gridPadTop + "px " + BOARD_PAD + "px", position: "relative", zIndex: 1, cursor: "pointer", outline: armedItem ? "2px solid rgba(80,200,255,0.25)" : "none", borderRadius: 4 }}>
             {gridLines}
@@ -3029,8 +3029,8 @@ function logUfo(msg) {
 
         {/* ═══ COCKPIT DASHBOARD - METALLIC PANEL ═══ */}
         <div ref={hudRef} style={{ position: "relative", zIndex: 2, flexShrink: 0, background: GS.brushed, backgroundBlendMode: "overlay", borderTop: "3px solid #404a58", padding: "6px 6px 8px", boxShadow: "0 -4px 12px rgba(0,0,0,0.55), inset 0 1px 0 rgba(200,230,240,0.08)" }}>
-          <GsRivet pos={{ top: 4, left: 4 }} />
-          <GsRivet pos={{ top: 4, right: 4 }} />
+          <GsRivet pos={{ bottom: 4, left: 4 }} />
+          <GsRivet pos={{ bottom: 4, right: 4 }} />
 
           <HudPanelMemo baseCores={baseCores} extraCores={extraCores} plasma={plasma} maxPlasma={customGridRef.current ? customPlasmaRef.current : getLevelPlasma(level)} score={score} scoreFlash={scoreFlash} gameState={gameState} setGameState={setGameState} />
 
