@@ -9943,8 +9943,6 @@ function CosmicDriftGame() {
       position: "fixed",
       inset: 0,
       zIndex: 300,
-      background: "rgba(5,5,15,0.9)",
-      backdropFilter: "blur(6px)",
       display: "flex",
       alignItems: "center",
       justifyContent: "center"
@@ -9980,156 +9978,245 @@ function CosmicDriftGame() {
     });
   })), /*#__PURE__*/React.createElement(GsPanel, {
     style: {
+      width: 300,
+      maxWidth: "88vw",
+      padding: 0,
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 16,
+      background: "repeating-linear-gradient(45deg, rgba(255,60,80,0.14) 0px, rgba(255,60,80,0.14) 10px, rgba(0,0,0,0.35) 10px, rgba(0,0,0,0.35) 20px)"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "12px 14px 10px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
       textAlign: "center",
-      padding: "28px 32px",
-      minWidth: 260,
-      maxWidth: 340,
-      animation: "introFadeIn 0.3s ease-out"
-    }
-  }, newHighScore && /*#__PURE__*/React.createElement("div", {
-    style: {
       marginBottom: 12,
-      animation: "introFadeIn 0.5s ease-out"
+      paddingBottom: 12,
+      borderBottom: GS.ib
     }
-  }, /*#__PURE__*/React.createElement(GsMono, {
-    size: 9,
-    ls: 3,
-    color: "#ffcc4499",
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "block",
+      fontSize: 9,
+      fontWeight: 700,
+      color: "rgba(200,220,240,0.4)",
+      letterSpacing: 4,
+      textTransform: "uppercase",
       marginBottom: 4
     }
-  }, "NEW HIGH SCORE"), /*#__PURE__*/React.createElement("div", {
+  }, customLevelMode ? customLevelName : "Level " + level), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 28,
-      fontWeight: 700,
-      color: "#ffcc44",
-      textShadow: "0 0 20px rgba(255,200,60,0.5), 0 0 40px rgba(255,200,60,0.2)",
-      letterSpacing: 2,
-      fontFamily: "'Exo 2', sans-serif"
-    }
-  }, score.toLocaleString())), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 32,
+      fontSize: 24,
       fontWeight: 800,
       color: "#ff4455",
-      marginBottom: 8,
       letterSpacing: 3,
-      fontFamily: "'Exo 2', sans-serif",
-      textShadow: "0 0 20px rgba(255,60,80,0.4)"
+      textTransform: "uppercase",
+      textShadow: "0 0 18px #ff445588"
     }
-  }, "GAME OVER"), customLevelMode && /*#__PURE__*/React.createElement("div", {
+  }, "Game Over")), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 13,
-      color: "rgba(180,200,220,0.5)",
-      marginBottom: 4
+      display: "flex",
+      gap: 6,
+      marginBottom: 8
     }
-  }, customLevelName), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "inline-block",
+      flex: 1,
+      position: "relative",
       background: GS.inset,
       border: GS.ib,
       borderRadius: 6,
-      padding: "6px 20px",
-      marginBottom: 24,
-      boxShadow: GS.is
+      boxShadow: GS.is,
+      padding: "8px 4px 6px",
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      position: "absolute",
+      inset: 0,
+      borderRadius: 5,
+      background: "radial-gradient(ellipse 80% 60% at 50% 70%, rgba(255,68,85,0.12) 0%, transparent 70%)",
+      pointerEvents: "none"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 20,
+      fontWeight: 700,
+      color: "#ff4455",
+      lineHeight: 1,
+      position: "relative"
+    }
+  }, blocksDestroyedRef.current), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 7,
+      color: "rgba(200,220,240,0.4)",
+      letterSpacing: 2,
+      marginTop: 3,
+      textTransform: "uppercase",
+      position: "relative"
+    }
+  }, "Blocks")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      position: "relative",
+      background: GS.inset,
+      border: GS.ib,
+      borderRadius: 6,
+      boxShadow: GS.is,
+      padding: "8px 4px 6px",
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      position: "absolute",
+      inset: 0,
+      borderRadius: 5,
+      background: "radial-gradient(ellipse 80% 60% at 50% 70%, rgba(255,68,85,0.12) 0%, transparent 70%)",
+      pointerEvents: "none"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 20,
+      fontWeight: 700,
+      color: "#ff4455",
+      lineHeight: 1,
+      position: "relative"
+    }
+  }, shotsFiredRef.current > 0 ? Math.round(shotsHitRef.current / shotsFiredRef.current * 100) : 0, "%"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 7,
+      color: "rgba(200,220,240,0.4)",
+      letterSpacing: 2,
+      marginTop: 3,
+      textTransform: "uppercase",
+      position: "relative"
+    }
+  }, "Accuracy")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      position: "relative",
+      background: GS.inset,
+      border: GS.ib,
+      borderRadius: 6,
+      boxShadow: GS.is,
+      padding: "8px 4px 6px",
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      position: "absolute",
+      inset: 0,
+      borderRadius: 5,
+      background: "radial-gradient(ellipse 80% 60% at 50% 70%, rgba(255,68,85,0.12) 0%, transparent 70%)",
+      pointerEvents: "none"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 20,
+      fontWeight: 700,
+      color: "#ff4455",
+      lineHeight: 1,
+      position: "relative"
+    }
+  }, shotsFiredRef.current), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 7,
+      color: "rgba(200,220,240,0.4)",
+      letterSpacing: 2,
+      marginTop: 3,
+      textTransform: "uppercase",
+      position: "relative"
+    }
+  }, "Used"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative",
+      background: GS.inset,
+      border: GS.ib,
+      borderRadius: 6,
+      boxShadow: GS.is,
+      padding: "8px 12px",
+      marginBottom: 10
+    }
+  }, newHighScore && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 5
     }
   }, /*#__PURE__*/React.createElement(GsMono, {
-    size: 14,
-    color: GS.blue
-  }, score.toLocaleString())), !customLevelMode && /*#__PURE__*/React.createElement("div", {
+    size: 7,
+    ls: 2
+  }, "New High Score"), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      gap: 10,
-      justifyContent: "center",
-      flexWrap: "wrap"
-    }
-  }, gameModeRef.current === "highlights" && FIXED_LEVELS[level] && /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      playSignatureLevel(level);
-    },
-    style: {
-      padding: "12px 24px",
-      borderRadius: 6,
-      background: GS.brushedSolid,
-      border: GS.pbl,
-      color: "#c8d8ff",
-      fontWeight: 700,
-      fontSize: 14,
-      cursor: "pointer",
-      boxShadow: GS.ps
-    }
-  }, "Retry Level"), /*#__PURE__*/React.createElement("div", {
-    onClick: fullRestart,
-    style: {
-      padding: "12px 24px",
-      borderRadius: 6,
-      background: GS.brushedSolid,
-      border: GS.pbl,
-      color: gameModeRef.current === "highlights" ? "rgba(200,184,255,0.6)" : "#c8d8ff",
-      fontWeight: 700,
-      fontSize: gameModeRef.current === "highlights" ? 12 : 14,
-      cursor: "pointer",
-      boxShadow: GS.ps
-    }
-  }, gameModeRef.current === "highlights" ? "Start Over" : "Try Again"), /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      setGameState("playing");
-      stopMusic();
-      setScreen("splash");
-    },
-    style: {
-      padding: "12px 24px",
-      borderRadius: 6,
-      background: GS.brushedSolid,
-      border: GS.pbl,
-      color: "rgba(180,200,220,0.5)",
-      fontWeight: 700,
-      fontSize: 12,
-      cursor: "pointer",
-      boxShadow: GS.ps
-    }
-  }, "Main Menu")), customLevelMode && /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 10,
-      justifyContent: "center",
-      flexWrap: "wrap"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    onClick: backToMyLevels,
-    style: {
-      padding: "12px 20px",
-      borderRadius: 6,
-      background: GS.brushedSolid,
-      border: GS.pbl,
-      color: "#c8b8ff",
-      fontWeight: 700,
       fontSize: 13,
-      cursor: "pointer",
-      boxShadow: GS.ps
+      fontWeight: 700,
+      color: "#ffcc44",
+      fontFamily: "'JetBrains Mono', monospace",
+      textShadow: "0 0 8px rgba(255,200,60,0.5)"
     }
-  }, "My Levels"), /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
+  }, "★")), newHighScore && /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 1,
+      background: "#14202e",
+      marginBottom: 5
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement(GsMono, {
+    size: 7,
+    ls: 2
+  }, "Final Score"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 18,
+      fontWeight: 700,
+      color: newHighScore ? "#ffcc44" : "#d8eaf6",
+      fontFamily: "'JetBrains Mono', monospace",
+      textShadow: newHighScore ? "0 0 10px rgba(255,200,60,0.4)" : "none"
+    }
+  }, score.toLocaleString()))), /*#__PURE__*/React.createElement("div", {
+    onClick: customLevelMode ? function () {
       if (customGridRef.current) playCustomLevel(customLevelDataRef.current || {
         name: customLevelName,
         grid: customGridRef.current.slice(),
         shipStart: customShipRef.current,
         startPlasma: customPlasmaRef.current
       });
-    },
+    } : gameModeRef.current === "highlights" && FIXED_LEVELS[level] ? function () {
+      playSignatureLevel(level);
+    } : fullRestart,
     style: {
-      padding: "12px 20px",
-      borderRadius: 6,
-      background: GS.brushedSolid,
-      border: GS.pbl,
-      color: "#c8d8ff",
-      fontWeight: 700,
-      fontSize: 13,
+      position: "relative",
+      width: "100%",
+      padding: "12px 0",
+      borderRadius: 8,
+      background: "linear-gradient(180deg, #a83d3d 0%, #782a2a 100%)",
+      border: "1px solid #ff445555",
+      color: "#ffffff",
+      fontWeight: 800,
+      fontSize: 14,
       cursor: "pointer",
-      boxShadow: GS.ps
+      boxShadow: "0 2px 14px rgba(255,68,85,0.18), inset 0 1px 0 rgba(255,255,255,0.15)",
+      textAlign: "center",
+      letterSpacing: 2,
+      marginBottom: 8,
+      boxSizing: "border-box",
+      textTransform: "uppercase"
     }
-  }, "Retry"), /*#__PURE__*/React.createElement("div", {
+  }, "Play Again"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 6
+    }
+  }, customLevelMode && /*#__PURE__*/React.createElement("div", {
     onClick: function () {
       openLevelInBuilder(customLevelDataRef.current || {
         name: customLevelName,
@@ -10139,17 +10226,72 @@ function CosmicDriftGame() {
       });
     },
     style: {
-      padding: "12px 20px",
+      flex: 1,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 3,
+      padding: "8px 4px",
       borderRadius: 6,
-      background: GS.brushedSolid,
-      border: "2px solid rgba(80,200,255,0.3)",
-      color: "#80ddff",
-      fontWeight: 700,
-      fontSize: 13,
-      cursor: "pointer",
-      boxShadow: GS.ps
+      background: GS.inset,
+      border: GS.ib,
+      boxShadow: GS.is,
+      cursor: "pointer"
     }
-  }, "Edit")))), /*#__PURE__*/React.createElement(LegendOverlay, {
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "14",
+    height: "14",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "#ff4455",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+  })), /*#__PURE__*/React.createElement(GsMono, {
+    size: 7,
+    ls: 1,
+    color: "#ff445588"
+  }, "Edit")), /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      setGameState("playing");
+      stopMusic();
+      setScreen("splash");
+    },
+    style: {
+      flex: 1,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 3,
+      padding: "8px 4px",
+      borderRadius: 6,
+      background: GS.inset,
+      border: GS.ib,
+      boxShadow: GS.is,
+      cursor: "pointer"
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "14",
+    height: "14",
+    viewBox: "0 0 24 24"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5a2 2 0 00-2 2v4h2V5h14v14H5v-4H3v4a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z",
+    fill: "rgba(200,210,220,0.5)"
+  })), /*#__PURE__*/React.createElement(GsMono, {
+    size: 7,
+    ls: 1
+  }, "Main Menu")))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 16,
+      background: "repeating-linear-gradient(45deg, rgba(255,60,80,0.14) 0px, rgba(255,60,80,0.14) 10px, rgba(0,0,0,0.35) 10px, rgba(0,0,0,0.35) 20px)"
+    }
+  }))), /*#__PURE__*/React.createElement(LegendOverlay, {
     open: legendOpen,
     onClose: function () {
       setLegendOpen(false);
