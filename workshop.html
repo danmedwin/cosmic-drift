@@ -6515,7 +6515,21 @@ function CosmicWorkshop() {
     }
   }, savedLevels.length > 0 ? savedLevels.slice().sort(function (a, b) {
     return new Date(b.savedAt || 0) - new Date(a.savedAt || 0);
-  })[0].name || "Untitled" : "Default")), React.createElement("div", {
+  })[0].name || "Untitled" : "Default"), React.createElement(WsMono, {
+    size: 7,
+    ls: 0,
+    color: "rgba(128,221,255,0.3)",
+    style: {
+      display: "block",
+      marginTop: 3
+    }
+  }, function () {
+    if (savedLevels.length === 0) return "--";
+    var lv = savedLevels.slice().sort(function (a, b) {
+      return (b.modified || 0) - (a.modified || 0);
+    })[0];
+    return lv.modified ? new Date(lv.modified).toLocaleDateString() : lv.savedAt ? new Date(lv.savedAt).toLocaleDateString() : "--";
+  }())), React.createElement("div", {
     onClick: function () {
       setScreen("designer");
       setBdCurrentView("list");
@@ -6563,6 +6577,25 @@ function CosmicWorkshop() {
       }
     }
     return "Default";
+  }()), React.createElement(WsMono, {
+    size: 7,
+    ls: 0,
+    color: "rgba(200,184,255,0.3)",
+    style: {
+      display: "block",
+      marginTop: 3
+    }
+  }, function () {
+    var keys = Object.keys(bdActiveMap);
+    for (var i = 0; i < keys.length; i++) {
+      var did = bdActiveMap[keys[i]];
+      if (did) {
+        for (var j = 0; j < bdSaved.length; j++) {
+          if (bdSaved[j].id === did && bdSaved[j].modifiedAt) return new Date(bdSaved[j].modifiedAt).toLocaleDateString();
+        }
+      }
+    }
+    return "--";
   }())), React.createElement("div", {
     onClick: function () {
       setScreen("vfx");
@@ -6611,6 +6644,25 @@ function CosmicWorkshop() {
       }
     }
     return "Default";
+  }()), React.createElement(WsMono, {
+    size: 7,
+    ls: 0,
+    color: "rgba(255,180,60,0.3)",
+    style: {
+      display: "block",
+      marginTop: 3
+    }
+  }, function () {
+    var keys = Object.keys(vfxActiveMap);
+    for (var i = 0; i < keys.length; i++) {
+      var did = vfxActiveMap[keys[i]];
+      if (did) {
+        for (var j = 0; j < vfxSaved.length; j++) {
+          if (vfxSaved[j].id === did && vfxSaved[j].modifiedAt) return new Date(vfxSaved[j].modifiedAt).toLocaleDateString();
+        }
+      }
+    }
+    return "--";
   }())), React.createElement("div", {
     onClick: function () {
       setScreen("ufo");
@@ -6646,52 +6698,18 @@ function CosmicWorkshop() {
       overflow: "hidden",
       textOverflow: "ellipsis"
     }
-  }, ufoSaved.length > 0 ? ufoGetActiveDesign().name || "Active" : "Default"))), React.createElement("div", {
-    style: {
-      marginTop: 6,
-      textAlign: "right"
-    }
-  }, React.createElement(WsMono, {
+  }, ufoSaved.length > 0 ? ufoGetActiveDesign().name || "Active" : "Default"), React.createElement(WsMono, {
     size: 7,
-    ls: 1,
-    color: "rgba(180,140,255,0.3)"
+    ls: 0,
+    color: "rgba(100,220,180,0.3)",
+    style: {
+      display: "block",
+      marginTop: 3
+    }
   }, function () {
-    var ts = [];
-    if (savedLevels.length > 0) {
-      var lv = savedLevels.slice().sort(function (a, b) {
-        return (b.modified || 0) - (a.modified || 0);
-      })[0];
-      if (lv.modified) ts.push(lv.modified);else if (lv.savedAt) ts.push(new Date(lv.savedAt).getTime());
-    }
-    var bkeys = Object.keys(bdActiveMap);
-    for (var bi = 0; bi < bkeys.length; bi++) {
-      var bdid = bdActiveMap[bkeys[bi]];
-      if (bdid) {
-        for (var bj = 0; bj < bdSaved.length; bj++) {
-          if (bdSaved[bj].id === bdid && bdSaved[bj].modifiedAt) {
-            ts.push(new Date(bdSaved[bj].modifiedAt).getTime());
-            break;
-          }
-        }
-      }
-    }
-    var vkeys = Object.keys(vfxActiveMap);
-    for (var vi = 0; vi < vkeys.length; vi++) {
-      var vdid = vfxActiveMap[vkeys[vi]];
-      if (vdid) {
-        for (var vj = 0; vj < vfxSaved.length; vj++) {
-          if (vfxSaved[vj].id === vdid && vfxSaved[vj].modifiedAt) {
-            ts.push(new Date(vfxSaved[vj].modifiedAt).getTime());
-            break;
-          }
-        }
-      }
-    }
     var ad = ufoGetActiveDesign();
-    if (ad && ad.savedAt) ts.push(new Date(ad.savedAt).getTime());
-    if (ts.length === 0) return "LAST EDIT: --";
-    return "LAST EDIT: " + new Date(Math.max.apply(null, ts)).toLocaleDateString();
-  }()))),
+    return ad && ad.savedAt ? new Date(ad.savedAt).toLocaleDateString() : "--";
+  }())))),
   // FLEX SPACER — pushes Recent Project / Resume / Bridge to bottom
   React.createElement("div", {
     style: {

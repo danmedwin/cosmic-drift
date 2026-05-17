@@ -2148,40 +2148,33 @@ export default function CosmicWorkshop() {
                 React.createElement(WsLED, { color: "#80ddff", size: 4 }),
                 React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(128,221,255,0.6)" }, "GRID")
               ),
-              React.createElement("div", { style: { color: "#a8d8f0", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, savedLevels.length > 0 ? (savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0].name || "Untitled") : "Default")
+              React.createElement("div", { style: { color: "#a8d8f0", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, savedLevels.length > 0 ? (savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0].name || "Untitled") : "Default"),
+              React.createElement(WsMono, { size: 7, ls: 0, color: "rgba(128,221,255,0.3)", style: { display: "block", marginTop: 3 } }, (function() { if (savedLevels.length === 0) return "--"; var lv = savedLevels.slice().sort(function(a,b){return(b.modified||0)-(a.modified||0);})[0]; return lv.modified ? new Date(lv.modified).toLocaleDateString() : (lv.savedAt ? new Date(lv.savedAt).toLocaleDateString() : "--"); }()))
             ),
             React.createElement("div", { onClick: function() { setScreen("designer"); setBdCurrentView("list"); setBdSavedTab("active"); }, style: { background: "linear-gradient(180deg, rgba(200,184,255,0.1) 0%, rgba(160,140,220,0.05) 100%)", border: "1px solid rgba(200,184,255,0.22)", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 3, marginBottom: 4 } },
                 React.createElement(WsLED, { color: "#c8b8ff", size: 4 }),
                 React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(200,184,255,0.6)" }, "BLOCKS")
               ),
-              React.createElement("div", { style: { color: "#c8b8ff", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, (function() { var keys = Object.keys(bdActiveMap); for (var i = 0; i < keys.length; i++) { var did = bdActiveMap[keys[i]]; if (did) { for (var j = 0; j < bdSaved.length; j++) { if (bdSaved[j].id === did) return bdSaved[j].name || "Custom"; } } } return "Default"; }()))
+              React.createElement("div", { style: { color: "#c8b8ff", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, (function() { var keys = Object.keys(bdActiveMap); for (var i = 0; i < keys.length; i++) { var did = bdActiveMap[keys[i]]; if (did) { for (var j = 0; j < bdSaved.length; j++) { if (bdSaved[j].id === did) return bdSaved[j].name || "Custom"; } } } return "Default"; }())),
+              React.createElement(WsMono, { size: 7, ls: 0, color: "rgba(200,184,255,0.3)", style: { display: "block", marginTop: 3 } }, (function() { var keys = Object.keys(bdActiveMap); for (var i=0; i<keys.length; i++) { var did = bdActiveMap[keys[i]]; if (did) { for (var j=0; j<bdSaved.length; j++) { if (bdSaved[j].id === did && bdSaved[j].modifiedAt) return new Date(bdSaved[j].modifiedAt).toLocaleDateString(); } } } return "--"; }()))
             ),
             React.createElement("div", { onClick: function() { setScreen("vfx"); setVfxCurrentView("list"); setVfxSavedTab("active"); }, style: { background: "linear-gradient(180deg, rgba(255,180,60,0.1) 0%, rgba(220,140,30,0.05) 100%)", border: "1px solid rgba(255,180,60,0.22)", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 3, marginBottom: 4 } },
                 React.createElement(WsLED, { color: "#ffb43c", size: 4 }),
                 React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(255,180,60,0.6)" }, "VFX")
               ),
-              React.createElement("div", { style: { color: "#ffd080", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, (function() { var keys = Object.keys(vfxActiveMap); for (var i = 0; i < keys.length; i++) { var did = vfxActiveMap[keys[i]]; if (did) { for (var j = 0; j < vfxSaved.length; j++) { if (vfxSaved[j].id === did) return vfxSaved[j].name || "Custom"; } } } return "Default"; }()))
+              React.createElement("div", { style: { color: "#ffd080", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, (function() { var keys = Object.keys(vfxActiveMap); for (var i = 0; i < keys.length; i++) { var did = vfxActiveMap[keys[i]]; if (did) { for (var j = 0; j < vfxSaved.length; j++) { if (vfxSaved[j].id === did) return vfxSaved[j].name || "Custom"; } } } return "Default"; }())),
+              React.createElement(WsMono, { size: 7, ls: 0, color: "rgba(255,180,60,0.3)", style: { display: "block", marginTop: 3 } }, (function() { var keys = Object.keys(vfxActiveMap); for (var i=0; i<keys.length; i++) { var did = vfxActiveMap[keys[i]]; if (did) { for (var j=0; j<vfxSaved.length; j++) { if (vfxSaved[j].id === did && vfxSaved[j].modifiedAt) return new Date(vfxSaved[j].modifiedAt).toLocaleDateString(); } } } return "--"; }()))
             ),
             React.createElement("div", { onClick: function() { setScreen("ufo"); }, style: { background: "linear-gradient(180deg, rgba(100,220,180,0.1) 0%, rgba(60,180,140,0.05) 100%)", border: "1px solid rgba(100,220,180,0.22)", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 3, marginBottom: 4 } },
                 React.createElement(WsLED, { color: "#64dcb4", size: 4 }),
                 React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(100,220,180,0.6)" }, "HULL")
               ),
-              React.createElement("div", { style: { color: "#80e8c4", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, ufoSaved.length > 0 ? (ufoGetActiveDesign().name || "Active") : "Default")
+              React.createElement("div", { style: { color: "#80e8c4", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, ufoSaved.length > 0 ? (ufoGetActiveDesign().name || "Active") : "Default"),
+              React.createElement(WsMono, { size: 7, ls: 0, color: "rgba(100,220,180,0.3)", style: { display: "block", marginTop: 3 } }, (function() { var ad = ufoGetActiveDesign(); return ad && ad.savedAt ? new Date(ad.savedAt).toLocaleDateString() : "--"; }()))
             )
-          ),
-          React.createElement("div", { style: { marginTop: 6, textAlign: "right" } },
-            React.createElement(WsMono, { size: 7, ls: 1, color: "rgba(180,140,255,0.3)" }, (function() {
-              var ts = [];
-              if (savedLevels.length > 0) { var lv = savedLevels.slice().sort(function(a,b){return(b.modified||0)-(a.modified||0);})[0]; if (lv.modified) ts.push(lv.modified); else if (lv.savedAt) ts.push(new Date(lv.savedAt).getTime()); }
-              var bkeys = Object.keys(bdActiveMap); for (var bi=0; bi<bkeys.length; bi++) { var bdid = bdActiveMap[bkeys[bi]]; if (bdid) { for (var bj=0; bj<bdSaved.length; bj++) { if (bdSaved[bj].id === bdid && bdSaved[bj].modifiedAt) { ts.push(new Date(bdSaved[bj].modifiedAt).getTime()); break; } } } }
-              var vkeys = Object.keys(vfxActiveMap); for (var vi=0; vi<vkeys.length; vi++) { var vdid = vfxActiveMap[vkeys[vi]]; if (vdid) { for (var vj=0; vj<vfxSaved.length; vj++) { if (vfxSaved[vj].id === vdid && vfxSaved[vj].modifiedAt) { ts.push(new Date(vfxSaved[vj].modifiedAt).getTime()); break; } } } }
-              var ad = ufoGetActiveDesign(); if (ad && ad.savedAt) ts.push(new Date(ad.savedAt).getTime());
-              if (ts.length === 0) return "LAST EDIT: --";
-              return "LAST EDIT: " + new Date(Math.max.apply(null, ts)).toLocaleDateString();
-            }()))
           )
         ),
 
