@@ -219,8 +219,8 @@ function PlasmaContainer(props) {
 // ── Shared top bar component ──
 function WorkshopTopBar(props) {
   return React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6, padding: "8px 10px", background: WS.brushed, backgroundBlendMode: "overlay", borderBottom: PNLB, boxShadow: "0 3px 6px rgba(0,0,0,0.4)", position: "relative", zIndex: 2 } },
-    WsRivet({ top: 5, left: 5 }),
-    WsRivet({ top: 5, right: 5 }),
+    WsRivet({ top: 4, left: 4 }),
+    WsRivet({ top: 4, right: 4 }),
     React.createElement("div", { onClick: props.onBack, style: { padding: "6px 10px", borderRadius: 4, background: PNL, border: PNLB, color: "rgba(200,210,220,0.8)", fontSize: 10, fontWeight: 700, letterSpacing: 1, cursor: "pointer", textTransform: "uppercase", boxShadow: "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)", display: "flex", alignItems: "center", gap: 4 } },
       React.createElement("svg", { width: "8", height: "8", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M15 18l-6-6 6-6", fill: "none", stroke: "currentColor", strokeWidth: "3", strokeLinecap: "round", strokeLinejoin: "round" })),
       " " + (props.backLabel || "Back")),
@@ -2389,7 +2389,7 @@ export default function CosmicWorkshop() {
       // ── BUILDER EDITOR ──
       lbScreen === "editor" && React.createElement(React.Fragment, null,
         React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 5, padding: "6px 8px", background: WS.brushed, backgroundBlendMode: "overlay", borderBottom: PNLB, boxShadow: "0 3px 6px rgba(0,0,0,0.4)", position: "relative", zIndex: 2 } },
-          WsRivet({ top: 5, left: 5 }), WsRivet({ top: 5, right: 5 }),
+          WsRivet({ top: 4, left: 4 }), WsRivet({ top: 4, right: 4 }),
           React.createElement("div", { onClick: handleBuilderBack, style: Object.assign({}, BTN_TOPBAR, { display: "flex", alignItems: "center", gap: 3 }) }, React.createElement("svg", { width: "8", height: "8", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M15 18l-6-6 6-6", fill: "none", stroke: "currentColor", strokeWidth: "3", strokeLinecap: "round", strokeLinejoin: "round" })), "My Levels"),
           React.createElement("div", { ref: tourSaveRef, style: { display: "flex", gap: 5 } },
             React.createElement("div", { onClick: handleBuilderSave, style: BTN_SAVE }, "Save"),
