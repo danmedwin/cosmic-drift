@@ -2438,60 +2438,64 @@ function logUfo(msg) {
       <style>{ANIM_CSS}</style><style>{projCSS}</style>
       {newHighLevel && <div style={{ position: "fixed", top: 60, left: "50%", transform: "translateX(-50%)", zIndex: 250, pointerEvents: "none", animation: "introFadeIn 0.4s ease-out" }}><div style={{ background: "linear-gradient(135deg, rgba(30,50,30,0.95), rgba(20,40,20,0.95))", border: "1px solid rgba(80,255,80,0.35)", borderRadius: 10, padding: "10px 20px", textAlign: "center", boxShadow: "0 4px 20px rgba(0,0,0,0.5), 0 0 15px rgba(80,255,80,0.15)" }}><div style={{ fontSize: 12, fontWeight: 700, color: "#80ff80", letterSpacing: 1.5, textTransform: "uppercase" }}>New Territory!</div><div style={{ fontSize: 10, color: "rgba(180,220,180,0.5)", marginTop: 2 }}>Every level from here is your highest.</div></div></div>}
       {showLevelClear && <div style={{ position: "fixed", inset: 0, zIndex: 300, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: bonusDone ? "auto" : "none" }}>
-  <GsPanel style={{ width: 300, maxWidth: "88vw", padding: "14px 14px 12px" }}>
-    <div style={{ textAlign: "center", marginBottom: 14, paddingBottom: 12, borderBottom: GS.ib }}>
-      <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(200,220,240,0.4)", letterSpacing: 4, textTransform: "uppercase", marginBottom: 4 }}>{customLevelMode ? customLevelName : ("Level " + level)}</div>
-      <div style={{ fontSize: 24, fontWeight: 800, color: GS.green, letterSpacing: 3, textTransform: "uppercase", textShadow: "0 0 18px " + GS.green + "88" }}>Level Clear</div>
-    </div>
-    {levelClearStats && <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
-      <div style={{ flex: 1, position: "relative", background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: "8px 4px 6px", textAlign: "center" }}>
-        <span style={{ position: "absolute", inset: 0, borderRadius: 5, background: "radial-gradient(ellipse 80% 60% at 50% 70%, " + GS.green + "1a 0%, transparent 70%)", pointerEvents: "none" }} />
-        <div style={{ fontSize: 20, fontWeight: 700, color: GS.green, lineHeight: 1, position: "relative" }}>{levelClearStats.blocks}</div>
-        <div style={{ fontSize: 7, color: "rgba(200,220,240,0.4)", letterSpacing: 2, marginTop: 3, textTransform: "uppercase", position: "relative" }}>Blocks</div>
+  <GsPanel style={{ width: 300, maxWidth: "88vw", padding: 0, overflow: "hidden" }}>
+    <div style={{ height: 16, background: "repeating-linear-gradient(45deg, rgba(80,255,174,0.12) 0px, rgba(80,255,174,0.12) 10px, rgba(0,0,0,0.35) 10px, rgba(0,0,0,0.35) 20px)" }} />
+    <div style={{ padding: "12px 14px 10px" }}>
+      <div style={{ textAlign: "center", marginBottom: 12, paddingBottom: 12, borderBottom: GS.ib }}>
+        <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(200,220,240,0.4)", letterSpacing: 4, textTransform: "uppercase", marginBottom: 4 }}>{customLevelMode ? customLevelName : ("Level " + level)}</div>
+        <div style={{ fontSize: 24, fontWeight: 800, color: GS.green, letterSpacing: 3, textTransform: "uppercase", textShadow: "0 0 18px " + GS.green + "88" }}>Level Clear</div>
       </div>
-      <div style={{ flex: 1, position: "relative", background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: "8px 4px 6px", textAlign: "center" }}>
-        <span style={{ position: "absolute", inset: 0, borderRadius: 5, background: "radial-gradient(ellipse 80% 60% at 50% 70%, " + GS.green + "1a 0%, transparent 70%)", pointerEvents: "none" }} />
-        <div style={{ fontSize: 20, fontWeight: 700, color: GS.green, lineHeight: 1, position: "relative" }}>{levelClearStats.shots > 0 ? Math.round(levelClearStats.hits / levelClearStats.shots * 100) : 0}%</div>
-        <div style={{ fontSize: 7, color: "rgba(200,220,240,0.4)", letterSpacing: 2, marginTop: 3, textTransform: "uppercase", position: "relative" }}>Accuracy</div>
-      </div>
-      <div style={{ flex: 1, position: "relative", background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: "8px 4px 6px", textAlign: "center" }}>
-        <span style={{ position: "absolute", inset: 0, borderRadius: 5, background: "radial-gradient(ellipse 80% 60% at 50% 70%, " + GS.green + "1a 0%, transparent 70%)", pointerEvents: "none" }} />
-        <div style={{ fontSize: 20, fontWeight: 700, color: GS.green, lineHeight: 1, position: "relative" }}>{levelClearStats.plasma}</div>
-        <div style={{ fontSize: 7, color: "rgba(200,220,240,0.4)", letterSpacing: 2, marginTop: 3, textTransform: "uppercase", position: "relative" }}>Plasma</div>
-      </div>
-    </div>}
-    <div style={{ position: "relative", background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: "8px 12px", marginBottom: 10 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
-        <GsMono size={7} ls={2}>Flight Score</GsMono>
-        <div style={{ fontSize: 15, fontWeight: 700, color: bonusDone ? GS.green : "#c8b8ff", fontFamily: "'JetBrains Mono', monospace", transition: "color 0.3s" }}>{bonusDone ? ("+" + bonusEarned) : "..."}</div>
-      </div>
-      <div style={{ height: 1, background: GS.ib.replace("1px solid ", ""), marginBottom: 5 }} />
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <GsMono size={7} ls={2}>Total Score</GsMono>
-        <div style={{ fontSize: 18, fontWeight: 700, color: "#d8eaf6", fontFamily: "'JetBrains Mono', monospace" }}>{score.toLocaleString()}</div>
-      </div>
-    </div>
-    {bonusDone && !customLevelMode && <div onClick={nextLevel} style={{ position: "relative", width: "100%", padding: "12px 0", borderRadius: 8, background: "linear-gradient(180deg, #3da85e 0%, #2a7842 100%)", border: "1px solid " + GS.green + "55", color: "#ffffff", fontWeight: 800, fontSize: 14, cursor: "pointer", boxShadow: "0 2px 14px rgba(80,255,174,0.18), inset 0 1px 0 rgba(255,255,255,0.15)", textAlign: "center", letterSpacing: 2, marginBottom: 8, boxSizing: "border-box", textTransform: "uppercase" }}>{gameModeRef.current === "highlights" && !getNextSigLevel(level) ? "Back to Menu" : "Next Level"}</div>}
-    {bonusDone && customLevelMode && <div onClick={backToMyLevels} style={{ position: "relative", width: "100%", padding: "12px 0", borderRadius: 8, background: "linear-gradient(180deg, #3da85e 0%, #2a7842 100%)", border: "1px solid " + GS.green + "55", color: "#ffffff", fontWeight: 800, fontSize: 14, cursor: "pointer", boxShadow: "0 2px 14px rgba(80,255,174,0.18), inset 0 1px 0 rgba(255,255,255,0.15)", textAlign: "center", letterSpacing: 2, marginBottom: 8, boxSizing: "border-box", textTransform: "uppercase" }}>My Levels</div>}
-    {bonusDone && gameModeRef.current === "highlights" && getNextSigLevel(level) && <div style={{ color: "rgba(200,220,240,0.35)", fontSize: 9, fontWeight: 600, textAlign: "center", marginBottom: 8, letterSpacing: 1 }}>Next: {FIXED_LEVELS[getNextSigLevel(level)].name}</div>}
-    {bonusDone && <div style={{ display: "flex", gap: 6 }}>
-      <div onClick={function () { if (customLevelMode && customGridRef.current) { playCustomLevel(customLevelDataRef.current || { name: customLevelName, grid: customGridRef.current.slice(), shipStart: customShipRef.current, startPlasma: customPlasmaRef.current }); } else { replayLevel(); } }} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, padding: "8px 4px", borderRadius: 6, background: GS.inset, border: GS.ib, boxShadow: GS.is, cursor: "pointer" }}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={GS.green} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-        <GsMono size={7} ls={1} color={GS.green + "aa"}>Replay</GsMono>
-      </div>
-      {customLevelMode && <div onClick={function () { openLevelInBuilder(customLevelDataRef.current || { name: customLevelName, grid: customGridRef.current.slice(), shipStart: customShipRef.current, startPlasma: customPlasmaRef.current }); }} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, padding: "8px 4px", borderRadius: 6, background: GS.inset, border: GS.ib, boxShadow: GS.is, cursor: "pointer" }}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={GS.green} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        <GsMono size={7} ls={1} color={GS.green + "aa"}>Edit</GsMono>
+      {levelClearStats && <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+        <div style={{ flex: 1, position: "relative", background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: "8px 4px 6px", textAlign: "center" }}>
+          <span style={{ position: "absolute", inset: 0, borderRadius: 5, background: "radial-gradient(ellipse 80% 60% at 50% 70%, " + GS.green + "1a 0%, transparent 70%)", pointerEvents: "none" }} />
+          <div style={{ fontSize: 20, fontWeight: 700, color: GS.green, lineHeight: 1, position: "relative" }}>{levelClearStats.blocks}</div>
+          <div style={{ fontSize: 7, color: "rgba(200,220,240,0.4)", letterSpacing: 2, marginTop: 3, textTransform: "uppercase", position: "relative" }}>Blocks</div>
+        </div>
+        <div style={{ flex: 1, position: "relative", background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: "8px 4px 6px", textAlign: "center" }}>
+          <span style={{ position: "absolute", inset: 0, borderRadius: 5, background: "radial-gradient(ellipse 80% 60% at 50% 70%, " + GS.green + "1a 0%, transparent 70%)", pointerEvents: "none" }} />
+          <div style={{ fontSize: 20, fontWeight: 700, color: GS.green, lineHeight: 1, position: "relative" }}>{levelClearStats.shots > 0 ? Math.round(levelClearStats.hits / levelClearStats.shots * 100) : 0}%</div>
+          <div style={{ fontSize: 7, color: "rgba(200,220,240,0.4)", letterSpacing: 2, marginTop: 3, textTransform: "uppercase", position: "relative" }}>Accuracy</div>
+        </div>
+        <div style={{ flex: 1, position: "relative", background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: "8px 4px 6px", textAlign: "center" }}>
+          <span style={{ position: "absolute", inset: 0, borderRadius: 5, background: "radial-gradient(ellipse 80% 60% at 50% 70%, " + GS.green + "1a 0%, transparent 70%)", pointerEvents: "none" }} />
+          <div style={{ fontSize: 20, fontWeight: 700, color: GS.green, lineHeight: 1, position: "relative" }}>{levelClearStats.shots}</div>
+          <div style={{ fontSize: 7, color: "rgba(200,220,240,0.4)", letterSpacing: 2, marginTop: 3, textTransform: "uppercase", position: "relative" }}>Used</div>
+        </div>
       </div>}
-      {!customLevelMode && gameModeRef.current === "campaign" && <div onClick={function () { saveGame(); }} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, padding: "8px 4px", borderRadius: 6, background: GS.inset, border: GS.ib, boxShadow: GS.is, cursor: "pointer" }}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={GS.green} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
-        <GsMono size={7} ls={1} color={GS.green + "aa"}>Save</GsMono>
-      </div>}
-      <div onClick={function () { if (customLevelMode) { backToMyLevels(); } else { stopMusic(); setScreen("splash"); } }} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, padding: "8px 4px", borderRadius: 6, background: GS.inset, border: GS.ib, boxShadow: GS.is, cursor: "pointer" }}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={GS.green} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
-        <GsMono size={7} ls={1} color={GS.green + "aa"}>Menu</GsMono>
+      <div style={{ position: "relative", background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: "8px 12px", marginBottom: 10 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
+          <GsMono size={7} ls={2}>Flight Score</GsMono>
+          <div style={{ fontSize: 15, fontWeight: 700, color: bonusDone ? GS.green : "#c8b8ff", fontFamily: "'JetBrains Mono', monospace", transition: "color 0.3s" }}>{bonusDone ? ("+" + bonusEarned) : "..."}</div>
+        </div>
+        <div style={{ height: 1, background: "#14202e", marginBottom: 5 }} />
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <GsMono size={7} ls={2}>Total Score</GsMono>
+          <div style={{ fontSize: 18, fontWeight: 700, color: "#d8eaf6", fontFamily: "'JetBrains Mono', monospace" }}>{score.toLocaleString()}</div>
+        </div>
       </div>
-    </div>}
+      {bonusDone && !customLevelMode && <div onClick={nextLevel} style={{ position: "relative", width: "100%", padding: "12px 0", borderRadius: 8, background: "linear-gradient(180deg, #3da85e 0%, #2a7842 100%)", border: "1px solid " + GS.green + "55", color: "#ffffff", fontWeight: 800, fontSize: 14, cursor: "pointer", boxShadow: "0 2px 14px rgba(80,255,174,0.18), inset 0 1px 0 rgba(255,255,255,0.15)", textAlign: "center", letterSpacing: 2, marginBottom: 8, boxSizing: "border-box", textTransform: "uppercase" }}>{gameModeRef.current === "highlights" && !getNextSigLevel(level) ? "Back to Menu" : "Next Level"}</div>}
+      {bonusDone && customLevelMode && <div onClick={backToMyLevels} style={{ position: "relative", width: "100%", padding: "12px 0", borderRadius: 8, background: "linear-gradient(180deg, #3da85e 0%, #2a7842 100%)", border: "1px solid " + GS.green + "55", color: "#ffffff", fontWeight: 800, fontSize: 14, cursor: "pointer", boxShadow: "0 2px 14px rgba(80,255,174,0.18), inset 0 1px 0 rgba(255,255,255,0.15)", textAlign: "center", letterSpacing: 2, marginBottom: 8, boxSizing: "border-box", textTransform: "uppercase" }}>My Levels</div>}
+      {bonusDone && gameModeRef.current === "highlights" && getNextSigLevel(level) && <div style={{ color: "rgba(200,220,240,0.35)", fontSize: 9, fontWeight: 600, textAlign: "center", marginBottom: 8, letterSpacing: 1 }}>Next: {FIXED_LEVELS[getNextSigLevel(level)].name}</div>}
+      {bonusDone && <div style={{ display: "flex", gap: 6 }}>
+        <div onClick={function () { if (customLevelMode && customGridRef.current) { playCustomLevel(customLevelDataRef.current || { name: customLevelName, grid: customGridRef.current.slice(), shipStart: customShipRef.current, startPlasma: customPlasmaRef.current }); } else { replayLevel(); } }} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, padding: "8px 4px", borderRadius: 6, background: GS.inset, border: GS.ib, boxShadow: GS.is, cursor: "pointer" }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={GS.green} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          <GsMono size={7} ls={1} color={GS.green + "aa"}>Replay</GsMono>
+        </div>
+        <div onClick={function () { var gd, ss, pa, ln; if (customLevelMode) { openLevelInBuilder(customLevelDataRef.current || { name: customLevelName, grid: customGridRef.current.slice(), shipStart: customShipRef.current, startPlasma: customPlasmaRef.current }); } else if (FIXED_LEVELS[level]) { var fl = FIXED_LEVELS[level]; gd = fl.grid.slice(); ss = fl.ship != null ? fl.ship : 3; pa = fl.plasma || START_PLASMA; ln = fl.name; openLevelInBuilder({ grid: gd, shipStart: ss, startPlasma: pa, name: ln }); } else { gd = gridRef2.current.slice(); ss = shipCol; pa = getLevelPlasma(level); ln = "Level " + level; openLevelInBuilder({ grid: gd, shipStart: ss, startPlasma: pa, name: ln }); } }} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, padding: "8px 4px", borderRadius: 6, background: GS.inset, border: GS.ib, boxShadow: GS.is, cursor: "pointer" }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={GS.green} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <GsMono size={7} ls={1} color={GS.green + "aa"}>Edit</GsMono>
+        </div>
+        <div onClick={function () { if (customLevelMode) { backToMyLevels(); } else { stopMusic(); setScreen("splash"); } }} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, padding: "8px 4px", borderRadius: 6, background: GS.inset, border: GS.ib, boxShadow: GS.is, cursor: "pointer" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 3, alignItems: "center" }}>
+            <div style={{ width: 14, height: 2, borderRadius: 1, background: GS.green + "aa" }} />
+            <div style={{ width: 14, height: 2, borderRadius: 1, background: GS.green + "aa" }} />
+            <div style={{ width: 14, height: 2, borderRadius: 1, background: GS.green + "aa" }} />
+          </div>
+          <GsMono size={7} ls={1} color={GS.green + "aa"}>Menu</GsMono>
+        </div>
+      </div>}
+    </div>
+    <div style={{ height: 16, background: "repeating-linear-gradient(45deg, rgba(80,255,174,0.12) 0px, rgba(80,255,174,0.12) 10px, rgba(0,0,0,0.35) 10px, rgba(0,0,0,0.35) 20px)" }} />
   </GsPanel>
 </div>}
       {showLost && <div style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(5,5,15,0.9)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center" }}>{newHighScore && <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden" }}>{Array.from({ length: 30 }).map(function (_, ci) { var colors = ["#ff4488", "#ffaa22", "#44ddff", "#88ff44", "#cc66ff", "#ffdd44"]; return <div key={ci} style={{ position: "absolute", left: (10 + Math.random() * 80) + "%", top: "35%", width: 6 + Math.random() * 6, height: 6 + Math.random() * 6, borderRadius: Math.random() > 0.5 ? "50%" : "2px", background: colors[ci % colors.length], opacity: 0, animation: "confettiBurst 1.2s ease-out forwards", animationDelay: (Math.random() * 0.4) + "s", "--cx": (-60 + Math.random() * 120) + "px", "--cy": (-120 + Math.random() * 250) + "px", "--cr": (Math.random() * 720 - 360) + "deg" }} />; })}</div>}<div style={{ textAlign: "center", padding: 32 }}>{newHighScore && <div style={{ marginBottom: 12, animation: "introFadeIn 0.5s ease-out" }}><div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,200,60,0.6)", letterSpacing: 3, textTransform: "uppercase", marginBottom: 4 }}>New High Score!</div><div style={{ fontSize: 28, fontWeight: 700, color: "#ffcc44", textShadow: "0 0 20px rgba(255,200,60,0.5), 0 0 40px rgba(255,200,60,0.2)", letterSpacing: 2 }}>{score.toLocaleString()}</div></div>}<div style={{ fontSize: 32, fontWeight: 700, color: "#ff4455", marginBottom: 8, letterSpacing: 2 }}>GAME OVER</div>{customLevelMode && <div style={{ fontSize: 13, color: "rgba(180,200,220,0.5)", marginBottom: 4 }}>{customLevelName}</div>}<div style={{ fontSize: 16, color: "#c8b8ff", marginBottom: 24 }}>Score: {score}</div>{!customLevelMode && <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>{gameModeRef.current === "highlights" && FIXED_LEVELS[level] && <div onClick={function () { playSignatureLevel(level); }} style={{ padding: "12px 24px", borderRadius: 6, background: PNL, border: PNLB, color: "#c8d8ff", fontWeight: 700, fontSize: 14, cursor: "pointer", boxShadow: PNLS }}>Retry Level</div>}<div onClick={fullRestart} style={{ padding: "12px 24px", borderRadius: 6, background: PNL, border: PNLB, color: gameModeRef.current === "highlights" ? "rgba(200,184,255,0.6)" : "#c8d8ff", fontWeight: 700, fontSize: gameModeRef.current === "highlights" ? 12 : 14, cursor: "pointer", boxShadow: PNLS }}>{gameModeRef.current === "highlights" ? "Start Over" : "Try Again"}</div><div onClick={function () { setGameState("playing"); stopMusic(); setScreen("splash"); }} style={{ padding: "12px 24px", borderRadius: 6, background: PNL, border: PNLB, color: "rgba(180,200,220,0.5)", fontWeight: 700, fontSize: 12, cursor: "pointer", boxShadow: PNLS }}>Main Menu</div></div>}{customLevelMode && <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}><div onClick={backToMyLevels} style={{ padding: "12px 20px", borderRadius: 6, background: PNL, border: PNLB, color: "#c8b8ff", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: PNLS }}>My Levels</div><div onClick={function () { if (customGridRef.current) playCustomLevel(customLevelDataRef.current || { name: customLevelName, grid: customGridRef.current.slice(), shipStart: customShipRef.current, startPlasma: customPlasmaRef.current }); }} style={{ padding: "12px 20px", borderRadius: 6, background: PNL, border: PNLB, color: "#c8d8ff", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: PNLS }}>Retry</div><div onClick={function () { openLevelInBuilder(customLevelDataRef.current || { name: customLevelName, grid: customGridRef.current.slice(), shipStart: customShipRef.current, startPlasma: customPlasmaRef.current }); }} style={{ padding: "12px 20px", borderRadius: 6, background: PNL, border: "2px solid rgba(80,200,255,0.3)", color: "#80ddff", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: PNLS }}>Edit</div></div>}</div></div>}

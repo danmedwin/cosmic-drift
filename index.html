@@ -9446,12 +9446,22 @@ function CosmicDriftGame() {
     style: {
       width: 300,
       maxWidth: "88vw",
-      padding: "14px 14px 12px"
+      padding: 0,
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 16,
+      background: "repeating-linear-gradient(45deg, rgba(80,255,174,0.12) 0px, rgba(80,255,174,0.12) 10px, rgba(0,0,0,0.35) 10px, rgba(0,0,0,0.35) 20px)"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "12px 14px 10px"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "center",
-      marginBottom: 14,
+      marginBottom: 12,
       paddingBottom: 12,
       borderBottom: GS.ib
     }
@@ -9578,7 +9588,7 @@ function CosmicDriftGame() {
       lineHeight: 1,
       position: "relative"
     }
-  }, levelClearStats.plasma), /*#__PURE__*/React.createElement("div", {
+  }, levelClearStats.shots), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 7,
       color: "rgba(200,220,240,0.4)",
@@ -9587,7 +9597,7 @@ function CosmicDriftGame() {
       textTransform: "uppercase",
       position: "relative"
     }
-  }, "Plasma"))), /*#__PURE__*/React.createElement("div", {
+  }, "Used"))), /*#__PURE__*/React.createElement("div", {
     style: {
       position: "relative",
       background: GS.inset,
@@ -9618,7 +9628,7 @@ function CosmicDriftGame() {
   }, bonusDone ? "+" + bonusEarned : "...")), /*#__PURE__*/React.createElement("div", {
     style: {
       height: 1,
-      background: GS.ib.replace("1px solid ", ""),
+      background: "#14202e",
       marginBottom: 5
     }
   }), /*#__PURE__*/React.createElement("div", {
@@ -9737,14 +9747,40 @@ function CosmicDriftGame() {
     size: 7,
     ls: 1,
     color: GS.green + "aa"
-  }, "Replay")), customLevelMode && /*#__PURE__*/React.createElement("div", {
+  }, "Replay")), /*#__PURE__*/React.createElement("div", {
     onClick: function () {
-      openLevelInBuilder(customLevelDataRef.current || {
-        name: customLevelName,
-        grid: customGridRef.current.slice(),
-        shipStart: customShipRef.current,
-        startPlasma: customPlasmaRef.current
-      });
+      var gd, ss, pa, ln;
+      if (customLevelMode) {
+        openLevelInBuilder(customLevelDataRef.current || {
+          name: customLevelName,
+          grid: customGridRef.current.slice(),
+          shipStart: customShipRef.current,
+          startPlasma: customPlasmaRef.current
+        });
+      } else if (FIXED_LEVELS[level]) {
+        var fl = FIXED_LEVELS[level];
+        gd = fl.grid.slice();
+        ss = fl.ship != null ? fl.ship : 3;
+        pa = fl.plasma || START_PLASMA;
+        ln = fl.name;
+        openLevelInBuilder({
+          grid: gd,
+          shipStart: ss,
+          startPlasma: pa,
+          name: ln
+        });
+      } else {
+        gd = gridRef2.current.slice();
+        ss = shipCol;
+        pa = getLevelPlasma(level);
+        ln = "Level " + level;
+        openLevelInBuilder({
+          grid: gd,
+          shipStart: ss,
+          startPlasma: pa,
+          name: ln
+        });
+      }
     },
     style: {
       flex: 1,
@@ -9777,44 +9813,7 @@ function CosmicDriftGame() {
     size: 7,
     ls: 1,
     color: GS.green + "aa"
-  }, "Edit")), !customLevelMode && gameModeRef.current === "campaign" && /*#__PURE__*/React.createElement("div", {
-    onClick: function () {
-      saveGame();
-    },
-    style: {
-      flex: 1,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 3,
-      padding: "8px 4px",
-      borderRadius: 6,
-      background: GS.inset,
-      border: GS.ib,
-      boxShadow: GS.is,
-      cursor: "pointer"
-    }
-  }, /*#__PURE__*/React.createElement("svg", {
-    width: "14",
-    height: "14",
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: GS.green,
-    strokeWidth: "2",
-    strokeLinecap: "round",
-    strokeLinejoin: "round"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"
-  }), /*#__PURE__*/React.createElement("polyline", {
-    points: "17,21 17,13 7,13 7,21"
-  }), /*#__PURE__*/React.createElement("polyline", {
-    points: "7,3 7,8 15,8"
-  })), /*#__PURE__*/React.createElement(GsMono, {
-    size: 7,
-    ls: 1,
-    color: GS.green + "aa"
-  }, "Save")), /*#__PURE__*/React.createElement("div", {
+  }, "Edit")), /*#__PURE__*/React.createElement("div", {
     onClick: function () {
       if (customLevelMode) {
         backToMyLevels();
@@ -9837,24 +9836,44 @@ function CosmicDriftGame() {
       boxShadow: GS.is,
       cursor: "pointer"
     }
-  }, /*#__PURE__*/React.createElement("svg", {
-    width: "14",
-    height: "14",
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: GS.green,
-    strokeWidth: "2",
-    strokeLinecap: "round",
-    strokeLinejoin: "round"
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
-  }), /*#__PURE__*/React.createElement("polyline", {
-    points: "9,22 9,12 15,12 15,22"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 3,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 14,
+      height: 2,
+      borderRadius: 1,
+      background: GS.green + "aa"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 14,
+      height: 2,
+      borderRadius: 1,
+      background: GS.green + "aa"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 14,
+      height: 2,
+      borderRadius: 1,
+      background: GS.green + "aa"
+    }
   })), /*#__PURE__*/React.createElement(GsMono, {
     size: 7,
     ls: 1,
     color: GS.green + "aa"
-  }, "Menu"))))), showLost && /*#__PURE__*/React.createElement("div", {
+  }, "Menu")))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 16,
+      background: "repeating-linear-gradient(45deg, rgba(80,255,174,0.12) 0px, rgba(80,255,174,0.12) 10px, rgba(0,0,0,0.35) 10px, rgba(0,0,0,0.35) 20px)"
+    }
+  }))), showLost && /*#__PURE__*/React.createElement("div", {
     style: {
       position: "fixed",
       inset: 0,
