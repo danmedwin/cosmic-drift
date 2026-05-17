@@ -1388,6 +1388,7 @@ export default function CosmicDriftGame() {
   var _sh = useState(false), shipHit = _sh[0], setShipHit = _sh[1];
   var _be = useState(0), bonusEarned = _be[0], setBonusEarned = _be[1];
   var _lcs = useState(null), levelClearStats = _lcs[0], setLevelClearStats = _lcs[1];
+  var _lce = useState(false), showLevelClearExit = _lce[0], setShowLevelClearExit = _lce[1];
   var shotsFiredRef = useRef(0);
   var shotsHitRef = useRef(0);
   var blocksDestroyedRef = useRef(0);
@@ -2167,7 +2168,7 @@ function logUfo(msg) {
     levelGenRef.current += 1;
     processedRef.current.clear(); removingRef.current.clear(); visualRemovingRef.current.clear(); burntBlocksRef.current.clear(); pendingFFRef.current = 0;
     projRef.current = []; projDomRefs.current = {}; vfxRef.current = []; setProjectiles([]); setVfx([]); shakingRef.current.clear(); setShakingBlocks(new Set()); setRemovingBlocks(new Set()); _clearCanvasProj();
-    setArmedItem(null); setBonusDone(false); setLevelClearStats(null);
+    setArmedItem(null); setBonusDone(false); setLevelClearStats(null); setShowLevelClearExit(false);
     shotsFiredRef.current = 0; shotsHitRef.current = 0; blocksDestroyedRef.current = 0;
     setTutPhase(0); tutPhaseRef.current = 0;
     setTutReminder(false);
@@ -2485,19 +2486,25 @@ function logUfo(msg) {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={GS.green} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           <GsMono size={7} ls={1} color={GS.green + "aa"}>Edit</GsMono>
         </div>
-        <div onClick={function () { if (customLevelMode) { backToMyLevels(); } else { stopMusic(); setScreen("splash"); } }} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, padding: "8px 4px", borderRadius: 6, background: GS.inset, border: GS.ib, boxShadow: GS.is, cursor: "pointer" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 3, alignItems: "center" }}>
-            <div style={{ width: 14, height: 2, borderRadius: 1, background: GS.green + "aa" }} />
-            <div style={{ width: 14, height: 2, borderRadius: 1, background: GS.green + "aa" }} />
-            <div style={{ width: 14, height: 2, borderRadius: 1, background: GS.green + "aa" }} />
-          </div>
-          <GsMono size={7} ls={1} color={GS.green + "aa"}>Menu</GsMono>
+        <div onClick={function () { if (customLevelMode) { backToMyLevels(); } else { setShowLevelClearExit(true); } }} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, padding: "8px 4px", borderRadius: 6, background: GS.inset, border: GS.ib, boxShadow: GS.is, cursor: "pointer", color: "#ff8866" }}>
+          <svg width="14" height="14" viewBox="0 0 24 24"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5a2 2 0 00-2 2v4h2V5h14v14H5v-4H3v4a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z" fill="currentColor" /></svg>
+          <GsMono size={7} ls={1} color="#ff886688">Exit</GsMono>
         </div>
       </div>}
     </div>
     <div style={{ height: 16, background: "repeating-linear-gradient(45deg, rgba(80,255,174,0.12) 0px, rgba(80,255,174,0.12) 10px, rgba(0,0,0,0.35) 10px, rgba(0,0,0,0.35) 20px)" }} />
   </GsPanel>
 </div>}
+      {showLevelClearExit && <div style={{ position: "fixed", inset: 0, zIndex: 350, background: "rgba(5,5,20,0.75)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Quicksand',sans-serif" }}>
+        <div style={{ background: "linear-gradient(170deg,#151040,#1a0a2e)", border: "1px solid rgba(255,100,80,0.3)", borderRadius: 16, padding: "20px 24px", textAlign: "center", maxWidth: 280, animation: "introFadeIn 0.25s ease-out" }}>
+          <div style={{ color: "#ff8866", fontSize: 15, fontWeight: 700, marginBottom: 8 }}>Exit to Menu?</div>
+          <div style={{ color: "rgba(200,184,255,0.5)", fontSize: 12, marginBottom: 18 }}>Your score won’t be saved as a checkpoint until you start the next level.</div>
+          <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+            <div onClick={function () { setShowLevelClearExit(false); }} style={{ padding: "8px 20px", borderRadius: 16, border: "1px solid rgba(120,80,255,0.3)", color: "#c8b8ff", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>Cancel</div>
+            <div onClick={function () { setShowLevelClearExit(false); setCustomLevelMode(false); customGridRef.current = null; customLevelDataRef.current = null; customPlasmaRef.current = START_PLASMA; setGameState("playing"); stopMusic(); setScreen("splash"); }} style={{ padding: "8px 20px", borderRadius: 16, background: "rgba(255,60,60,0.3)", border: "1px solid rgba(255,80,80,0.35)", color: "#ff8866", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Exit</div>
+          </div>
+        </div>
+      </div>}
       {showLost && <div style={{ position: "fixed", inset: 0, zIndex: 300, background: "rgba(5,5,15,0.9)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center" }}>{newHighScore && <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden" }}>{Array.from({ length: 30 }).map(function (_, ci) { var colors = ["#ff4488", "#ffaa22", "#44ddff", "#88ff44", "#cc66ff", "#ffdd44"]; return <div key={ci} style={{ position: "absolute", left: (10 + Math.random() * 80) + "%", top: "35%", width: 6 + Math.random() * 6, height: 6 + Math.random() * 6, borderRadius: Math.random() > 0.5 ? "50%" : "2px", background: colors[ci % colors.length], opacity: 0, animation: "confettiBurst 1.2s ease-out forwards", animationDelay: (Math.random() * 0.4) + "s", "--cx": (-60 + Math.random() * 120) + "px", "--cy": (-120 + Math.random() * 250) + "px", "--cr": (Math.random() * 720 - 360) + "deg" }} />; })}</div>}<div style={{ textAlign: "center", padding: 32 }}>{newHighScore && <div style={{ marginBottom: 12, animation: "introFadeIn 0.5s ease-out" }}><div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,200,60,0.6)", letterSpacing: 3, textTransform: "uppercase", marginBottom: 4 }}>New High Score!</div><div style={{ fontSize: 28, fontWeight: 700, color: "#ffcc44", textShadow: "0 0 20px rgba(255,200,60,0.5), 0 0 40px rgba(255,200,60,0.2)", letterSpacing: 2 }}>{score.toLocaleString()}</div></div>}<div style={{ fontSize: 32, fontWeight: 700, color: "#ff4455", marginBottom: 8, letterSpacing: 2 }}>GAME OVER</div>{customLevelMode && <div style={{ fontSize: 13, color: "rgba(180,200,220,0.5)", marginBottom: 4 }}>{customLevelName}</div>}<div style={{ fontSize: 16, color: "#c8b8ff", marginBottom: 24 }}>Score: {score}</div>{!customLevelMode && <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>{gameModeRef.current === "highlights" && FIXED_LEVELS[level] && <div onClick={function () { playSignatureLevel(level); }} style={{ padding: "12px 24px", borderRadius: 6, background: PNL, border: PNLB, color: "#c8d8ff", fontWeight: 700, fontSize: 14, cursor: "pointer", boxShadow: PNLS }}>Retry Level</div>}<div onClick={fullRestart} style={{ padding: "12px 24px", borderRadius: 6, background: PNL, border: PNLB, color: gameModeRef.current === "highlights" ? "rgba(200,184,255,0.6)" : "#c8d8ff", fontWeight: 700, fontSize: gameModeRef.current === "highlights" ? 12 : 14, cursor: "pointer", boxShadow: PNLS }}>{gameModeRef.current === "highlights" ? "Start Over" : "Try Again"}</div><div onClick={function () { setGameState("playing"); stopMusic(); setScreen("splash"); }} style={{ padding: "12px 24px", borderRadius: 6, background: PNL, border: PNLB, color: "rgba(180,200,220,0.5)", fontWeight: 700, fontSize: 12, cursor: "pointer", boxShadow: PNLS }}>Main Menu</div></div>}{customLevelMode && <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}><div onClick={backToMyLevels} style={{ padding: "12px 20px", borderRadius: 6, background: PNL, border: PNLB, color: "#c8b8ff", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: PNLS }}>My Levels</div><div onClick={function () { if (customGridRef.current) playCustomLevel(customLevelDataRef.current || { name: customLevelName, grid: customGridRef.current.slice(), shipStart: customShipRef.current, startPlasma: customPlasmaRef.current }); }} style={{ padding: "12px 20px", borderRadius: 6, background: PNL, border: PNLB, color: "#c8d8ff", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: PNLS }}>Retry</div><div onClick={function () { openLevelInBuilder(customLevelDataRef.current || { name: customLevelName, grid: customGridRef.current.slice(), shipStart: customShipRef.current, startPlasma: customPlasmaRef.current }); }} style={{ padding: "12px 20px", borderRadius: 6, background: PNL, border: "2px solid rgba(80,200,255,0.3)", color: "#80ddff", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: PNLS }}>Edit</div></div>}</div></div>}
       <LegendOverlay open={legendOpen} onClose={function () { setLegendOpen(false); }} />
 

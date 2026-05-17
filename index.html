@@ -5282,6 +5282,9 @@ function CosmicDriftGame() {
   var _lcs = useState(null),
     levelClearStats = _lcs[0],
     setLevelClearStats = _lcs[1];
+  var _lce = useState(false),
+    showLevelClearExit = _lce[0],
+    setShowLevelClearExit = _lce[1];
   var shotsFiredRef = useRef(0);
   var shotsHitRef = useRef(0);
   var blocksDestroyedRef = useRef(0);
@@ -7903,6 +7906,7 @@ function CosmicDriftGame() {
     setArmedItem(null);
     setBonusDone(false);
     setLevelClearStats(null);
+    setShowLevelClearExit(false);
     shotsFiredRef.current = 0;
     shotsHitRef.current = 0;
     blocksDestroyedRef.current = 0;
@@ -9818,8 +9822,7 @@ function CosmicDriftGame() {
       if (customLevelMode) {
         backToMyLevels();
       } else {
-        stopMusic();
-        setScreen("splash");
+        setShowLevelClearExit(true);
       }
     },
     style: {
@@ -9834,46 +9837,101 @@ function CosmicDriftGame() {
       background: GS.inset,
       border: GS.ib,
       boxShadow: GS.is,
-      cursor: "pointer"
+      cursor: "pointer",
+      color: "#ff8866"
     }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      flexDirection: "column",
-      gap: 3,
-      alignItems: "center"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: 14,
-      height: 2,
-      borderRadius: 1,
-      background: GS.green + "aa"
-    }
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: 14,
-      height: 2,
-      borderRadius: 1,
-      background: GS.green + "aa"
-    }
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: 14,
-      height: 2,
-      borderRadius: 1,
-      background: GS.green + "aa"
-    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "14",
+    height: "14",
+    viewBox: "0 0 24 24"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5a2 2 0 00-2 2v4h2V5h14v14H5v-4H3v4a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z",
+    fill: "currentColor"
   })), /*#__PURE__*/React.createElement(GsMono, {
     size: 7,
     ls: 1,
-    color: GS.green + "aa"
-  }, "Menu")))), /*#__PURE__*/React.createElement("div", {
+    color: "#ff886688"
+  }, "Exit")))), /*#__PURE__*/React.createElement("div", {
     style: {
       height: 16,
       background: "repeating-linear-gradient(45deg, rgba(80,255,174,0.12) 0px, rgba(80,255,174,0.12) 10px, rgba(0,0,0,0.35) 10px, rgba(0,0,0,0.35) 20px)"
     }
-  }))), showLost && /*#__PURE__*/React.createElement("div", {
+  }))), showLevelClearExit && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      inset: 0,
+      zIndex: 350,
+      background: "rgba(5,5,20,0.75)",
+      backdropFilter: "blur(4px)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontFamily: "'Quicksand',sans-serif"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "linear-gradient(170deg,#151040,#1a0a2e)",
+      border: "1px solid rgba(255,100,80,0.3)",
+      borderRadius: 16,
+      padding: "20px 24px",
+      textAlign: "center",
+      maxWidth: 280,
+      animation: "introFadeIn 0.25s ease-out"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "#ff8866",
+      fontSize: 15,
+      fontWeight: 700,
+      marginBottom: 8
+    }
+  }, "Exit to Menu?"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "rgba(200,184,255,0.5)",
+      fontSize: 12,
+      marginBottom: 18
+    }
+  }, "Your score won\u2019t be saved as a checkpoint until you start the next level."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 12,
+      justifyContent: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      setShowLevelClearExit(false);
+    },
+    style: {
+      padding: "8px 20px",
+      borderRadius: 16,
+      border: "1px solid rgba(120,80,255,0.3)",
+      color: "#c8b8ff",
+      fontSize: 12,
+      fontWeight: 600,
+      cursor: "pointer"
+    }
+  }, "Cancel"), /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      setShowLevelClearExit(false);
+      setCustomLevelMode(false);
+      customGridRef.current = null;
+      customLevelDataRef.current = null;
+      customPlasmaRef.current = START_PLASMA;
+      setGameState("playing");
+      stopMusic();
+      setScreen("splash");
+    },
+    style: {
+      padding: "8px 20px",
+      borderRadius: 16,
+      background: "rgba(255,60,60,0.3)",
+      border: "1px solid rgba(255,80,80,0.35)",
+      color: "#ff8866",
+      fontSize: 12,
+      fontWeight: 700,
+      cursor: "pointer"
+    }
+  }, "Exit")))), showLost && /*#__PURE__*/React.createElement("div", {
     style: {
       position: "fixed",
       inset: 0,
