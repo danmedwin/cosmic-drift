@@ -9978,10 +9978,13 @@ function CosmicDriftGame() {
         "--cr": Math.random() * 720 - 360 + "deg"
       }
     });
-  })), /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement(GsPanel, {
     style: {
       textAlign: "center",
-      padding: 32
+      padding: "28px 32px",
+      minWidth: 260,
+      maxWidth: 340,
+      animation: "introFadeIn 0.3s ease-out"
     }
   }, newHighScore && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -12530,15 +12533,36 @@ function CosmicDriftGame() {
       top: "100%",
       right: 6,
       marginTop: 4,
-      background: "linear-gradient(180deg, #3a3a4a, #28283a)",
-      border: "2px solid rgba(80,200,255,0.2)",
-      borderRadius: 8,
+      background: GS.brushed,
+      backgroundBlendMode: "overlay",
+      border: GS.pb,
+      borderRadius: 10,
       padding: "4px 0",
       minWidth: 160,
-      boxShadow: "0 8px 24px rgba(0,0,0,0.6), 0 0 12px rgba(80,200,255,0.08)",
+      boxShadow: "0 8px 24px rgba(0,0,0,0.7), 0 0 12px rgba(80,200,255,0.06)",
       zIndex: 20
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(GsRivet, {
+    pos: {
+      top: 5,
+      left: 5
+    }
+  }), /*#__PURE__*/React.createElement(GsRivet, {
+    pos: {
+      top: 5,
+      right: 5
+    }
+  }), /*#__PURE__*/React.createElement(GsRivet, {
+    pos: {
+      bottom: 5,
+      left: 5
+    }
+  }), /*#__PURE__*/React.createElement(GsRivet, {
+    pos: {
+      bottom: 5,
+      right: 5
+    }
+  }), /*#__PURE__*/React.createElement("div", {
     onClick: function () {
       setGameMenuOpen(false);
       setLegendOpen(true);
