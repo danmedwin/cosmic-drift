@@ -2934,6 +2934,10 @@ function logUfo(msg) {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 6px", position: "relative", zIndex: 10, background: GS.brushed, backgroundBlendMode: "overlay", borderBottom: GS.pb, boxShadow: "0 3px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(200,230,240,0.08)" }}>
           <GsRivet pos={{ top: 4, left: 4 }} />
           <GsRivet pos={{ top: 4, right: 4 }} />
+          <GsRivet pos={{ bottom: 4, left: 4 }} />
+          <GsRivet pos={{ bottom: 4, left: "33%" }} />
+          <GsRivet pos={{ bottom: 4, left: "67%" }} />
+          <GsRivet pos={{ bottom: 4, right: 4 }} />
           <div style={{ background: GS.inset, border: GS.ib, borderRadius: 6, padding: "5px 12px", boxShadow: GS.is, display: "flex", alignItems: "center", gap: 8, flex: 1, marginRight: 6 }}>
             <GsLED color={customLevelMode ? "#c8b8ff" : GS.blue} size={5} />
             <span style={{ fontFamily: "'JetBrains Mono', monospace", color: customLevelMode ? "#c8b8ff" : GS.blue, fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textShadow: "0 0 8px " + (customLevelMode ? "rgba(200,184,255,0.35)" : "rgba(128,221,255,0.35)") }}>{customLevelMode ? customLevelName : (getLevelName(level) ? "Lvl " + level + " \u00B7 " + getLevelName(level) : "Level " + level)}</span>
@@ -3029,7 +3033,13 @@ function logUfo(msg) {
 
         {/* ═══ COCKPIT DASHBOARD - METALLIC PANEL ═══ */}
         <div ref={hudRef} style={{ position: "relative", zIndex: 2, flexShrink: 0, background: GS.brushed, backgroundBlendMode: "overlay", borderTop: "3px solid #404a58", padding: "6px 6px 8px", boxShadow: "0 -4px 12px rgba(0,0,0,0.55), inset 0 1px 0 rgba(200,230,240,0.08)" }}>
+          <GsRivet pos={{ top: 4, left: 4 }} />
+          <GsRivet pos={{ top: 4, left: "33%" }} />
+          <GsRivet pos={{ top: 4, left: "67%" }} />
+          <GsRivet pos={{ top: 4, right: 4 }} />
           <GsRivet pos={{ bottom: 4, left: 4 }} />
+          <GsRivet pos={{ bottom: 4, left: "33%" }} />
+          <GsRivet pos={{ bottom: 4, left: "67%" }} />
           <GsRivet pos={{ bottom: 4, right: 4 }} />
 
           <HudPanelMemo baseCores={baseCores} extraCores={extraCores} plasma={plasma} maxPlasma={customGridRef.current ? customPlasmaRef.current : getLevelPlasma(level)} score={score} scoreFlash={scoreFlash} gameState={gameState} setGameState={setGameState} />
