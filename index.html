@@ -12261,13 +12261,21 @@ function CosmicDriftGame() {
     onClick: function () {
       setShowExitConfirm(false);
       setGameMenuOpen(false);
+      var wasCustom = customLevelMode;
       setCustomLevelMode(false);
       customGridRef.current = null;
       customLevelDataRef.current = null;
       customPlasmaRef.current = START_PLASMA;
       setGameState("playing");
       stopMusic();
-      setScreen("splash");
+      if (wasCustom) {
+        try {
+          sessionStorage.setItem("cd_open_section", "levels");
+        } catch (e) {}
+        navigateToWorkshop();
+      } else {
+        setScreen("splash");
+      }
     },
     style: {
       padding: "8px 20px",

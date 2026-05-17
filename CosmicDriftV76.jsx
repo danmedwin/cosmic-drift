@@ -2858,7 +2858,17 @@ function logUfo(msg) {
           <GsMono size={10} color={GS.blue + "88"} style={{ display: "block", marginBottom: 18 }}>PROGRESS IN THIS LEVEL WILL BE LOST</GsMono>
           <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
             <div onClick={function () { setShowExitConfirm(false); }} style={{ padding: "8px 20px", borderRadius: 6, background: GS.brushedSolid, border: GS.pbl, color: "#b0c8d8", fontSize: 12, fontWeight: 600, cursor: "pointer", boxShadow: GS.ps }}>Cancel</div>
-            <div onClick={function () { setShowExitConfirm(false); setGameMenuOpen(false); setCustomLevelMode(false); customGridRef.current = null; customLevelDataRef.current = null; customPlasmaRef.current = START_PLASMA; setGameState("playing"); stopMusic(); setScreen("splash"); }} style={{ padding: "8px 20px", borderRadius: 6, background: "rgba(200,50,50,0.25)", border: "1px solid rgba(255,80,80,0.35)", color: "#ff8866", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Exit</div>
+            <div onClick={function () {
+              setShowExitConfirm(false); setGameMenuOpen(false);
+              var wasCustom = customLevelMode;
+              setCustomLevelMode(false); customGridRef.current = null; customLevelDataRef.current = null; customPlasmaRef.current = START_PLASMA; setGameState("playing"); stopMusic();
+              if (wasCustom) {
+                try { sessionStorage.setItem("cd_open_section", "levels"); } catch(e) {}
+                navigateToWorkshop();
+              } else {
+                setScreen("splash");
+              }
+            }} style={{ padding: "8px 20px", borderRadius: 6, background: "rgba(200,50,50,0.25)", border: "1px solid rgba(255,80,80,0.35)", color: "#ff8866", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Exit</div>
           </div>
         </GsPanel>
       </div>}
