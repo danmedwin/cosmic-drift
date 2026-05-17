@@ -1257,13 +1257,20 @@ function WorkshopTopBar(props) {
       alignItems: "center",
       gap: 6,
       padding: "8px 10px",
-      background: PNL,
+      background: WS.brushed,
+      backgroundBlendMode: "overlay",
       borderBottom: PNLB,
       boxShadow: "0 3px 6px rgba(0,0,0,0.4)",
       position: "relative",
       zIndex: 2
     }
-  }, React.createElement("div", {
+  }, WsRivet({
+    top: 5,
+    left: 5
+  }), WsRivet({
+    top: 5,
+    right: 5
+  }), React.createElement("div", {
     onClick: props.onBack,
     style: {
       padding: "6px 10px",
@@ -7476,9 +7483,17 @@ function CosmicWorkshop() {
       zIndex: 1,
       display: "flex",
       flexDirection: "column",
-      height: "100%"
+      height: "100%",
+      background: WS.brushed,
+      backgroundBlendMode: "overlay"
     }
-  },
+  }, WsRivet({
+    bottom: 5,
+    left: 5
+  }), WsRivet({
+    bottom: 5,
+    right: 5
+  }),
   // ── MY LEVELS LIST ──
   lbScreen === "list" && React.createElement(React.Fragment, null, React.createElement(WorkshopTopBar, {
     onBack: function () {
@@ -7688,13 +7703,20 @@ function CosmicWorkshop() {
       alignItems: "center",
       gap: 5,
       padding: "6px 8px",
-      background: PNL,
+      background: WS.brushed,
+      backgroundBlendMode: "overlay",
       borderBottom: PNLB,
       boxShadow: "0 3px 6px rgba(0,0,0,0.4)",
       position: "relative",
       zIndex: 2
     }
-  }, React.createElement("div", {
+  }, WsRivet({
+    top: 5,
+    left: 5
+  }), WsRivet({
+    top: 5,
+    right: 5
+  }), React.createElement("div", {
     onClick: handleBuilderBack,
     style: Object.assign({}, BTN_TOPBAR, {
       display: "flex",
@@ -8482,9 +8504,17 @@ function CosmicWorkshop() {
       zIndex: 1,
       display: "flex",
       flexDirection: "column",
-      height: "100%"
+      height: "100%",
+      background: WS.brushed,
+      backgroundBlendMode: "overlay"
     }
-  },
+  }, WsRivet({
+    bottom: 5,
+    left: 5
+  }), WsRivet({
+    bottom: 5,
+    right: 5
+  }),
   // ── MY DESIGNS LIST ──
   bdCurrentView === "list" && React.createElement(React.Fragment, null, React.createElement(WorkshopTopBar, {
     onBack: function () {
@@ -9320,9 +9350,17 @@ function CosmicWorkshop() {
       zIndex: 1,
       display: "flex",
       flexDirection: "column",
-      height: "100%"
+      height: "100%",
+      background: WS.brushed,
+      backgroundBlendMode: "overlay"
     }
-  },
+  }, WsRivet({
+    bottom: 5,
+    left: 5
+  }), WsRivet({
+    bottom: 5,
+    right: 5
+  }),
   // ── VFX EFFECTS LIST ──
   vfxCurrentView === "list" && React.createElement(React.Fragment, null, React.createElement(WorkshopTopBar, {
     onBack: function () {
@@ -9964,9 +10002,17 @@ function CosmicWorkshop() {
       zIndex: 1,
       display: "flex",
       flexDirection: "column",
-      height: "100%"
+      height: "100%",
+      background: WS.brushed,
+      backgroundBlendMode: "overlay"
     }
-  },
+  }, WsRivet({
+    bottom: 5,
+    left: 5
+  }), WsRivet({
+    bottom: 5,
+    right: 5
+  }),
   // ── LIST VIEW ──
   ufoView === "list" && React.createElement(React.Fragment, null, React.createElement(WorkshopTopBar, {
     onBack: function () {
