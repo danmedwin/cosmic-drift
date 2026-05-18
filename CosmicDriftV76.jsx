@@ -1624,6 +1624,8 @@ export default function CosmicDriftGame() {
         var d = Math.abs(shipSvgX - (67 + bc * 26));
         if (d < aimDist) { aimDist = d; aimedCol = bc; }
       }
+      // Skip if closest active column is more than 2 columns away from ship
+      if (aimDist > 52) return;
       // Within that column pick the lowest active block (highest row = closest to ship)
       var pickIdx = -1;
       var pickRow = -1;
