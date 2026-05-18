@@ -152,8 +152,8 @@ function UFOBlockSvg(props) {
       React.createElement("ellipse", { cx: hx - dRx * 0.22, cy: dY - dRy * 0.28, rx: dRx * 0.27, ry: dRy * 0.22, fill: "white", opacity: "0.25", transform: "rotate(-20," + (hx - dRx * 0.22) + "," + (dY - dRy * 0.28) + ")", clipPath: "url(#ufo-dc-" + uid + ")" })));
 }
 
-var SHIP_HULLS = ["arrow", "dart", "raptor", "wedge", "cruiser", "saucer"];
-var SHIP_HULL_LABELS = { arrow: "Default", dart: "Dart", raptor: "Raptor", wedge: "Wedge", cruiser: "Cruiser", saucer: "Saucer" };
+var SHIP_HULLS = ["arrow", "dart", "raptor", "wedge", "cruiser", "saucer", "none"];
+var SHIP_HULL_LABELS = { arrow: "Default", dart: "Dart", raptor: "Raptor", wedge: "Wedge", cruiser: "Cruiser", saucer: "Saucer", none: "None" };
 var SHIP_PART_TYPES = ["circle", "rect", "triangle", "line", "wings", "boosters", "rockets"];
 var SHIP_PART_LABELS = { circle: "Oval", rect: "Rect", triangle: "Triangle", line: "Line", wings: "Wings", boosters: "Boosters", rockets: "Rockets" };
 function shipRenderPart(part, key, isSelected) {
@@ -225,7 +225,9 @@ function ShipDesignSvg(props) {
       React.createElement("stop", { offset: "0%", stopColor: hullColor }),
       React.createElement("stop", { offset: "100%", stopColor: hullColor2 })));
   var els = [];
-  if (hull === "arrow") {
+  if (hull === "none") {
+    els = [];
+  } else if (hull === "arrow") {
     els = [
       React.createElement("path", { key: "b", d: "M20 1 L4 36 L13 30 L20 40 L27 30 L36 36 Z", fill: fill }),
       React.createElement("path", { key: "h", d: "M20 6 L9 32 L14 29 L20 37 L26 29 L31 32 Z", fill: hl }),
@@ -512,7 +514,7 @@ var UFO_DESIGNS_KEY  = "cosmic-drift-ufo-designs";
 var UFO_ACTIVE_KEY   = "cosmic-drift-ufo-active";
 var SHIP_DESIGNS_KEY = "cosmic-drift-ship-designs";
 var SHIP_ACTIVE_KEY  = "cosmic-drift-ship-active";
-var SHIP_DEFAULT_DESIGN = { hull: "arrow", hullColor: "#ffd0ff", hullColor2: "#cc70cc", cockpitColor: "#80ddff", engineColor: "#ff60ff", engineOpacity: 0.8, parts: [] };
+var SHIP_DEFAULT_DESIGN = { hull: "arrow", hullColor: "#ffd0ff", hullColor2: "#cc70cc", cockpitColor: "#f5c4f5", engineColor: "#ff60ff", engineOpacity: 0, parts: [] };
 function shipLoadDesigns() {
   return window.storage.get(SHIP_DESIGNS_KEY).then(function(result) {
     if (!result || !result.value) return [];
@@ -2244,7 +2246,11 @@ export default function CosmicWorkshop() {
       list.splice(idx, 1);
       return Object.assign({}, prev, { parts: list });
     });
-    setShipSelectedPart(-1);
+    setShipSelectedPart(function(prevSel) {
+      if (prevSel === idx) return -1;
+      if (prevSel > idx) return prevSel - 1;
+      return prevSel;
+    });
   }
   function shipMovePart(idx, dir) {
     setShipEdit(function(prev) {
@@ -3383,7 +3389,16 @@ export default function CosmicWorkshop() {
                     return React.createElement("div", { key: idx, onClick: function() { setShipSelectedPart(idx); },
                       style: { display: "flex", alignItems: "center", gap: 8, padding: "6px 8px", borderRadius: 6, cursor: "pointer", background: isSel ? "rgba(255,138,170,0.12)" : "rgba(255,255,255,0.02)", border: isSel ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.05)" } },
                       React.createElement("div", { style: { width: 14, height: 14, borderRadius: 3, background: p.color || "#80ddff", border: "1px solid rgba(255,255,255,0.2)", flex: "0 0 auto" } }),
-                      React.createElement("div", { style: { flex: 1, color: isSel ? "#ff8aaa" : "rgba(200,210,220,0.7)", fontSize: 11, fontWeight: 600, fontFamily: "'Exo 2', sans-serif", letterSpacing: 0.4 } }, SHIP_PART_LABELS[p.type] + " · (" + p.x.toFixed(0) + "," + p.y.toFixed(0) + ")"));
+                      React.createElement("div", { style: { flex: 1, color: isSel ? "#ff8aaa" : "rgba(200,210,220,0.7)", fontSize: 11, fontWeight: 600, fontFamily: "'Exo 2', sans-serif", letterSpacing: 0.4 } }, SHIP_PART_LABELS[p.type] + " · (" + p.x.toFixed(0) + "," + p.y.toFixed(0) + ")"),
+                      React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipDeletePart(idx); },
+                        title: "Delete part",
+                        style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", background: "rgba(220,60,80,0.12)", border: "1px solid rgba(220,60,80,0.3)", flex: "0 0 auto" } },
+                        React.createElement("svg", { width: "12", height: "12", viewBox: "0 0 24 24", fill: "none", stroke: "#ff8088", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+                          React.createElement("path", { d: "M3 6h18" }),
+                          React.createElement("path", { d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" }),
+                          React.createElement("path", { d: "M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" }),
+                          React.createElement("path", { d: "M10 11v6" }),
+                          React.createElement("path", { d: "M14 11v6" }))));
                   }))));
           })(),
           React.createElement("div", { style: { display: "flex", justifyContent: "center", marginTop: 20 } },

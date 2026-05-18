@@ -808,7 +808,7 @@ var UFO_DEFAULT_DESIGN = { hullColor: "#b86020", domeColor: "#44ffee", lightColo
 var GAME_UFO_DESIGN = Object.assign({}, UFO_DEFAULT_DESIGN);
 var SHIP_DESIGNS_KEY  = "cosmic-drift-ship-designs";
 var SHIP_ACTIVE_KEY_G = "cosmic-drift-ship-active";
-var SHIP_DEFAULT_DESIGN = { hull: "arrow", hullColor: "#ffd0ff", hullColor2: "#cc70cc", cockpitColor: "#80ddff", engineColor: "#ff60ff", engineOpacity: 0.8, parts: [] };
+var SHIP_DEFAULT_DESIGN = { hull: "arrow", hullColor: "#ffd0ff", hullColor2: "#cc70cc", cockpitColor: "#f5c4f5", engineColor: "#ff60ff", engineOpacity: 0, parts: [] };
 var GAME_SHIP_DESIGN = Object.assign({}, SHIP_DEFAULT_DESIGN);
 function shipRenderPart(part, key) {
   var x = typeof part.x === "number" ? part.x : 20;
@@ -878,7 +878,9 @@ function ShipDesignSvg(props) {
       React.createElement("stop", { offset: "0%", stopColor: hullColor }),
       React.createElement("stop", { offset: "100%", stopColor: hullColor2 })));
   var els = [];
-  if (hull === "arrow") {
+  if (hull === "none") {
+    els = [];
+  } else if (hull === "arrow") {
     els = [
       React.createElement("path", { key: "b", d: "M20 1 L4 36 L13 30 L20 40 L27 30 L36 36 Z", fill: fill }),
       React.createElement("path", { key: "h", d: "M20 6 L9 32 L14 29 L20 37 L26 29 L31 32 Z", fill: hl }),

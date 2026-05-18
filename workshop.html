@@ -974,14 +974,15 @@ function UFOBlockSvg(props) {
     clipPath: "url(#ufo-dc-" + uid + ")"
   })));
 }
-var SHIP_HULLS = ["arrow", "dart", "raptor", "wedge", "cruiser", "saucer"];
+var SHIP_HULLS = ["arrow", "dart", "raptor", "wedge", "cruiser", "saucer", "none"];
 var SHIP_HULL_LABELS = {
   arrow: "Default",
   dart: "Dart",
   raptor: "Raptor",
   wedge: "Wedge",
   cruiser: "Cruiser",
-  saucer: "Saucer"
+  saucer: "Saucer",
+  none: "None"
 };
 var SHIP_PART_TYPES = ["circle", "rect", "triangle", "line", "wings", "boosters", "rockets"];
 var SHIP_PART_LABELS = {
@@ -1143,7 +1144,9 @@ function ShipDesignSvg(props) {
     stopColor: hullColor2
   })));
   var els = [];
-  if (hull === "arrow") {
+  if (hull === "none") {
+    els = [];
+  } else if (hull === "arrow") {
     els = [React.createElement("path", {
       key: "b",
       d: "M20 1 L4 36 L13 30 L20 40 L27 30 L36 36 Z",
@@ -2040,9 +2043,9 @@ var SHIP_DEFAULT_DESIGN = {
   hull: "arrow",
   hullColor: "#ffd0ff",
   hullColor2: "#cc70cc",
-  cockpitColor: "#80ddff",
+  cockpitColor: "#f5c4f5",
   engineColor: "#ff60ff",
-  engineOpacity: 0.8,
+  engineOpacity: 0,
   parts: []
 };
 function shipLoadDesigns() {
@@ -6564,7 +6567,11 @@ function CosmicWorkshop() {
         parts: list
       });
     });
-    setShipSelectedPart(-1);
+    setShipSelectedPart(function (prevSel) {
+      if (prevSel === idx) return -1;
+      if (prevSel > idx) return prevSel - 1;
+      return prevSel;
+    });
   }
   function shipMovePart(idx, dir) {
     setShipEdit(function (prev) {
@@ -12092,7 +12099,44 @@ function CosmicWorkshop() {
           fontFamily: "'Exo 2', sans-serif",
           letterSpacing: 0.4
         }
-      }, SHIP_PART_LABELS[p.type] + " · (" + p.x.toFixed(0) + "," + p.y.toFixed(0) + ")"));
+      }, SHIP_PART_LABELS[p.type] + " · (" + p.x.toFixed(0) + "," + p.y.toFixed(0) + ")"), React.createElement("div", {
+        onClick: function (e) {
+          e.stopPropagation();
+          shipDeletePart(idx);
+        },
+        title: "Delete part",
+        style: {
+          width: 22,
+          height: 22,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: 4,
+          cursor: "pointer",
+          background: "rgba(220,60,80,0.12)",
+          border: "1px solid rgba(220,60,80,0.3)",
+          flex: "0 0 auto"
+        }
+      }, React.createElement("svg", {
+        width: "12",
+        height: "12",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "#ff8088",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round"
+      }, React.createElement("path", {
+        d: "M3 6h18"
+      }), React.createElement("path", {
+        d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+      }), React.createElement("path", {
+        d: "M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
+      }), React.createElement("path", {
+        d: "M10 11v6"
+      }), React.createElement("path", {
+        d: "M14 11v6"
+      }))));
     }))));
   }(), React.createElement("div", {
     style: {

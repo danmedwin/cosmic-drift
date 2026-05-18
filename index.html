@@ -2846,9 +2846,9 @@ var SHIP_DEFAULT_DESIGN = {
   hull: "arrow",
   hullColor: "#ffd0ff",
   hullColor2: "#cc70cc",
-  cockpitColor: "#80ddff",
+  cockpitColor: "#f5c4f5",
   engineColor: "#ff60ff",
-  engineOpacity: 0.8,
+  engineOpacity: 0,
   parts: []
 };
 var GAME_SHIP_DESIGN = Object.assign({}, SHIP_DEFAULT_DESIGN);
@@ -2994,7 +2994,9 @@ function ShipDesignSvg(props) {
     stopColor: hullColor2
   })));
   var els = [];
-  if (hull === "arrow") {
+  if (hull === "none") {
+    els = [];
+  } else if (hull === "arrow") {
     els = [React.createElement("path", {
       key: "b",
       d: "M20 1 L4 36 L13 30 L20 40 L27 30 L36 36 Z",
