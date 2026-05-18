@@ -4470,6 +4470,11 @@ function CosmicWorkshop() {
   var _shipRenamingId = useState(null),
     shipRenamingId = _shipRenamingId[0],
     setShipRenamingId = _shipRenamingId[1];
+  // Saved-game snapshot loaded on splash mount so the CONTINUE button can show
+  // the level + difficulty under "Saved Game". Stays null when no save exists.
+  var _wsSaveInfo = useState(null),
+    wsSaveInfo = _wsSaveInfo[0],
+    setWsSaveInfo = _wsSaveInfo[1];
   var _shipRenameValue = useState(""),
     shipRenameValue = _shipRenameValue[0],
     setShipRenameValue = _shipRenameValue[1];
@@ -4666,6 +4671,21 @@ function CosmicWorkshop() {
         shipSaveActiveId(seed.id);
       }
     });
+  }, []);
+
+  // Load saved-game snapshot (written by the game) so the CONTINUE button can
+  // surface the player's current level + difficulty.
+  useEffect(function () {
+    try {
+      if (!window.storage || !window.storage.get) return;
+      window.storage.get("cosmic_drift_save").then(function (r) {
+        if (r && r.value) {
+          try {
+            setWsSaveInfo(JSON.parse(r.value));
+          } catch (e) {}
+        }
+      }).catch(function () {});
+    } catch (e) {}
   }, []);
 
   // Entry animation when arriving from game splash
@@ -8491,128 +8511,13 @@ function CosmicWorkshop() {
     var ad = shipGetActiveDesign();
     return shipActiveId && ad.savedAt ? new Date(ad.savedAt).toLocaleDateString() : "--";
   }())))),
-  // FLEX SPACER — pushes Recent Project / Resume / Bridge to bottom
+  // FLEX SPACER — pushes the credit + Resume + Bridge to bottom
   React.createElement("div", {
     style: {
       flex: 1,
       minHeight: 8
     }
   }),
-  // RECENT PROJECT
-  React.createElement(WsPanel, {
-    style: {
-      padding: "8px 10px"
-    }
-  }, React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      marginBottom: 6
-    }
-  }, React.createElement(WsMono, {
-    size: 8,
-    ls: 2.5,
-    color: "rgba(180,140,255,0.65)"
-  }, "RECENT PROJECT")), savedLevels.length > 0 ? function () {
-    var rec = savedLevels.slice().sort(function (a, b) {
-      return new Date(b.savedAt || 0) - new Date(a.savedAt || 0);
-    })[0];
-    var dateStr = rec.savedAt ? new Date(rec.savedAt).toLocaleDateString() : "";
-    return React.createElement("div", {
-      onClick: function () {
-        handleSplashToGamePlay(rec.id);
-      },
-      style: {
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        cursor: "pointer"
-      }
-    }, React.createElement("div", {
-      style: {
-        width: 36,
-        height: 36,
-        borderRadius: 6,
-        background: "rgba(80,50,140,0.3)",
-        border: "1px solid rgba(160,100,255,0.25)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexShrink: 0
-      }
-    }, React.createElement("svg", {
-      width: "22",
-      height: "22",
-      viewBox: "0 0 24 24"
-    }, React.createElement("rect", {
-      x: "2",
-      y: "2",
-      width: "9",
-      height: "9",
-      rx: "1",
-      fill: "rgba(128,221,255,0.35)",
-      stroke: "rgba(128,221,255,0.5)",
-      strokeWidth: "0.5"
-    }), React.createElement("rect", {
-      x: "13",
-      y: "2",
-      width: "9",
-      height: "9",
-      rx: "1",
-      fill: "rgba(200,184,255,0.25)",
-      stroke: "rgba(200,184,255,0.4)",
-      strokeWidth: "0.5"
-    }), React.createElement("rect", {
-      x: "2",
-      y: "13",
-      width: "9",
-      height: "9",
-      rx: "1",
-      fill: "rgba(255,255,255,0.06)",
-      stroke: "rgba(255,255,255,0.12)",
-      strokeWidth: "0.5"
-    }), React.createElement("rect", {
-      x: "13",
-      y: "13",
-      width: "9",
-      height: "9",
-      rx: "1",
-      fill: "rgba(255,180,60,0.2)",
-      stroke: "rgba(255,180,60,0.35)",
-      strokeWidth: "0.5"
-    }))), React.createElement("div", {
-      style: {
-        flex: 1,
-        minWidth: 0
-      }
-    }, React.createElement("div", {
-      style: {
-        color: "#c8d8e8",
-        fontWeight: 700,
-        fontSize: 14,
-        fontFamily: "'Exo 2', sans-serif",
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis"
-      }
-    }, rec.name || "Untitled"), React.createElement(WsMono, {
-      size: 7.5,
-      ls: 0.8,
-      color: "rgba(200,180,255,0.35)"
-    }, "LEVEL  ·  8×6  ·  " + dateStr)), React.createElement("span", {
-      style: {
-        color: "rgba(200,170,255,0.35)",
-        fontSize: 18,
-        fontWeight: 300,
-        flexShrink: 0
-      }
-    }, "›"));
-  }() : React.createElement(WsMono, {
-    size: 9,
-    ls: 1,
-    color: "rgba(200,180,255,0.2)"
-  }, "—  no levels saved")),
   // CREDIT
   React.createElement("div", {
     style: {
@@ -8704,11 +8609,32 @@ function CosmicWorkshop() {
       color: "#f0e8ff",
       textShadow: "0 0 14px rgba(200,140,255,0.7), 0 1px 0 rgba(0,0,0,0.4)"
     }
-  }, "CONTINUE"), React.createElement(WsMono, {
-    size: 9,
-    ls: 1.5,
+  }, "CONTINUE"),
+  // Two-line caption: "Saved Game" + level / difficulty.
+  React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "flex-start",
+      justifyContent: "center",
+      gap: 2,
+      lineHeight: 1
+    }
+  }, React.createElement(WsMono, {
+    size: 8,
+    ls: 1.2,
+    color: "rgba(200,160,255,0.55)"
+  }, "SAVED GAME"), React.createElement(WsMono, {
+    size: 8,
+    ls: 0.6,
     color: "rgba(200,160,255,0.4)"
-  }, "L · 8×6"))),
+  }, function () {
+    if (!wsSaveInfo) return "no save";
+    var lvl = wsSaveInfo.level != null ? "LEVEL " + wsSaveInfo.level : "";
+    var diff = (wsSaveInfo.difficulty || "").toString().toUpperCase();
+    if (lvl && diff) return lvl + "  ·  " + diff;
+    return lvl || diff || "—";
+  }())))),
   // ── BOTTOM BRIDGE BAR (mirrors game-splash Workshop lever) ──
   React.createElement(WsPanel, {
     onClick: function () {
