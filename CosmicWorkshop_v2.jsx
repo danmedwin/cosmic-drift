@@ -272,14 +272,18 @@ function shipRenderPart(part, key, isSelected) {
   var fillMode = part.fillMode || "solid";
   var color2 = part.color2 || color;
   var gradAngle = typeof part.gradAngle === "number" ? part.gradAngle : 0;
+  // gradStop pushes the inner stop outward, making the center color hold its
+  // solid value until that offset before fading to color2. Used by radial.
+  var gradStop = typeof part.gradStop === "number" ? part.gradStop : 0;
   var fillRef = color;
   var defsEl = null;
   if (fillMode === "linear" || fillMode === "radial") {
     var gradId = "shipgrad-" + key;
-    var stops = [
-      React.createElement("stop", { key: "s0", offset: "0%", stopColor: color }),
-      React.createElement("stop", { key: "s1", offset: "100%", stopColor: color2 })
-    ];
+    var stops = [React.createElement("stop", { key: "s0", offset: "0%", stopColor: color })];
+    if (fillMode === "radial" && gradStop > 0) {
+      stops.push(React.createElement("stop", { key: "smid", offset: (gradStop * 100) + "%", stopColor: color }));
+    }
+    stops.push(React.createElement("stop", { key: "s1", offset: "100%", stopColor: color2 }));
     if (fillMode === "linear") {
       defsEl = React.createElement("defs", { key: "d" },
         React.createElement("linearGradient", { id: gradId, x1: "0", y1: "0", x2: "1", y2: "0", gradientTransform: "rotate(" + gradAngle + " 0.5 0.5)" }, stops));
@@ -1303,6 +1307,8 @@ export default function CosmicWorkshop() {
   var shipDirtyRef = useRef(false);
   var _shipSelectedPart = useState(-1), shipSelectedPart = _shipSelectedPart[0], setShipSelectedPart = _shipSelectedPart[1];
   var shipDragRef = useRef(null);
+  // Tracks an active row-drag in the parts list (Z-order reordering by drag).
+  var shipDragHandleRef = useRef(null);
   var _shipHullPromptId = useState(null), shipHullPromptId = _shipHullPromptId[0], setShipHullPromptId = _shipHullPromptId[1];
   var _shipWhLocked = useState(false), shipWhLocked = _shipWhLocked[0], setShipWhLocked = _shipWhLocked[1];
   var bdScrollRef = useRef(null);
@@ -2695,6 +2701,38 @@ export default function CosmicWorkshop() {
   function shipPreviewPointerUp(e) {
     shipDragRef.current = null;
   }
+  // Parts-list row-drag handlers. The grip on each row owns the pointer
+  // capture; while dragging, we measure other rows' bounding rects to figure
+  // out the target index and swap as the pointer crosses each midpoint.
+  function shipDragHandleStart(idx, e) {
+    if (e.preventDefault) e.preventDefault();
+    if (e.stopPropagation) e.stopPropagation();
+    setShipSelectedPart(idx);
+    shipDragHandleRef.current = { idx: idx };
+    if (e.currentTarget.setPointerCapture && e.pointerId != null) {
+      try { e.currentTarget.setPointerCapture(e.pointerId); } catch(err) {}
+    }
+  }
+  function shipDragHandleMove(e) {
+    var d = shipDragHandleRef.current;
+    if (!d) return;
+    if (e.preventDefault) e.preventDefault();
+    var rows = document.querySelectorAll("[data-shippart-row]");
+    var cy = e.clientY != null ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+    var targetIdx = d.idx;
+    for (var i = 0; i < rows.length; i++) {
+      var r = rows[i].getBoundingClientRect();
+      if (cy < r.top + r.height / 2) { targetIdx = i; break; }
+      if (i === rows.length - 1) targetIdx = i;
+    }
+    if (targetIdx !== d.idx) {
+      shipReorderPart(d.idx, targetIdx);
+      d.idx = targetIdx;
+    }
+  }
+  function shipDragHandleEnd(e) {
+    shipDragHandleRef.current = null;
+  }
   function shipUpdateEdit(key, val) {
     shipDirtyRef.current = true;
     setShipEdit(function(prev) { var next = Object.assign({}, prev); next[key] = val; return next; });
@@ -3826,6 +3864,8 @@ export default function CosmicWorkshop() {
                 onChange: function(v) { shipUpdatePart(shipSelectedPart, "color2", v); } }),
               fillMode === "linear" && React.createElement(BDSlider, { label: "Gradient Angle", value: sel.gradAngle || 0, min: 0, max: 360, step: 15, displayValue: (sel.gradAngle || 0) + "°",
                 onChange: function(v) { shipUpdatePart(shipSelectedPart, "gradAngle", v); } }),
+              fillMode === "radial" && React.createElement(BDSlider, { label: "Center Size", value: sel.gradStop || 0, min: 0, max: 0.95, step: 0.05, displayValue: Math.round((sel.gradStop || 0) * 100) + "%",
+                onChange: function(v) { shipUpdatePart(shipSelectedPart, "gradStop", v); } }),
               React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, marginTop: 12, marginBottom: 4, letterSpacing: 0.5, textTransform: "uppercase" } }, "Border"),
               React.createElement(BDColorPicker, { label: "Border Color", value: sel.bc || "#000000",
                 presets: ["#000000", "#222a3a", "#ffffff", "#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70cc"],
@@ -3881,8 +3921,24 @@ export default function CosmicWorkshop() {
                   partsList.map(function(p, idx) {
                     var isSel = idx === shipSelectedPart;
                     var displayName = p.name || SHIP_PART_LABELS[p.type];
-                    return React.createElement("div", { key: idx, onClick: function() { setShipSelectedPart(idx); },
-                      style: { display: "flex", alignItems: "center", gap: 8, padding: "6px 8px", borderRadius: 6, cursor: "pointer", background: isSel ? "rgba(255,138,170,0.12)" : "rgba(255,255,255,0.02)", border: isSel ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.05)" } },
+                    return React.createElement("div", Object.assign({ key: idx, onClick: function() { setShipSelectedPart(idx); },
+                      style: { display: "flex", alignItems: "center", gap: 6, padding: "6px 6px", borderRadius: 6, cursor: "pointer", background: isSel ? "rgba(255,138,170,0.12)" : "rgba(255,255,255,0.02)", border: isSel ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.05)" } }, { "data-shippart-row": "1" }),
+                      // Drag handle (6-dot grip) for reordering Z-layer
+                      React.createElement("div", {
+                        onPointerDown: function(e) { shipDragHandleStart(idx, e); },
+                        onPointerMove: shipDragHandleMove,
+                        onPointerUp: shipDragHandleEnd,
+                        onPointerCancel: shipDragHandleEnd,
+                        title: "Drag to reorder",
+                        style: { width: 16, height: 22, display: "flex", alignItems: "center", justifyContent: "center", cursor: "grab", touchAction: "none", flex: "0 0 auto", color: "rgba(180,200,220,0.5)" }
+                      },
+                        React.createElement("svg", { width: "10", height: "16", viewBox: "0 0 10 16", fill: "currentColor" },
+                          React.createElement("circle", { cx: 2.5, cy: 3,  r: 1.3 }),
+                          React.createElement("circle", { cx: 7.5, cy: 3,  r: 1.3 }),
+                          React.createElement("circle", { cx: 2.5, cy: 8,  r: 1.3 }),
+                          React.createElement("circle", { cx: 7.5, cy: 8,  r: 1.3 }),
+                          React.createElement("circle", { cx: 2.5, cy: 13, r: 1.3 }),
+                          React.createElement("circle", { cx: 7.5, cy: 13, r: 1.3 }))),
                       React.createElement("div", { style: { width: 14, height: 14, borderRadius: 3, background: p.color || "#80ddff", border: "1px solid rgba(255,255,255,0.2)", flex: "0 0 auto" } }),
                       React.createElement("div", { style: { flex: 1, color: isSel ? "#ff8aaa" : "rgba(200,210,220,0.7)", fontSize: 11, fontWeight: 600, fontFamily: "'Exo 2', sans-serif", letterSpacing: 0.4 } }, displayName + " · (" + p.x.toFixed(0) + "," + p.y.toFixed(0) + ")"),
                       React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipDuplicatePart(idx); },

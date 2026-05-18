@@ -905,14 +905,16 @@ function shipRenderPart(part, key) {
   var fillMode = part.fillMode || "solid";
   var color2 = part.color2 || color;
   var gradAngle = typeof part.gradAngle === "number" ? part.gradAngle : 0;
+  var gradStop = typeof part.gradStop === "number" ? part.gradStop : 0;
   var fillRef = color;
   var defsEl = null;
   if (fillMode === "linear" || fillMode === "radial") {
     var gradId = "shipgrad-" + key;
-    var stops = [
-      React.createElement("stop", { key: "s0", offset: "0%", stopColor: color }),
-      React.createElement("stop", { key: "s1", offset: "100%", stopColor: color2 })
-    ];
+    var stops = [React.createElement("stop", { key: "s0", offset: "0%", stopColor: color })];
+    if (fillMode === "radial" && gradStop > 0) {
+      stops.push(React.createElement("stop", { key: "smid", offset: (gradStop * 100) + "%", stopColor: color }));
+    }
+    stops.push(React.createElement("stop", { key: "s1", offset: "100%", stopColor: color2 }));
     if (fillMode === "linear") {
       defsEl = React.createElement("defs", { key: "d" },
         React.createElement("linearGradient", { id: gradId, x1: "0", y1: "0", x2: "1", y2: "0", gradientTransform: "rotate(" + gradAngle + " 0.5 0.5)" }, stops));
