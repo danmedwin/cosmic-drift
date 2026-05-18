@@ -296,6 +296,12 @@ function shipTrashSvg(size, color) {
     React.createElement("path", { d: "M10 11v6" }),
     React.createElement("path", { d: "M14 11v6" }));
 }
+// Classic "two stacked rectangles" duplicate icon.
+function shipCopySvg(size, color) {
+  return React.createElement("svg", { width: String(size), height: String(size), viewBox: "0 0 24 24", fill: "none", stroke: color, strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+    React.createElement("rect", { x: "9", y: "9", width: "12", height: "12", rx: "2" }),
+    React.createElement("path", { d: "M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" }));
+}
 function shipLockSvg(size, locked) {
   var color = locked ? "#ff8aaa" : "rgba(180,200,220,0.65)";
   return React.createElement("svg", { width: String(size), height: String(size), viewBox: "0 0 24 24", fill: "none", stroke: color, strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
@@ -2287,6 +2293,23 @@ export default function CosmicWorkshop() {
       return Object.assign({}, prev, { parts: list });
     });
   }
+  // Duplicate the part at idx: deep-copies, nudges by (1.5, 1.5) so the copy is
+  // visible, inserts right after the original, and selects the new copy.
+  function shipDuplicatePart(idx) {
+    shipDirtyRef.current = true;
+    setShipEdit(function(prev) {
+      var list = (prev.parts || []).slice();
+      if (idx < 0 || idx >= list.length) return prev;
+      var src = list[idx];
+      var copy = JSON.parse(JSON.stringify(src));
+      copy.x = Math.max(0, Math.min(40, (src.x || 20) + 1.5));
+      copy.y = Math.max(0, Math.min(40, (src.y || 20) + 1.5));
+      if (src.name) copy.name = src.name + " copy";
+      list.splice(idx + 1, 0, copy);
+      setShipSelectedPart(idx + 1);
+      return Object.assign({}, prev, { parts: list });
+    });
+  }
   function shipDeletePart(idx) {
     shipDirtyRef.current = true;
     setShipEdit(function(prev) {
@@ -3449,10 +3472,15 @@ export default function CosmicWorkshop() {
               sel && React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,138,170,0.25)", borderRadius: 12, padding: "12px 16px 8px" } },
                 React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 } },
                   React.createElement("div", { style: { color: "#ff8aaa", fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", fontFamily: "'Exo 2', sans-serif" } }, "Selected: " + (sel.name || SHIP_PART_LABELS[sel.type])),
-                  React.createElement("div", { onClick: function() { shipDeletePart(shipSelectedPart); },
-                    title: "Delete part",
-                    style: { width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, cursor: "pointer", background: "rgba(220,60,80,0.15)", border: "1px solid rgba(220,60,80,0.4)" } },
-                    shipTrashSvg(14, "#ff8088"))),
+                  React.createElement("div", { style: { display: "flex", gap: 6 } },
+                    React.createElement("div", { onClick: function() { shipDuplicatePart(shipSelectedPart); },
+                      title: "Duplicate part",
+                      style: { width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, cursor: "pointer", background: "rgba(128,221,255,0.12)", border: "1px solid rgba(128,221,255,0.4)" } },
+                      shipCopySvg(14, "#80ddff")),
+                    React.createElement("div", { onClick: function() { shipDeletePart(shipSelectedPart); },
+                      title: "Delete part",
+                      style: { width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, cursor: "pointer", background: "rgba(220,60,80,0.15)", border: "1px solid rgba(220,60,80,0.4)" } },
+                      shipTrashSvg(14, "#ff8088")))),
                 React.createElement("div", { style: { marginBottom: 10 } },
                   React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, marginBottom: 4, letterSpacing: 0.5 } }, "NAME"),
                   React.createElement("input", { value: sel.name || "", onChange: function(e) { shipUpdatePart(shipSelectedPart, "name", e.target.value); },
@@ -3504,6 +3532,10 @@ export default function CosmicWorkshop() {
                       style: { display: "flex", alignItems: "center", gap: 8, padding: "6px 8px", borderRadius: 6, cursor: "pointer", background: isSel ? "rgba(255,138,170,0.12)" : "rgba(255,255,255,0.02)", border: isSel ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.05)" } },
                       React.createElement("div", { style: { width: 14, height: 14, borderRadius: 3, background: p.color || "#80ddff", border: "1px solid rgba(255,255,255,0.2)", flex: "0 0 auto" } }),
                       React.createElement("div", { style: { flex: 1, color: isSel ? "#ff8aaa" : "rgba(200,210,220,0.7)", fontSize: 11, fontWeight: 600, fontFamily: "'Exo 2', sans-serif", letterSpacing: 0.4 } }, displayName + " · (" + p.x.toFixed(0) + "," + p.y.toFixed(0) + ")"),
+                      React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipDuplicatePart(idx); },
+                        title: "Duplicate part",
+                        style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", background: "rgba(128,221,255,0.1)", border: "1px solid rgba(128,221,255,0.3)", flex: "0 0 auto" } },
+                        shipCopySvg(12, "#80ddff")),
                       React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipDeletePart(idx); },
                         title: "Delete part",
                         style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", background: "rgba(220,60,80,0.12)", border: "1px solid rgba(220,60,80,0.3)", flex: "0 0 auto" } },

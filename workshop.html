@@ -1432,6 +1432,27 @@ function shipTrashSvg(size, color) {
     d: "M14 11v6"
   }));
 }
+// Classic "two stacked rectangles" duplicate icon.
+function shipCopySvg(size, color) {
+  return React.createElement("svg", {
+    width: String(size),
+    height: String(size),
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: color,
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, React.createElement("rect", {
+    x: "9",
+    y: "9",
+    width: "12",
+    height: "12",
+    rx: "2"
+  }), React.createElement("path", {
+    d: "M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+  }));
+}
 function shipLockSvg(size, locked) {
   var color = locked ? "#ff8aaa" : "rgba(180,200,220,0.65)";
   return React.createElement("svg", {
@@ -6700,6 +6721,25 @@ function CosmicWorkshop() {
         o[key] = val;
         return o;
       }());
+      return Object.assign({}, prev, {
+        parts: list
+      });
+    });
+  }
+  // Duplicate the part at idx: deep-copies, nudges by (1.5, 1.5) so the copy is
+  // visible, inserts right after the original, and selects the new copy.
+  function shipDuplicatePart(idx) {
+    shipDirtyRef.current = true;
+    setShipEdit(function (prev) {
+      var list = (prev.parts || []).slice();
+      if (idx < 0 || idx >= list.length) return prev;
+      var src = list[idx];
+      var copy = JSON.parse(JSON.stringify(src));
+      copy.x = Math.max(0, Math.min(40, (src.x || 20) + 1.5));
+      copy.y = Math.max(0, Math.min(40, (src.y || 20) + 1.5));
+      if (src.name) copy.name = src.name + " copy";
+      list.splice(idx + 1, 0, copy);
+      setShipSelectedPart(idx + 1);
       return Object.assign({}, prev, {
         parts: list
       });
@@ -12168,6 +12208,27 @@ function CosmicWorkshop() {
         fontFamily: "'Exo 2', sans-serif"
       }
     }, "Selected: " + (sel.name || SHIP_PART_LABELS[sel.type])), React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 6
+      }
+    }, React.createElement("div", {
+      onClick: function () {
+        shipDuplicatePart(shipSelectedPart);
+      },
+      title: "Duplicate part",
+      style: {
+        width: 28,
+        height: 28,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 6,
+        cursor: "pointer",
+        background: "rgba(128,221,255,0.12)",
+        border: "1px solid rgba(128,221,255,0.4)"
+      }
+    }, shipCopySvg(14, "#80ddff")), React.createElement("div", {
       onClick: function () {
         shipDeletePart(shipSelectedPart);
       },
@@ -12183,7 +12244,7 @@ function CosmicWorkshop() {
         background: "rgba(220,60,80,0.15)",
         border: "1px solid rgba(220,60,80,0.4)"
       }
-    }, shipTrashSvg(14, "#ff8088"))), React.createElement("div", {
+    }, shipTrashSvg(14, "#ff8088")))), React.createElement("div", {
       style: {
         marginBottom: 10
       }
@@ -12420,6 +12481,24 @@ function CosmicWorkshop() {
           letterSpacing: 0.4
         }
       }, displayName + " · (" + p.x.toFixed(0) + "," + p.y.toFixed(0) + ")"), React.createElement("div", {
+        onClick: function (e) {
+          e.stopPropagation();
+          shipDuplicatePart(idx);
+        },
+        title: "Duplicate part",
+        style: {
+          width: 22,
+          height: 22,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: 4,
+          cursor: "pointer",
+          background: "rgba(128,221,255,0.1)",
+          border: "1px solid rgba(128,221,255,0.3)",
+          flex: "0 0 auto"
+        }
+      }, shipCopySvg(12, "#80ddff")), React.createElement("div", {
         onClick: function (e) {
           e.stopPropagation();
           shipDeletePart(idx);
