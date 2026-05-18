@@ -758,10 +758,15 @@ function BDHeaderBtn(props) {
 
 // Unified button style for list cards
 var BTN_BASE = { borderRadius: 4, fontSize: 10, fontWeight: 700, cursor: "pointer", letterSpacing: 0.5, textTransform: "uppercase", fontFamily: "'Quicksand',sans-serif" };
-var BTN_EDIT = Object.assign({}, BTN_BASE, { padding: "5px 12px", background: PNL, border: "1px solid rgba(80,200,255,0.3)", color: "#80ddff" });
+var BTN_EDIT = Object.assign({}, BTN_BASE, { padding: "5px 12px", background: PNL, border: "1px solid rgba(80,200,255,0.3)", color: "#80ddff", display: "flex", alignItems: "center", gap: 5 });
 var BTN_RENAME = Object.assign({}, BTN_BASE, { padding: "5px 10px", background: PNL, border: PNLB, color: "rgba(200,210,220,0.6)" });
-var BTN_EXPORT = Object.assign({}, BTN_BASE, { padding: "5px 10px", background: PNL, border: "1px solid rgba(200,184,255,0.3)", color: "#c8b8ff" });
+var BTN_EXPORT = Object.assign({}, BTN_BASE, { padding: "5px 10px", background: PNL, border: "1px solid rgba(200,184,255,0.3)", color: "#c8b8ff", display: "flex", alignItems: "center", gap: 5 });
 var BTN_DELETE = Object.assign({}, BTN_BASE, { padding: "5px 10px", background: "rgba(80,20,20,0.4)", border: "1px solid rgba(255,80,80,0.3)", color: "#ff8866" });
+var BTN_DELETE_ICON = Object.assign({}, BTN_BASE, { padding: "5px 8px", background: "rgba(80,20,20,0.4)", border: "1px solid rgba(255,80,80,0.3)", color: "#ff8866", display: "flex", alignItems: "center", justifyContent: "center" });
+function WsIconPencil(sz) { var s = sz || 11; return React.createElement("svg", { width: s, height: s, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2.3", strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("path", { d: "M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" }), React.createElement("path", { d: "M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" })); }
+function WsIconCopy(sz) { var s = sz || 11; return React.createElement("svg", { width: s, height: s, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2.3", strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("rect", { x: "9", y: "9", width: "13", height: "13", rx: "2" }), React.createElement("path", { d: "M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" })); }
+function WsIconShare(sz) { var s = sz || 11; return React.createElement("svg", { width: s, height: s, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2.3", strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("path", { d: "M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" }), React.createElement("polyline", { points: "16 6 12 2 8 6" }), React.createElement("line", { x1: "12", y1: "2", x2: "12", y2: "15" })); }
+function WsIconTrash(sz) { var s = sz || 12; return React.createElement("svg", { width: s, height: s, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("polyline", { points: "3 6 5 6 21 6" }), React.createElement("path", { d: "M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" }), React.createElement("path", { d: "M10 11v6M14 11v6" }), React.createElement("path", { d: "M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" })); }
 var BTN_TOPBAR = Object.assign({}, BTN_BASE, { padding: "6px 8px", borderRadius: 4, background: PNL, border: PNLB, color: "rgba(200,210,220,0.8)", fontSize: 9, letterSpacing: 1, boxShadow: "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" });
 var BTN_TOPBAR_ACCENT = Object.assign({}, BTN_TOPBAR, { border: "2px solid rgba(80,200,255,0.3)", color: "#80ddff" });
 var BTN_TOPBAR_PURPLE = Object.assign({}, BTN_TOPBAR, { border: "1px solid rgba(200,184,255,0.3)", color: "#c8b8ff" });
@@ -2373,15 +2378,17 @@ export default function CosmicWorkshop() {
                 React.createElement("div", { onClick: function() { renameLevel(lv.id, renamingName); }, style: { padding: "4px 8px", borderRadius: 4, background: "rgba(80,200,100,0.2)", border: "1px solid rgba(80,200,100,0.4)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" } }, React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M5 13l4 4L19 7", fill: "none", stroke: "#80dd90", strokeWidth: "2.5", strokeLinecap: "round", strokeLinejoin: "round" }))),
                 React.createElement("div", { onClick: function() { setRenamingId(null); }, style: { padding: "4px 8px", borderRadius: 4, border: "1px solid rgba(120,80,255,0.3)", color: "#c8b8ff", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "X"))
               : React.createElement("div", { style: { marginBottom: 8 } },
-                React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, lv.name || "Untitled"),
+                React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 5 } },
+                  React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, lv.name || "Untitled"),
+                  React.createElement("div", { onClick: function() { setRenamingId(lv.id); setRenamingName(lv.name || ""); }, style: { opacity: 0.35, cursor: "pointer", display: "flex", alignItems: "center" } }, WsIconPencil(12))),
                 React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 10 } }, dateStr)),
-              React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } },
+              React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" } },
                 React.createElement("div", { onClick: function() { navigateToGame(lv.id); }, style: BTN_PLAY }, "PLAY"),
-                React.createElement("div", { onClick: function() { openBuilder(lv); }, style: BTN_EDIT }, "EDIT"),
-                React.createElement("div", { onClick: function() { copyLevel(lv); }, style: BTN_EDIT }, "Edit Copy"),
-                React.createElement("div", { onClick: function() { setRenamingId(lv.id); setRenamingName(lv.name || ""); }, style: BTN_RENAME }, "RENAME"),
-                React.createElement("div", { onClick: function() { exportLevel(lv); }, style: BTN_EXPORT }, "EXPORT"),
-                React.createElement("div", { onClick: function() { setDeletingId(lv.id); }, style: BTN_DELETE }, "DELETE")));
+                React.createElement("div", { onClick: function() { openBuilder(lv); }, style: BTN_EDIT }, WsIconPencil(), "EDIT"),
+                React.createElement("div", { onClick: function() { copyLevel(lv); }, style: BTN_EDIT }, WsIconCopy(), "Edit Copy"),
+                React.createElement("div", { onClick: function() { exportLevel(lv); }, style: BTN_EXPORT }, WsIconShare(), "SHARE"),
+                React.createElement("div", { style: { flex: 1 } }),
+                React.createElement("div", { onClick: function() { setDeletingId(lv.id); }, style: BTN_DELETE_ICON }, WsIconTrash())));
           })),
         deletingId && renderDeleteOverlay("Delete Level?", function() { setDeletingId(null); }, function() { deleteLevel(deletingId); }),
         exportId && renderExportOverlay("Export Level", exportText, copied, function() { copyToClipboard(exportText, setCopied); }, function() { setExportId(null); }),
@@ -2511,15 +2518,17 @@ export default function CosmicWorkshop() {
               : React.createElement("div", { style: { display: "flex", gap: 10, marginBottom: 8, alignItems: "center" } },
                 React.createElement(BDBlockPreview, { design: saved, size: 38 }),
                 React.createElement("div", { style: { flex: 1, minWidth: 0 } },
-                  React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, saved.name || "Unnamed"),
-                  React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 10 } }, (bt ? bt.label + " \u00B7 " : "") + saved.shape + (saved.pattern !== "none" ? " \u00B7 " + saved.pattern : "") + (dateStr ? " \u00B7 " + dateStr : "")))),
-              React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } },
-                saved.assignedTo && React.createElement("div", { onClick: function() { bdToggleActive(saved); }, style: bdActiveMap[saved.assignedTo] === saved.id ? BTN_ISACTIVE : BTN_SETACTIVE }, bdActiveMap[saved.assignedTo] === saved.id ? "★ Active" : "Set Active"),
-                React.createElement("div", { onClick: function() { bdOpenEditor(saved); }, style: BTN_EDIT }, "EDIT"),
-                React.createElement("div", { onClick: function() { bdCopyPreset(saved); }, style: BTN_EDIT }, "Edit Copy"),
-                React.createElement("div", { onClick: function() { setBdRenamingId(saved.id); setBdRenamingName(saved.name || ""); }, style: BTN_RENAME }, "RENAME"),
-                React.createElement("div", { onClick: function() { bdExportDesign(saved); }, style: BTN_EXPORT }, "EXPORT"),
-                React.createElement("div", { onClick: function() { setBdDeletingId(saved.id); }, style: BTN_DELETE }, "DELETE")));
+                  React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 5 } },
+                    React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, saved.name || "Unnamed"),
+                    React.createElement("div", { onClick: function() { setBdRenamingId(saved.id); setBdRenamingName(saved.name || ""); }, style: { opacity: 0.35, cursor: "pointer", display: "flex", alignItems: "center" } }, WsIconPencil(12))),
+                  React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 10 } }, (bt ? bt.label + " \u00B7 " : "") + saved.shape + (saved.pattern !== "none" ? " \u00B7 " + saved.pattern : "") + (dateStr ? " \u00B7 " + dateStr : ""))),
+                saved.assignedTo && React.createElement("div", { onClick: function() { bdToggleActive(saved); }, style: bdActiveMap[saved.assignedTo] === saved.id ? BTN_ISACTIVE : BTN_SETACTIVE }, bdActiveMap[saved.assignedTo] === saved.id ? "★ Active" : "Set Active")),
+              React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" } },
+                React.createElement("div", { onClick: function() { bdOpenEditor(saved); }, style: BTN_EDIT }, WsIconPencil(), "EDIT"),
+                React.createElement("div", { onClick: function() { bdCopyPreset(saved); }, style: BTN_EDIT }, WsIconCopy(), "Edit Copy"),
+                React.createElement("div", { onClick: function() { bdExportDesign(saved); }, style: BTN_EXPORT }, WsIconShare(), "SHARE"),
+                React.createElement("div", { style: { flex: 1 } }),
+                React.createElement("div", { onClick: function() { setBdDeletingId(saved.id); }, style: BTN_DELETE_ICON }, WsIconTrash())));
           }),
           // Game Blocks tab
           bdSavedTab === "factory" && BD_FACTORY_PRESETS.map(function(preset) {
@@ -2677,15 +2686,17 @@ export default function CosmicWorkshop() {
               : React.createElement("div", { style: { display: "flex", gap: 10, marginBottom: 8, alignItems: "center" } },
                 renderVfxIcon(saved),
                 React.createElement("div", { style: { flex: 1, minWidth: 0 } },
-                  React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, saved.name || "Unnamed"),
-                  React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 10 } }, etInfo.label + (dateStr ? " · " + dateStr : "")))),
-              React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } },
-                React.createElement("div", { onClick: function() { vfxToggleActive(saved); }, style: isAct ? BTN_ISACTIVE : BTN_SETACTIVE }, isAct ? "★ Active" : "Set Active"),
-                React.createElement("div", { onClick: function() { vfxOpenEditor(saved); }, style: BTN_EDIT }, "EDIT"),
-                React.createElement("div", { onClick: function() { vfxCopyPreset(saved); }, style: BTN_EDIT }, "Edit Copy"),
-                React.createElement("div", { onClick: function() { setVfxRenamingId(saved.id); setVfxRenamingName(saved.name || ""); }, style: BTN_RENAME }, "RENAME"),
-                React.createElement("div", { onClick: function() { vfxExportDesign(saved); }, style: BTN_EXPORT }, "EXPORT"),
-                React.createElement("div", { onClick: function() { setVfxDeletingId(saved.id); }, style: BTN_DELETE }, "DELETE")));
+                  React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 5 } },
+                    React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, saved.name || "Unnamed"),
+                    React.createElement("div", { onClick: function() { setVfxRenamingId(saved.id); setVfxRenamingName(saved.name || ""); }, style: { opacity: 0.35, cursor: "pointer", display: "flex", alignItems: "center" } }, WsIconPencil(12))),
+                  React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 10 } }, etInfo.label + (dateStr ? " · " + dateStr : ""))),
+                React.createElement("div", { onClick: function() { vfxToggleActive(saved); }, style: isAct ? BTN_ISACTIVE : BTN_SETACTIVE }, isAct ? "★ Active" : "Set Active")),
+              React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" } },
+                React.createElement("div", { onClick: function() { vfxOpenEditor(saved); }, style: BTN_EDIT }, WsIconPencil(), "EDIT"),
+                React.createElement("div", { onClick: function() { vfxCopyPreset(saved); }, style: BTN_EDIT }, WsIconCopy(), "Edit Copy"),
+                React.createElement("div", { onClick: function() { vfxExportDesign(saved); }, style: BTN_EXPORT }, WsIconShare(), "SHARE"),
+                React.createElement("div", { style: { flex: 1 } }),
+                React.createElement("div", { onClick: function() { setVfxDeletingId(saved.id); }, style: BTN_DELETE_ICON }, WsIconTrash())));
           }),
           vfxSavedTab === "factory" && VFX_FACTORY_PRESETS.map(function(preset) {
             return React.createElement("div", { key: preset.id, style: Object.assign({}, CARD_STYLE, { display: "flex", alignItems: "center", gap: 10 }) },
@@ -2794,14 +2805,14 @@ export default function CosmicWorkshop() {
                 React.createElement("div", { style: { width: 64, height: 64, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.2)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.06)", flexShrink: 0 } },
                   React.createElement(UFOBlockSvg, { size: 56, design: design, uid: design.id })),
                 React.createElement("div", { style: { flex: 1, minWidth: 0 } },
-                  React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700, marginBottom: 3 } }, design.name || "Untitled"),
-                  isActive && React.createElement("div", { style: { display: "inline-block", background: "rgba(100,220,180,0.15)", border: "1px solid rgba(100,220,180,0.35)", borderRadius: 4, padding: "1px 6px", fontSize: 10, color: "#64dcb4", fontWeight: 700 } }, "ACTIVE"))),
-              React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap" } },
-                React.createElement("div", { onClick: function() { ufoOpenEditor(design); }, style: BTN_EDIT }, "EDIT"),
-                React.createElement("div", { onClick: function() { ufoEditDirtyRef.current = false; setUfoEditId(null); setUfoEditDesign(Object.assign({}, design, { name: (design.name || "My UFO") + " (copy)" })); setUfoView("editor"); }, style: BTN_EDIT }, "Edit Copy"),
-                !isActive && React.createElement("div", { onClick: function() { ufoSetActive(design.id); }, style: Object.assign({}, BTN_TOPBAR, { padding: "5px 10px", fontSize: 10, color: "#64dcb4", border: "1px solid rgba(100,220,180,0.3)" }) }, "SET ACTIVE"),
-                React.createElement("div", { onClick: function() { ufoExportDesign(design); }, style: BTN_EXPORT }, "EXPORT"),
-                React.createElement("div", { onClick: function() { setUfoDeletingId(design.id); }, style: BTN_DELETE }, "DELETE")));
+                  React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700, marginBottom: 3 } }, design.name || "Untitled")),
+                React.createElement("div", { onClick: function() { ufoSetActive(design.id); }, style: isActive ? BTN_ISACTIVE : BTN_SETACTIVE }, isActive ? "★ Active" : "Set Active")),
+              React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" } },
+                React.createElement("div", { onClick: function() { ufoOpenEditor(design); }, style: BTN_EDIT }, WsIconPencil(), "EDIT"),
+                React.createElement("div", { onClick: function() { ufoEditDirtyRef.current = false; setUfoEditId(null); setUfoEditDesign(Object.assign({}, design, { name: (design.name || "My UFO") + " (copy)" })); setUfoView("editor"); }, style: BTN_EDIT }, WsIconCopy(), "Edit Copy"),
+                React.createElement("div", { onClick: function() { ufoExportDesign(design); }, style: BTN_EXPORT }, WsIconShare(), "SHARE"),
+                React.createElement("div", { style: { flex: 1 } }),
+                React.createElement("div", { onClick: function() { setUfoDeletingId(design.id); }, style: BTN_DELETE_ICON }, WsIconTrash())));
           })),
         ufoDeletingId && renderDeleteOverlay("Delete UFO Design?", function() { setUfoDeletingId(null); }, function() { ufoDeleteDesign(ufoDeletingId); }),
         ufoExportId && renderExportOverlay("Export UFO Design", ufoExportText, ufoCopied, function() { copyToClipboard(ufoExportText, setUfoCopied); }, function() { setUfoExportId(null); }),
