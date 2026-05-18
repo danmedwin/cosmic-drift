@@ -9023,15 +9023,15 @@ function CosmicWorkshop() {
       }
     }, customActive ? customActive.name || "Unnamed" : "Default")), customActive && React.createElement("div", {
       onClick: function () {
-        bdToggleActive(customActive);
-      },
-      style: BTN_RENAME
-    }, WsIconReset(), "Use Default"), customActive && React.createElement("div", {
-      onClick: function () {
         bdOpenEditor(customActive);
       },
       style: BTN_EDIT
-    }, WsIconPencil(), "Edit"), customActive && factory && React.createElement(BDBlockPreview, {
+    }, WsIconPencil(), "Edit"), customActive && React.createElement("div", {
+      onClick: function () {
+        bdToggleActive(customActive);
+      },
+      style: BTN_RENAME
+    }, WsIconReset(), "Use Default"), customActive && factory && React.createElement(BDBlockPreview, {
       design: factory,
       size: 22
     }), !customActive && factory && React.createElement("div", {
@@ -9852,15 +9852,15 @@ function CosmicWorkshop() {
       }
     }, customActive ? customActive.name || "Unnamed" : "Default")), customActive && React.createElement("div", {
       onClick: function () {
-        vfxToggleActive(customActive);
-      },
-      style: BTN_RENAME
-    }, WsIconReset(), "Use Default"), customActive && React.createElement("div", {
-      onClick: function () {
         vfxOpenEditor(customActive);
       },
       style: BTN_EDIT
-    }, WsIconPencil(), "Edit"), customActive && vfxFactoryFor(et.id) && React.createElement("div", {
+    }, WsIconPencil(), "Edit"), customActive && React.createElement("div", {
+      onClick: function () {
+        vfxToggleActive(customActive);
+      },
+      style: BTN_RENAME
+    }, WsIconReset(), "Use Default"), customActive && vfxFactoryFor(et.id) && React.createElement("div", {
       style: {
         width: 22,
         height: 22,
