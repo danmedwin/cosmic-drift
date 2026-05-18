@@ -2153,14 +2153,47 @@ export default function CosmicWorkshop() {
           React.createElement("div", { onClick: onConfirm, style: { padding: "8px 20px", borderRadius: 16, background: "linear-gradient(135deg,#2a5a6a,#1a3a4a)", border: "1px solid rgba(80,200,255,0.4)", color: "#80ddff", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "Import & Set Active"))));
   }
 
-  function renderBackWarnOverlay(onStay, onLeave) {
+  // Unsaved-changes overlay used by every workshop editor.
+  // - onStay: keep editing (close overlay)
+  // - onSaveAndLeave: save the current edit, then exit
+  // - onLeave: discard changes and exit
+  function renderBackWarnOverlay(onStay, onSaveAndLeave, onLeave) {
+    var btnBase = { padding: "10px 14px", borderRadius: 8, cursor: "pointer", fontSize: 12, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", fontFamily: "'Exo 2', sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 };
     return React.createElement("div", { style: OVERLAY_BG },
-      React.createElement("div", { style: Object.assign({}, OVERLAY_BOX, { border: "1px solid rgba(120,80,255,0.3)", maxWidth: 280 }) },
-        React.createElement("div", { style: { color: "#c8b8ff", fontSize: 15, fontWeight: 700, marginBottom: 8, fontFamily: "'Quicksand',sans-serif" } }, "Unsaved Changes"),
-        React.createElement("div", { style: { color: "rgba(200,184,255,0.5)", fontSize: 12, marginBottom: 16 } }, "You have unsaved changes. Leave anyway?"),
-        React.createElement("div", { style: { display: "flex", gap: 12, justifyContent: "center" } },
-          React.createElement("div", { onClick: onStay, style: { padding: "8px 20px", borderRadius: 16, border: "1px solid rgba(120,80,255,0.3)", color: "#c8b8ff", fontSize: 12, fontWeight: 600, cursor: "pointer" } }, "Stay"),
-          React.createElement("div", { onClick: onLeave, style: { padding: "8px 20px", borderRadius: 16, background: "rgba(255,60,60,0.3)", border: "1px solid rgba(255,80,80,0.35)", color: "#ff8866", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "Leave"))));
+      React.createElement("div", { style: {
+        background: WS.brushed, backgroundBlendMode: "overlay",
+        borderRadius: 14, padding: "20px 22px 18px",
+        maxWidth: 320, width: "calc(100% - 40px)",
+        border: "1px solid rgba(255,255,255,0.1)",
+        boxShadow: "0 8px 24px rgba(0,0,0,0.55)",
+        textAlign: "center", animation: "introFadeIn 0.25s ease-out"
+      } },
+        React.createElement("div", { style: { color: "#c8b8ff", fontSize: 13, fontWeight: 700, marginBottom: 8, letterSpacing: 1.5, textTransform: "uppercase", fontFamily: "'Exo 2', sans-serif" } }, "Unsaved Changes"),
+        React.createElement("div", { style: { color: "rgba(200,210,220,0.65)", fontSize: 12, marginBottom: 14, lineHeight: 1.4 } }, "You have unsaved changes. What would you like to do?"),
+        React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 8 } },
+          // Save & Leave (primary, green)
+          onSaveAndLeave && React.createElement("div", { onClick: onSaveAndLeave,
+            style: Object.assign({}, btnBase, { background: "linear-gradient(180deg, #2a5a3a, #1a3a28)", border: "1px solid rgba(80,200,100,0.5)", color: "#80dd90", boxShadow: "0 0 6px rgba(80,200,100,0.18), inset 0 1px 0 rgba(255,255,255,0.08)" }) },
+            React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+              React.createElement("path", { d: "M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" }),
+              React.createElement("polyline", { points: "17 21 17 13 7 13 7 21" }),
+              React.createElement("polyline", { points: "7 3 7 8 15 8" })),
+            "Save & Leave"),
+          // Stay (subdued, return arrow)
+          React.createElement("div", { onClick: onStay,
+            style: Object.assign({}, btnBase, { background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.15)", color: "rgba(200,210,220,0.85)" }) },
+            React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+              React.createElement("path", { d: "M3 12a9 9 0 1 0 3-6.7L3 8" }),
+              React.createElement("polyline", { points: "3 3 3 8 8 8" })),
+            "Stay & Keep Editing"),
+          // Leave Without Saving (destructive, red)
+          React.createElement("div", { onClick: onLeave,
+            style: Object.assign({}, btnBase, { background: "rgba(220,60,80,0.15)", border: "1px solid rgba(220,60,80,0.4)", color: "#ff8088" }) },
+            React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+              React.createElement("path", { d: "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" }),
+              React.createElement("polyline", { points: "16 17 21 12 16 7" }),
+              React.createElement("line", { x1: "21", y1: "12", x2: "9", y2: "12" })),
+            "Leave Without Saving"))));
   }
 
   function renderSortBar(currentSort, onSort, extraOpts) {
@@ -3081,7 +3114,10 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { width: 36 } }),
               React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 10 } }, (builderTourStep + 1) + " of " + BUILDER_TOUR_STEPS.length),
               builderTourStep < BUILDER_TOUR_STEPS.length - 1 ? React.createElement("div", { onClick: function() { setBuilderTourStep(null); builderTourSeenRef.current = true; try { window.storage.set("cosmic_drift_builder_tour", "seen"); } catch (e) {} }, style: { color: "rgba(180,200,220,0.35)", fontSize: 10, fontWeight: 600, cursor: "pointer" } }, "Skip") : React.createElement("div", { style: { width: 36 } })))),
-        showBackWarn && renderBackWarnOverlay(function() { setShowBackWarn(false); }, function() { setShowBackWarn(false); loadSavedLevels(); setLbScreen("list"); }))),
+        showBackWarn && renderBackWarnOverlay(
+          function() { setShowBackWarn(false); },
+          function() { handleBuilderSave(); setShowBackWarn(false); loadSavedLevels(); setLbScreen("list"); },
+          function() { setShowBackWarn(false); loadSavedLevels(); setLbScreen("list"); }))),
 
     // ═══ BLOCK DESIGNER ═══
     screen === "designer" && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", background: WS.brushed, backgroundBlendMode: "overlay" } },
@@ -3251,7 +3287,10 @@ export default function CosmicWorkshop() {
                   bdDisplayDesign.iconGlow && React.createElement(React.Fragment, null,
                     React.createElement(BDColorPicker, { value: bdDisplayDesign.iconGlowColor, onChange: function(v) { bdUpdateDesign("iconGlowColor", v); }, label: "Glow Color" }),
                     React.createElement(BDSlider, { label: "Glow Spread", value: bdDisplayDesign.iconGlowIntensity, onChange: function(v) { bdUpdateDesign("iconGlowIntensity", v); }, min: 1, max: 12, step: 0.5 }))))))),
-        bdShowBackWarn && renderBackWarnOverlay(function() { setBdShowBackWarn(false); }, function() { setBdShowBackWarn(false); setBdCurrentView("list"); }))),
+        bdShowBackWarn && renderBackWarnOverlay(
+          function() { setBdShowBackWarn(false); },
+          function() { bdSaveCurrentDesign(); setBdShowBackWarn(false); setBdCurrentView("list"); },
+          function() { setBdShowBackWarn(false); setBdCurrentView("list"); }))),
 
     screen === "vfx" && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", background: WS.brushed, backgroundBlendMode: "overlay" } },
       WsRivet({ bottom: 5, left: 5 }), WsRivet({ bottom: 5, right: 5 }),
@@ -3381,7 +3420,10 @@ export default function CosmicWorkshop() {
               React.createElement(BDSlider, { label: "Particle Size", value: vfxEditDesign.particleSize, onChange: function(v) { vfxUpdateDesign("particleSize", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.particleSize || 1).toFixed(1) + "x" })),
             React.createElement("div", { style: { display: "flex", gap: 10, marginTop: 8, justifyContent: "center" } },
               React.createElement("div", { onClick: vfxResetDesign, style: Object.assign({}, BTN_RENAME, { padding: "8px 18px", fontSize: 11 }) }, "Reset to Default")))),
-        vfxShowBackWarn && renderBackWarnOverlay(function() { setVfxShowBackWarn(false); }, function() { setVfxShowBackWarn(false); setVfxCurrentView("list"); }))),
+        vfxShowBackWarn && renderBackWarnOverlay(
+          function() { setVfxShowBackWarn(false); },
+          function() { vfxSaveCurrentDesign(); setVfxShowBackWarn(false); setVfxCurrentView("list"); },
+          function() { setVfxShowBackWarn(false); setVfxCurrentView("list"); }))),
 
     // ═══ UFO CUSTOMIZER ═══
     screen === "ufo" && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", background: WS.brushed, backgroundBlendMode: "overlay" } },
@@ -3472,6 +3514,7 @@ export default function CosmicWorkshop() {
             }, "Reset to Defaults"))),
         ufoShowBackWarn && renderBackWarnOverlay(
           function() { setUfoShowBackWarn(false); },
+          function() { ufoSaveCurrent(); setUfoShowBackWarn(false); setUfoView("list"); ufoEditDirtyRef.current = false; },
           function() { setUfoShowBackWarn(false); setUfoView("list"); ufoEditDirtyRef.current = false; })))
 ,
 
@@ -3671,6 +3714,7 @@ export default function CosmicWorkshop() {
             }, "Reset to Preset"))),
         shipShowBackWarn && renderBackWarnOverlay(
           function() { setShipShowBackWarn(false); },
+          function() { shipSaveCurrent(); setShipShowBackWarn(false); setShipView("list"); shipDirtyRef.current = false; },
           function() { setShipShowBackWarn(false); setShipView("list"); shipDirtyRef.current = false; }),
         shipHullPromptId && renderHullPresetOverlay(shipHullPromptId,
           function() { setShipHullPromptId(null); },
