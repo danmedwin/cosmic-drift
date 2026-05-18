@@ -1064,6 +1064,48 @@ var SAMPLE_LEVEL = {
   isSample: true
 };
 
+// ── Active Loadout mini-preview helpers ──
+// Tiny pixel-grid preview of a saved level's block layout.
+function renderGridMiniPreview(level, accent) {
+  var cell = 5;
+  var grid = level && level.grid;
+  var border = "1px solid " + (accent || "rgba(128,221,255,0.25)");
+  if (!grid || grid.length !== COLS * ROWS) {
+    return React.createElement("div", { style: { width: COLS * cell, height: ROWS * cell, background: "rgba(80,200,255,0.04)", borderRadius: 2, border: border, margin: "0 auto" } });
+  }
+  var cells = [];
+  for (var i = 0; i < grid.length; i++) {
+    var bt = grid[i];
+    var bc = BLOCK_COLORS[bt];
+    cells.push(React.createElement("div", { key: i, style: { width: cell, height: cell, background: bc ? bc.bg : "transparent" } }));
+  }
+  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(" + COLS + ", " + cell + "px)", gap: 0, width: COLS * cell, margin: "0 auto", borderRadius: 2, overflow: "hidden", border: border } }, cells);
+}
+// 2x5 grid of tiny BDBlockPreview thumbnails — one per block type (active or default).
+function renderBlocksSetPreview(activeMap, savedDesigns) {
+  var items = [];
+  for (var bt = 1; bt <= 10; bt++) {
+    var design = bdResolveActiveDesign(bt, activeMap, savedDesigns);
+    if (design) items.push(React.createElement("div", { key: bt, style: { width: 10, height: 10, overflow: "hidden" } }, React.createElement(BDBlockPreview, { design: design, size: 10 })));
+  }
+  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(5, 10px)", gap: 1, width: 54, margin: "0 auto" } }, items);
+}
+// Row of 4 colored dots — one per VFX effect type, using its primary color.
+function renderVfxSetPreview(activeMap, savedDesigns) {
+  var types = [
+    { key: "acid_ooze",     colorField: "color2" },
+    { key: "burn",          colorField: "emberColor" },
+    { key: "block_destroy", colorField: "burstColor" },
+    { key: "drone_explode", colorField: "coreColor" }
+  ];
+  var items = types.map(function(t) {
+    var d = vfxResolveActive(t.key, activeMap, savedDesigns) || {};
+    var c = d[t.colorField] || "#888";
+    return React.createElement("div", { key: t.key, style: { width: 10, height: 10, borderRadius: "50%", background: c, boxShadow: "0 0 4px " + c + ", inset 0 0 1px rgba(255,255,255,0.4)" } });
+  });
+  return React.createElement("div", { style: { display: "flex", gap: 3, justifyContent: "center" } }, items);
+}
+
 // ── Workshop cockpit design tokens + helpers ──
 var WS = {
   brushed: "linear-gradient(180deg, #3a4250 0%, #2c333f 35%, #1f2530 70%, #1a1f2a 100%), repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 3px)",
@@ -2792,6 +2834,8 @@ export default function CosmicWorkshop() {
                 React.createElement(WsLED, { color: "#80ddff", size: 4 }),
                 React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(128,221,255,0.6)" }, "GRID")
               ),
+              React.createElement("div", { style: { display: "flex", justifyContent: "center", marginBottom: 4 } },
+                renderGridMiniPreview(savedLevels.length > 0 ? savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0] : null, "rgba(128,221,255,0.3)")),
               React.createElement("div", { style: { color: "#a8d8f0", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, savedLevels.length > 0 ? (savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0].name || "Untitled") : "Default"),
               React.createElement(WsMono, { size: 7, ls: 0, color: "rgba(128,221,255,0.3)", style: { display: "block", marginTop: 3 } }, (function() { if (savedLevels.length === 0) return "--"; var lv = savedLevels.slice().sort(function(a,b){return(b.modified||0)-(a.modified||0);})[0]; return lv.modified ? new Date(lv.modified).toLocaleDateString() : (lv.savedAt ? new Date(lv.savedAt).toLocaleDateString() : "--"); }()))
             ),
@@ -2800,6 +2844,8 @@ export default function CosmicWorkshop() {
                 React.createElement(WsLED, { color: "#c8b8ff", size: 4 }),
                 React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(200,184,255,0.6)" }, "BLOCKS")
               ),
+              React.createElement("div", { style: { display: "flex", justifyContent: "center", marginBottom: 4 } },
+                renderBlocksSetPreview(bdActiveMap, bdSaved)),
               React.createElement("div", { style: { color: "#c8b8ff", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, (function() { var keys = Object.keys(bdActiveMap); for (var i = 0; i < keys.length; i++) { var did = bdActiveMap[keys[i]]; if (did) { for (var j = 0; j < bdSaved.length; j++) { if (bdSaved[j].id === did) return bdSaved[j].name || "Custom"; } } } return "Default"; }())),
               React.createElement(WsMono, { size: 7, ls: 0, color: "rgba(200,184,255,0.3)", style: { display: "block", marginTop: 3 } }, (function() { var keys = Object.keys(bdActiveMap); for (var i=0; i<keys.length; i++) { var did = bdActiveMap[keys[i]]; if (did) { for (var j=0; j<bdSaved.length; j++) { if (bdSaved[j].id === did && bdSaved[j].modifiedAt) return new Date(bdSaved[j].modifiedAt).toLocaleDateString(); } } } return "--"; }()))
             ),
@@ -2808,6 +2854,8 @@ export default function CosmicWorkshop() {
                 React.createElement(WsLED, { color: "#ffb43c", size: 4 }),
                 React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(255,180,60,0.6)" }, "VFX")
               ),
+              React.createElement("div", { style: { display: "flex", justifyContent: "center", marginBottom: 4, height: 30, alignItems: "center" } },
+                renderVfxSetPreview(vfxActiveMap, vfxSaved)),
               React.createElement("div", { style: { color: "#ffd080", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, (function() { var keys = Object.keys(vfxActiveMap); for (var i = 0; i < keys.length; i++) { var did = vfxActiveMap[keys[i]]; if (did) { for (var j = 0; j < vfxSaved.length; j++) { if (vfxSaved[j].id === did) return vfxSaved[j].name || "Custom"; } } } return "Default"; }())),
               React.createElement(WsMono, { size: 7, ls: 0, color: "rgba(255,180,60,0.3)", style: { display: "block", marginTop: 3 } }, (function() { var keys = Object.keys(vfxActiveMap); for (var i=0; i<keys.length; i++) { var did = vfxActiveMap[keys[i]]; if (did) { for (var j=0; j<vfxSaved.length; j++) { if (vfxSaved[j].id === did && vfxSaved[j].modifiedAt) return new Date(vfxSaved[j].modifiedAt).toLocaleDateString(); } } } return "--"; }()))
             ),
@@ -2816,6 +2864,8 @@ export default function CosmicWorkshop() {
                 React.createElement(WsLED, { color: "#64dcb4", size: 4 }),
                 React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(100,220,180,0.6)" }, "HULL")
               ),
+              React.createElement("div", { style: { display: "flex", justifyContent: "center", marginBottom: 4, height: 30 } },
+                React.createElement(UFOBlockSvg, { size: 30, design: ufoGetActiveDesign(), uid: "loadout-ufo" })),
               React.createElement("div", { style: { color: "#80e8c4", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, ufoSaved.length > 0 ? (ufoGetActiveDesign().name || "Active") : "Default"),
               React.createElement(WsMono, { size: 7, ls: 0, color: "rgba(100,220,180,0.3)", style: { display: "block", marginTop: 3 } }, (function() { var ad = ufoGetActiveDesign(); return ad && ad.savedAt ? new Date(ad.savedAt).toLocaleDateString() : "--"; }()))
             ),
@@ -2824,6 +2874,8 @@ export default function CosmicWorkshop() {
                 React.createElement(WsLED, { color: "#ff8aaa", size: 4 }),
                 React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(255,138,170,0.6)" }, "SHIP")
               ),
+              React.createElement("div", { style: { display: "flex", justifyContent: "center", marginBottom: 4, height: 30 } },
+                React.createElement(ShipDesignSvg, { size: 30, design: shipGetActiveDesign(), uid: "loadout-ship" })),
               React.createElement("div", { style: { color: "#ffb8cc", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, (function() { return shipSaved.length > 0 && shipActiveId ? (shipGetActiveDesign().name || "Custom") : "Default"; }())),
               React.createElement(WsMono, { size: 7, ls: 0, color: "rgba(255,138,170,0.3)", style: { display: "block", marginTop: 3 } }, (function() { var ad = shipGetActiveDesign(); return shipActiveId && ad.savedAt ? new Date(ad.savedAt).toLocaleDateString() : "--"; }()))
             )
