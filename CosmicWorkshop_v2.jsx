@@ -759,7 +759,7 @@ function BDHeaderBtn(props) {
 // Unified button style for list cards
 var BTN_BASE = { borderRadius: 4, fontSize: 10, fontWeight: 700, cursor: "pointer", letterSpacing: 0.5, textTransform: "uppercase", fontFamily: "'Quicksand',sans-serif" };
 var BTN_EDIT = Object.assign({}, BTN_BASE, { padding: "5px 12px", background: PNL, border: "1px solid rgba(80,200,255,0.3)", color: "#80ddff", display: "flex", alignItems: "center", gap: 5 });
-var BTN_RENAME = Object.assign({}, BTN_BASE, { padding: "5px 10px", background: PNL, border: PNLB, color: "rgba(200,210,220,0.6)" });
+var BTN_RENAME = Object.assign({}, BTN_BASE, { padding: "5px 10px", background: PNL, border: PNLB, color: "rgba(200,210,220,0.6)", display: "flex", alignItems: "center", gap: 5 });
 var BTN_EXPORT = Object.assign({}, BTN_BASE, { padding: "5px 10px", background: PNL, border: "1px solid rgba(200,184,255,0.3)", color: "#c8b8ff", display: "flex", alignItems: "center", gap: 5 });
 var BTN_DELETE = Object.assign({}, BTN_BASE, { padding: "5px 10px", background: "rgba(80,20,20,0.4)", border: "1px solid rgba(255,80,80,0.3)", color: "#ff8866" });
 var BTN_DELETE_ICON = Object.assign({}, BTN_BASE, { padding: "5px 8px", background: "rgba(80,20,20,0.4)", border: "1px solid rgba(255,80,80,0.3)", color: "#ff8866", display: "flex", alignItems: "center", justifyContent: "center" });
@@ -767,6 +767,7 @@ function WsIconPencil(sz) { var s = sz || 11; return React.createElement("svg", 
 function WsIconCopy(sz) { var s = sz || 11; return React.createElement("svg", { width: s, height: s, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2.3", strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("rect", { x: "9", y: "9", width: "13", height: "13", rx: "2" }), React.createElement("path", { d: "M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" })); }
 function WsIconShare(sz) { var s = sz || 11; return React.createElement("svg", { width: s, height: s, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2.3", strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("path", { d: "M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" }), React.createElement("polyline", { points: "16 6 12 2 8 6" }), React.createElement("line", { x1: "12", y1: "2", x2: "12", y2: "15" })); }
 function WsIconTrash(sz) { var s = sz || 12; return React.createElement("svg", { width: s, height: s, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("polyline", { points: "3 6 5 6 21 6" }), React.createElement("path", { d: "M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" }), React.createElement("path", { d: "M10 11v6M14 11v6" }), React.createElement("path", { d: "M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" })); }
+function WsIconReset(sz) { var s = sz || 11; return React.createElement("svg", { width: s, height: s, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2.3", strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("polyline", { points: "1 4 1 10 7 10" }), React.createElement("path", { d: "M3.51 15a9 9 0 1 0 .49-5.07" })); }
 var BTN_TOPBAR = Object.assign({}, BTN_BASE, { padding: "6px 8px", borderRadius: 4, background: PNL, border: PNLB, color: "rgba(200,210,220,0.8)", fontSize: 9, letterSpacing: 1, boxShadow: "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" });
 var BTN_TOPBAR_ACCENT = Object.assign({}, BTN_TOPBAR, { border: "2px solid rgba(80,200,255,0.3)", color: "#80ddff" });
 var BTN_TOPBAR_PURPLE = Object.assign({}, BTN_TOPBAR, { border: "1px solid rgba(200,184,255,0.3)", color: "#c8b8ff" });
@@ -2536,7 +2537,7 @@ export default function CosmicWorkshop() {
               React.createElement(BDBlockPreview, { design: preset, size: 38 }),
               React.createElement("div", { style: { flex: 1, minWidth: 0 } },
                 React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, preset.name)),
-              React.createElement("div", { onClick: function() { bdCopyPreset(preset); }, style: BTN_EDIT }, "Edit Copy"));
+              React.createElement("div", { onClick: function() { bdCopyPreset(preset); }, style: BTN_EDIT }, WsIconCopy(), "Edit Copy"));
           }),
           // Active Blocks tab - the design active for each block type
           bdSavedTab === "active" && BD_BLOCK_TYPES.map(function(bt) {
@@ -2549,9 +2550,9 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { flex: 1, minWidth: 0 } },
                 React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, bt.label),
                 React.createElement("div", { style: { color: customActive ? "rgba(150,220,170,0.7)" : "rgba(180,200,220,0.3)", fontSize: 10 } }, customActive ? (customActive.name || "Unnamed") : "Default")),
-              customActive && React.createElement("div", { onClick: function() { bdToggleActive(customActive); }, style: BTN_RENAME }, "Use Default"),
-              customActive && React.createElement("div", { onClick: function() { bdOpenEditor(customActive); }, style: BTN_EDIT }, "Edit"),
-              !customActive && factory && React.createElement("div", { onClick: function() { bdCopyPreset(factory); }, style: BTN_EDIT }, "Edit Copy"));
+              customActive && React.createElement("div", { onClick: function() { bdToggleActive(customActive); }, style: BTN_RENAME }, WsIconReset(), "Use Default"),
+              customActive && React.createElement("div", { onClick: function() { bdOpenEditor(customActive); }, style: BTN_EDIT }, WsIconPencil(), "Edit"),
+              !customActive && factory && React.createElement("div", { onClick: function() { bdCopyPreset(factory); }, style: BTN_EDIT }, WsIconCopy(), "Edit Copy"));
           })),
         bdDeletingId && renderDeleteOverlay("Delete Design?", function() { setBdDeletingId(null); }, function() { bdDeleteDesign(bdDeletingId); }),
         bdExportId && renderExportOverlay("Export Design", bdExportText, bdCopied, function() { copyToClipboard(bdExportText, setBdCopied); }, function() { setBdExportId(null); }),
@@ -2704,7 +2705,7 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { flex: 1, minWidth: 0 } },
                 React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, preset.name),
                 React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 10 } }, vfxTypeInfo(preset.effectType).label + " · built-in")),
-              React.createElement("div", { onClick: function() { vfxCopyPreset(preset); }, style: BTN_EDIT }, "Edit Copy"));
+              React.createElement("div", { onClick: function() { vfxCopyPreset(preset); }, style: BTN_EDIT }, WsIconCopy(), "Edit Copy"));
           }),
           vfxSavedTab === "active" && VFX_EFFECT_TYPES.map(function(et) {
             var activeId = vfxActiveMap[et.id], customActive = null;
@@ -2715,9 +2716,9 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { flex: 1, minWidth: 0 } },
                 React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, et.label),
                 React.createElement("div", { style: { color: customActive ? "rgba(255,200,120,0.7)" : "rgba(180,200,220,0.3)", fontSize: 10 } }, customActive ? (customActive.name || "Unnamed") : "Default")),
-              customActive && React.createElement("div", { onClick: function() { vfxToggleActive(customActive); }, style: BTN_RENAME }, "Use Default"),
-              customActive && React.createElement("div", { onClick: function() { vfxOpenEditor(customActive); }, style: BTN_EDIT }, "Edit"),
-              !customActive && shown && React.createElement("div", { onClick: function() { vfxCopyPreset(shown); }, style: BTN_EDIT }, "Edit Copy"));
+              customActive && React.createElement("div", { onClick: function() { vfxToggleActive(customActive); }, style: BTN_RENAME }, WsIconReset(), "Use Default"),
+              customActive && React.createElement("div", { onClick: function() { vfxOpenEditor(customActive); }, style: BTN_EDIT }, WsIconPencil(), "Edit"),
+              !customActive && shown && React.createElement("div", { onClick: function() { vfxCopyPreset(shown); }, style: BTN_EDIT }, WsIconCopy(), "Edit Copy"));
           })),
         vfxDeletingId && renderDeleteOverlay("Delete Effect?", function() { setVfxDeletingId(null); }, function() { vfxDeleteDesign(vfxDeletingId); }),
         vfxExportId && renderExportOverlay("Export Effect", vfxExportText, vfxCopied, function() { copyToClipboard(vfxExportText, setVfxCopied); }, function() { setVfxExportId(null); }),
