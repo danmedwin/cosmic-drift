@@ -152,10 +152,63 @@ function UFOBlockSvg(props) {
       React.createElement("ellipse", { cx: hx - dRx * 0.22, cy: dY - dRy * 0.28, rx: dRx * 0.27, ry: dRy * 0.22, fill: "white", opacity: "0.25", transform: "rotate(-20," + (hx - dRx * 0.22) + "," + (dY - dRy * 0.28) + ")", clipPath: "url(#ufo-dc-" + uid + ")" })));
 }
 
-var SHIP_HULLS = ["arrow", "dart", "raptor", "wedge", "cruiser", "saucer", "none"];
-var SHIP_HULL_LABELS = { arrow: "Default", dart: "Dart", raptor: "Raptor", wedge: "Wedge", cruiser: "Cruiser", saucer: "Saucer", none: "None" };
-var SHIP_PART_TYPES = ["circle", "rect", "triangle", "line", "wings", "boosters", "rockets"];
-var SHIP_PART_LABELS = { circle: "Oval", rect: "Rect", triangle: "Triangle", line: "Line", wings: "Wings", boosters: "Boosters", rockets: "Rockets" };
+var SHIP_HULLS = ["arrow", "dart", "raptor", "wedge", "cruiser", "saucer", "startrack", "none"];
+var SHIP_HULL_LABELS = { arrow: "Default", dart: "Dart", raptor: "Raptor", wedge: "Wedge", cruiser: "Cruiser", saucer: "Saucer", startrack: "Star Track", none: "None" };
+var SHIP_PART_TYPES = ["circle", "rect", "triangle", "line"];
+var SHIP_PART_LABELS = { circle: "Oval", rect: "Rect", triangle: "Triangle", line: "Line" };
+// Each hull preset is a parts array (no baked hull SVG). Selecting a hull in
+// the editor loads its parts; existing saved designs with empty `parts` are
+// migrated on load by populating from the named hull preset.
+var HULL_PRESETS = {
+  arrow: [
+    { type: "triangle", x: 20, y: 22, w: 28, h: 32, rot: 0, color: "#ffd0ff", opacity: 1 }
+  ],
+  dart: [
+    { type: "triangle", x: 20, y: 22, w: 16, h: 34, rot: 0, color: "#ffd0ff", opacity: 1 }
+  ],
+  raptor: [
+    { type: "triangle", x: 20, y: 22, w: 16, h: 30, rot: 0, color: "#ffd0ff", opacity: 1 },
+    { type: "triangle", x: 8,  y: 30, w: 10, h: 14, rot: 0, color: "#cc70cc", opacity: 1 },
+    { type: "triangle", x: 32, y: 30, w: 10, h: 14, rot: 0, color: "#cc70cc", opacity: 1 }
+  ],
+  wedge: [
+    { type: "triangle", x: 20, y: 21, w: 34, h: 32, rot: 0, color: "#ffd0ff", opacity: 1 }
+  ],
+  cruiser: [
+    { type: "rect", x: 20, y: 22, w: 9, h: 32, cr: 4.5, rot: 0, color: "#ffd0ff", opacity: 1 },
+    { type: "rect", x: 9,  y: 26, w: 5, h: 16, cr: 2.5, rot: 0, color: "#cc70cc", opacity: 1 },
+    { type: "rect", x: 31, y: 26, w: 5, h: 16, cr: 2.5, rot: 0, color: "#cc70cc", opacity: 1 }
+  ],
+  saucer: [
+    { type: "circle", x: 20, y: 24, w: 32, h: 22, rot: 0, color: "#ffd0ff", opacity: 1 },
+    { type: "circle", x: 19, y: 17, w: 12, h: 10, rot: 0, color: "#80ddff", opacity: 0.85 }
+  ],
+  // Star Track: top-down Star-Trek-style saucer + body + two nacelles + pylon arms.
+  // Derived from star-track.svg by scaling 0.045 and centering on (20,20).
+  startrack: [
+    { type: "circle", x: 20,   y: 10,   w: 17,   h: 17,   rot: 0,   color: "#b8c0c8", opacity: 1 },
+    { type: "circle", x: 20,   y: 8,    w: 9,    h: 4,    rot: 0,   color: "#80ddff", opacity: 0.55 },
+    { type: "rect",   x: 20,   y: 24.5, w: 4.4,  h: 16.2, cr: 2.2,  rot: 0, color: "#b8c0c8", opacity: 1 },
+    { type: "rect",   x: 11.3, y: 29.1, w: 2.4,  h: 19.8, cr: 1.2,  rot: 0, color: "#b8c0c8", opacity: 1 },
+    { type: "rect",   x: 28.7, y: 29.1, w: 2.4,  h: 19.8, cr: 1.2,  rot: 0, color: "#b8c0c8", opacity: 1 },
+    { type: "line",   x: 15.4, y: 27.3, w: 12,   h: 1.35, rot: -47, color: "#b8c0c8", opacity: 1 },
+    { type: "line",   x: 24.6, y: 27.3, w: 12,   h: 1.35, rot: 47,  color: "#b8c0c8", opacity: 1 }
+  ],
+  none: []
+};
+function shipHullPresetParts(hullId) {
+  var preset = HULL_PRESETS[hullId] || HULL_PRESETS.none;
+  return JSON.parse(JSON.stringify(preset));
+}
+// Backfills parts for any stored design whose array is empty but `hull` is a
+// known preset. Returns a new object; doesn't mutate input.
+function shipMigrateDesign(d) {
+  if (!d || typeof d !== "object") return d;
+  if ((!Array.isArray(d.parts) || d.parts.length === 0) && d.hull && HULL_PRESETS[d.hull]) {
+    return Object.assign({}, d, { parts: shipHullPresetParts(d.hull) });
+  }
+  return d;
+}
 function shipRenderPart(part, key, isSelected) {
   var x = typeof part.x === "number" ? part.x : 20;
   var y = typeof part.y === "number" ? part.y : 20;
@@ -164,125 +217,74 @@ function shipRenderPart(part, key, isSelected) {
   var rot = part.rot || 0;
   var color = part.color || "#80ddff";
   var op = typeof part.opacity === "number" ? part.opacity : 1;
+  var bw = typeof part.bw === "number" ? part.bw : 0;
+  var bc = part.bc || "#000000";
+  var bo = typeof part.bo === "number" ? part.bo : 1;
+  var cr = typeof part.cr === "number" ? part.cr : 0;
   var t = "rotate(" + rot + " " + x + " " + y + ")";
+  var strokeProps = bw > 0 ? { stroke: bc, strokeWidth: bw, strokeOpacity: bo } : {};
   var inner = null;
   if (part.type === "circle") {
-    inner = React.createElement("ellipse", { cx: x, cy: y, rx: w / 2, ry: h / 2, fill: color, opacity: op, transform: t });
+    inner = React.createElement("ellipse", Object.assign({ cx: x, cy: y, rx: w / 2, ry: h / 2, fill: color, opacity: op, transform: t }, strokeProps));
   } else if (part.type === "rect") {
-    inner = React.createElement("rect", { x: x - w / 2, y: y - h / 2, width: w, height: h, fill: color, opacity: op, transform: t });
+    inner = React.createElement("rect", Object.assign({ x: x - w / 2, y: y - h / 2, width: w, height: h, rx: cr, ry: cr, fill: color, opacity: op, transform: t }, strokeProps));
   } else if (part.type === "triangle") {
     var p1 = x + "," + (y - h / 2);
     var p2 = (x - w / 2) + "," + (y + h / 2);
     var p3 = (x + w / 2) + "," + (y + h / 2);
-    inner = React.createElement("polygon", { points: p1 + " " + p2 + " " + p3, fill: color, opacity: op, transform: t });
+    inner = React.createElement("polygon", Object.assign({ points: p1 + " " + p2 + " " + p3, fill: color, opacity: op, transform: t }, strokeProps));
   } else if (part.type === "line") {
-    inner = React.createElement("rect", { x: x - w / 2, y: y - Math.max(0.4, h) / 2, width: w, height: Math.max(0.4, h), fill: color, opacity: op, transform: t });
-  } else if (part.type === "wings") {
-    var ws = w / 8;
-    var lp = "M " + x + " " + y + " L " + (x - 10 * ws) + " " + (y + 4 * ws) + " L " + (x - 2 * ws) + " " + (y + 3 * ws) + " Z";
-    var rp = "M " + x + " " + y + " L " + (x + 10 * ws) + " " + (y + 4 * ws) + " L " + (x + 2 * ws) + " " + (y + 3 * ws) + " Z";
-    inner = React.createElement("g", { transform: t, opacity: op },
-      React.createElement("path", { d: lp, fill: color }),
-      React.createElement("path", { d: rp, fill: color }));
-  } else if (part.type === "boosters") {
-    var bs = w / 8;
-    inner = React.createElement("g", { transform: t, opacity: op },
-      React.createElement("rect", { x: x - 5 * bs, y: y - 4 * bs, width: 3 * bs, height: 8 * bs, rx: 1.2 * bs, fill: color }),
-      React.createElement("rect", { x: x + 2 * bs, y: y - 4 * bs, width: 3 * bs, height: 8 * bs, rx: 1.2 * bs, fill: color }));
-  } else if (part.type === "rockets") {
-    var rs = w / 8;
-    var lr = "M " + (x - 3 * rs) + " " + (y - 6 * rs) + " L " + (x - 1.5 * rs) + " " + (y - 4 * rs) + " L " + (x - 1.5 * rs) + " " + (y + 4 * rs) + " L " + (x - 3 * rs) + " " + (y + 4 * rs) + " Z";
-    var rr = "M " + (x + 3 * rs) + " " + (y - 6 * rs) + " L " + (x + 1.5 * rs) + " " + (y - 4 * rs) + " L " + (x + 1.5 * rs) + " " + (y + 4 * rs) + " L " + (x + 3 * rs) + " " + (y + 4 * rs) + " Z";
-    inner = React.createElement("g", { transform: t, opacity: op },
-      React.createElement("path", { d: lr, fill: color }),
-      React.createElement("path", { d: rr, fill: color }));
+    inner = React.createElement("rect", Object.assign({ x: x - w / 2, y: y - Math.max(0.4, h) / 2, width: w, height: Math.max(0.4, h), fill: color, opacity: op, transform: t }, strokeProps));
   } else {
     return null;
   }
   if (isSelected) {
-    var bw = w + 2, bh = h + 2;
+    var bbw = w + 2, bbh = h + 2;
     return React.createElement("g", { key: key },
       inner,
-      React.createElement("rect", { x: x - bw / 2, y: y - bh / 2, width: bw, height: bh, fill: "none", stroke: "#ffd060", strokeWidth: 0.6, strokeDasharray: "1.2 0.8", transform: t, pointerEvents: "none" }));
+      React.createElement("rect", { x: x - bbw / 2, y: y - bbh / 2, width: bbw, height: bbh, fill: "none", stroke: "#ffd060", strokeWidth: 0.6, strokeDasharray: "1.2 0.8", transform: t, pointerEvents: "none" }));
   }
   return React.createElement("g", { key: key }, inner);
 }
 function ShipDesignSvg(props) {
   var size = props.size || 40;
-  var uid = props.uid || "0";
-  var d = Object.assign({}, SHIP_DEFAULT_DESIGN, props.design || {});
-  var hull = d.hull || "arrow";
-  var hullColor = d.hullColor || "#ffd0ff";
-  var hullColor2 = d.hullColor2 || "#cc70cc";
-  var cockpitColor = d.cockpitColor || "#80ddff";
-  var engineColor = d.engineColor || "#ff60ff";
-  var engineOpacity = typeof d.engineOpacity === "number" ? d.engineOpacity : 0.8;
-  var gradId = "shg-" + uid;
-  var fill = "url(#" + gradId + ")";
-  var hl = "rgba(255,255,255,0.15)";
-  var defs = React.createElement("defs", null,
-    React.createElement("linearGradient", { id: gradId, x1: "0", y1: "0", x2: "0", y2: "1" },
-      React.createElement("stop", { offset: "0%", stopColor: hullColor }),
-      React.createElement("stop", { offset: "100%", stopColor: hullColor2 })));
-  var els = [];
-  if (hull === "none") {
-    els = [];
-  } else if (hull === "arrow") {
-    els = [
-      React.createElement("path", { key: "b", d: "M20 1 L4 36 L13 30 L20 40 L27 30 L36 36 Z", fill: fill }),
-      React.createElement("path", { key: "h", d: "M20 6 L9 32 L14 29 L20 37 L26 29 L31 32 Z", fill: hl }),
-      React.createElement("ellipse", { key: "c", cx: "20", cy: "14", rx: "2.5", ry: "4", fill: cockpitColor, opacity: "0.85" }),
-      React.createElement("ellipse", { key: "e", cx: "20", cy: "38", rx: "3", ry: "1.4", fill: engineColor, opacity: String(engineOpacity) })
-    ];
-  } else if (hull === "dart") {
-    els = [
-      React.createElement("path", { key: "b", d: "M20 1 L31 30 L23 24 L23 39 L17 39 L17 24 L9 30 Z", fill: fill }),
-      React.createElement("path", { key: "h", d: "M20 5 L28 28 L22 26 L22 37 L18 37 L18 26 L12 28 Z", fill: hl }),
-      React.createElement("ellipse", { key: "c", cx: "20", cy: "12", rx: "3", ry: "5", fill: cockpitColor, opacity: "0.85" }),
-      React.createElement("ellipse", { key: "e", cx: "20", cy: "38", rx: "4", ry: "2", fill: engineColor, opacity: String(engineOpacity) })
-    ];
-  } else if (hull === "raptor") {
-    els = [
-      React.createElement("path", { key: "b", d: "M20 2 L38 28 L26 20 L24 38 L16 38 L14 20 L2 28 Z", fill: fill }),
-      React.createElement("path", { key: "h", d: "M20 6 L34 26 L26 21 L24 35 L16 35 L14 21 L6 26 Z", fill: hl }),
-      React.createElement("ellipse", { key: "c", cx: "20", cy: "14", rx: "3.5", ry: "5", fill: cockpitColor, opacity: "0.85" }),
-      React.createElement("ellipse", { key: "e", cx: "20", cy: "37", rx: "4", ry: "2", fill: engineColor, opacity: String(engineOpacity) })
-    ];
-  } else if (hull === "wedge") {
-    els = [
-      React.createElement("path", { key: "b", d: "M20 2 L35 36 L20 31 L5 36 Z", fill: fill }),
-      React.createElement("path", { key: "h", d: "M20 6 L31 33 L20 29 L9 33 Z", fill: hl }),
-      React.createElement("ellipse", { key: "c", cx: "20", cy: "12", rx: "2.5", ry: "4", fill: cockpitColor, opacity: "0.85" }),
-      React.createElement("path", { key: "e", d: "M8 34 L32 34", stroke: engineColor, strokeWidth: "3", strokeLinecap: "round", opacity: String(engineOpacity) })
-    ];
-  } else if (hull === "cruiser") {
-    els = [
-      React.createElement("path", { key: "b", d: "M20 1 L27 8 L27 32 L24 39 L16 39 L13 32 L13 8 Z", fill: fill }),
-      React.createElement("path", { key: "lp", d: "M12 16 L7 20 L7 33 L12 35 Z", fill: hullColor2 }),
-      React.createElement("path", { key: "rp", d: "M28 16 L33 20 L33 33 L28 35 Z", fill: hullColor2 }),
-      React.createElement("path", { key: "h", d: "M20 4 L25 10 L25 30 L22 37 L18 37 L15 30 L15 10 Z", fill: hl }),
-      React.createElement("ellipse", { key: "c", cx: "20", cy: "12", rx: "3", ry: "5", fill: cockpitColor, opacity: "0.85" }),
-      React.createElement("ellipse", { key: "le", cx: "9.5", cy: "34", rx: "2.5", ry: "1.5", fill: engineColor, opacity: String(engineOpacity) }),
-      React.createElement("ellipse", { key: "re", cx: "30.5", cy: "34", rx: "2.5", ry: "1.5", fill: engineColor, opacity: String(engineOpacity) })
-    ];
-  } else {
-    els = [
-      React.createElement("ellipse", { key: "disc", cx: "20", cy: "24", rx: "18", ry: "13", fill: fill }),
-      React.createElement("ellipse", { key: "hi", cx: "20", cy: "20", rx: "15", ry: "4", fill: hl }),
-      React.createElement("ellipse", { key: "dome", cx: "19", cy: "15", rx: "7", ry: "6", fill: cockpitColor, opacity: "0.85" }),
-      React.createElement("ellipse", { key: "e", cx: "20", cy: "36", rx: "4", ry: "1.5", fill: engineColor, opacity: String(engineOpacity) })
-    ];
-  }
+  var svgRef = props.svgRef || null;
+  var svgStyle = props.style || {};
+  var d = props.design || SHIP_DEFAULT_DESIGN;
   var parts = Array.isArray(d.parts) ? d.parts : [];
   var selIdx = typeof props.selectedIdx === "number" ? props.selectedIdx : -1;
-  var partEls = [];
+  var els = [];
   for (var pi = 0; pi < parts.length; pi++) {
     var el = shipRenderPart(parts[pi], "p-" + pi, pi === selIdx);
-    if (el) partEls.push(el);
+    if (el) els.push(el);
   }
-  return React.createElement("svg", { viewBox: "0 0 40 40", width: String(size), height: String(size), style: { display: "block" } },
-    defs,
-    React.createElement("g", null, els.concat(partEls)));
+  return React.createElement("svg", { ref: svgRef, viewBox: "0 0 40 40", width: String(size), height: String(size), style: Object.assign({ display: "block" }, svgStyle) },
+    React.createElement("g", null, els));
+}
+// Mini shape glyph next to each "+ TYPE" add-part button.
+function shipPartIcon(type) {
+  var props = { width: "14", height: "10", viewBox: "0 0 24 18" };
+  if (type === "circle") return React.createElement("svg", props, React.createElement("ellipse", { cx: 12, cy: 9, rx: 10, ry: 7, fill: "currentColor" }));
+  if (type === "rect")   return React.createElement("svg", props, React.createElement("rect", { x: 3, y: 3, width: 18, height: 12, rx: 2, fill: "currentColor" }));
+  if (type === "triangle") return React.createElement("svg", props, React.createElement("polygon", { points: "12,2 22,16 2,16", fill: "currentColor" }));
+  if (type === "line")   return React.createElement("svg", props, React.createElement("rect", { x: 1, y: 7, width: 22, height: 4, fill: "currentColor" }));
+  return null;
+}
+function shipTrashSvg(size, color) {
+  return React.createElement("svg", { width: String(size), height: String(size), viewBox: "0 0 24 24", fill: "none", stroke: color, strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+    React.createElement("path", { d: "M3 6h18" }),
+    React.createElement("path", { d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" }),
+    React.createElement("path", { d: "M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" }),
+    React.createElement("path", { d: "M10 11v6" }),
+    React.createElement("path", { d: "M14 11v6" }));
+}
+function shipLockSvg(size, locked) {
+  var color = locked ? "#ff8aaa" : "rgba(180,200,220,0.65)";
+  return React.createElement("svg", { width: String(size), height: String(size), viewBox: "0 0 24 24", fill: "none", stroke: color, strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+    React.createElement("rect", { x: 4, y: 11, width: 16, height: 10, rx: 2 }),
+    locked
+      ? React.createElement("path", { d: "M8 11V7a4 4 0 0 1 8 0v4" })
+      : React.createElement("path", { d: "M8 11V7a4 4 0 0 1 7.5-2" }));
 }
 
 // Corner power-icon badge for crate variant blocks (types 11-16).
@@ -514,7 +516,7 @@ var UFO_DESIGNS_KEY  = "cosmic-drift-ufo-designs";
 var UFO_ACTIVE_KEY   = "cosmic-drift-ufo-active";
 var SHIP_DESIGNS_KEY = "cosmic-drift-ship-designs";
 var SHIP_ACTIVE_KEY  = "cosmic-drift-ship-active";
-var SHIP_DEFAULT_DESIGN = { hull: "arrow", hullColor: "#ffd0ff", hullColor2: "#cc70cc", cockpitColor: "#f5c4f5", engineColor: "#ff60ff", engineOpacity: 0, parts: [] };
+var SHIP_DEFAULT_DESIGN = { hull: "arrow", parts: [] };
 function shipLoadDesigns() {
   return window.storage.get(SHIP_DESIGNS_KEY).then(function(result) {
     if (!result || !result.value) return [];
@@ -1094,6 +1096,8 @@ export default function CosmicWorkshop() {
   var shipDirtyRef = useRef(false);
   var _shipSelectedPart = useState(-1), shipSelectedPart = _shipSelectedPart[0], setShipSelectedPart = _shipSelectedPart[1];
   var shipDragRef = useRef(null);
+  var _shipHullPromptId = useState(null), shipHullPromptId = _shipHullPromptId[0], setShipHullPromptId = _shipHullPromptId[1];
+  var _shipWhLocked = useState(false), shipWhLocked = _shipWhLocked[0], setShipWhLocked = _shipWhLocked[1];
   var bdScrollRef = useRef(null);
 
   // ══ LEVEL BUILDER STATE ══
@@ -1177,11 +1181,13 @@ export default function CosmicWorkshop() {
     });
     shipLoadDesigns().then(function(designs) {
       if (designs && designs.length > 0) {
-        setShipSaved(designs);
+        // Backfill parts for legacy designs whose parts array is empty
+        var migrated = designs.map(shipMigrateDesign);
+        setShipSaved(migrated);
         shipLoadActiveId().then(function(id) { setShipActiveId(id); });
       } else {
-        // First-time install: seed a "Default" ship (the magenta arrow) and set it active.
-        var seed = Object.assign({}, SHIP_DEFAULT_DESIGN, { id: "ship_default", name: "Default", savedAt: new Date().toISOString() });
+        // First-time install: seed the "Default" ship from the arrow preset.
+        var seed = { id: "ship_default", name: "Default", hull: "arrow", parts: shipHullPresetParts("arrow"), savedAt: new Date().toISOString() };
         setShipSaved([seed]);
         setShipActiveId(seed.id);
         shipSaveDesigns([seed]);
@@ -2190,38 +2196,37 @@ export default function CosmicWorkshop() {
 
   function shipGetActiveDesign() {
     if (shipActiveId) {
-      for (var i = 0; i < shipSaved.length; i++) { if (shipSaved[i].id === shipActiveId) return shipSaved[i]; }
+      for (var i = 0; i < shipSaved.length; i++) { if (shipSaved[i].id === shipActiveId) return shipMigrateDesign(shipSaved[i]); }
     }
-    return Object.assign({}, SHIP_DEFAULT_DESIGN);
+    return { hull: "arrow", parts: shipHullPresetParts("arrow") };
   }
   function shipOpenNew() {
     shipDirtyRef.current = false;
     setShipEditId(null);
-    setShipEdit(Object.assign({}, SHIP_DEFAULT_DESIGN, { name: "", parts: [] }));
+    setShipEdit({ hull: "arrow", name: "", parts: shipHullPresetParts("arrow") });
     setShipTab("hull");
     setShipSelectedPart(-1);
     setShipView("editor");
   }
   function shipOpenEditor(design) {
     shipDirtyRef.current = false;
+    var migrated = shipMigrateDesign(design);
     setShipEditId(design.id);
-    setShipEdit(Object.assign({}, design, { parts: Array.isArray(design.parts) ? design.parts.slice() : [] }));
+    setShipEdit(Object.assign({}, migrated, { parts: (migrated.parts || []).slice() }));
     setShipTab("hull");
     setShipSelectedPart(-1);
     setShipView("editor");
   }
   function shipAddPart(type) {
     var defaults = {
-      circle:   { w: 6, h: 6, color: "#80ddff" },
-      rect:     { w: 6, h: 6, color: "#80ddff" },
-      triangle: { w: 7, h: 7, color: "#80ddff" },
-      line:     { w: 10, h: 1, color: "#ffd060" },
-      wings:    { w: 14, h: 14, color: "#cc70cc" },
-      boosters: { w: 10, h: 10, color: "#ff8aaa" },
-      rockets:  { w: 10, h: 10, color: "#a0a8b8" }
+      circle:   { w: 6, h: 6,  color: "#80ddff" },
+      rect:     { w: 6, h: 6,  color: "#80ddff", cr: 0 },
+      triangle: { w: 7, h: 7,  color: "#80ddff" },
+      line:     { w: 10, h: 1, color: "#ffd060" }
     };
     var dflt = defaults[type] || defaults.circle;
-    var part = { type: type, x: 20, y: 22, w: dflt.w, h: dflt.h, rot: 0, color: dflt.color, opacity: 0.9 };
+    var part = { type: type, x: 20, y: 22, w: dflt.w, h: dflt.h, rot: 0, color: dflt.color, opacity: 0.9, bw: 0, bc: "#000000", bo: 1 };
+    if (type === "rect") part.cr = 0;
     shipDirtyRef.current = true;
     setShipEdit(function(prev) {
       var list = (Array.isArray(prev.parts) ? prev.parts : []).concat([part]);
@@ -2229,6 +2234,30 @@ export default function CosmicWorkshop() {
       setShipSelectedPart(list.length - 1);
       return next;
     });
+  }
+  // Replace/Add/Cancel flow for hull-tab tile taps.
+  function shipApplyHullPreset(hullId, mode) {
+    var presetParts = shipHullPresetParts(hullId);
+    shipDirtyRef.current = true;
+    setShipEdit(function(prev) {
+      var nextParts;
+      if (mode === "add") {
+        nextParts = (Array.isArray(prev.parts) ? prev.parts : []).concat(presetParts);
+      } else {
+        nextParts = presetParts;
+      }
+      return Object.assign({}, prev, { hull: hullId, parts: nextParts });
+    });
+    setShipSelectedPart(-1);
+  }
+  function shipOnHullTileTap(hullId) {
+    var existing = Array.isArray(shipEdit.parts) ? shipEdit.parts : [];
+    if (existing.length === 0 || hullId === "none") {
+      // Nothing to lose — just apply (or clear for None).
+      shipApplyHullPreset(hullId, "replace");
+      return;
+    }
+    setShipHullPromptId(hullId);
   }
   function shipUpdatePart(idx, key, val) {
     shipDirtyRef.current = true;
@@ -2262,6 +2291,59 @@ export default function CosmicWorkshop() {
       setShipSelectedPart(j);
       return Object.assign({}, prev, { parts: list });
     });
+  }
+  // Moves a part from its current index to `toIdx`, shifting others.
+  // Used by the Z (layer) slider.
+  function shipReorderPart(fromIdx, toIdx) {
+    if (fromIdx === toIdx) return;
+    setShipEdit(function(prev) {
+      var list = (prev.parts || []).slice();
+      if (fromIdx < 0 || fromIdx >= list.length) return prev;
+      var t = Math.max(0, Math.min(list.length - 1, toIdx));
+      var p = list[fromIdx];
+      list.splice(fromIdx, 1);
+      list.splice(t, 0, p);
+      shipDirtyRef.current = true;
+      setShipSelectedPart(t);
+      return Object.assign({}, prev, { parts: list });
+    });
+  }
+  // Width/height edit that respects the shipWhLocked toggle (preserves ratio).
+  function shipUpdatePartSize(idx, key, val) {
+    shipDirtyRef.current = true;
+    setShipEdit(function(prev) {
+      var list = (prev.parts || []).slice();
+      if (!list[idx]) return prev;
+      var p = list[idx];
+      var nw = p.w, nh = p.h;
+      if (key === "w") {
+        nw = val;
+        if (shipWhLocked && p.w > 0) nh = p.h * (val / p.w);
+      } else {
+        nh = val;
+        if (shipWhLocked && p.h > 0) nw = p.w * (val / p.h);
+      }
+      list[idx] = Object.assign({}, p, { w: Math.max(0.5, nw), h: Math.max(0.5, nh) });
+      return Object.assign({}, prev, { parts: list });
+    });
+  }
+  // Replace / Add / Cancel popup shown when tapping a hull preset that would
+  // overwrite existing parts.
+  function renderHullPresetOverlay(hullId, onCancel, onChoose) {
+    var label = SHIP_HULL_LABELS[hullId] || hullId;
+    return React.createElement("div", { onClick: onCancel,
+      style: { position: "absolute", inset: 0, background: "rgba(0,0,0,0.65)", zIndex: 20, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 } },
+      React.createElement("div", { onClick: function(e) { e.stopPropagation(); },
+        style: { background: "linear-gradient(180deg, #2a1525, #1a0c18)", border: "1px solid rgba(255,138,170,0.3)", borderRadius: 12, padding: "18px 18px 14px", maxWidth: 320, width: "100%", boxShadow: "0 8px 24px rgba(0,0,0,0.5)" } },
+        React.createElement("div", { style: { color: "#ff8aaa", fontSize: 13, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", fontFamily: "'Exo 2', sans-serif", marginBottom: 8 } }, "Apply " + label + " preset"),
+        React.createElement("div", { style: { color: "rgba(200,210,220,0.7)", fontSize: 12, lineHeight: 1.4, marginBottom: 14 } }, "This ship already has parts. Replace them with the preset, or add the preset's parts on top of yours?"),
+        React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 6 } },
+          React.createElement("div", { onClick: function() { onChoose("replace"); },
+            style: { padding: "9px 12px", textAlign: "center", borderRadius: 6, cursor: "pointer", background: "rgba(255,138,170,0.18)", border: "1px solid rgba(255,138,170,0.5)", color: "#ff8aaa", fontSize: 12, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase" } }, "Replace current shapes"),
+          React.createElement("div", { onClick: function() { onChoose("add"); },
+            style: { padding: "9px 12px", textAlign: "center", borderRadius: 6, cursor: "pointer", background: "rgba(128,221,255,0.12)", border: "1px solid rgba(128,221,255,0.4)", color: "#80ddff", fontSize: 12, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase" } }, "Add to current shapes"),
+          React.createElement("div", { onClick: onCancel,
+            style: { padding: "9px 12px", textAlign: "center", borderRadius: 6, cursor: "pointer", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(200,210,220,0.7)", fontSize: 12, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase" } }, "Cancel"))));
   }
   function shipPreviewPointerDown(e) {
     if (e.preventDefault) e.preventDefault();
@@ -3321,31 +3403,15 @@ export default function CosmicWorkshop() {
               placeholder: "My Ship", style: { width: "100%", padding: "6px 10px", borderRadius: 6, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#b0c8d8", fontSize: 16, fontFamily: "'Quicksand',sans-serif", outline: "none", boxSizing: "border-box" } })),
           React.createElement("div", { style: { display: "flex", gap: 4, marginBottom: 12 } },
             React.createElement("div", { onClick: function() { setShipTab("hull"); }, style: { flex: 1, padding: "8px 12px", textAlign: "center", borderRadius: 8, cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: 0.8, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase", background: shipTab === "hull" ? "rgba(255,138,170,0.2)" : "rgba(255,255,255,0.04)", border: shipTab === "hull" ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.08)", color: shipTab === "hull" ? "#ff8aaa" : "rgba(180,200,220,0.5)" } }, "Hull"),
-            React.createElement("div", { onClick: function() { setShipTab("colors"); }, style: { flex: 1, padding: "8px 12px", textAlign: "center", borderRadius: 8, cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: 0.8, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase", background: shipTab === "colors" ? "rgba(255,138,170,0.2)" : "rgba(255,255,255,0.04)", border: shipTab === "colors" ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.08)", color: shipTab === "colors" ? "#ff8aaa" : "rgba(180,200,220,0.5)" } }, "Colors"),
             React.createElement("div", { onClick: function() { setShipTab("parts"); }, style: { flex: 1, padding: "8px 12px", textAlign: "center", borderRadius: 8, cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: 0.8, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase", background: shipTab === "parts" ? "rgba(255,138,170,0.2)" : "rgba(255,255,255,0.04)", border: shipTab === "parts" ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.08)", color: shipTab === "parts" ? "#ff8aaa" : "rgba(180,200,220,0.5)" } }, "Parts")),
           shipTab === "hull" && React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 } },
             SHIP_HULLS.map(function(h) {
               var isSelected = (shipEdit.hull || "arrow") === h;
-              return React.createElement("div", { key: h, onClick: function() { shipUpdateEdit("hull", h); }, style: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "10px 6px", borderRadius: 8, cursor: "pointer", background: isSelected ? "rgba(255,138,170,0.12)" : "rgba(255,255,255,0.03)", border: isSelected ? "2px solid #ff8aaa" : "1px solid rgba(255,255,255,0.08)" } },
-                React.createElement(ShipDesignSvg, { size: 44, design: Object.assign({}, shipEdit, { hull: h, parts: [] }), uid: "hull-" + h }),
+              var presetDesign = { parts: HULL_PRESETS[h] || [] };
+              return React.createElement("div", { key: h, onClick: function() { shipOnHullTileTap(h); }, style: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "10px 6px", borderRadius: 8, cursor: "pointer", background: isSelected ? "rgba(255,138,170,0.12)" : "rgba(255,255,255,0.03)", border: isSelected ? "2px solid #ff8aaa" : "1px solid rgba(255,255,255,0.08)" } },
+                React.createElement(ShipDesignSvg, { size: 44, design: presetDesign }),
                 React.createElement("div", { style: { color: isSelected ? "#ff8aaa" : "rgba(180,200,220,0.5)", fontSize: 9, fontWeight: 700, letterSpacing: 0.5, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, SHIP_HULL_LABELS[h]));
             })),
-          shipTab === "colors" && React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px" } },
-            React.createElement(BDColorPicker, { label: "Hull Color", value: shipEdit.hullColor,
-              presets: ["#ffd0ff", "#ff80c0", "#cc3080", "#8060ff", "#40a0ff", "#80cc40", "#ff8040", "#60d0d0"],
-              onChange: function(v) { shipUpdateEdit("hullColor", v); } }),
-            React.createElement(BDColorPicker, { label: "Hull Dark", value: shipEdit.hullColor2,
-              presets: ["#cc70cc", "#aa3080", "#601840", "#4030a0", "#1050a0", "#40801a", "#a04020", "#208080"],
-              onChange: function(v) { shipUpdateEdit("hullColor2", v); } }),
-            React.createElement(BDColorPicker, { label: "Cockpit", value: shipEdit.cockpitColor,
-              presets: ["#80ddff", "#44ffee", "#ff80c0", "#ffcc44", "#80ff80", "#ffffff", "#cc80ff", "#ff8844"],
-              onChange: function(v) { shipUpdateEdit("cockpitColor", v); } }),
-            React.createElement(BDColorPicker, { label: "Engine Glow", value: shipEdit.engineColor,
-              presets: ["#ff60ff", "#ff4488", "#40a0ff", "#80ff80", "#ffcc00", "#ff6633", "#44ddff", "#ffffff"],
-              onChange: function(v) { shipUpdateEdit("engineColor", v); } }),
-            React.createElement(BDSlider, { label: "Glow Intensity", value: shipEdit.engineOpacity,
-              min: 0, max: 1, step: 0.05, displayValue: Math.round(shipEdit.engineOpacity * 100) + "%",
-              onChange: function(v) { shipUpdateEdit("engineOpacity", v); } })),
           shipTab === "parts" && (function() {
             var partsList = Array.isArray(shipEdit.parts) ? shipEdit.parts : [];
             var sel = (shipSelectedPart >= 0 && shipSelectedPart < partsList.length) ? partsList[shipSelectedPart] : null;
@@ -3355,16 +3421,21 @@ export default function CosmicWorkshop() {
                 React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 4 } },
                   SHIP_PART_TYPES.map(function(pt) {
                     return React.createElement("div", { key: pt, onClick: function() { shipAddPart(pt); },
-                      style: { padding: "8px 4px", textAlign: "center", borderRadius: 6, cursor: "pointer", fontSize: 10, fontWeight: 700, letterSpacing: 0.4, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase", background: "rgba(255,138,170,0.08)", border: "1px solid rgba(255,138,170,0.25)", color: "#ff8aaa" } },
-                      "+ " + SHIP_PART_LABELS[pt]);
+                      style: { padding: "8px 4px", textAlign: "center", borderRadius: 6, cursor: "pointer", fontSize: 10, fontWeight: 700, letterSpacing: 0.4, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase", background: "rgba(255,138,170,0.08)", border: "1px solid rgba(255,138,170,0.25)", color: "#ff8aaa", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 } },
+                      shipPartIcon(pt),
+                      React.createElement("span", null, "+ " + SHIP_PART_LABELS[pt]));
                   }))),
               sel && React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,138,170,0.25)", borderRadius: 12, padding: "12px 16px 8px" } },
                 React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 } },
-                  React.createElement("div", { style: { color: "#ff8aaa", fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", fontFamily: "'Exo 2', sans-serif" } }, "Selected: " + SHIP_PART_LABELS[sel.type]),
-                  React.createElement("div", { style: { display: "flex", gap: 4 } },
-                    React.createElement("div", { onClick: function() { shipMovePart(shipSelectedPart, -1); }, style: { padding: "4px 8px", borderRadius: 6, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(180,200,220,0.7)", fontSize: 12, cursor: "pointer" } }, "↓"),
-                    React.createElement("div", { onClick: function() { shipMovePart(shipSelectedPart, 1); }, style: { padding: "4px 8px", borderRadius: 6, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(180,200,220,0.7)", fontSize: 12, cursor: "pointer" } }, "↑"),
-                    React.createElement("div", { onClick: function() { shipDeletePart(shipSelectedPart); }, style: { padding: "4px 8px", borderRadius: 6, background: "rgba(220,60,80,0.15)", border: "1px solid rgba(220,60,80,0.4)", color: "#ff8088", fontSize: 10, fontWeight: 700, cursor: "pointer", letterSpacing: 0.5 } }, "DELETE"))),
+                  React.createElement("div", { style: { color: "#ff8aaa", fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", fontFamily: "'Exo 2', sans-serif" } }, "Selected: " + (sel.name || SHIP_PART_LABELS[sel.type])),
+                  React.createElement("div", { onClick: function() { shipDeletePart(shipSelectedPart); },
+                    title: "Delete part",
+                    style: { width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, cursor: "pointer", background: "rgba(220,60,80,0.15)", border: "1px solid rgba(220,60,80,0.4)" } },
+                    shipTrashSvg(14, "#ff8088"))),
+                React.createElement("div", { style: { marginBottom: 10 } },
+                  React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, marginBottom: 4, letterSpacing: 0.5 } }, "NAME"),
+                  React.createElement("input", { value: sel.name || "", onChange: function(e) { shipUpdatePart(shipSelectedPart, "name", e.target.value); },
+                    placeholder: SHIP_PART_LABELS[sel.type], style: { width: "100%", padding: "5px 8px", borderRadius: 6, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#b0c8d8", fontSize: 16, fontFamily: "'Quicksand',sans-serif", outline: "none", boxSizing: "border-box" } })),
                 React.createElement(BDColorPicker, { label: "Color", value: sel.color,
                   presets: ["#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70cc", "#a0a8b8", "#ffffff", "#222a3a"],
                   onChange: function(v) { shipUpdatePart(shipSelectedPart, "color", v); } }),
@@ -3374,41 +3445,61 @@ export default function CosmicWorkshop() {
                   onChange: function(v) { shipUpdatePart(shipSelectedPart, "x", v); } }),
                 React.createElement(BDSlider, { label: "Position Y", value: sel.y, min: 0, max: 40, step: 0.5, displayValue: sel.y.toFixed(1),
                   onChange: function(v) { shipUpdatePart(shipSelectedPart, "y", v); } }),
-                React.createElement(BDSlider, { label: "Width", value: sel.w, min: 1, max: 30, step: 0.5, displayValue: sel.w.toFixed(1),
-                  onChange: function(v) { shipUpdatePart(shipSelectedPart, "w", v); } }),
-                React.createElement(BDSlider, { label: "Height", value: sel.h, min: 0.5, max: 30, step: 0.5, displayValue: sel.h.toFixed(1),
-                  onChange: function(v) { shipUpdatePart(shipSelectedPart, "h", v); } }),
+                React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 36px", gap: 8, alignItems: "stretch" } },
+                  React.createElement("div", null,
+                    React.createElement(BDSlider, { label: "Width", value: sel.w, min: 1, max: 30, step: 0.5, displayValue: sel.w.toFixed(1),
+                      onChange: function(v) { shipUpdatePartSize(shipSelectedPart, "w", v); } }),
+                    React.createElement(BDSlider, { label: "Height", value: sel.h, min: 0.5, max: 30, step: 0.5, displayValue: sel.h.toFixed(1),
+                      onChange: function(v) { shipUpdatePartSize(shipSelectedPart, "h", v); } })),
+                  React.createElement("div", {
+                    onClick: function() { setShipWhLocked(!shipWhLocked); },
+                    title: shipWhLocked ? "Width/Height locked" : "Lock width/height ratio",
+                    style: { display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, cursor: "pointer",
+                      background: shipWhLocked ? "rgba(255,138,170,0.15)" : "rgba(255,255,255,0.04)",
+                      border: shipWhLocked ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.1)" } },
+                    shipLockSvg(18, shipWhLocked))),
+                sel.type === "rect" && React.createElement(BDSlider, { label: "Corner Radius", value: sel.cr || 0, min: 0, max: Math.min(sel.w, sel.h) / 2, step: 0.25, displayValue: (sel.cr || 0).toFixed(2),
+                  onChange: function(v) { shipUpdatePart(shipSelectedPart, "cr", v); } }),
                 React.createElement(BDSlider, { label: "Rotation", value: sel.rot || 0, min: 0, max: 360, step: 5, displayValue: (sel.rot || 0) + "°",
-                  onChange: function(v) { shipUpdatePart(shipSelectedPart, "rot", v); } })),
+                  onChange: function(v) { shipUpdatePart(shipSelectedPart, "rot", v); } }),
+                partsList.length > 1 && React.createElement(BDSlider, { label: "Z (layer)", value: shipSelectedPart, min: 0, max: partsList.length - 1, step: 1, displayValue: shipSelectedPart + " / " + (partsList.length - 1),
+                  onChange: function(v) { shipReorderPart(shipSelectedPart, Math.round(v)); } }),
+                React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, marginTop: 8, marginBottom: 4, letterSpacing: 0.5, textTransform: "uppercase" } }, "Border"),
+                React.createElement(BDColorPicker, { label: "Border Color", value: sel.bc || "#000000",
+                  presets: ["#000000", "#222a3a", "#ffffff", "#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70cc"],
+                  onChange: function(v) { shipUpdatePart(shipSelectedPart, "bc", v); } }),
+                React.createElement(BDSlider, { label: "Border Width", value: sel.bw || 0, min: 0, max: 4, step: 0.1, displayValue: (sel.bw || 0).toFixed(1),
+                  onChange: function(v) { shipUpdatePart(shipSelectedPart, "bw", v); } }),
+                React.createElement(BDSlider, { label: "Border Opacity", value: typeof sel.bo === "number" ? sel.bo : 1, min: 0, max: 1, step: 0.05, displayValue: Math.round((typeof sel.bo === "number" ? sel.bo : 1) * 100) + "%",
+                  onChange: function(v) { shipUpdatePart(shipSelectedPart, "bo", v); } })),
               React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "10px 12px" } },
                 React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 11, marginBottom: 8, letterSpacing: 0.5 } }, "PARTS (" + partsList.length + ")"),
                 partsList.length === 0 ? React.createElement("div", { style: { color: "rgba(180,200,220,0.4)", fontSize: 11, fontStyle: "italic", padding: "6px 0" } }, "No parts yet — add one above.") :
                 React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 4 } },
                   partsList.map(function(p, idx) {
                     var isSel = idx === shipSelectedPart;
+                    var displayName = p.name || SHIP_PART_LABELS[p.type];
                     return React.createElement("div", { key: idx, onClick: function() { setShipSelectedPart(idx); },
                       style: { display: "flex", alignItems: "center", gap: 8, padding: "6px 8px", borderRadius: 6, cursor: "pointer", background: isSel ? "rgba(255,138,170,0.12)" : "rgba(255,255,255,0.02)", border: isSel ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.05)" } },
                       React.createElement("div", { style: { width: 14, height: 14, borderRadius: 3, background: p.color || "#80ddff", border: "1px solid rgba(255,255,255,0.2)", flex: "0 0 auto" } }),
-                      React.createElement("div", { style: { flex: 1, color: isSel ? "#ff8aaa" : "rgba(200,210,220,0.7)", fontSize: 11, fontWeight: 600, fontFamily: "'Exo 2', sans-serif", letterSpacing: 0.4 } }, SHIP_PART_LABELS[p.type] + " · (" + p.x.toFixed(0) + "," + p.y.toFixed(0) + ")"),
+                      React.createElement("div", { style: { flex: 1, color: isSel ? "#ff8aaa" : "rgba(200,210,220,0.7)", fontSize: 11, fontWeight: 600, fontFamily: "'Exo 2', sans-serif", letterSpacing: 0.4 } }, displayName + " · (" + p.x.toFixed(0) + "," + p.y.toFixed(0) + ")"),
                       React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipDeletePart(idx); },
                         title: "Delete part",
                         style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", background: "rgba(220,60,80,0.12)", border: "1px solid rgba(220,60,80,0.3)", flex: "0 0 auto" } },
-                        React.createElement("svg", { width: "12", height: "12", viewBox: "0 0 24 24", fill: "none", stroke: "#ff8088", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
-                          React.createElement("path", { d: "M3 6h18" }),
-                          React.createElement("path", { d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" }),
-                          React.createElement("path", { d: "M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" }),
-                          React.createElement("path", { d: "M10 11v6" }),
-                          React.createElement("path", { d: "M14 11v6" }))));
+                        shipTrashSvg(12, "#ff8088")));
                   }))));
           })(),
           React.createElement("div", { style: { display: "flex", justifyContent: "center", marginTop: 20 } },
             React.createElement("div", {
-              onClick: function() { shipDirtyRef.current = true; setShipEdit(Object.assign({}, SHIP_DEFAULT_DESIGN, { name: shipEdit.name || "", parts: [] })); setShipSelectedPart(-1); },
+              onClick: function() { shipDirtyRef.current = true; var h = shipEdit.hull || "arrow"; setShipEdit(Object.assign({}, shipEdit, { hull: h, parts: shipHullPresetParts(h) })); setShipSelectedPart(-1); },
               style: { padding: "8px 20px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.1)", color: "rgba(180,200,220,0.5)", fontSize: 11, fontFamily: "'Exo 2', sans-serif", cursor: "pointer", letterSpacing: 0.5 }
-            }, "Reset to Defaults"))),
+            }, "Reset to Preset"))),
         shipShowBackWarn && renderBackWarnOverlay(
           function() { setShipShowBackWarn(false); },
-          function() { setShipShowBackWarn(false); setShipView("list"); shipDirtyRef.current = false; }))
+          function() { setShipShowBackWarn(false); setShipView("list"); shipDirtyRef.current = false; }),
+        shipHullPromptId && renderHullPresetOverlay(shipHullPromptId,
+          function() { setShipHullPromptId(null); },
+          function(mode) { shipApplyHullPreset(shipHullPromptId, mode); setShipHullPromptId(null); }))
     )
   );
 }

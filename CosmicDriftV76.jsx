@@ -808,8 +808,57 @@ var UFO_DEFAULT_DESIGN = { hullColor: "#b86020", domeColor: "#44ffee", lightColo
 var GAME_UFO_DESIGN = Object.assign({}, UFO_DEFAULT_DESIGN);
 var SHIP_DESIGNS_KEY  = "cosmic-drift-ship-designs";
 var SHIP_ACTIVE_KEY_G = "cosmic-drift-ship-active";
-var SHIP_DEFAULT_DESIGN = { hull: "arrow", hullColor: "#ffd0ff", hullColor2: "#cc70cc", cockpitColor: "#f5c4f5", engineColor: "#ff60ff", engineOpacity: 0, parts: [] };
-var GAME_SHIP_DESIGN = Object.assign({}, SHIP_DEFAULT_DESIGN);
+var SHIP_DEFAULT_DESIGN = { hull: "arrow", parts: [] };
+// Parts-array hull presets (kept in sync with Workshop's HULL_PRESETS).
+// The game also migrates stored designs missing parts by populating from the
+// named hull preset, so legacy saves render correctly without a Workshop visit.
+var HULL_PRESETS = {
+  arrow: [
+    { type: "triangle", x: 20, y: 22, w: 28, h: 32, rot: 0, color: "#ffd0ff", opacity: 1 }
+  ],
+  dart: [
+    { type: "triangle", x: 20, y: 22, w: 16, h: 34, rot: 0, color: "#ffd0ff", opacity: 1 }
+  ],
+  raptor: [
+    { type: "triangle", x: 20, y: 22, w: 16, h: 30, rot: 0, color: "#ffd0ff", opacity: 1 },
+    { type: "triangle", x: 8,  y: 30, w: 10, h: 14, rot: 0, color: "#cc70cc", opacity: 1 },
+    { type: "triangle", x: 32, y: 30, w: 10, h: 14, rot: 0, color: "#cc70cc", opacity: 1 }
+  ],
+  wedge: [
+    { type: "triangle", x: 20, y: 21, w: 34, h: 32, rot: 0, color: "#ffd0ff", opacity: 1 }
+  ],
+  cruiser: [
+    { type: "rect", x: 20, y: 22, w: 9, h: 32, cr: 4.5, rot: 0, color: "#ffd0ff", opacity: 1 },
+    { type: "rect", x: 9,  y: 26, w: 5, h: 16, cr: 2.5, rot: 0, color: "#cc70cc", opacity: 1 },
+    { type: "rect", x: 31, y: 26, w: 5, h: 16, cr: 2.5, rot: 0, color: "#cc70cc", opacity: 1 }
+  ],
+  saucer: [
+    { type: "circle", x: 20, y: 24, w: 32, h: 22, rot: 0, color: "#ffd0ff", opacity: 1 },
+    { type: "circle", x: 19, y: 17, w: 12, h: 10, rot: 0, color: "#80ddff", opacity: 0.85 }
+  ],
+  startrack: [
+    { type: "circle", x: 20,   y: 10,   w: 17,   h: 17,   rot: 0,   color: "#b8c0c8", opacity: 1 },
+    { type: "circle", x: 20,   y: 8,    w: 9,    h: 4,    rot: 0,   color: "#80ddff", opacity: 0.55 },
+    { type: "rect",   x: 20,   y: 24.5, w: 4.4,  h: 16.2, cr: 2.2,  rot: 0, color: "#b8c0c8", opacity: 1 },
+    { type: "rect",   x: 11.3, y: 29.1, w: 2.4,  h: 19.8, cr: 1.2,  rot: 0, color: "#b8c0c8", opacity: 1 },
+    { type: "rect",   x: 28.7, y: 29.1, w: 2.4,  h: 19.8, cr: 1.2,  rot: 0, color: "#b8c0c8", opacity: 1 },
+    { type: "line",   x: 15.4, y: 27.3, w: 12,   h: 1.35, rot: -47, color: "#b8c0c8", opacity: 1 },
+    { type: "line",   x: 24.6, y: 27.3, w: 12,   h: 1.35, rot: 47,  color: "#b8c0c8", opacity: 1 }
+  ],
+  none: []
+};
+function shipHullPresetParts(hullId) {
+  var preset = HULL_PRESETS[hullId] || HULL_PRESETS.none;
+  return JSON.parse(JSON.stringify(preset));
+}
+function shipMigrateDesign(d) {
+  if (!d || typeof d !== "object") return d;
+  if ((!Array.isArray(d.parts) || d.parts.length === 0) && d.hull && HULL_PRESETS[d.hull]) {
+    return Object.assign({}, d, { parts: shipHullPresetParts(d.hull) });
+  }
+  return d;
+}
+var GAME_SHIP_DESIGN = { hull: "arrow", parts: shipHullPresetParts("arrow") };
 function shipRenderPart(part, key) {
   var x = typeof part.x === "number" ? part.x : 20;
   var y = typeof part.y === "number" ? part.y : 20;
@@ -818,123 +867,42 @@ function shipRenderPart(part, key) {
   var rot = part.rot || 0;
   var color = part.color || "#80ddff";
   var op = typeof part.opacity === "number" ? part.opacity : 1;
+  var bw = typeof part.bw === "number" ? part.bw : 0;
+  var bc = part.bc || "#000000";
+  var bo = typeof part.bo === "number" ? part.bo : 1;
+  var cr = typeof part.cr === "number" ? part.cr : 0;
   var t = "rotate(" + rot + " " + x + " " + y + ")";
+  var strokeProps = bw > 0 ? { stroke: bc, strokeWidth: bw, strokeOpacity: bo } : {};
   if (part.type === "circle") {
-    return React.createElement("ellipse", { key: key, cx: x, cy: y, rx: w / 2, ry: h / 2, fill: color, opacity: op, transform: t });
+    return React.createElement("ellipse", Object.assign({ key: key, cx: x, cy: y, rx: w / 2, ry: h / 2, fill: color, opacity: op, transform: t }, strokeProps));
   }
   if (part.type === "rect") {
-    return React.createElement("rect", { key: key, x: x - w / 2, y: y - h / 2, width: w, height: h, fill: color, opacity: op, transform: t });
+    return React.createElement("rect", Object.assign({ key: key, x: x - w / 2, y: y - h / 2, width: w, height: h, rx: cr, ry: cr, fill: color, opacity: op, transform: t }, strokeProps));
   }
   if (part.type === "triangle") {
     var p1 = x + "," + (y - h / 2);
     var p2 = (x - w / 2) + "," + (y + h / 2);
     var p3 = (x + w / 2) + "," + (y + h / 2);
-    return React.createElement("polygon", { key: key, points: p1 + " " + p2 + " " + p3, fill: color, opacity: op, transform: t });
+    return React.createElement("polygon", Object.assign({ key: key, points: p1 + " " + p2 + " " + p3, fill: color, opacity: op, transform: t }, strokeProps));
   }
   if (part.type === "line") {
-    return React.createElement("rect", { key: key, x: x - w / 2, y: y - Math.max(0.4, h) / 2, width: w, height: Math.max(0.4, h), fill: color, opacity: op, transform: t });
-  }
-  if (part.type === "wings") {
-    var ws = w / 8;
-    var lp = "M " + x + " " + y + " L " + (x - 10 * ws) + " " + (y + 4 * ws) + " L " + (x - 2 * ws) + " " + (y + 3 * ws) + " Z";
-    var rp = "M " + x + " " + y + " L " + (x + 10 * ws) + " " + (y + 4 * ws) + " L " + (x + 2 * ws) + " " + (y + 3 * ws) + " Z";
-    return React.createElement("g", { key: key, transform: t, opacity: op },
-      React.createElement("path", { d: lp, fill: color }),
-      React.createElement("path", { d: rp, fill: color }));
-  }
-  if (part.type === "boosters") {
-    var bs = w / 8;
-    return React.createElement("g", { key: key, transform: t, opacity: op },
-      React.createElement("rect", { x: x - 5 * bs, y: y - 4 * bs, width: 3 * bs, height: 8 * bs, rx: 1.2 * bs, fill: color }),
-      React.createElement("rect", { x: x + 2 * bs, y: y - 4 * bs, width: 3 * bs, height: 8 * bs, rx: 1.2 * bs, fill: color }));
-  }
-  if (part.type === "rockets") {
-    var rs = w / 8;
-    var lr = "M " + (x - 3 * rs) + " " + (y - 6 * rs) + " L " + (x - 1.5 * rs) + " " + (y - 4 * rs) + " L " + (x - 1.5 * rs) + " " + (y + 4 * rs) + " L " + (x - 3 * rs) + " " + (y + 4 * rs) + " Z";
-    var rr = "M " + (x + 3 * rs) + " " + (y - 6 * rs) + " L " + (x + 1.5 * rs) + " " + (y - 4 * rs) + " L " + (x + 1.5 * rs) + " " + (y + 4 * rs) + " L " + (x + 3 * rs) + " " + (y + 4 * rs) + " Z";
-    return React.createElement("g", { key: key, transform: t, opacity: op },
-      React.createElement("path", { d: lr, fill: color }),
-      React.createElement("path", { d: rr, fill: color }));
+    return React.createElement("rect", Object.assign({ key: key, x: x - w / 2, y: y - Math.max(0.4, h) / 2, width: w, height: Math.max(0.4, h), fill: color, opacity: op, transform: t }, strokeProps));
   }
   return null;
 }
 function ShipDesignSvg(props) {
   var size = props.size || 40;
-  var uid = props.uid || "0";
   var svgRef = props.svgRef || null;
   var svgStyle = props.style || {};
-  var d = Object.assign({}, SHIP_DEFAULT_DESIGN, props.design || {});
-  var hull = d.hull || "arrow";
-  var hullColor = d.hullColor || "#ffd0ff";
-  var hullColor2 = d.hullColor2 || "#cc70cc";
-  var cockpitColor = d.cockpitColor || "#80ddff";
-  var engineColor = d.engineColor || "#ff60ff";
-  var engineOpacity = typeof d.engineOpacity === "number" ? d.engineOpacity : 0.8;
-  var gradId = "shg-" + uid;
-  var fill = "url(#" + gradId + ")";
-  var hl = "rgba(255,255,255,0.15)";
-  var defs = React.createElement("defs", null,
-    React.createElement("linearGradient", { id: gradId, x1: "0", y1: "0", x2: "0", y2: "1" },
-      React.createElement("stop", { offset: "0%", stopColor: hullColor }),
-      React.createElement("stop", { offset: "100%", stopColor: hullColor2 })));
-  var els = [];
-  if (hull === "none") {
-    els = [];
-  } else if (hull === "arrow") {
-    els = [
-      React.createElement("path", { key: "b", d: "M20 1 L4 36 L13 30 L20 40 L27 30 L36 36 Z", fill: fill }),
-      React.createElement("path", { key: "h", d: "M20 6 L9 32 L14 29 L20 37 L26 29 L31 32 Z", fill: hl }),
-      React.createElement("ellipse", { key: "c", cx: "20", cy: "14", rx: "2.5", ry: "4", fill: cockpitColor, opacity: "0.85" }),
-      React.createElement("ellipse", { key: "e", cx: "20", cy: "38", rx: "3", ry: "1.4", fill: engineColor, opacity: String(engineOpacity) })
-    ];
-  } else if (hull === "dart") {
-    els = [
-      React.createElement("path", { key: "b", d: "M20 1 L31 30 L23 24 L23 39 L17 39 L17 24 L9 30 Z", fill: fill }),
-      React.createElement("path", { key: "h", d: "M20 5 L28 28 L22 26 L22 37 L18 37 L18 26 L12 28 Z", fill: hl }),
-      React.createElement("ellipse", { key: "c", cx: "20", cy: "12", rx: "3", ry: "5", fill: cockpitColor, opacity: "0.85" }),
-      React.createElement("ellipse", { key: "e", cx: "20", cy: "38", rx: "4", ry: "2", fill: engineColor, opacity: String(engineOpacity) })
-    ];
-  } else if (hull === "raptor") {
-    els = [
-      React.createElement("path", { key: "b", d: "M20 2 L38 28 L26 20 L24 38 L16 38 L14 20 L2 28 Z", fill: fill }),
-      React.createElement("path", { key: "h", d: "M20 6 L34 26 L26 21 L24 35 L16 35 L14 21 L6 26 Z", fill: hl }),
-      React.createElement("ellipse", { key: "c", cx: "20", cy: "14", rx: "3.5", ry: "5", fill: cockpitColor, opacity: "0.85" }),
-      React.createElement("ellipse", { key: "e", cx: "20", cy: "37", rx: "4", ry: "2", fill: engineColor, opacity: String(engineOpacity) })
-    ];
-  } else if (hull === "wedge") {
-    els = [
-      React.createElement("path", { key: "b", d: "M20 2 L35 36 L20 31 L5 36 Z", fill: fill }),
-      React.createElement("path", { key: "h", d: "M20 6 L31 33 L20 29 L9 33 Z", fill: hl }),
-      React.createElement("ellipse", { key: "c", cx: "20", cy: "12", rx: "2.5", ry: "4", fill: cockpitColor, opacity: "0.85" }),
-      React.createElement("path", { key: "e", d: "M8 34 L32 34", stroke: engineColor, strokeWidth: "3", strokeLinecap: "round", opacity: String(engineOpacity) })
-    ];
-  } else if (hull === "cruiser") {
-    els = [
-      React.createElement("path", { key: "b", d: "M20 1 L27 8 L27 32 L24 39 L16 39 L13 32 L13 8 Z", fill: fill }),
-      React.createElement("path", { key: "lp", d: "M12 16 L7 20 L7 33 L12 35 Z", fill: hullColor2 }),
-      React.createElement("path", { key: "rp", d: "M28 16 L33 20 L33 33 L28 35 Z", fill: hullColor2 }),
-      React.createElement("path", { key: "h", d: "M20 4 L25 10 L25 30 L22 37 L18 37 L15 30 L15 10 Z", fill: hl }),
-      React.createElement("ellipse", { key: "c", cx: "20", cy: "12", rx: "3", ry: "5", fill: cockpitColor, opacity: "0.85" }),
-      React.createElement("ellipse", { key: "le", cx: "9.5", cy: "34", rx: "2.5", ry: "1.5", fill: engineColor, opacity: String(engineOpacity) }),
-      React.createElement("ellipse", { key: "re", cx: "30.5", cy: "34", rx: "2.5", ry: "1.5", fill: engineColor, opacity: String(engineOpacity) })
-    ];
-  } else {
-    els = [
-      React.createElement("ellipse", { key: "disc", cx: "20", cy: "24", rx: "18", ry: "13", fill: fill }),
-      React.createElement("ellipse", { key: "hi", cx: "20", cy: "20", rx: "15", ry: "4", fill: hl }),
-      React.createElement("ellipse", { key: "dome", cx: "19", cy: "15", rx: "7", ry: "6", fill: cockpitColor, opacity: "0.85" }),
-      React.createElement("ellipse", { key: "e", cx: "20", cy: "36", rx: "4", ry: "1.5", fill: engineColor, opacity: String(engineOpacity) })
-    ];
-  }
+  var d = props.design || SHIP_DEFAULT_DESIGN;
   var parts = Array.isArray(d.parts) ? d.parts : [];
-  var partEls = [];
+  var els = [];
   for (var pi = 0; pi < parts.length; pi++) {
     var pel = shipRenderPart(parts[pi], "p-" + pi);
-    if (pel) partEls.push(pel);
+    if (pel) els.push(pel);
   }
   return React.createElement("svg", { ref: svgRef, viewBox: "0 0 40 40", width: String(size), height: String(size), style: Object.assign({ display: "block" }, svgStyle) },
-    defs,
-    React.createElement("g", null, els.concat(partEls)));
+    React.createElement("g", null, els));
 }
 var GAME_VFX_ACTIVE = {};
 var VFX_DEFAULTS = {
@@ -1732,8 +1700,7 @@ export default function CosmicDriftGame() {
               var activeId = ra && ra.value ? ra.value : null;
               var found = null;
               for (var i = 0; i < designs.length; i++) { if (designs[i].id === activeId) { found = designs[i]; break; } }
-              if (!found) found = null;
-              if (found) GAME_SHIP_DESIGN = Object.assign({}, SHIP_DEFAULT_DESIGN, found);
+              if (found) GAME_SHIP_DESIGN = shipMigrateDesign(found);
             }).catch(function() {});
           }
         }
