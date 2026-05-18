@@ -1349,6 +1349,13 @@ export default function CosmicWorkshop() {
             setUfoActiveId(migrated.id);
             ufoSaveDesigns([migrated]);
             ufoSaveActiveId(migrated.id);
+          } else {
+            // First-time install: seed a "Default" UFO using the factory style.
+            var seed = Object.assign({}, UFO_DEFAULT_DESIGN, { id: "ufo_default", name: "Default", savedAt: new Date().toISOString() });
+            setUfoSaved([seed]);
+            setUfoActiveId(seed.id);
+            ufoSaveDesigns([seed]);
+            ufoSaveActiveId(seed.id);
           }
         }).catch(function() {}); } catch(e) {}
       }
@@ -2875,6 +2882,9 @@ export default function CosmicWorkshop() {
                 React.createElement(WsLED, { color: "#c8b8ff", size: 4 }),
                 React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(200,184,255,0.6)" }, "BLOCKS")
               ),
+              // Invisible spacer matches the name line in GRID/HULL/SHIP so previews
+              // start at the same vertical position across all tiles.
+              React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, marginBottom: 4, visibility: "hidden" } }, " "),
               React.createElement("div", { style: { display: "flex", justifyContent: "center" } },
                 renderBlocksSetPreview(bdActiveMap, bdSaved))
             ),
@@ -2883,7 +2893,8 @@ export default function CosmicWorkshop() {
                 React.createElement(WsLED, { color: "#ffb43c", size: 4 }),
                 React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(255,180,60,0.6)" }, "VFX")
               ),
-              React.createElement("div", { style: { display: "flex", justifyContent: "center", height: 30, alignItems: "center" } },
+              React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, marginBottom: 4, visibility: "hidden" } }, " "),
+              React.createElement("div", { style: { display: "flex", justifyContent: "center", alignItems: "center" } },
                 renderVfxSetPreview(vfxActiveMap, vfxSaved))
             ),
             React.createElement("div", { onClick: function() { setScreen("ufo"); }, style: { background: "linear-gradient(180deg, rgba(100,220,180,0.1) 0%, rgba(60,180,140,0.05) 100%)", border: "1px solid rgba(100,220,180,0.22)", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },

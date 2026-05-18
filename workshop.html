@@ -4845,6 +4845,17 @@ function CosmicWorkshop() {
               setUfoActiveId(migrated.id);
               ufoSaveDesigns([migrated]);
               ufoSaveActiveId(migrated.id);
+            } else {
+              // First-time install: seed a "Default" UFO using the factory style.
+              var seed = Object.assign({}, UFO_DEFAULT_DESIGN, {
+                id: "ufo_default",
+                name: "Default",
+                savedAt: new Date().toISOString()
+              });
+              setUfoSaved([seed]);
+              setUfoActiveId(seed.id);
+              ufoSaveDesigns([seed]);
+              ufoSaveActiveId(seed.id);
             }
           }).catch(function () {});
         } catch (e) {}
@@ -8498,7 +8509,18 @@ function CosmicWorkshop() {
     size: 6.5,
     ls: 0.5,
     color: "rgba(200,184,255,0.6)"
-  }, "BLOCKS")), React.createElement("div", {
+  }, "BLOCKS")),
+  // Invisible spacer matches the name line in GRID/HULL/SHIP so previews
+  // start at the same vertical position across all tiles.
+  React.createElement("div", {
+    style: {
+      fontFamily: "'Exo 2', sans-serif",
+      fontSize: 11,
+      fontWeight: 700,
+      marginBottom: 4,
+      visibility: "hidden"
+    }
+  }, " "), React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "center"
@@ -8532,9 +8554,16 @@ function CosmicWorkshop() {
     color: "rgba(255,180,60,0.6)"
   }, "VFX")), React.createElement("div", {
     style: {
+      fontFamily: "'Exo 2', sans-serif",
+      fontSize: 11,
+      fontWeight: 700,
+      marginBottom: 4,
+      visibility: "hidden"
+    }
+  }, " "), React.createElement("div", {
+    style: {
       display: "flex",
       justifyContent: "center",
-      height: 30,
       alignItems: "center"
     }
   }, renderVfxSetPreview(vfxActiveMap, vfxSaved))), React.createElement("div", {
