@@ -3406,16 +3406,18 @@ export default function CosmicWorkshop() {
             React.createElement("div", { onClick: shipSaveCurrent, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #3a1030, #280820)", boxShadow: "0 0 8px rgba(255,138,170,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, shipSaveStatus || "Save"))
         }),
         React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "0 16px 32px" } },
-          React.createElement("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", padding: "20px 0 12px" } },
+          // Sticky preview: pinned to the top of the scroll container so the
+          // ship stays visible while editing controls farther down.
+          React.createElement("div", { style: { position: "sticky", top: 0, zIndex: 5, display: "flex", flexDirection: "column", alignItems: "center", padding: "12px 0 10px", margin: "0 -16px", background: "rgba(14,18,28,0.92)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)", borderBottom: "1px solid rgba(255,138,170,0.12)" } },
             React.createElement("div", {
-              style: { width: 160, height: 160, padding: 4, borderRadius: 12, background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,138,170,0.15)", touchAction: "none", cursor: shipTab === "parts" ? "crosshair" : "default" },
+              style: { width: 128, height: 128, padding: 4, borderRadius: 12, background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,138,170,0.15)", touchAction: "none", cursor: shipTab === "parts" ? "crosshair" : "default" },
               onPointerDown: shipTab === "parts" ? shipPreviewPointerDown : undefined,
               onPointerMove: shipTab === "parts" ? shipPreviewPointerMove : undefined,
               onPointerUp:   shipTab === "parts" ? shipPreviewPointerUp   : undefined,
               onPointerCancel: shipTab === "parts" ? shipPreviewPointerUp : undefined
             },
-              React.createElement(ShipDesignSvg, { size: 152, design: shipEdit, uid: "edit", selectedIdx: shipTab === "parts" ? shipSelectedPart : -1 })),
-            shipTab === "parts" && React.createElement("div", { style: { fontSize: 10, color: "rgba(180,200,220,0.5)", marginTop: 6, letterSpacing: 0.5 } }, "Tap a part on the ship to select. Drag to move.")),
+              React.createElement(ShipDesignSvg, { size: 120, design: shipEdit, uid: "edit", selectedIdx: shipTab === "parts" ? shipSelectedPart : -1 })),
+            shipTab === "parts" && React.createElement("div", { style: { fontSize: 10, color: "rgba(180,200,220,0.5)", marginTop: 4, letterSpacing: 0.5 } }, "Tap a part on the ship to select. Drag to move.")),
           React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "12px 16px", marginBottom: 10 } },
             React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 11, marginBottom: 6, letterSpacing: 0.5 } }, "NAME"),
             React.createElement("input", { value: shipEdit.name || "", onChange: function(e) { shipUpdateEdit("name", e.target.value); },
@@ -3442,7 +3444,7 @@ export default function CosmicWorkshop() {
                     return React.createElement("div", { key: pt, onClick: function() { shipAddPart(pt); },
                       style: { padding: "8px 4px", textAlign: "center", borderRadius: 6, cursor: "pointer", fontSize: 10, fontWeight: 700, letterSpacing: 0.4, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase", background: "rgba(255,138,170,0.08)", border: "1px solid rgba(255,138,170,0.25)", color: "#ff8aaa", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 } },
                       shipPartIcon(pt),
-                      React.createElement("span", null, "+ " + SHIP_PART_LABELS[pt]));
+                      React.createElement("span", null, SHIP_PART_LABELS[pt]));
                   }))),
               sel && React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,138,170,0.25)", borderRadius: 12, padding: "12px 16px 8px" } },
                 React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 } },

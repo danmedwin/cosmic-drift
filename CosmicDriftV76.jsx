@@ -3238,7 +3238,7 @@ function logUfo(msg) {
               {new Array(COLS).fill(0).map(function (_, ci) {
                 var isActive = ci === shipCol;
                 return <div key={ci} style={{ height: 68, display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: 4, borderTop: "2px solid rgba(140,160,180," + (isActive ? "0.2" : "0.06") + ")", background: isActive ? "rgba(255,168,255,0.04)" : "transparent", transition: isDragging ? "none" : "background 0.15s, border-color 0.15s" }}>
-                  {isActive && <ShipDesignSvg svgRef={shipSvgRef} size={32} design={GAME_SHIP_DESIGN} uid="game" style={{ filter: "drop-shadow(0 0 10px rgba(255,168,255,0.5))", animation: shipHit ? "shipOozeHit 0.8s ease-out" : "none" }} />}
+                  {isActive && <ShipDesignSvg svgRef={shipSvgRef} size={44} design={GAME_SHIP_DESIGN} uid="game" style={{ filter: "drop-shadow(0 0 10px rgba(255,168,255,0.5))", animation: shipHit ? "shipOozeHit 0.8s ease-out" : "none" }} />}
                 </div>;
               })}
             </div>
