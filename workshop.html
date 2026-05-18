@@ -8560,11 +8560,15 @@ function CosmicWorkshop() {
       marginBottom: 4,
       visibility: "hidden"
     }
-  }, " "), React.createElement("div", {
+  }, " "),
+  // VFX is only a 2x2 grid; shift it down by one icon row so its
+  // bottom edge lines up with the taller Blocks (3x3) preview.
+  React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "center",
-      alignItems: "center"
+      alignItems: "center",
+      marginTop: 25
     }
   }, renderVfxSetPreview(vfxActiveMap, vfxSaved))), React.createElement("div", {
     onClick: function () {

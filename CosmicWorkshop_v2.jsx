@@ -2894,7 +2894,9 @@ export default function CosmicWorkshop() {
                 React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(255,180,60,0.6)" }, "VFX")
               ),
               React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, marginBottom: 4, visibility: "hidden" } }, " "),
-              React.createElement("div", { style: { display: "flex", justifyContent: "center", alignItems: "center" } },
+              // VFX is only a 2x2 grid; shift it down by one icon row so its
+              // bottom edge lines up with the taller Blocks (3x3) preview.
+              React.createElement("div", { style: { display: "flex", justifyContent: "center", alignItems: "center", marginTop: 25 } },
                 renderVfxSetPreview(vfxActiveMap, vfxSaved))
             ),
             React.createElement("div", { onClick: function() { setScreen("ufo"); }, style: { background: "linear-gradient(180deg, rgba(100,220,180,0.1) 0%, rgba(60,180,140,0.05) 100%)", border: "1px solid rgba(100,220,180,0.22)", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
