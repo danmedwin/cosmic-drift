@@ -3433,10 +3433,19 @@ export default function CosmicWorkshop() {
                           value: shipRenameValue,
                           autoFocus: true,
                           onChange: function(e) { setShipRenameValue(e.target.value); },
-                          onBlur: shipCommitRename,
                           onKeyDown: function(e) { if (e.key === "Enter") shipCommitRename(); else if (e.key === "Escape") shipCancelRename(); },
                           style: { flex: 1, minWidth: 0, padding: "4px 8px", borderRadius: 6, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,138,170,0.5)", color: "#b0c8d8", fontSize: 16, fontWeight: 700, fontFamily: "'Quicksand',sans-serif", outline: "none", boxSizing: "border-box" }
-                        }))
+                        }),
+                        React.createElement("div", { onMouseDown: function(e) { e.preventDefault(); }, onClick: shipCommitRename,
+                          title: "Save name",
+                          style: { padding: "4px 8px", borderRadius: 4, background: "rgba(80,200,100,0.2)", border: "1px solid rgba(80,200,100,0.4)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" } },
+                          React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" },
+                            React.createElement("path", { d: "M5 13l4 4L19 7", fill: "none", stroke: "#80dd90", strokeWidth: "2.5", strokeLinecap: "round", strokeLinejoin: "round" }))),
+                        React.createElement("div", { onMouseDown: function(e) { e.preventDefault(); }, onClick: shipCancelRename,
+                          title: "Cancel rename",
+                          style: { padding: "4px 8px", borderRadius: 4, background: "rgba(220,60,80,0.18)", border: "1px solid rgba(220,60,80,0.45)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" } },
+                          React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" },
+                            React.createElement("path", { d: "M6 6L18 18 M18 6L6 18", fill: "none", stroke: "#ff8088", strokeWidth: "2.5", strokeLinecap: "round" }))))
                     : React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6, marginBottom: 3 } },
                         React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, design.name || "Untitled"),
                         React.createElement("div", { onClick: function() { shipStartRename(design); },
