@@ -840,13 +840,13 @@ var HULL_PRESETS = {
     { type: "circle", x: 20, y: 17.2, w: 12, h: 11,   rot: 0, color: "#80ddff", opacity: 0.85 }
   ],
   startrack: [
+    { type: "line",   name: "left-arm",      x: 15.4, y: 27.3, w: 12,   h: 1.35, rot: -47, color: "#878787", opacity: 1 },
+    { type: "line",   name: "right-arm",     x: 24.6, y: 27.3, w: 12,   h: 1.35, rot: 47,  color: "#878787", opacity: 1 },
+    { type: "rect",   name: "Body",          x: 20,   y: 24.5, w: 4.4,  h: 16.2, cr: 2.2,  rot: 0,   color: "#878787", opacity: 1 },
+    { type: "rect",   name: "left-nacelle",  x: 11.3, y: 29.1, w: 2.4,  h: 19.8, cr: 1.2,  rot: 0,   color: "#80ddff", opacity: 1 },
+    { type: "rect",   name: "right-nacelle", x: 28.7, y: 29.1, w: 2.4,  h: 19.8, cr: 1.2,  rot: 0,   color: "#80ddff", opacity: 1 },
     { type: "circle", name: "Saucer",        x: 20,   y: 10,   w: 17,   h: 17,   rot: 0,   color: "#b8c0c8", opacity: 1 },
-    { type: "circle", name: "Dome",          x: 20,   y: 8,    w: 9,    h: 4,    rot: 0,   color: "#80ddff", opacity: 0.55 },
-    { type: "rect",   name: "Body",          x: 20,   y: 24.5, w: 4.4,  h: 16.2, cr: 2.2,  rot: 0, color: "#b8c0c8", opacity: 1 },
-    { type: "rect",   name: "left-nacelle",  x: 11.3, y: 29.1, w: 2.4,  h: 19.8, cr: 1.2,  rot: 0, color: "#b8c0c8", opacity: 1 },
-    { type: "rect",   name: "right-nacelle", x: 28.7, y: 29.1, w: 2.4,  h: 19.8, cr: 1.2,  rot: 0, color: "#b8c0c8", opacity: 1 },
-    { type: "line",   name: "left-arm",      x: 15.4, y: 27.3, w: 12,   h: 1.35, rot: -47, color: "#b8c0c8", opacity: 1 },
-    { type: "line",   name: "right-arm",     x: 24.6, y: 27.3, w: 12,   h: 1.35, rot: 47,  color: "#b8c0c8", opacity: 1 }
+    { type: "circle", name: "Dome",          x: 20,   y: 6.78, w: 9,    h: 4,    rot: 0,   color: "#80ddff", opacity: 0.55 }
   ],
   falcor: [
     { type: "circle",   name: "Saucer",         x: 19.94, y: 25.08, w: 27,  h: 27, rot: 0,   color: "#b8c0c8", opacity: 1 },
