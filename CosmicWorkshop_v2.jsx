@@ -2038,55 +2038,46 @@ export default function CosmicWorkshop() {
     // ═══ SPLASH SCREEN ═══
     screen === "splash" && React.createElement("div", { onTouchStart: handleSplashTouchStart, onTouchEnd: handleSplashTouchEnd, style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", background: "radial-gradient(ellipse 90% 60% at 50% 28%, #0e0820 0%, #0a0618 45%, #06040f 100%)", animation: splashEntering ? "cdSplashEnterFromGame 0.4s ease-out both" : (splashTransition === "exit" ? "cdSplashExitShrink 0.62s ease-in both" : "none"), willChange: "transform, filter" } },
 
-      // ── TOP STATUS STRIP ──
-      React.createElement("div", { style: { flexShrink: 0, background: WS.brushed, backgroundBlendMode: "overlay", borderBottom: "1px solid rgba(120,80,200,0.3)", boxShadow: "0 3px 8px rgba(0,0,0,0.5)", padding: "8px 10px", display: "flex", alignItems: "center", gap: 6 } },
-        React.createElement(WsLED, { color: WS.green, size: 5 }),
-        React.createElement(WsLED, { color: "#b060ff", size: 5 }),
-        React.createElement(WsMono, { size: 8, ls: 1.5, color: "rgba(200,170,255,0.55)" }, "SVC-MODE"),
-        React.createElement("span", { style: { color: "rgba(180,140,255,0.25)", fontSize: 7 } }, "|"),
-        React.createElement(WsMono, { size: 8, ls: 1.5, color: WS.green }, "GRANTED"),
-        React.createElement("span", { style: { color: "rgba(180,140,255,0.25)", fontSize: 7 } }, "|"),
-        React.createElement(WsMono, { size: 8, ls: 1.5, color: "rgba(200,170,255,0.35)" }, WORKSHOP_VERSION),
-        React.createElement("div", { style: { flex: 1 } }),
-        React.createElement("div", { onClick: function() { setShowWsGuide(true); }, style: { width: 28, height: 28, borderRadius: 6, background: "linear-gradient(180deg, #3a2060 0%, #261040 100%)", border: "1px solid rgba(160,100,255,0.35)", boxShadow: "inset 0 1px 0 rgba(200,160,255,0.18), 0 2px 4px rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 } },
-          React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "rgba(200,170,255,0.6)", strokeWidth: "2" },
-            React.createElement("circle", { cx: "12", cy: "12", r: "9" }),
-            React.createElement("path", { d: "M9.5 9.5a2.5 2.5 0 1 1 4.4 1.7c-.6.6-1.4.9-1.4 2.3" }),
-            React.createElement("circle", { cx: "12", cy: "17", r: "0.6", fill: "rgba(200,170,255,0.6)" })
+      // ── TITLE + STATUS HEADER ──
+      React.createElement(WsPanel, { style: { flexShrink: 0, padding: "8px 8px 8px 18px", display: "flex", alignItems: "center", gap: 10, overflow: "hidden", borderRadius: "10px 10px 0 0" } },
+        React.createElement("div", { style: { position: "absolute", left: 0, top: 0, bottom: 0, width: 5, background: "repeating-linear-gradient(135deg, #ffcc00 0 4px, #111 4px 8px)", opacity: 0.65, borderRadius: "10px 0 0 0" } }),
+        React.createElement("div", { style: { position: "absolute", right: 0, top: 0, bottom: 0, width: 5, background: "repeating-linear-gradient(135deg, #ffcc00 0 4px, #111 4px 8px)", opacity: 0.65, borderRadius: "0 10px 0 0" } }),
+        React.createElement("div", { style: { flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 } },
+          React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 33, fontWeight: 700, letterSpacing: 7, color: "#ede8ff", textTransform: "uppercase", textShadow: "0 0 22px rgba(160,100,255,0.55), 0 0 44px rgba(120,60,220,0.25)", lineHeight: 1.1 } }, "WORKSHOP"),
+          React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", gap: 8 } },
+            React.createElement("div", { style: { height: 1, width: 22, background: "rgba(160,100,255,0.25)" } }),
+            React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,170,255,0.32)" }, "SERVICE PANEL  ·  OPEN"),
+            React.createElement("div", { style: { height: 1, width: 22, background: "rgba(160,100,255,0.25)" } })
+          ),
+          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginTop: 2 } },
+            React.createElement(WsLED, { color: WS.green, size: 6 }),
+            React.createElement(WsLED, { color: "#b060ff", size: 6 })
           )
         ),
-        React.createElement("div", { onClick: function() { setShowWsMenu(true); }, style: { width: 28, height: 28, borderRadius: 6, background: "linear-gradient(180deg, #3a2060 0%, #261040 100%)", border: "1px solid rgba(160,100,255,0.35)", boxShadow: "inset 0 1px 0 rgba(200,160,255,0.18), 0 2px 4px rgba(0,0,0,0.5)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, cursor: "pointer", flexShrink: 0 } },
-          React.createElement("div", { style: { width: 12, height: 1.5, borderRadius: 1, background: "rgba(200,170,255,0.6)" } }),
-          React.createElement("div", { style: { width: 12, height: 1.5, borderRadius: 1, background: "rgba(200,170,255,0.6)" } }),
-          React.createElement("div", { style: { width: 12, height: 1.5, borderRadius: 1, background: "rgba(200,170,255,0.6)" } })
+        React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 6, flexShrink: 0 } },
+          React.createElement("div", { onClick: function() { setShowWsGuide(true); }, style: { width: 36, height: 36, borderRadius: 6, background: "linear-gradient(180deg, #3a2060 0%, #261040 100%)", border: "1px solid rgba(160,100,255,0.35)", boxShadow: "inset 0 1px 0 rgba(200,160,255,0.18), 0 2px 4px rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 } },
+            React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "rgba(200,170,255,0.6)", strokeWidth: "2" },
+              React.createElement("circle", { cx: "12", cy: "12", r: "9" }),
+              React.createElement("path", { d: "M9.5 9.5a2.5 2.5 0 1 1 4.4 1.7c-.6.6-1.4.9-1.4 2.3" }),
+              React.createElement("circle", { cx: "12", cy: "17", r: "0.6", fill: "rgba(200,170,255,0.6)" })
+            )
+          ),
+          React.createElement("div", { onClick: function() { setShowWsMenu(true); }, style: { width: 36, height: 36, borderRadius: 6, background: "linear-gradient(180deg, #3a2060 0%, #261040 100%)", border: "1px solid rgba(160,100,255,0.35)", boxShadow: "inset 0 1px 0 rgba(200,160,255,0.18), 0 2px 4px rgba(0,0,0,0.5)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, cursor: "pointer", flexShrink: 0 } },
+            React.createElement("div", { style: { width: 14, height: 2, borderRadius: 1, background: "rgba(200,170,255,0.6)" } }),
+            React.createElement("div", { style: { width: 14, height: 2, borderRadius: 1, background: "rgba(200,170,255,0.6)" } }),
+            React.createElement("div", { style: { width: 14, height: 2, borderRadius: 1, background: "rgba(200,170,255,0.6)" } })
+          )
         )
       ),
 
       // ── SCROLLABLE BODY ──
       React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "8px 10px 6px", display: "flex", flexDirection: "column", gap: 8 } },
 
-        // TITLE PANEL
-        React.createElement(WsPanel, { style: { padding: "14px 14px 12px", overflow: "hidden", position: "relative" } },
-          React.createElement("div", { style: { position: "absolute", left: 0, top: 0, bottom: 0, width: 5, background: "repeating-linear-gradient(135deg, #ffcc00 0 4px, #111 4px 8px)", opacity: 0.65, borderRadius: "10px 0 0 10px" } }),
-          React.createElement("div", { style: { position: "absolute", right: 0, top: 0, bottom: 0, width: 5, background: "repeating-linear-gradient(135deg, #ffcc00 0 4px, #111 4px 8px)", opacity: 0.65, borderRadius: "0 10px 10px 0" } }),
-          React.createElement("div", { style: { textAlign: "center", paddingLeft: 10, paddingRight: 10 } },
-            React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 33, fontWeight: 700, letterSpacing: 7, color: "#ede8ff", textTransform: "uppercase", textShadow: "0 0 22px rgba(160,100,255,0.55), 0 0 44px rgba(120,60,220,0.25)", lineHeight: 1.1 } }, "WORKSHOP"),
-            React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 6 } },
-              React.createElement("div", { style: { height: 1, flex: 1, background: "linear-gradient(90deg, transparent, rgba(160,100,255,0.25))" } }),
-              React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,170,255,0.32)" }, "SERVICE PANEL  ·  OPEN"),
-              React.createElement("div", { style: { height: 1, flex: 1, background: "linear-gradient(270deg, transparent, rgba(160,100,255,0.25))" } })
-            )
-          )
-        ),
-
         // MODULES PANEL
         React.createElement(WsPanel, { style: { padding: "10px" } },
           React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, paddingLeft: 2, paddingRight: 2 } },
             React.createElement(WsMono, { size: 8, ls: 2.5, color: "rgba(180,140,255,0.65)" }, "MODULES"),
-            React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8 } },
-              React.createElement(WsMono, { size: 7, ls: 1, color: "rgba(180,140,255,0.3)" }, "04 / 04"),
-              React.createElement(WsMono, { size: 7, ls: 1.5, color: WS.green + "88" }, "✓ AUTOSAVE")
-            )
+            React.createElement(WsMono, { size: 7, ls: 1, color: "rgba(180,140,255,0.3)" }, "04 / 04")
           ),
           React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 } },
             React.createElement("div", { onClick: function() { loadSavedLevels(); setScreen("builder"); setLbScreen("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(80,200,255,0.12)", borderLeft: "3px solid #80ddff", borderRadius: 8, padding: "10px 10px 10px 10px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 6 } },
@@ -2134,17 +2125,13 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 10 } }, "Configure the alien hull")
             )
           ),
-          React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 8, paddingTop: 6, borderTop: "1px solid rgba(160,100,255,0.08)", paddingLeft: 2, paddingRight: 2 } },
-            React.createElement(WsMono, { size: 7, ls: 1.5, color: "rgba(180,140,255,0.2)" }, "SVC V2.0"),
-            React.createElement(WsMono, { size: 7, ls: 1.5, color: WS.green + "55" }, "AUTOSAVE ✓")
-          )
+
         ),
 
         // ACTIVE LOADOUT
         React.createElement(WsPanel, { style: { padding: "8px 10px" } },
           React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 } },
-            React.createElement(WsMono, { size: 8, ls: 2.5, color: "rgba(180,140,255,0.65)" }, "ACTIVE LOADOUT"),
-            React.createElement(WsMono, { size: 7, ls: 1, color: WS.green + "99" }, "- SYNCED")
+            React.createElement(WsMono, { size: 8, ls: 2.5, color: "rgba(180,140,255,0.65)" }, "ACTIVE LOADOUT")
           ),
           React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 5 } },
             React.createElement("div", { onClick: function() { loadSavedLevels(); setScreen("builder"); setLbScreen("list"); }, style: { background: "linear-gradient(180deg, rgba(80,200,255,0.1) 0%, rgba(60,160,210,0.05) 100%)", border: "1px solid rgba(80,200,255,0.22)", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
@@ -2188,8 +2175,7 @@ export default function CosmicWorkshop() {
         // RECENT PROJECT
         React.createElement(WsPanel, { style: { padding: "8px 10px" } },
           React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 } },
-            React.createElement(WsMono, { size: 8, ls: 2.5, color: "rgba(180,140,255,0.65)" }, "RECENT PROJECT"),
-            React.createElement(WsMono, { size: 7, ls: 1, color: WS.green + "99" }, "- SYNCED")
+            React.createElement(WsMono, { size: 8, ls: 2.5, color: "rgba(180,140,255,0.65)" }, "RECENT PROJECT")
           ),
           savedLevels.length > 0 ? (function() {
             var rec = savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0];
