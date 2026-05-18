@@ -2550,9 +2550,9 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { flex: 1, minWidth: 0 } },
                 React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, bt.label),
                 React.createElement("div", { style: { color: customActive ? "rgba(150,220,170,0.7)" : "rgba(180,200,220,0.3)", fontSize: 10 } }, customActive ? (customActive.name || "Unnamed") : "Default")),
-              customActive && factory && React.createElement(BDBlockPreview, { design: factory, size: 22 }),
               customActive && React.createElement("div", { onClick: function() { bdToggleActive(customActive); }, style: BTN_RENAME }, WsIconReset(), "Use Default"),
               customActive && React.createElement("div", { onClick: function() { bdOpenEditor(customActive); }, style: BTN_EDIT }, WsIconPencil(), "Edit"),
+              customActive && factory && React.createElement(BDBlockPreview, { design: factory, size: 22 }),
               !customActive && factory && React.createElement("div", { onClick: function() { bdCopyPreset(factory); }, style: BTN_EDIT }, WsIconCopy(), "Edit Copy"));
           })),
         bdDeletingId && renderDeleteOverlay("Delete Design?", function() { setBdDeletingId(null); }, function() { bdDeleteDesign(bdDeletingId); }),
@@ -2717,9 +2717,9 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { flex: 1, minWidth: 0 } },
                 React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, et.label),
                 React.createElement("div", { style: { color: customActive ? "rgba(255,200,120,0.7)" : "rgba(180,200,220,0.3)", fontSize: 10 } }, customActive ? (customActive.name || "Unnamed") : "Default")),
-              customActive && vfxFactoryFor(et.id) && React.createElement("div", { style: { width: 22, height: 22, overflow: "hidden", borderRadius: 4, flexShrink: 0 } }, React.createElement("div", { style: { transform: "scale(0.5)", transformOrigin: "top left", width: 44, height: 44 } }, renderVfxIcon(vfxFactoryFor(et.id)))),
               customActive && React.createElement("div", { onClick: function() { vfxToggleActive(customActive); }, style: BTN_RENAME }, WsIconReset(), "Use Default"),
               customActive && React.createElement("div", { onClick: function() { vfxOpenEditor(customActive); }, style: BTN_EDIT }, WsIconPencil(), "Edit"),
+              customActive && vfxFactoryFor(et.id) && React.createElement("div", { style: { width: 22, height: 22, overflow: "hidden", borderRadius: 4, flexShrink: 0 } }, React.createElement("div", { style: { transform: "scale(0.5)", transformOrigin: "top left", width: 44, height: 44 } }, renderVfxIcon(vfxFactoryFor(et.id)))),
               !customActive && shown && React.createElement("div", { onClick: function() { vfxCopyPreset(shown); }, style: BTN_EDIT }, WsIconCopy(), "Edit Copy"));
           })),
         vfxDeletingId && renderDeleteOverlay("Delete Effect?", function() { setVfxDeletingId(null); }, function() { vfxDeleteDesign(vfxDeletingId); }),

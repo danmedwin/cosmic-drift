@@ -9021,10 +9021,7 @@ function CosmicWorkshop() {
         color: customActive ? "rgba(150,220,170,0.7)" : "rgba(180,200,220,0.3)",
         fontSize: 10
       }
-    }, customActive ? customActive.name || "Unnamed" : "Default")), customActive && factory && React.createElement(BDBlockPreview, {
-      design: factory,
-      size: 22
-    }), customActive && React.createElement("div", {
+    }, customActive ? customActive.name || "Unnamed" : "Default")), customActive && React.createElement("div", {
       onClick: function () {
         bdToggleActive(customActive);
       },
@@ -9034,7 +9031,10 @@ function CosmicWorkshop() {
         bdOpenEditor(customActive);
       },
       style: BTN_EDIT
-    }, WsIconPencil(), "Edit"), !customActive && factory && React.createElement("div", {
+    }, WsIconPencil(), "Edit"), customActive && factory && React.createElement(BDBlockPreview, {
+      design: factory,
+      size: 22
+    }), !customActive && factory && React.createElement("div", {
       onClick: function () {
         bdCopyPreset(factory);
       },
@@ -9850,7 +9850,17 @@ function CosmicWorkshop() {
         color: customActive ? "rgba(255,200,120,0.7)" : "rgba(180,200,220,0.3)",
         fontSize: 10
       }
-    }, customActive ? customActive.name || "Unnamed" : "Default")), customActive && vfxFactoryFor(et.id) && React.createElement("div", {
+    }, customActive ? customActive.name || "Unnamed" : "Default")), customActive && React.createElement("div", {
+      onClick: function () {
+        vfxToggleActive(customActive);
+      },
+      style: BTN_RENAME
+    }, WsIconReset(), "Use Default"), customActive && React.createElement("div", {
+      onClick: function () {
+        vfxOpenEditor(customActive);
+      },
+      style: BTN_EDIT
+    }, WsIconPencil(), "Edit"), customActive && vfxFactoryFor(et.id) && React.createElement("div", {
       style: {
         width: 22,
         height: 22,
@@ -9865,17 +9875,7 @@ function CosmicWorkshop() {
         width: 44,
         height: 44
       }
-    }, renderVfxIcon(vfxFactoryFor(et.id)))), customActive && React.createElement("div", {
-      onClick: function () {
-        vfxToggleActive(customActive);
-      },
-      style: BTN_RENAME
-    }, WsIconReset(), "Use Default"), customActive && React.createElement("div", {
-      onClick: function () {
-        vfxOpenEditor(customActive);
-      },
-      style: BTN_EDIT
-    }, WsIconPencil(), "Edit"), !customActive && shown && React.createElement("div", {
+    }, renderVfxIcon(vfxFactoryFor(et.id)))), !customActive && shown && React.createElement("div", {
       onClick: function () {
         vfxCopyPreset(shown);
       },
