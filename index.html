@@ -5420,6 +5420,7 @@ function CosmicDriftGame() {
   var splashShipXRef = useRef(0);
   var splashMovingRef = useRef(false);
   var splashMoveDurRef = useRef(600);
+  var splashPointsRef = useRef(0);
   var _spTick = useState(0);
   var setSplashTick = _spTick[1];
   var _tutsReset = useState(false),
@@ -5932,8 +5933,7 @@ function CosmicDriftGame() {
       var svgGap = 143 - pickRow * 26;
       var popDelay = Math.max(160, Math.round(svgGap * 1.15 / 200 * 650));
       splashPlasmaRef.current = {
-        key: Date.now(),
-        cx: Math.round(splashShipXRef.current / 1.15 + 160)
+        key: Date.now()
       };
       setSplashTick(function (prev) {
         return prev + 1;
@@ -5942,6 +5942,7 @@ function CosmicDriftGame() {
         if (cancelled) return;
         blocks[pickIdx].active = false;
         blocks[pickIdx].popKey = Date.now();
+        splashPointsRef.current = splashPointsRef.current + 1;
         splashPlasmaRef.current = null;
         setSplashTick(function (prev) {
           return prev + 1;
@@ -5966,6 +5967,7 @@ function CosmicDriftGame() {
           blocks[j].active = true;
           blocks[j].popKey = 0;
         }
+        splashPointsRef.current = 0;
         splashPlasmaRef.current = null;
         splashShipXRef.current = 0;
         splashMovingRef.current = false;
@@ -6004,6 +6006,7 @@ function CosmicDriftGame() {
       splashPlasmaRef.current = null;
       splashShipXRef.current = 0;
       splashMovingRef.current = false;
+      splashPointsRef.current = 0;
     };
   }, [screen]);
   // ?play=levelId deep link: auto-load and start a custom level (used by Workshop "Play" buttons).
@@ -9536,6 +9539,8 @@ function CosmicDriftGame() {
       bl: _bl
     });
   }
+  var _spn = splashPointsRef.current;
+  var splashPtsStr = (_spn < 10 ? "00" : _spn < 100 ? "0" : "") + _spn;
   return /*#__PURE__*/React.createElement("div", {
     style: {
       height: viewportH + "px",
@@ -10612,71 +10617,103 @@ function CosmicDriftGame() {
       mixBlendMode: "overlay",
       opacity: 0.6
     }
+  }), /*#__PURE__*/React.createElement(GsPanel, {
+    style: {
+      flexShrink: 0,
+      padding: "8px 8px 8px 18px",
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      position: "relative",
+      zIndex: 1,
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      left: 0,
+      top: 0,
+      bottom: 0,
+      width: 3,
+      background: "repeating-linear-gradient(135deg, #ffb43c 0 5px, #1a1f2a 5px 10px)",
+      opacity: 0.55
+    }
   }), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 6,
-      flexShrink: 0,
-      height: 36,
-      position: "relative",
-      zIndex: 1
+      position: "absolute",
+      right: 0,
+      top: 0,
+      bottom: 0,
+      width: 3,
+      background: "repeating-linear-gradient(135deg, #ffb43c 0 5px, #1a1f2a 5px 10px)",
+      opacity: 0.55
     }
-  }, /*#__PURE__*/React.createElement(GsPanel, {
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
-      height: "100%",
       display: "flex",
+      flexDirection: "column",
       alignItems: "center",
-      padding: "0 12px 0 18px",
+      gap: 3
+    }
+  }, /*#__PURE__*/React.createElement("h1", {
+    style: {
+      margin: 0,
+      lineHeight: 1,
+      fontFamily: "'Exo 2', sans-serif",
+      fontSize: 28,
+      fontWeight: 800,
+      letterSpacing: 6,
+      color: "#dfe9f3",
+      textShadow: "0 1px 0 rgba(255,255,255,0.12), 0 -1px 0 rgba(0,0,0,0.6), 0 0 14px rgba(128,221,255,0.35)",
+      whiteSpace: "nowrap"
+    }
+  }, "COSMIC DRIFT"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'JetBrains Mono', monospace",
+      fontSize: 9,
+      letterSpacing: 3,
+      color: "rgba(200,220,240,0.5)",
+      display: "inline-flex",
+      alignItems: "center",
       gap: 10
     }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 22,
+      height: 1,
+      background: "rgba(80,221,255,0.25)"
+    }
+  }), /*#__PURE__*/React.createElement("span", null, "BLOCK SHOOTER"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 22,
+      height: 1,
+      background: "rgba(80,221,255,0.25)"
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      marginTop: 2
+    }
   }, /*#__PURE__*/React.createElement(GsLED, {
-    color: GS.green
-  }), /*#__PURE__*/React.createElement(GsMono, {
-    size: 9,
-    ls: 2.5,
-    color: "rgba(128,221,255,0.7)",
+    color: DIFF_COLORS[difficulty] || GS.green,
+    size: 6
+  }), /*#__PURE__*/React.createElement(GsLED, {
+    color: gameMode === "campaign" ? GS.blue : "#c8b8ff",
+    size: 6
+  }), /*#__PURE__*/React.createElement(GsLED, {
+    color: npSavedChoice !== "skip" ? GS.green : "rgba(40,55,70,0.7)",
+    size: 6
+  }))), /*#__PURE__*/React.createElement("div", {
     style: {
-      whiteSpace: "nowrap"
-    }
-  }, "CD\xB776"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      width: 1,
-      height: 12,
-      background: "rgba(80,221,255,0.18)",
+      display: "flex",
+      flexDirection: "column",
+      gap: 6,
       flexShrink: 0
     }
-  }), /*#__PURE__*/React.createElement(GsMono, {
-    size: 9,
-    ls: 2,
-    style: {
-      whiteSpace: "nowrap"
-    }
-  }, "DRIFTER"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      width: 1,
-      height: 12,
-      background: "rgba(80,221,255,0.18)",
-      flexShrink: 0
-    }
-  }), /*#__PURE__*/React.createElement(GsMono, {
-    size: 9,
-    ls: 2,
-    style: {
-      whiteSpace: "nowrap"
-    }
-  }, "NOMINAL"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1
-    }
-  }), /*#__PURE__*/React.createElement(GsLED, {
-    color: "#ffb43c",
-    size: 5
-  }), /*#__PURE__*/React.createElement(GsLED, {
-    color: GS.green,
-    size: 5
-  })), /*#__PURE__*/React.createElement(GsIconBtn, {
+  }, /*#__PURE__*/React.createElement(GsIconBtn, {
     onClick: function () {
       setLegendOpen(true);
     }
@@ -10741,75 +10778,7 @@ function CosmicDriftGame() {
       borderRadius: 1,
       background: splashMenuOpen ? "#80ddff" : "rgba(200,210,220,0.6)"
     }
-  }))), /*#__PURE__*/React.createElement(GsPanel, {
-    style: {
-      flexShrink: 0,
-      padding: "8px 18px",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 3,
-      overflow: "hidden",
-      height: 68,
-      position: "relative",
-      zIndex: 1
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "absolute",
-      left: 0,
-      top: 0,
-      bottom: 0,
-      width: 3,
-      background: "repeating-linear-gradient(135deg, #ffb43c 0 5px, #1a1f2a 5px 10px)",
-      opacity: 0.55
-    }
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "absolute",
-      right: 0,
-      top: 0,
-      bottom: 0,
-      width: 3,
-      background: "repeating-linear-gradient(135deg, #ffb43c 0 5px, #1a1f2a 5px 10px)",
-      opacity: 0.55
-    }
-  }), /*#__PURE__*/React.createElement("h1", {
-    style: {
-      margin: 0,
-      lineHeight: 1,
-      fontFamily: "'Exo 2', sans-serif",
-      fontSize: 28,
-      fontWeight: 800,
-      letterSpacing: 6,
-      color: "#dfe9f3",
-      textShadow: "0 1px 0 rgba(255,255,255,0.12), 0 -1px 0 rgba(0,0,0,0.6), 0 0 14px rgba(128,221,255,0.35)",
-      whiteSpace: "nowrap"
-    }
-  }, "COSMIC DRIFT"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: "'JetBrains Mono', monospace",
-      fontSize: 9,
-      letterSpacing: 3,
-      color: "rgba(200,220,240,0.5)",
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 10
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      width: 22,
-      height: 1,
-      background: "rgba(80,221,255,0.25)"
-    }
-  }), /*#__PURE__*/React.createElement("span", null, "BLOCK SHOOTER"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      width: 22,
-      height: 1,
-      background: "rgba(80,221,255,0.25)"
-    }
-  }))), /*#__PURE__*/React.createElement(GsPanel, {
+  })))), /*#__PURE__*/React.createElement(GsPanel, {
     style: {
       flex: 1,
       minHeight: 100,
@@ -10975,7 +10944,17 @@ function CosmicDriftGame() {
     }
   }, /*#__PURE__*/React.createElement("g", {
     transform: "translate(160, 248)"
-  }, /*#__PURE__*/React.createElement("g", {
+  }, splashPlasmaRef.current && /*#__PURE__*/React.createElement("circle", {
+    key: splashPlasmaRef.current.key,
+    cx: 0,
+    cy: -14,
+    r: "5",
+    fill: "#80ddff",
+    style: {
+      filter: "drop-shadow(0 0 8px #80ddff)",
+      animation: "splashPlasmaBall 0.65s ease-in forwards"
+    }
+  }), /*#__PURE__*/React.createElement("g", {
     transform: "scale(0.32) translate(-50, -50)"
   }, /*#__PURE__*/React.createElement("path", {
     d: "M 50 6 L 86 78 L 64 68 L 50 88 L 36 68 L 14 78 Z",
@@ -10986,17 +10965,7 @@ function CosmicDriftGame() {
     style: {
       filter: "drop-shadow(0 0 10px #e9a8e0)"
     }
-  })))), splashPlasmaRef.current && /*#__PURE__*/React.createElement("circle", {
-    key: splashPlasmaRef.current.key,
-    cx: splashPlasmaRef.current.cx,
-    cy: "236",
-    r: "5",
-    fill: "#80ddff",
-    style: {
-      filter: "drop-shadow(0 0 8px #80ddff)",
-      animation: "splashPlasmaBall 0.65s ease-in forwards"
-    }
-  }), /*#__PURE__*/React.createElement("g", {
+  })))), /*#__PURE__*/React.createElement("g", {
     fontFamily: "'JetBrains Mono', monospace",
     fontSize: "8",
     letterSpacing: "1.5",
@@ -11004,10 +10973,10 @@ function CosmicDriftGame() {
   }, /*#__PURE__*/React.createElement("text", {
     x: "22",
     y: "26"
-  }, "N ", "·", " 000"), /*#__PURE__*/React.createElement("text", {
-    x: "252",
+  }, "P · " + splashPtsStr), /*#__PURE__*/React.createElement("text", {
+    x: "248",
     y: "26"
-  }, "SECTOR 7"), /*#__PURE__*/React.createElement("text", {
+  }, "SECT " + GAME_VERSION.toUpperCase()), /*#__PURE__*/React.createElement("text", {
     x: "22",
     y: "304"
   }, "RNG 8x6"), /*#__PURE__*/React.createElement("text", {
@@ -11039,11 +11008,7 @@ function CosmicDriftGame() {
     style: {
       flex: 1
     }
-  }), /*#__PURE__*/React.createElement(GsMono, {
-    size: 7,
-    ls: 1.5,
-    color: "rgba(80,255,210,0.7)"
-  }, "·", " LIVE")), /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
       background: GS.inset,
       border: GS.ib,

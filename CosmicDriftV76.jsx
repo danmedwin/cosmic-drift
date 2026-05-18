@@ -1425,6 +1425,7 @@ export default function CosmicDriftGame() {
   var splashShipXRef = useRef(0);
   var splashMovingRef = useRef(false);
   var splashMoveDurRef = useRef(600);
+  var splashPointsRef = useRef(0);
   var _spTick = useState(0); var setSplashTick = _spTick[1];
   var _tutsReset = useState(false), tutsReset = _tutsReset[0], setTutsReset = _tutsReset[1];
   var _ufoDbg = useState(null), ufoDebugText = _ufoDbg[0], setUfoDebugText = _ufoDbg[1];
@@ -1607,12 +1608,13 @@ export default function CosmicDriftGame() {
       if (pickIdx < 0) { pickTarget(); return; }
       var svgGap = 143 - pickRow * 26;
       var popDelay = Math.max(160, Math.round(svgGap * 1.15 / 200 * 650));
-      splashPlasmaRef.current = { key: Date.now(), cx: Math.round(splashShipXRef.current / 1.15 + 160) };
+      splashPlasmaRef.current = { key: Date.now() };
       setSplashTick(function(prev) { return prev + 1; });
       setTimeout(function() {
         if (cancelled) return;
         blocks[pickIdx].active = false;
         blocks[pickIdx].popKey = Date.now();
+        splashPointsRef.current = splashPointsRef.current + 1;
         splashPlasmaRef.current = null;
         setSplashTick(function(prev) { return prev + 1; });
         setTimeout(function() {
@@ -1629,6 +1631,7 @@ export default function CosmicDriftGame() {
       }
       if (cols.length === 0) {
         for (var j = 0; j < blocks.length; j++) { blocks[j].active = true; blocks[j].popKey = 0; }
+        splashPointsRef.current = 0;
         splashPlasmaRef.current = null;
         splashShipXRef.current = 0;
         splashMovingRef.current = false;
@@ -1661,6 +1664,7 @@ export default function CosmicDriftGame() {
       splashPlasmaRef.current = null;
       splashShipXRef.current = 0;
       splashMovingRef.current = false;
+      splashPointsRef.current = 0;
     };
   }, [screen]);
   // ?play=levelId deep link: auto-load and start a custom level (used by Workshop "Play" buttons).
@@ -2508,6 +2512,9 @@ function logUfo(msg) {
     empBloomEl = <EMPBloomOverlay key="empbloom" ex2={_ex2} sy2={_sy2} bl={_bl} />;
   }
 
+  var _spn = splashPointsRef.current;
+  var splashPtsStr = (_spn < 10 ? "00" : _spn < 100 ? "0" : "") + _spn;
+
   return (
     <div style={{ height: viewportH + "px", background: "#0b0c1a", backgroundImage: "linear-gradient(170deg,#0b0c1a 0%,#151020 40%,#0d1525 100%)", display: "flex", flexDirection: "column", alignItems: "center", fontFamily: "'Quicksand','Segoe UI',sans-serif", touchAction: "none", overflow: "hidden" }}>
       <canvas ref={canvasRef} style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 50 }} />
@@ -2656,38 +2663,32 @@ function logUfo(msg) {
         {/* Wear overlay */}
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80px 18px at 10% 8%, rgba(255,255,255,0.04) 0%, transparent 70%),radial-gradient(ellipse 60px 14px at 88% 92%, rgba(0,0,0,0.25) 0%, transparent 70%),radial-gradient(circle 2px at 30% 80%, rgba(180,200,220,0.18) 0%, transparent 70%),radial-gradient(circle 1.5px at 72% 18%, rgba(180,200,220,0.15) 0%, transparent 70%)", pointerEvents: "none", mixBlendMode: "overlay", opacity: 0.6 }} />
 
-        {/* Top strip */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0, height: 36, position: "relative", zIndex: 1 }}>
-          <GsPanel style={{ flex: 1, height: "100%", display: "flex", alignItems: "center", padding: "0 12px 0 18px", gap: 10 }}>
-            <GsLED color={GS.green} />
-            <GsMono size={9} ls={2.5} color="rgba(128,221,255,0.7)" style={{ whiteSpace: "nowrap" }}>CD&#xb7;76</GsMono>
-            <span style={{ width: 1, height: 12, background: "rgba(80,221,255,0.18)", flexShrink: 0 }} />
-            <GsMono size={9} ls={2} style={{ whiteSpace: "nowrap" }}>DRIFTER</GsMono>
-            <span style={{ width: 1, height: 12, background: "rgba(80,221,255,0.18)", flexShrink: 0 }} />
-            <GsMono size={9} ls={2} style={{ whiteSpace: "nowrap" }}>NOMINAL</GsMono>
-            <div style={{ flex: 1 }} />
-            <GsLED color="#ffb43c" size={5} />
-            <GsLED color={GS.green} size={5} />
-          </GsPanel>
-          <GsIconBtn onClick={function() { setLegendOpen(true); }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M9.5 9.5a2.5 2.5 0 1 1 4.4 1.7c-.6.6-1.4.9-1.4 2.3" /><circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none" /></svg>
-          </GsIconBtn>
-          <div onClick={function() { setSplashMenuOpen(!splashMenuOpen); }} style={{ width: 36, height: 36, borderRadius: 8, background: splashMenuOpen ? "rgba(40,40,55,0.9)" : GS.brushedSolid, border: splashMenuOpen ? "2px solid rgba(80,200,255,0.3)" : GS.pbl, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, cursor: "pointer", flexShrink: 0, boxShadow: splashMenuOpen ? "0 0 12px rgba(80,200,255,0.25), 0 2px 4px rgba(0,0,0,0.5)" : "inset 0 1px 0 rgba(200,230,240,0.14), inset 0 -2px 3px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.5)" }}>
-            <div style={{ width: 14, height: 2, borderRadius: 1, background: splashMenuOpen ? "#80ddff" : "rgba(200,210,220,0.6)" }} />
-            <div style={{ width: 14, height: 2, borderRadius: 1, background: splashMenuOpen ? "#80ddff" : "rgba(200,210,220,0.6)" }} />
-            <div style={{ width: 14, height: 2, borderRadius: 1, background: splashMenuOpen ? "#80ddff" : "rgba(200,210,220,0.6)" }} />
-          </div>
-        </div>
-
-        {/* Title panel */}
-        <GsPanel style={{ flexShrink: 0, padding: "8px 18px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, overflow: "hidden", height: 68, position: "relative", zIndex: 1 }}>
+        {/* Title + status header */}
+        <GsPanel style={{ flexShrink: 0, padding: "8px 8px 8px 18px", display: "flex", alignItems: "center", gap: 10, position: "relative", zIndex: 1, overflow: "hidden" }}>
           <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, background: "repeating-linear-gradient(135deg, #ffb43c 0 5px, #1a1f2a 5px 10px)", opacity: 0.55 }} />
           <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: 3, background: "repeating-linear-gradient(135deg, #ffb43c 0 5px, #1a1f2a 5px 10px)", opacity: 0.55 }} />
-          <h1 style={{ margin: 0, lineHeight: 1, fontFamily: "'Exo 2', sans-serif", fontSize: 28, fontWeight: 800, letterSpacing: 6, color: "#dfe9f3", textShadow: "0 1px 0 rgba(255,255,255,0.12), 0 -1px 0 rgba(0,0,0,0.6), 0 0 14px rgba(128,221,255,0.35)", whiteSpace: "nowrap" }}>COSMIC DRIFT</h1>
-          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, letterSpacing: 3, color: "rgba(200,220,240,0.5)", display: "inline-flex", alignItems: "center", gap: 10 }}>
-            <span style={{ width: 22, height: 1, background: "rgba(80,221,255,0.25)" }} />
-            <span>BLOCK SHOOTER</span>
-            <span style={{ width: 22, height: 1, background: "rgba(80,221,255,0.25)" }} />
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+            <h1 style={{ margin: 0, lineHeight: 1, fontFamily: "'Exo 2', sans-serif", fontSize: 28, fontWeight: 800, letterSpacing: 6, color: "#dfe9f3", textShadow: "0 1px 0 rgba(255,255,255,0.12), 0 -1px 0 rgba(0,0,0,0.6), 0 0 14px rgba(128,221,255,0.35)", whiteSpace: "nowrap" }}>COSMIC DRIFT</h1>
+            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, letterSpacing: 3, color: "rgba(200,220,240,0.5)", display: "inline-flex", alignItems: "center", gap: 10 }}>
+              <span style={{ width: 22, height: 1, background: "rgba(80,221,255,0.25)" }} />
+              <span>BLOCK SHOOTER</span>
+              <span style={{ width: 22, height: 1, background: "rgba(80,221,255,0.25)" }} />
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 2 }}>
+              <GsLED color={DIFF_COLORS[difficulty] || GS.green} size={6} />
+              <GsLED color={gameMode === "campaign" ? GS.blue : "#c8b8ff"} size={6} />
+              <GsLED color={npSavedChoice !== "skip" ? GS.green : "rgba(40,55,70,0.7)"} size={6} />
+            </div>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, flexShrink: 0 }}>
+            <GsIconBtn onClick={function() { setLegendOpen(true); }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M9.5 9.5a2.5 2.5 0 1 1 4.4 1.7c-.6.6-1.4.9-1.4 2.3" /><circle cx="12" cy="17" r="0.9" fill="currentColor" stroke="none" /></svg>
+            </GsIconBtn>
+            <div onClick={function() { setSplashMenuOpen(!splashMenuOpen); }} style={{ width: 36, height: 36, borderRadius: 8, background: splashMenuOpen ? "rgba(40,40,55,0.9)" : GS.brushedSolid, border: splashMenuOpen ? "2px solid rgba(80,200,255,0.3)" : GS.pbl, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, cursor: "pointer", flexShrink: 0, boxShadow: splashMenuOpen ? "0 0 12px rgba(80,200,255,0.25), 0 2px 4px rgba(0,0,0,0.5)" : "inset 0 1px 0 rgba(200,230,240,0.14), inset 0 -2px 3px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.5)" }}>
+              <div style={{ width: 14, height: 2, borderRadius: 1, background: splashMenuOpen ? "#80ddff" : "rgba(200,210,220,0.6)" }} />
+              <div style={{ width: 14, height: 2, borderRadius: 1, background: splashMenuOpen ? "#80ddff" : "rgba(200,210,220,0.6)" }} />
+              <div style={{ width: 14, height: 2, borderRadius: 1, background: splashMenuOpen ? "#80ddff" : "rgba(200,210,220,0.6)" }} />
+            </div>
           </div>
         </GsPanel>
 
@@ -2709,9 +2710,8 @@ function logUfo(msg) {
               {Array.from({ length: 24 }).map(function(_, i) { var a = i / 24 * Math.PI * 2 - Math.PI / 2; var r1 = 146, r2 = i % 6 === 0 ? 134 : 140; return <line key={i} x1={160 + r1 * Math.cos(a)} y1={160 + r1 * Math.sin(a)} x2={160 + r2 * Math.cos(a)} y2={160 + r2 * Math.sin(a)} stroke="rgba(80,221,255,0.35)" strokeWidth="1" />; })}
               {[[10,10,1,1],[310,10,-1,1],[10,310,1,-1],[310,310,-1,-1]].map(function(br, i) { var cx = br[0], cy = br[1], sx = br[2], sy = br[3]; return <g key={"br" + i} stroke="rgba(80,221,255,0.55)" strokeWidth="1.5" strokeLinecap="round"><line x1={cx} y1={cy} x2={cx + 14 * sx} y2={cy} /><line x1={cx} y1={cy} x2={cx} y2={cy + 14 * sy} /></g>; })}
               <g transform="translate(56, 82)">{splashBlocksRef.current.map(function(blk, i) { var pal = ["#80ddff","#c8b8ff","#ffb43c","#64dcb4","#e0457b","#7b5ea7"]; var px = pal[blk.p]; return <rect key={blk.active ? "a" + i : "p" + i} x={blk.c * 26} y={blk.r * 26} width={22} height={22} rx={3} fill={px} opacity="0.95" style={blk.active ? { filter: "drop-shadow(0 0 6px " + px + "aa)" } : { filter: "drop-shadow(0 0 6px " + px + "aa)", animation: "blockPop 0.5s ease-out forwards", transformBox: "fill-box", transformOrigin: "center" }} />; })}</g>
-              <g style={{ transform: "translateX(" + splashShipXRef.current + "px)", transition: splashMovingRef.current ? ("transform " + splashMoveDurRef.current + "ms ease-in-out") : "none" }}><g transform="translate(160, 248)"><g transform="scale(0.32) translate(-50, -50)"><path d="M 50 6 L 86 78 L 64 68 L 50 88 L 36 68 L 14 78 Z" fill="url(#gsShipGrad)" stroke="#3a1a44" strokeWidth="3" strokeLinejoin="round" style={{ filter: "drop-shadow(0 0 10px #e9a8e0)" }} /></g></g></g>
-              {splashPlasmaRef.current && <circle key={splashPlasmaRef.current.key} cx={splashPlasmaRef.current.cx} cy="236" r="5" fill="#80ddff" style={{ filter: "drop-shadow(0 0 8px #80ddff)", animation: "splashPlasmaBall 0.65s ease-in forwards" }} />}
-              <g fontFamily="'JetBrains Mono', monospace" fontSize="8" letterSpacing="1.5" fill="rgba(80,221,255,0.55)"><text x="22" y="26">N {"·"} 000</text><text x="252" y="26">SECTOR 7</text><text x="22" y="304">RNG 8x6</text><text x="246" y="304">{"↑"} HOSTILE</text></g>
+              <g style={{ transform: "translateX(" + splashShipXRef.current + "px)", transition: splashMovingRef.current ? ("transform " + splashMoveDurRef.current + "ms ease-in-out") : "none" }}><g transform="translate(160, 248)">{splashPlasmaRef.current && <circle key={splashPlasmaRef.current.key} cx={0} cy={-14} r="5" fill="#80ddff" style={{ filter: "drop-shadow(0 0 8px #80ddff)", animation: "splashPlasmaBall 0.65s ease-in forwards" }} />}<g transform="scale(0.32) translate(-50, -50)"><path d="M 50 6 L 86 78 L 64 68 L 50 88 L 36 68 L 14 78 Z" fill="url(#gsShipGrad)" stroke="#3a1a44" strokeWidth="3" strokeLinejoin="round" style={{ filter: "drop-shadow(0 0 10px #e9a8e0)" }} /></g></g></g>
+              <g fontFamily="'JetBrains Mono', monospace" fontSize="8" letterSpacing="1.5" fill="rgba(80,221,255,0.55)"><text x="22" y="26">{"P · " + splashPtsStr}</text><text x="248" y="26">{"SECT " + GAME_VERSION.toUpperCase()}</text><text x="22" y="304">RNG 8x6</text><text x="246" y="304">{"↑"} HOSTILE</text></g>
             </svg>
           </div>
         </GsPanel>
@@ -2722,7 +2722,7 @@ function logUfo(msg) {
             <GsLED color={GS.blue} size={5} />
             <GsMono size={8} ls={2} color="rgba(80,221,255,0.7)">FLIGHT RECORD</GsMono>
             <div style={{ flex: 1 }} />
-            <GsMono size={7} ls={1.5} color="rgba(80,255,210,0.7)">{"·"} LIVE</GsMono>
+            
           </div>
           <div style={{ background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: 3, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 3 }}>
             <GsStatReadout s={{ label: "BEST", value: bestScore > 0 ? bestScore.toLocaleString() : "—", glow: GS.blue }} />
