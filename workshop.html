@@ -1239,8 +1239,8 @@ var HULL_PRESETS = {
   falcor: [{
     type: "circle",
     name: "Saucer",
-    x: 20,
-    y: 25,
+    x: 19.94,
+    y: 25.08,
     w: 27,
     h: 27,
     rot: 0,
@@ -1249,8 +1249,8 @@ var HULL_PRESETS = {
   }, {
     type: "triangle",
     name: "Left-Mandible",
-    x: 16,
-    y: 9,
+    x: 15.94,
+    y: 9.37,
     w: 7.5,
     h: 14,
     rot: 12,
@@ -1259,8 +1259,8 @@ var HULL_PRESETS = {
   }, {
     type: "triangle",
     name: "Right-Mandible",
-    x: 24,
-    y: 9,
+    x: 23.94,
+    y: 9.12,
     w: 7.5,
     h: 14,
     rot: -12,
@@ -1277,6 +1277,82 @@ var HULL_PRESETS = {
     rot: 0,
     color: "#b8c0c8",
     opacity: 1
+  }, {
+    type: "circle",
+    x: 32.02,
+    y: 11.87,
+    w: 3.5,
+    h: 1.5,
+    rot: 0,
+    color: "#80ddff",
+    opacity: 0.9,
+    bw: 0,
+    bc: "#000000",
+    bo: 1
+  }, {
+    type: "circle",
+    x: 20,
+    y: 25,
+    w: 11,
+    h: 11,
+    rot: 0,
+    color: "#b8c0c8",
+    opacity: 1,
+    bw: 1,
+    bc: "#797c7e",
+    bo: 1
+  }, {
+    type: "rect",
+    x: 10.77,
+    y: 25,
+    w: 8,
+    h: 4,
+    rot: 0,
+    color: "#b8c0c8",
+    opacity: 1,
+    bw: 0.9,
+    bc: "#747677",
+    bo: 1,
+    cr: 0.75
+  }, {
+    type: "rect",
+    x: 29.38,
+    y: 25,
+    w: 7.5,
+    h: 4,
+    rot: 0,
+    color: "#b8c0c8",
+    opacity: 1,
+    bw: 0.9,
+    bc: "#747677",
+    bo: 1,
+    cr: 0.75
+  }, {
+    type: "rect",
+    x: 20,
+    y: 34.11,
+    w: 8,
+    h: 4,
+    rot: 90,
+    color: "#b8c0c8",
+    opacity: 1,
+    bw: 0.9,
+    bc: "#747677",
+    bo: 1,
+    cr: 0.75
+  }, {
+    type: "rect",
+    x: 20,
+    y: 16,
+    w: 7.5,
+    h: 4,
+    rot: 90,
+    color: "#b8c0c8",
+    opacity: 1,
+    bw: 0.9,
+    bc: "#747677",
+    bo: 1,
+    cr: 0.75
   }],
   // Bird of Play: layer names match bird-of-play.svg. Right-triangle wing
   // fins are rendered as degenerate trapezoids (tw=0) with tofs at the edge
@@ -3548,6 +3624,23 @@ function BDSlider(props) {
     step = props.step || 1,
     label = props.label,
     displayValue = props.displayValue;
+  // Tap the displayed value to type a number directly; commit clamps to
+  // [min, max]. Available everywhere BDSlider is used (Block Designer, VFX,
+  // UFO, Hangar). Enter commits, Escape cancels.
+  var _ed = useState(false),
+    editing = _ed[0],
+    setEditing = _ed[1];
+  var _ev = useState(""),
+    editValue = _ev[0],
+    setEditValue = _ev[1];
+  function commitEdit() {
+    var n = parseFloat(editValue);
+    if (!isNaN(n)) onChange(Math.max(min, Math.min(max, n)));
+    setEditing(false);
+  }
+  function cancelEdit() {
+    setEditing(false);
+  }
   return React.createElement("div", {
     style: {
       marginBottom: 12
@@ -3556,14 +3649,107 @@ function BDSlider(props) {
     style: {
       display: "flex",
       justifyContent: "space-between",
+      alignItems: "center",
       fontSize: 13,
       color: "#889",
       marginBottom: 4,
       fontFamily: "'Exo 2', sans-serif"
     }
-  }, React.createElement("span", null, label), React.createElement("span", {
+  }, React.createElement("span", null, label), editing ? React.createElement("div", {
     style: {
-      color: "#bbc"
+      display: "flex",
+      alignItems: "center",
+      gap: 4
+    }
+  }, React.createElement("input", {
+    type: "text",
+    value: editValue,
+    autoFocus: true,
+    onChange: function (e) {
+      setEditValue(e.target.value);
+    },
+    onKeyDown: function (e) {
+      if (e.key === "Enter") commitEdit();else if (e.key === "Escape") cancelEdit();
+    },
+    style: {
+      width: 64,
+      padding: "2px 6px",
+      fontSize: 16,
+      fontFamily: "'Exo 2', sans-serif",
+      background: "rgba(0,0,0,0.3)",
+      border: "1px solid rgba(128,221,255,0.5)",
+      color: "#bbc",
+      borderRadius: 4,
+      outline: "none",
+      textAlign: "right"
+    }
+  }), React.createElement("div", {
+    onMouseDown: function (e) {
+      e.preventDefault();
+    },
+    onClick: commitEdit,
+    title: "Confirm",
+    style: {
+      width: 22,
+      height: 22,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 4,
+      cursor: "pointer",
+      background: "rgba(80,200,100,0.2)",
+      border: "1px solid rgba(80,200,100,0.4)"
+    }
+  }, React.createElement("svg", {
+    width: "12",
+    height: "12",
+    viewBox: "0 0 24 24"
+  }, React.createElement("path", {
+    d: "M5 13l4 4L19 7",
+    fill: "none",
+    stroke: "#80dd90",
+    strokeWidth: "2.5",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }))), React.createElement("div", {
+    onMouseDown: function (e) {
+      e.preventDefault();
+    },
+    onClick: cancelEdit,
+    title: "Cancel",
+    style: {
+      width: 22,
+      height: 22,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 4,
+      cursor: "pointer",
+      background: "rgba(220,60,80,0.18)",
+      border: "1px solid rgba(220,60,80,0.45)"
+    }
+  }, React.createElement("svg", {
+    width: "12",
+    height: "12",
+    viewBox: "0 0 24 24"
+  }, React.createElement("path", {
+    d: "M6 6L18 18 M18 6L6 18",
+    fill: "none",
+    stroke: "#ff8088",
+    strokeWidth: "2.5",
+    strokeLinecap: "round"
+  })))) : React.createElement("span", {
+    onClick: function () {
+      setEditValue(String(value));
+      setEditing(true);
+    },
+    title: "Tap to type a value",
+    style: {
+      color: "#bbc",
+      cursor: "pointer",
+      padding: "2px 6px",
+      borderRadius: 4,
+      userSelect: "none"
     }
   }, displayValue != null ? displayValue : value)), React.createElement("input", {
     type: "range",

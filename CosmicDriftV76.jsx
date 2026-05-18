@@ -849,10 +849,16 @@ var HULL_PRESETS = {
     { type: "line",   name: "right-arm",     x: 24.6, y: 27.3, w: 12,   h: 1.35, rot: 47,  color: "#b8c0c8", opacity: 1 }
   ],
   falcor: [
-    { type: "circle",   name: "Saucer",         x: 20, y: 25, w: 27,  h: 27, rot: 0,    color: "#b8c0c8", opacity: 1 },
-    { type: "triangle", name: "Left-Mandible",  x: 16, y: 9,  w: 7.5, h: 14, rot: 12,   color: "#b8c0c8", opacity: 1 },
-    { type: "triangle", name: "Right-Mandible", x: 24, y: 9,  w: 7.5, h: 14, rot: -12,  color: "#b8c0c8", opacity: 1 },
-    { type: "rect",     name: "Cockpit",        x: 32, y: 15, w: 3.4, h: 8,  cr: 1,     rot: 0, color: "#b8c0c8", opacity: 1 }
+    { type: "circle",   name: "Saucer",         x: 19.94, y: 25.08, w: 27,  h: 27, rot: 0,   color: "#b8c0c8", opacity: 1 },
+    { type: "triangle", name: "Left-Mandible",  x: 15.94, y: 9.37,  w: 7.5, h: 14, rot: 12,  color: "#b8c0c8", opacity: 1 },
+    { type: "triangle", name: "Right-Mandible", x: 23.94, y: 9.12,  w: 7.5, h: 14, rot: -12, color: "#b8c0c8", opacity: 1 },
+    { type: "rect",     name: "Cockpit",        x: 32,    y: 15,    w: 3.4, h: 8,  cr: 1,    rot: 0, color: "#b8c0c8", opacity: 1 },
+    { type: "circle",   x: 32.02, y: 11.87, w: 3.5,  h: 1.5, rot: 0,  color: "#80ddff", opacity: 0.9, bw: 0,   bc: "#000000", bo: 1 },
+    { type: "circle",   x: 20,    y: 25,    w: 11,   h: 11,  rot: 0,  color: "#b8c0c8", opacity: 1,   bw: 1,   bc: "#797c7e", bo: 1 },
+    { type: "rect",     x: 10.77, y: 25,    w: 8,    h: 4,   rot: 0,  color: "#b8c0c8", opacity: 1,   bw: 0.9, bc: "#747677", bo: 1, cr: 0.75 },
+    { type: "rect",     x: 29.38, y: 25,    w: 7.5,  h: 4,   rot: 0,  color: "#b8c0c8", opacity: 1,   bw: 0.9, bc: "#747677", bo: 1, cr: 0.75 },
+    { type: "rect",     x: 20,    y: 34.11, w: 8,    h: 4,   rot: 90, color: "#b8c0c8", opacity: 1,   bw: 0.9, bc: "#747677", bo: 1, cr: 0.75 },
+    { type: "rect",     x: 20,    y: 16,    w: 7.5,  h: 4,   rot: 90, color: "#b8c0c8", opacity: 1,   bw: 0.9, bc: "#747677", bo: 1, cr: 0.75 }
   ],
   birdofplay: [
     { type: "rect",      name: "Rounded-Rectangle",        x: 20,    y: 28.46, w: 15.41, h: 14.45, cr: 2.61, rot: 0,   color: "#b8c0c8", opacity: 1 },
