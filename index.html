@@ -5924,28 +5924,66 @@ function CosmicDriftGame() {
     var cancelled = false;
     function doFire() {
       if (firing || cancelled) return;
-      var active = [];
+      var anyActive = false;
       for (var i = 0; i < blocks.length; i++) {
-        if (blocks[i].active) active.push(i);
+        if (blocks[i].active) {
+          anyActive = true;
+          break;
+        }
       }
-      if (active.length === 0) {
+      if (!anyActive) {
         for (var j = 0; j < blocks.length; j++) {
           blocks[j].active = true;
           blocks[j].popKey = 0;
         }
         splashPlasmaRef.current = null;
-        setSplashTick(function (t) {
-          return t + 1;
+        setSplashTick(function (prev) {
+          return prev + 1;
         });
         return;
       }
-      var pickIdx = active[Math.floor(Math.random() * active.length)];
+      // Estimate ship aimed column from drift timing (10 s period matches CSS animation)
+      var driftT = Date.now() % 10000 / 10000;
+      var driftPx = -Math.cos(driftT * 2 * Math.PI) * 100;
+      var shipSvgX = 160 + driftPx / 1.15;
+      // Find the active column closest to ship X
+      var aimedCol = -1;
+      var aimDist = 9999;
+      var colSeen = {};
+      for (var ci = 0; ci < blocks.length; ci++) {
+        if (!blocks[ci].active) continue;
+        var bc = blocks[ci].c;
+        if (colSeen[bc]) continue;
+        colSeen[bc] = true;
+        var d = Math.abs(shipSvgX - (67 + bc * 26));
+        if (d < aimDist) {
+          aimDist = d;
+          aimedCol = bc;
+        }
+      }
+      // Within that column pick the lowest active block (highest row = closest to ship)
+      var pickIdx = -1;
+      var pickRow = -1;
+      for (var k = 0; k < blocks.length; k++) {
+        if (!blocks[k].active || blocks[k].c !== aimedCol) continue;
+        if (blocks[k].r > pickRow) {
+          pickRow = blocks[k].r;
+          pickIdx = k;
+        }
+      }
+      if (pickIdx < 0) return;
+      // Time the pop so it coincides with plasma reaching that row
+      // Plasma circle starts at cy=-12 inside translate(160,248) → SVG y=236
+      // Block row r center SVG y = 93 + r*26; gap = 236-(93+r*26) = 143-r*26 SVG units
+      // Animation: -200px CSS over 650 ms; svgScale ≈ 1.15
+      var svgGap = 143 - pickRow * 26;
+      var popDelay = Math.max(160, Math.round(svgGap * 1.15 / 200 * 650));
       firing = true;
       splashPlasmaRef.current = {
         key: Date.now()
       };
-      setSplashTick(function (t) {
-        return t + 1;
+      setSplashTick(function (prev) {
+        return prev + 1;
       });
       setTimeout(function () {
         if (cancelled) return;
@@ -5953,10 +5991,10 @@ function CosmicDriftGame() {
         blocks[pickIdx].popKey = Date.now();
         splashPlasmaRef.current = null;
         firing = false;
-        setSplashTick(function (t) {
-          return t + 1;
+        setSplashTick(function (prev) {
+          return prev + 1;
         });
-      }, 600);
+      }, popDelay);
     }
     var firstFire = setTimeout(doFire, 1200);
     var interval = setInterval(doFire, 3000);
@@ -10931,7 +10969,7 @@ function CosmicDriftGame() {
     });
   })), /*#__PURE__*/React.createElement("g", {
     style: {
-      animation: "splashShipDrift 4s ease-in-out infinite"
+      animation: "splashShipDrift 10s ease-in-out infinite"
     }
   }, /*#__PURE__*/React.createElement("g", {
     transform: "translate(160, 248)"
