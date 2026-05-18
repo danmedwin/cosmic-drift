@@ -1238,16 +1238,6 @@ var HULL_PRESETS = {
   // approximated as rotated isoceles triangles (the SVG quadrilaterals taper
   // to ~16% width at the top, so the triangle silhouette matches closely).
   falcor: [{
-    type: "circle",
-    name: "Saucer",
-    x: 19.94,
-    y: 25.08,
-    w: 27,
-    h: 27,
-    rot: 0,
-    color: "#b8c0c8",
-    opacity: 1
-  }, {
     type: "triangle",
     name: "Left-Mandible",
     x: 15.94,
@@ -1255,8 +1245,11 @@ var HULL_PRESETS = {
     w: 7.5,
     h: 14,
     rot: 12,
-    color: "#b8c0c8",
-    opacity: 1
+    color: "#222a3a",
+    opacity: 1,
+    fillMode: "linear",
+    color2: "#a0a8b8",
+    gradAngle: 270
   }, {
     type: "triangle",
     name: "Right-Mandible",
@@ -1265,8 +1258,25 @@ var HULL_PRESETS = {
     w: 7.5,
     h: 14,
     rot: -12,
-    color: "#b8c0c8",
-    opacity: 1
+    color: "#222a3a",
+    opacity: 1,
+    fillMode: "linear",
+    color2: "#a0a8b8",
+    gradAngle: 285
+  }, {
+    type: "circle",
+    name: "Saucer",
+    x: 20.13,
+    y: 25.36,
+    w: 27,
+    h: 27,
+    rot: 0,
+    color: "#222a3a",
+    opacity: 1,
+    fillMode: "radial",
+    color2: "#a0a8b8",
+    gradStop: 0.4,
+    bw: 0
   }, {
     type: "rect",
     name: "Cockpit",
@@ -1276,8 +1286,10 @@ var HULL_PRESETS = {
     h: 8,
     cr: 1,
     rot: 0,
-    color: "#b8c0c8",
-    opacity: 1
+    color: "#a0a8b8",
+    opacity: 1,
+    fillMode: "linear",
+    color2: "#222a3a"
   }, {
     type: "circle",
     x: 32.02,
@@ -1291,69 +1303,84 @@ var HULL_PRESETS = {
     bc: "#000000",
     bo: 1
   }, {
-    type: "circle",
-    x: 20,
-    y: 25,
-    w: 11,
-    h: 11,
-    rot: 0,
-    color: "#b8c0c8",
-    opacity: 1,
-    bw: 1,
-    bc: "#797c7e",
-    bo: 1
-  }, {
     type: "rect",
     x: 10.77,
     y: 25,
     w: 8,
     h: 4,
     rot: 0,
-    color: "#b8c0c8",
+    color: "#222a3a",
     opacity: 1,
-    bw: 0.9,
+    bw: 0,
     bc: "#747677",
     bo: 1,
-    cr: 0.75
+    cr: 0.75,
+    fillMode: "linear",
+    color2: "#a0a8b8",
+    gradAngle: 270
   }, {
     type: "rect",
     x: 29.38,
     y: 25,
-    w: 7.5,
+    w: 8,
     h: 4,
     rot: 0,
-    color: "#b8c0c8",
+    color: "#222a3a",
     opacity: 1,
-    bw: 0.9,
+    bw: 0,
     bc: "#747677",
     bo: 1,
-    cr: 0.75
+    cr: 0.75,
+    fillMode: "linear",
+    color2: "#a0a8b8",
+    gradAngle: 270
   }, {
     type: "rect",
     x: 20,
     y: 34.11,
-    w: 8,
+    w: 9,
     h: 4,
     rot: 90,
     color: "#b8c0c8",
     opacity: 1,
-    bw: 0.9,
+    bw: 0.5,
     bc: "#747677",
     bo: 1,
-    cr: 0.75
+    cr: 0.75,
+    fillMode: "linear",
+    color2: "#222a3a",
+    gradAngle: 90
   }, {
     type: "rect",
     x: 20,
-    y: 16,
+    y: 15.8,
     w: 7.5,
-    h: 4,
+    h: 4.1,
     rot: 90,
     color: "#b8c0c8",
     opacity: 1,
-    bw: 0.9,
+    bw: 0.5,
     bc: "#747677",
     bo: 1,
-    cr: 0.75
+    cr: 0.75,
+    fillMode: "linear",
+    color2: "#222a3a",
+    gradAngle: 90
+  }, {
+    type: "circle",
+    x: 20,
+    y: 25,
+    w: 11,
+    h: 11,
+    rot: 0,
+    color: "#6b6b6b",
+    opacity: 1,
+    bw: 1,
+    bc: "#000000",
+    bo: 0.2,
+    fillMode: "radial",
+    color2: "#222a3a",
+    gradStop: 0.1
   }],
   // Bird of Play: layer names match bird-of-play.svg. Right-triangle wing
   // fins are rendered as degenerate trapezoids (tw=0) with tofs at the edge
@@ -7891,15 +7918,18 @@ function CosmicWorkshop() {
     var rows = document.querySelectorAll("[data-shippart-row]");
     var cy = e.clientY != null ? e.clientY : e.touches && e.touches[0] ? e.touches[0].clientY : 0;
     var targetIdx = d.idx;
+    // Rows are rendered in reverse Z order (top layer first), so we read each
+    // row's data-shippart-actual-idx attribute to translate display position
+    // back to the part's underlying index.
     for (var i = 0; i < rows.length; i++) {
       var r = rows[i].getBoundingClientRect();
       if (cy < r.top + r.height / 2) {
-        targetIdx = i;
+        targetIdx = parseInt(rows[i].getAttribute("data-shippart-actual-idx"), 10);
         break;
       }
-      if (i === rows.length - 1) targetIdx = i;
+      if (i === rows.length - 1) targetIdx = parseInt(rows[i].getAttribute("data-shippart-actual-idx"), 10);
     }
-    if (targetIdx !== d.idx) {
+    if (!isNaN(targetIdx) && targetIdx !== d.idx) {
       shipReorderPart(d.idx, targetIdx);
       d.idx = targetIdx;
     }
@@ -13428,7 +13458,12 @@ function CosmicWorkshop() {
         flexDirection: "column",
         gap: 4
       }
-    }, partsList.map(function (p, idx) {
+    },
+    // Reverse the visual order so the top layer (highest Z, end of
+    // the parts array) is at the top of the list. Underlying array
+    // is unchanged; we just iterate from the end.
+    partsList.slice().reverse().map(function (p, displayIdx) {
+      var idx = partsList.length - 1 - displayIdx;
       var isSel = idx === shipSelectedPart;
       var displayName = p.name || SHIP_PART_LABELS[p.type];
       return React.createElement("div", Object.assign({
@@ -13447,7 +13482,8 @@ function CosmicWorkshop() {
           border: isSel ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.05)"
         }
       }, {
-        "data-shippart-row": "1"
+        "data-shippart-row": "1",
+        "data-shippart-actual-idx": String(idx)
       }),
       // Drag handle (6-dot grip) for reordering Z-layer
       React.createElement("div", {
