@@ -1637,7 +1637,7 @@ export default function CosmicDriftGame() {
       var svgGap = 143 - pickRow * 26;
       var popDelay = Math.max(160, Math.round(svgGap * 1.15 / 200 * 650));
       firing = true;
-      splashPlasmaRef.current = { key: Date.now() };
+      splashPlasmaRef.current = { key: Date.now(), cx: Math.round(shipSvgX) };
       setSplashTick(function(prev) { return prev + 1; });
       setTimeout(function() {
         if (cancelled) return;
@@ -2698,7 +2698,8 @@ function logUfo(msg) {
               {Array.from({ length: 24 }).map(function(_, i) { var a = i / 24 * Math.PI * 2 - Math.PI / 2; var r1 = 146, r2 = i % 6 === 0 ? 134 : 140; return <line key={i} x1={160 + r1 * Math.cos(a)} y1={160 + r1 * Math.sin(a)} x2={160 + r2 * Math.cos(a)} y2={160 + r2 * Math.sin(a)} stroke="rgba(80,221,255,0.35)" strokeWidth="1" />; })}
               {[[10,10,1,1],[310,10,-1,1],[10,310,1,-1],[310,310,-1,-1]].map(function(br, i) { var cx = br[0], cy = br[1], sx = br[2], sy = br[3]; return <g key={"br" + i} stroke="rgba(80,221,255,0.55)" strokeWidth="1.5" strokeLinecap="round"><line x1={cx} y1={cy} x2={cx + 14 * sx} y2={cy} /><line x1={cx} y1={cy} x2={cx} y2={cy + 14 * sy} /></g>; })}
               <g transform="translate(56, 82)">{splashBlocksRef.current.map(function(blk, i) { var pal = ["#80ddff","#c8b8ff","#ffb43c","#64dcb4","#e0457b","#7b5ea7"]; var px = pal[blk.p]; return <rect key={blk.active ? "a" + i : "p" + i} x={blk.c * 26} y={blk.r * 26} width={22} height={22} rx={3} fill={px} opacity="0.95" style={blk.active ? { filter: "drop-shadow(0 0 6px " + px + "aa)" } : { filter: "drop-shadow(0 0 6px " + px + "aa)", animation: "blockPop 0.5s ease-out forwards", transformBox: "fill-box", transformOrigin: "center" }} />; })}</g>
-              <g style={{ animation: "splashShipDrift 10s ease-in-out infinite" }}><g transform="translate(160, 248)"><g transform="scale(0.32) translate(-50, -50)"><path d="M 50 6 L 86 78 L 64 68 L 50 88 L 36 68 L 14 78 Z" fill="url(#gsShipGrad)" stroke="#3a1a44" strokeWidth="3" strokeLinejoin="round" style={{ filter: "drop-shadow(0 0 10px #e9a8e0)" }} /></g>{splashPlasmaRef.current && <circle key={splashPlasmaRef.current.key} cx="0" cy="-12" r="5" fill="#80ddff" style={{ filter: "drop-shadow(0 0 8px #80ddff)", animation: "splashPlasmaBall 0.65s ease-in forwards" }} />}</g></g>
+              <g style={{ animation: "splashShipDrift 10s ease-in-out infinite" }}><g transform="translate(160, 248)"><g transform="scale(0.32) translate(-50, -50)"><path d="M 50 6 L 86 78 L 64 68 L 50 88 L 36 68 L 14 78 Z" fill="url(#gsShipGrad)" stroke="#3a1a44" strokeWidth="3" strokeLinejoin="round" style={{ filter: "drop-shadow(0 0 10px #e9a8e0)" }} /></g></g></g>
+              {splashPlasmaRef.current && <circle key={splashPlasmaRef.current.key} cx={splashPlasmaRef.current.cx} cy="236" r="5" fill="#80ddff" style={{ filter: "drop-shadow(0 0 8px #80ddff)", animation: "splashPlasmaBall 0.65s ease-in forwards" }} />}
               <g fontFamily="'JetBrains Mono', monospace" fontSize="8" letterSpacing="1.5" fill="rgba(80,221,255,0.55)"><text x="22" y="26">N {"·"} 000</text><text x="252" y="26">SECTOR 7</text><text x="22" y="304">RNG 8x6</text><text x="246" y="304">{"↑"} HOSTILE</text></g>
             </svg>
           </div>
