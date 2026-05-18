@@ -809,12 +809,12 @@ var GAME_UFO_DESIGN = Object.assign({}, UFO_DEFAULT_DESIGN);
 var SHIP_DESIGNS_KEY  = "cosmic-drift-ship-designs";
 var SHIP_ACTIVE_KEY_G = "cosmic-drift-ship-active";
 var SHIP_DEFAULT_DESIGN = { hull: "arrow", parts: [] };
+// Normalized 6-point swept-arrow polygon (matches Workshop's ARROW_POINTS).
+var ARROW_POINTS = [[0, -0.5], [0.5, 0.269], [0.207, 0.170], [0, 0.5], [-0.207, 0.170], [-0.5, 0.269]];
 // Parts-array hull presets (kept in sync with Workshop's HULL_PRESETS).
-// The game also migrates stored designs missing parts by populating from the
-// named hull preset, so legacy saves render correctly without a Workshop visit.
 var HULL_PRESETS = {
   arrow: [
-    { type: "triangle", x: 20, y: 22, w: 28, h: 32, rot: 0, color: "#ffd0ff", opacity: 1 }
+    { type: "arrow", name: "Triangle", x: 20, y: 20, w: 24, h: 36, rot: 0, color: "#efb6ed", opacity: 1, bw: 1, bc: "#a45ba3", bo: 1 }
   ],
   dart: [
     { type: "triangle", x: 20, y: 22, w: 16, h: 34, rot: 0, color: "#ffd0ff", opacity: 1 }
@@ -837,13 +837,19 @@ var HULL_PRESETS = {
     { type: "circle", x: 19, y: 17, w: 12, h: 10, rot: 0, color: "#80ddff", opacity: 0.85 }
   ],
   startrack: [
-    { type: "circle", x: 20,   y: 10,   w: 17,   h: 17,   rot: 0,   color: "#b8c0c8", opacity: 1 },
-    { type: "circle", x: 20,   y: 8,    w: 9,    h: 4,    rot: 0,   color: "#80ddff", opacity: 0.55 },
-    { type: "rect",   x: 20,   y: 24.5, w: 4.4,  h: 16.2, cr: 2.2,  rot: 0, color: "#b8c0c8", opacity: 1 },
-    { type: "rect",   x: 11.3, y: 29.1, w: 2.4,  h: 19.8, cr: 1.2,  rot: 0, color: "#b8c0c8", opacity: 1 },
-    { type: "rect",   x: 28.7, y: 29.1, w: 2.4,  h: 19.8, cr: 1.2,  rot: 0, color: "#b8c0c8", opacity: 1 },
-    { type: "line",   x: 15.4, y: 27.3, w: 12,   h: 1.35, rot: -47, color: "#b8c0c8", opacity: 1 },
-    { type: "line",   x: 24.6, y: 27.3, w: 12,   h: 1.35, rot: 47,  color: "#b8c0c8", opacity: 1 }
+    { type: "circle", name: "Saucer",        x: 20,   y: 10,   w: 17,   h: 17,   rot: 0,   color: "#b8c0c8", opacity: 1 },
+    { type: "circle", name: "Dome",          x: 20,   y: 8,    w: 9,    h: 4,    rot: 0,   color: "#80ddff", opacity: 0.55 },
+    { type: "rect",   name: "Body",          x: 20,   y: 24.5, w: 4.4,  h: 16.2, cr: 2.2,  rot: 0, color: "#b8c0c8", opacity: 1 },
+    { type: "rect",   name: "left-nacelle",  x: 11.3, y: 29.1, w: 2.4,  h: 19.8, cr: 1.2,  rot: 0, color: "#b8c0c8", opacity: 1 },
+    { type: "rect",   name: "right-nacelle", x: 28.7, y: 29.1, w: 2.4,  h: 19.8, cr: 1.2,  rot: 0, color: "#b8c0c8", opacity: 1 },
+    { type: "line",   name: "left-arm",      x: 15.4, y: 27.3, w: 12,   h: 1.35, rot: -47, color: "#b8c0c8", opacity: 1 },
+    { type: "line",   name: "right-arm",     x: 24.6, y: 27.3, w: 12,   h: 1.35, rot: 47,  color: "#b8c0c8", opacity: 1 }
+  ],
+  falcor: [
+    { type: "circle",   name: "Saucer",         x: 20, y: 25, w: 27,  h: 27, rot: 0,    color: "#b8c0c8", opacity: 1 },
+    { type: "triangle", name: "Left-Mandible",  x: 16, y: 8,  w: 7.5, h: 14, rot: 12,   color: "#b8c0c8", opacity: 1 },
+    { type: "triangle", name: "Right-Mandible", x: 24, y: 8,  w: 7.5, h: 14, rot: -12,  color: "#b8c0c8", opacity: 1 },
+    { type: "rect",     name: "Cockpit",        x: 32, y: 15, w: 3.4, h: 8,  cr: 1,     rot: 0, color: "#b8c0c8", opacity: 1 }
   ],
   none: []
 };
@@ -887,6 +893,10 @@ function shipRenderPart(part, key) {
   }
   if (part.type === "line") {
     return React.createElement("rect", Object.assign({ key: key, x: x - w / 2, y: y - Math.max(0.4, h) / 2, width: w, height: Math.max(0.4, h), fill: color, opacity: op, transform: t }, strokeProps));
+  }
+  if (part.type === "arrow") {
+    var apts = ARROW_POINTS.map(function(p){ return (x + p[0] * w) + "," + (y + p[1] * h); }).join(" ");
+    return React.createElement("polygon", Object.assign({ key: key, points: apts, fill: color, opacity: op, transform: t }, strokeProps));
   }
   return null;
 }

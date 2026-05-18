@@ -152,16 +152,22 @@ function UFOBlockSvg(props) {
       React.createElement("ellipse", { cx: hx - dRx * 0.22, cy: dY - dRy * 0.28, rx: dRx * 0.27, ry: dRy * 0.22, fill: "white", opacity: "0.25", transform: "rotate(-20," + (hx - dRx * 0.22) + "," + (dY - dRy * 0.28) + ")", clipPath: "url(#ufo-dc-" + uid + ")" })));
 }
 
-var SHIP_HULLS = ["arrow", "dart", "raptor", "wedge", "cruiser", "saucer", "startrack", "none"];
-var SHIP_HULL_LABELS = { arrow: "Default", dart: "Dart", raptor: "Raptor", wedge: "Wedge", cruiser: "Cruiser", saucer: "Saucer", startrack: "Star Track", none: "None" };
-var SHIP_PART_TYPES = ["circle", "rect", "triangle", "line"];
-var SHIP_PART_LABELS = { circle: "Oval", rect: "Rect", triangle: "Triangle", line: "Line" };
+var SHIP_HULLS = ["arrow", "dart", "raptor", "wedge", "cruiser", "saucer", "startrack", "falcor", "none"];
+var SHIP_HULL_LABELS = { arrow: "Default", dart: "Dart", raptor: "Raptor", wedge: "Wedge", cruiser: "Cruiser", saucer: "Saucer", startrack: "Star Track", falcor: "Millenia Falcor", none: "None" };
+var SHIP_PART_TYPES = ["circle", "rect", "triangle", "line", "arrow"];
+var SHIP_PART_LABELS = { circle: "Oval", rect: "Rect", triangle: "Triangle", line: "Line", arrow: "Arrow" };
+// Normalized 6-point swept-arrow polygon (centered, range [-0.5, 0.5]).
+// Derived from Cosmic-drift-default-ship.svg: front tip, right wing tip, right
+// inner notch, back tail, left inner notch, left wing tip.
+var ARROW_POINTS = [[0, -0.5], [0.5, 0.269], [0.207, 0.170], [0, 0.5], [-0.207, 0.170], [-0.5, 0.269]];
 // Each hull preset is a parts array (no baked hull SVG). Selecting a hull in
 // the editor loads its parts; existing saved designs with empty `parts` are
 // migrated on load by populating from the named hull preset.
 var HULL_PRESETS = {
+  // Default ship — single swept-arrow polygon from Cosmic-drift-default-ship.svg.
+  // SVG layer was named "Triangle"; we preserve the name on the part.
   arrow: [
-    { type: "triangle", x: 20, y: 22, w: 28, h: 32, rot: 0, color: "#ffd0ff", opacity: 1 }
+    { type: "arrow", name: "Triangle", x: 20, y: 20, w: 24, h: 36, rot: 0, color: "#efb6ed", opacity: 1, bw: 1, bc: "#a45ba3", bo: 1 }
   ],
   dart: [
     { type: "triangle", x: 20, y: 22, w: 16, h: 34, rot: 0, color: "#ffd0ff", opacity: 1 }
@@ -183,16 +189,24 @@ var HULL_PRESETS = {
     { type: "circle", x: 20, y: 24, w: 32, h: 22, rot: 0, color: "#ffd0ff", opacity: 1 },
     { type: "circle", x: 19, y: 17, w: 12, h: 10, rot: 0, color: "#80ddff", opacity: 0.85 }
   ],
-  // Star Track: top-down Star-Trek-style saucer + body + two nacelles + pylon arms.
-  // Derived from star-track.svg by scaling 0.045 and centering on (20,20).
+  // Star Track: layer names match star-track.svg.
   startrack: [
-    { type: "circle", x: 20,   y: 10,   w: 17,   h: 17,   rot: 0,   color: "#b8c0c8", opacity: 1 },
-    { type: "circle", x: 20,   y: 8,    w: 9,    h: 4,    rot: 0,   color: "#80ddff", opacity: 0.55 },
-    { type: "rect",   x: 20,   y: 24.5, w: 4.4,  h: 16.2, cr: 2.2,  rot: 0, color: "#b8c0c8", opacity: 1 },
-    { type: "rect",   x: 11.3, y: 29.1, w: 2.4,  h: 19.8, cr: 1.2,  rot: 0, color: "#b8c0c8", opacity: 1 },
-    { type: "rect",   x: 28.7, y: 29.1, w: 2.4,  h: 19.8, cr: 1.2,  rot: 0, color: "#b8c0c8", opacity: 1 },
-    { type: "line",   x: 15.4, y: 27.3, w: 12,   h: 1.35, rot: -47, color: "#b8c0c8", opacity: 1 },
-    { type: "line",   x: 24.6, y: 27.3, w: 12,   h: 1.35, rot: 47,  color: "#b8c0c8", opacity: 1 }
+    { type: "circle", name: "Saucer",        x: 20,   y: 10,   w: 17,   h: 17,   rot: 0,   color: "#b8c0c8", opacity: 1 },
+    { type: "circle", name: "Dome",          x: 20,   y: 8,    w: 9,    h: 4,    rot: 0,   color: "#80ddff", opacity: 0.55 },
+    { type: "rect",   name: "Body",          x: 20,   y: 24.5, w: 4.4,  h: 16.2, cr: 2.2,  rot: 0, color: "#b8c0c8", opacity: 1 },
+    { type: "rect",   name: "left-nacelle",  x: 11.3, y: 29.1, w: 2.4,  h: 19.8, cr: 1.2,  rot: 0, color: "#b8c0c8", opacity: 1 },
+    { type: "rect",   name: "right-nacelle", x: 28.7, y: 29.1, w: 2.4,  h: 19.8, cr: 1.2,  rot: 0, color: "#b8c0c8", opacity: 1 },
+    { type: "line",   name: "left-arm",      x: 15.4, y: 27.3, w: 12,   h: 1.35, rot: -47, color: "#b8c0c8", opacity: 1 },
+    { type: "line",   name: "right-arm",     x: 24.6, y: 27.3, w: 12,   h: 1.35, rot: 47,  color: "#b8c0c8", opacity: 1 }
+  ],
+  // Millenia Falcor: layer names match Millenia Falcor.svg. Mandibles are
+  // approximated as rotated isoceles triangles (the SVG quadrilaterals taper
+  // to ~16% width at the top, so the triangle silhouette matches closely).
+  falcor: [
+    { type: "circle",   name: "Saucer",         x: 20, y: 25, w: 27,  h: 27, rot: 0,    color: "#b8c0c8", opacity: 1 },
+    { type: "triangle", name: "Left-Mandible",  x: 16, y: 8,  w: 7.5, h: 14, rot: 12,   color: "#b8c0c8", opacity: 1 },
+    { type: "triangle", name: "Right-Mandible", x: 24, y: 8,  w: 7.5, h: 14, rot: -12,  color: "#b8c0c8", opacity: 1 },
+    { type: "rect",     name: "Cockpit",        x: 32, y: 15, w: 3.4, h: 8,  cr: 1,     rot: 0, color: "#b8c0c8", opacity: 1 }
   ],
   none: []
 };
@@ -235,6 +249,9 @@ function shipRenderPart(part, key, isSelected) {
     inner = React.createElement("polygon", Object.assign({ points: p1 + " " + p2 + " " + p3, fill: color, opacity: op, transform: t }, strokeProps));
   } else if (part.type === "line") {
     inner = React.createElement("rect", Object.assign({ x: x - w / 2, y: y - Math.max(0.4, h) / 2, width: w, height: Math.max(0.4, h), fill: color, opacity: op, transform: t }, strokeProps));
+  } else if (part.type === "arrow") {
+    var apts = ARROW_POINTS.map(function(p){ return (x + p[0] * w) + "," + (y + p[1] * h); }).join(" ");
+    inner = React.createElement("polygon", Object.assign({ points: apts, fill: color, opacity: op, transform: t }, strokeProps));
   } else {
     return null;
   }
@@ -268,6 +285,7 @@ function shipPartIcon(type) {
   if (type === "rect")   return React.createElement("svg", props, React.createElement("rect", { x: 3, y: 3, width: 18, height: 12, rx: 2, fill: "currentColor" }));
   if (type === "triangle") return React.createElement("svg", props, React.createElement("polygon", { points: "12,2 22,16 2,16", fill: "currentColor" }));
   if (type === "line")   return React.createElement("svg", props, React.createElement("rect", { x: 1, y: 7, width: 22, height: 4, fill: "currentColor" }));
+  if (type === "arrow")  return React.createElement("svg", props, React.createElement("polygon", { points: "12,1 22,14 17,12 12,18 7,12 2,14", fill: "currentColor" }));
   return null;
 }
 function shipTrashSvg(size, color) {
@@ -2222,7 +2240,8 @@ export default function CosmicWorkshop() {
       circle:   { w: 6, h: 6,  color: "#80ddff" },
       rect:     { w: 6, h: 6,  color: "#80ddff", cr: 0 },
       triangle: { w: 7, h: 7,  color: "#80ddff" },
-      line:     { w: 10, h: 1, color: "#ffd060" }
+      line:     { w: 10, h: 1, color: "#ffd060" },
+      arrow:    { w: 12, h: 16, color: "#efb6ed" }
     };
     var dflt = defaults[type] || defaults.circle;
     var part = { type: type, x: 20, y: 22, w: dflt.w, h: dflt.h, rot: 0, color: dflt.color, opacity: 0.9, bw: 0, bc: "#000000", bo: 1 };

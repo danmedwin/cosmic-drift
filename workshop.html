@@ -974,7 +974,7 @@ function UFOBlockSvg(props) {
     clipPath: "url(#ufo-dc-" + uid + ")"
   })));
 }
-var SHIP_HULLS = ["arrow", "dart", "raptor", "wedge", "cruiser", "saucer", "startrack", "none"];
+var SHIP_HULLS = ["arrow", "dart", "raptor", "wedge", "cruiser", "saucer", "startrack", "falcor", "none"];
 var SHIP_HULL_LABELS = {
   arrow: "Default",
   dart: "Dart",
@@ -983,28 +983,40 @@ var SHIP_HULL_LABELS = {
   cruiser: "Cruiser",
   saucer: "Saucer",
   startrack: "Star Track",
+  falcor: "Millenia Falcor",
   none: "None"
 };
-var SHIP_PART_TYPES = ["circle", "rect", "triangle", "line"];
+var SHIP_PART_TYPES = ["circle", "rect", "triangle", "line", "arrow"];
 var SHIP_PART_LABELS = {
   circle: "Oval",
   rect: "Rect",
   triangle: "Triangle",
-  line: "Line"
+  line: "Line",
+  arrow: "Arrow"
 };
+// Normalized 6-point swept-arrow polygon (centered, range [-0.5, 0.5]).
+// Derived from Cosmic-drift-default-ship.svg: front tip, right wing tip, right
+// inner notch, back tail, left inner notch, left wing tip.
+var ARROW_POINTS = [[0, -0.5], [0.5, 0.269], [0.207, 0.170], [0, 0.5], [-0.207, 0.170], [-0.5, 0.269]];
 // Each hull preset is a parts array (no baked hull SVG). Selecting a hull in
 // the editor loads its parts; existing saved designs with empty `parts` are
 // migrated on load by populating from the named hull preset.
 var HULL_PRESETS = {
+  // Default ship — single swept-arrow polygon from Cosmic-drift-default-ship.svg.
+  // SVG layer was named "Triangle"; we preserve the name on the part.
   arrow: [{
-    type: "triangle",
+    type: "arrow",
+    name: "Triangle",
     x: 20,
-    y: 22,
-    w: 28,
-    h: 32,
+    y: 20,
+    w: 24,
+    h: 36,
     rot: 0,
-    color: "#ffd0ff",
-    opacity: 1
+    color: "#efb6ed",
+    opacity: 1,
+    bw: 1,
+    bc: "#a45ba3",
+    bo: 1
   }],
   dart: [{
     type: "triangle",
@@ -1104,10 +1116,10 @@ var HULL_PRESETS = {
     color: "#80ddff",
     opacity: 0.85
   }],
-  // Star Track: top-down Star-Trek-style saucer + body + two nacelles + pylon arms.
-  // Derived from star-track.svg by scaling 0.045 and centering on (20,20).
+  // Star Track: layer names match star-track.svg.
   startrack: [{
     type: "circle",
+    name: "Saucer",
     x: 20,
     y: 10,
     w: 17,
@@ -1117,6 +1129,7 @@ var HULL_PRESETS = {
     opacity: 1
   }, {
     type: "circle",
+    name: "Dome",
     x: 20,
     y: 8,
     w: 9,
@@ -1126,6 +1139,7 @@ var HULL_PRESETS = {
     opacity: 0.55
   }, {
     type: "rect",
+    name: "Body",
     x: 20,
     y: 24.5,
     w: 4.4,
@@ -1136,6 +1150,7 @@ var HULL_PRESETS = {
     opacity: 1
   }, {
     type: "rect",
+    name: "left-nacelle",
     x: 11.3,
     y: 29.1,
     w: 2.4,
@@ -1146,6 +1161,7 @@ var HULL_PRESETS = {
     opacity: 1
   }, {
     type: "rect",
+    name: "right-nacelle",
     x: 28.7,
     y: 29.1,
     w: 2.4,
@@ -1156,6 +1172,7 @@ var HULL_PRESETS = {
     opacity: 1
   }, {
     type: "line",
+    name: "left-arm",
     x: 15.4,
     y: 27.3,
     w: 12,
@@ -1165,11 +1182,57 @@ var HULL_PRESETS = {
     opacity: 1
   }, {
     type: "line",
+    name: "right-arm",
     x: 24.6,
     y: 27.3,
     w: 12,
     h: 1.35,
     rot: 47,
+    color: "#b8c0c8",
+    opacity: 1
+  }],
+  // Millenia Falcor: layer names match Millenia Falcor.svg. Mandibles are
+  // approximated as rotated isoceles triangles (the SVG quadrilaterals taper
+  // to ~16% width at the top, so the triangle silhouette matches closely).
+  falcor: [{
+    type: "circle",
+    name: "Saucer",
+    x: 20,
+    y: 25,
+    w: 27,
+    h: 27,
+    rot: 0,
+    color: "#b8c0c8",
+    opacity: 1
+  }, {
+    type: "triangle",
+    name: "Left-Mandible",
+    x: 16,
+    y: 8,
+    w: 7.5,
+    h: 14,
+    rot: 12,
+    color: "#b8c0c8",
+    opacity: 1
+  }, {
+    type: "triangle",
+    name: "Right-Mandible",
+    x: 24,
+    y: 8,
+    w: 7.5,
+    h: 14,
+    rot: -12,
+    color: "#b8c0c8",
+    opacity: 1
+  }, {
+    type: "rect",
+    name: "Cockpit",
+    x: 32,
+    y: 15,
+    w: 3.4,
+    h: 8,
+    cr: 1,
+    rot: 0,
     color: "#b8c0c8",
     opacity: 1
   }],
@@ -1247,6 +1310,16 @@ function shipRenderPart(part, key, isSelected) {
       y: y - Math.max(0.4, h) / 2,
       width: w,
       height: Math.max(0.4, h),
+      fill: color,
+      opacity: op,
+      transform: t
+    }, strokeProps));
+  } else if (part.type === "arrow") {
+    var apts = ARROW_POINTS.map(function (p) {
+      return x + p[0] * w + "," + (y + p[1] * h);
+    }).join(" ");
+    inner = React.createElement("polygon", Object.assign({
+      points: apts,
       fill: color,
       opacity: op,
       transform: t
@@ -1329,6 +1402,10 @@ function shipPartIcon(type) {
     y: 7,
     width: 22,
     height: 4,
+    fill: "currentColor"
+  }));
+  if (type === "arrow") return React.createElement("svg", props, React.createElement("polygon", {
+    points: "12,1 22,14 17,12 12,18 7,12 2,14",
     fill: "currentColor"
   }));
   return null;
@@ -6554,6 +6631,11 @@ function CosmicWorkshop() {
         w: 10,
         h: 1,
         color: "#ffd060"
+      },
+      arrow: {
+        w: 12,
+        h: 16,
+        color: "#efb6ed"
       }
     };
     var dflt = defaults[type] || defaults.circle;
