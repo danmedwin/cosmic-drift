@@ -8384,21 +8384,7 @@ function CosmicWorkshop() {
     }
   }, savedLevels.length > 0 ? savedLevels.slice().sort(function (a, b) {
     return new Date(b.savedAt || 0) - new Date(a.savedAt || 0);
-  })[0].name || "Untitled" : "Default"), React.createElement(WsMono, {
-    size: 7,
-    ls: 0,
-    color: "rgba(128,221,255,0.3)",
-    style: {
-      display: "block",
-      marginTop: 3
-    }
-  }, function () {
-    if (savedLevels.length === 0) return "--";
-    var lv = savedLevels.slice().sort(function (a, b) {
-      return (b.modified || 0) - (a.modified || 0);
-    })[0];
-    return lv.modified ? new Date(lv.modified).toLocaleDateString() : lv.savedAt ? new Date(lv.savedAt).toLocaleDateString() : "--";
-  }())), React.createElement("div", {
+  })[0].name || "Untitled" : "Default")), React.createElement("div", {
     onClick: function () {
       setScreen("designer");
       setBdCurrentView("list");
@@ -8428,50 +8414,9 @@ function CosmicWorkshop() {
   }, "BLOCKS")), React.createElement("div", {
     style: {
       display: "flex",
-      justifyContent: "center",
-      marginBottom: 4
+      justifyContent: "center"
     }
-  }, renderBlocksSetPreview(bdActiveMap, bdSaved)), React.createElement("div", {
-    style: {
-      color: "#c8b8ff",
-      fontFamily: "'Exo 2', sans-serif",
-      fontSize: 11,
-      fontWeight: 700,
-      whiteSpace: "nowrap",
-      overflow: "hidden",
-      textOverflow: "ellipsis"
-    }
-  }, function () {
-    var keys = Object.keys(bdActiveMap);
-    for (var i = 0; i < keys.length; i++) {
-      var did = bdActiveMap[keys[i]];
-      if (did) {
-        for (var j = 0; j < bdSaved.length; j++) {
-          if (bdSaved[j].id === did) return bdSaved[j].name || "Custom";
-        }
-      }
-    }
-    return "Default";
-  }()), React.createElement(WsMono, {
-    size: 7,
-    ls: 0,
-    color: "rgba(200,184,255,0.3)",
-    style: {
-      display: "block",
-      marginTop: 3
-    }
-  }, function () {
-    var keys = Object.keys(bdActiveMap);
-    for (var i = 0; i < keys.length; i++) {
-      var did = bdActiveMap[keys[i]];
-      if (did) {
-        for (var j = 0; j < bdSaved.length; j++) {
-          if (bdSaved[j].id === did && bdSaved[j].modifiedAt) return new Date(bdSaved[j].modifiedAt).toLocaleDateString();
-        }
-      }
-    }
-    return "--";
-  }())), React.createElement("div", {
+  }, renderBlocksSetPreview(bdActiveMap, bdSaved))), React.createElement("div", {
     onClick: function () {
       setScreen("vfx");
       setVfxCurrentView("list");
@@ -8502,51 +8447,10 @@ function CosmicWorkshop() {
     style: {
       display: "flex",
       justifyContent: "center",
-      marginBottom: 4,
       height: 30,
       alignItems: "center"
     }
-  }, renderVfxSetPreview(vfxActiveMap, vfxSaved)), React.createElement("div", {
-    style: {
-      color: "#ffd080",
-      fontFamily: "'Exo 2', sans-serif",
-      fontSize: 11,
-      fontWeight: 700,
-      whiteSpace: "nowrap",
-      overflow: "hidden",
-      textOverflow: "ellipsis"
-    }
-  }, function () {
-    var keys = Object.keys(vfxActiveMap);
-    for (var i = 0; i < keys.length; i++) {
-      var did = vfxActiveMap[keys[i]];
-      if (did) {
-        for (var j = 0; j < vfxSaved.length; j++) {
-          if (vfxSaved[j].id === did) return vfxSaved[j].name || "Custom";
-        }
-      }
-    }
-    return "Default";
-  }()), React.createElement(WsMono, {
-    size: 7,
-    ls: 0,
-    color: "rgba(255,180,60,0.3)",
-    style: {
-      display: "block",
-      marginTop: 3
-    }
-  }, function () {
-    var keys = Object.keys(vfxActiveMap);
-    for (var i = 0; i < keys.length; i++) {
-      var did = vfxActiveMap[keys[i]];
-      if (did) {
-        for (var j = 0; j < vfxSaved.length; j++) {
-          if (vfxSaved[j].id === did && vfxSaved[j].modifiedAt) return new Date(vfxSaved[j].modifiedAt).toLocaleDateString();
-        }
-      }
-    }
-    return "--";
-  }())), React.createElement("div", {
+  }, renderVfxSetPreview(vfxActiveMap, vfxSaved))), React.createElement("div", {
     onClick: function () {
       setScreen("ufo");
     },
@@ -8592,18 +8496,7 @@ function CosmicWorkshop() {
       overflow: "hidden",
       textOverflow: "ellipsis"
     }
-  }, ufoSaved.length > 0 ? ufoGetActiveDesign().name || "Active" : "Default"), React.createElement(WsMono, {
-    size: 7,
-    ls: 0,
-    color: "rgba(100,220,180,0.3)",
-    style: {
-      display: "block",
-      marginTop: 3
-    }
-  }, function () {
-    var ad = ufoGetActiveDesign();
-    return ad && ad.savedAt ? new Date(ad.savedAt).toLocaleDateString() : "--";
-  }())), React.createElement("div", {
+  }, ufoSaved.length > 0 ? ufoGetActiveDesign().name || "Active" : "Default")), React.createElement("div", {
     onClick: function () {
       setScreen("hangar");
       setShipView("list");
@@ -8652,17 +8545,6 @@ function CosmicWorkshop() {
     }
   }, function () {
     return shipSaved.length > 0 && shipActiveId ? shipGetActiveDesign().name || "Custom" : "Default";
-  }()), React.createElement(WsMono, {
-    size: 7,
-    ls: 0,
-    color: "rgba(255,138,170,0.3)",
-    style: {
-      display: "block",
-      marginTop: 3
-    }
-  }, function () {
-    var ad = shipGetActiveDesign();
-    return shipActiveId && ad.savedAt ? new Date(ad.savedAt).toLocaleDateString() : "--";
   }())))),
   // FLEX SPACER — pushes the credit + Resume + Bridge to bottom
   React.createElement("div", {
