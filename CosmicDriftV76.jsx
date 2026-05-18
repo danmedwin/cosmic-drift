@@ -2717,19 +2717,21 @@ function logUfo(msg) {
         </GsPanel>
 
         {/* Stats strip */}
-        <GsPanel style={{ flexShrink: 0, padding: "8px 10px 10px", position: "relative", zIndex: 1 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6, paddingLeft: 5 }}>
+        <GsPanel style={{ flexShrink: 0, padding: "5px 10px 6px", position: "relative", zIndex: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3, paddingLeft: 5 }}>
             <GsLED color={GS.blue} size={5} />
             <GsMono size={8} ls={2} color="rgba(80,221,255,0.7)">FLIGHT RECORD</GsMono>
             <div style={{ flex: 1 }} />
             <GsMono size={7} ls={1.5} color="rgba(80,255,210,0.7)">{"·"} LIVE</GsMono>
           </div>
-          <div style={{ background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: 4, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4 }}>
+          <div style={{ background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: 3, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 3 }}>
             <GsStatReadout s={{ label: "BEST", value: bestScore > 0 ? bestScore.toLocaleString() : "—", glow: GS.blue }} />
             <GsStatReadout s={{ label: "LEVEL", value: bestLevel > 0 ? "L·" + bestLevel : "—", glow: "#ffb43c" }} />
             <GsStatReadout s={{ label: "DIFF", value: (DIFF_LABELS[difficulty] || difficulty).toUpperCase(), glow: DIFF_COLORS[difficulty] || GS.green }} />
           </div>
         </GsPanel>
+
+        <div style={{ flex: 1 }} />
 
         {/* Mode / Difficulty */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, flexShrink: 0, position: "relative", zIndex: 1 }}>
