@@ -204,8 +204,8 @@ var HULL_PRESETS = {
   // to ~16% width at the top, so the triangle silhouette matches closely).
   falcor: [
     { type: "circle",   name: "Saucer",         x: 20, y: 25, w: 27,  h: 27, rot: 0,    color: "#b8c0c8", opacity: 1 },
-    { type: "triangle", name: "Left-Mandible",  x: 16, y: 8,  w: 7.5, h: 14, rot: 12,   color: "#b8c0c8", opacity: 1 },
-    { type: "triangle", name: "Right-Mandible", x: 24, y: 8,  w: 7.5, h: 14, rot: -12,  color: "#b8c0c8", opacity: 1 },
+    { type: "triangle", name: "Left-Mandible",  x: 16, y: 9,  w: 7.5, h: 14, rot: 12,   color: "#b8c0c8", opacity: 1 },
+    { type: "triangle", name: "Right-Mandible", x: 24, y: 9,  w: 7.5, h: 14, rot: -12,  color: "#b8c0c8", opacity: 1 },
     { type: "rect",     name: "Cockpit",        x: 32, y: 15, w: 3.4, h: 8,  cr: 1,     rot: 0, color: "#b8c0c8", opacity: 1 }
   ],
   none: []
