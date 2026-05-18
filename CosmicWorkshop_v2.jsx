@@ -2951,7 +2951,12 @@ export default function CosmicWorkshop() {
             ),
             React.createElement("div", { onClick: function() { setScreen("ufo"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(100,220,180,0.12)", borderLeft: "3px solid #64dcb4", borderRadius: 8, padding: "10px 10px 10px 10px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 6 } },
               React.createElement("div", { style: { display: "flex", alignItems: "flex-start", justifyContent: "space-between" } },
-                React.createElement(UFOBlockSvg, { size: 20, design: ufoGetActiveDesign(), uid: "splash-tile" }),
+                React.createElement("svg", { width: "20", height: "20", viewBox: "0 0 24 24" },
+                  React.createElement("ellipse", { cx: "12", cy: "9.5", rx: "3.5", ry: "2.5", fill: "none", stroke: "#64dcb4", strokeWidth: "1.5" }),
+                  React.createElement("ellipse", { cx: "12", cy: "13", rx: "10", ry: "2.5", fill: "none", stroke: "#64dcb4", strokeWidth: "1.5" }),
+                  React.createElement("circle", { cx: "6",  cy: "17", r: "0.9", fill: "#64dcb4" }),
+                  React.createElement("circle", { cx: "12", cy: "18", r: "0.9", fill: "#64dcb4" }),
+                  React.createElement("circle", { cx: "18", cy: "17", r: "0.9", fill: "#64dcb4" })),
                 React.createElement(WsMono, { size: 7, ls: 0.5, color: "rgba(100,220,180,0.45)" }, ufoSaved.length + " ACTIVE")
               ),
               React.createElement("div", { style: { color: "#ddffee", fontSize: 12, fontWeight: 700, letterSpacing: 0.6, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "UFO Customizer"),
