@@ -152,6 +152,77 @@ function UFOBlockSvg(props) {
       React.createElement("ellipse", { cx: hx - dRx * 0.22, cy: dY - dRy * 0.28, rx: dRx * 0.27, ry: dRy * 0.22, fill: "white", opacity: "0.25", transform: "rotate(-20," + (hx - dRx * 0.22) + "," + (dY - dRy * 0.28) + ")", clipPath: "url(#ufo-dc-" + uid + ")" })));
 }
 
+var SHIP_HULLS = ["dart", "raptor", "wedge", "cross", "cruiser", "saucer"];
+var SHIP_HULL_LABELS = { dart: "Dart", raptor: "Raptor", wedge: "Wedge", cross: "Cross", cruiser: "Cruiser", saucer: "Saucer" };
+function ShipDesignSvg(props) {
+  var size = props.size || 40;
+  var uid = props.uid || "0";
+  var d = Object.assign({}, SHIP_DEFAULT_DESIGN, props.design || {});
+  var hull = d.hull || "dart";
+  var hullColor = d.hullColor || "#ff80c0";
+  var hullColor2 = d.hullColor2 || "#aa3080";
+  var cockpitColor = d.cockpitColor || "#80ddff";
+  var engineColor = d.engineColor || "#ff60ff";
+  var engineOpacity = typeof d.engineOpacity === "number" ? d.engineOpacity : 0.8;
+  var gradId = "shg-" + uid;
+  var fill = "url(#" + gradId + ")";
+  var hl = "rgba(255,255,255,0.13)";
+  var defs = React.createElement("defs", null,
+    React.createElement("linearGradient", { id: gradId, x1: "0", y1: "0", x2: "0", y2: "1" },
+      React.createElement("stop", { offset: "0%", stopColor: hullColor }),
+      React.createElement("stop", { offset: "100%", stopColor: hullColor2 })));
+  var els = [];
+  if (hull === "dart") {
+    els = [
+      React.createElement("path", { key: "b", d: "M20 1 L31 30 L23 24 L23 39 L17 39 L17 24 L9 30 Z", fill: fill }),
+      React.createElement("path", { key: "h", d: "M20 5 L28 28 L22 26 L22 37 L18 37 L18 26 L12 28 Z", fill: hl }),
+      React.createElement("ellipse", { key: "c", cx: "20", cy: "12", rx: "3", ry: "5", fill: cockpitColor, opacity: "0.85" }),
+      React.createElement("ellipse", { key: "e", cx: "20", cy: "38", rx: "4", ry: "2", fill: engineColor, opacity: String(engineOpacity) })
+    ];
+  } else if (hull === "raptor") {
+    els = [
+      React.createElement("path", { key: "b", d: "M20 2 L38 28 L26 20 L24 38 L16 38 L14 20 L2 28 Z", fill: fill }),
+      React.createElement("path", { key: "h", d: "M20 6 L34 26 L26 21 L24 35 L16 35 L14 21 L6 26 Z", fill: hl }),
+      React.createElement("ellipse", { key: "c", cx: "20", cy: "14", rx: "3.5", ry: "5", fill: cockpitColor, opacity: "0.85" }),
+      React.createElement("ellipse", { key: "e", cx: "20", cy: "37", rx: "4", ry: "2", fill: engineColor, opacity: String(engineOpacity) })
+    ];
+  } else if (hull === "wedge") {
+    els = [
+      React.createElement("path", { key: "b", d: "M20 2 L35 36 L20 31 L5 36 Z", fill: fill }),
+      React.createElement("path", { key: "h", d: "M20 6 L31 33 L20 29 L9 33 Z", fill: hl }),
+      React.createElement("ellipse", { key: "c", cx: "20", cy: "12", rx: "2.5", ry: "4", fill: cockpitColor, opacity: "0.85" }),
+      React.createElement("path", { key: "e", d: "M8 34 L32 34", stroke: engineColor, strokeWidth: "3", strokeLinecap: "round", opacity: String(engineOpacity) })
+    ];
+  } else if (hull === "cross") {
+    els = [
+      React.createElement("path", { key: "b", d: "M15 1 L25 1 L25 15 L39 15 L39 25 L25 25 L25 39 L15 39 L15 25 L1 25 L1 15 L15 15 Z", fill: fill }),
+      React.createElement("path", { key: "h", d: "M17 3 L23 3 L23 17 L37 17 L37 23 L23 23 L23 37 L17 37 L17 23 L3 23 L3 17 L17 17 Z", fill: hl }),
+      React.createElement("ellipse", { key: "c", cx: "20", cy: "20", rx: "4", ry: "4", fill: cockpitColor, opacity: "0.85" }),
+      React.createElement("ellipse", { key: "e", cx: "20", cy: "37", rx: "3.5", ry: "2", fill: engineColor, opacity: String(engineOpacity) })
+    ];
+  } else if (hull === "cruiser") {
+    els = [
+      React.createElement("path", { key: "b", d: "M20 1 L27 8 L27 32 L24 39 L16 39 L13 32 L13 8 Z", fill: fill }),
+      React.createElement("path", { key: "lp", d: "M12 16 L7 20 L7 33 L12 35 Z", fill: hullColor2 }),
+      React.createElement("path", { key: "rp", d: "M28 16 L33 20 L33 33 L28 35 Z", fill: hullColor2 }),
+      React.createElement("path", { key: "h", d: "M20 4 L25 10 L25 30 L22 37 L18 37 L15 30 L15 10 Z", fill: hl }),
+      React.createElement("ellipse", { key: "c", cx: "20", cy: "12", rx: "3", ry: "5", fill: cockpitColor, opacity: "0.85" }),
+      React.createElement("ellipse", { key: "le", cx: "9.5", cy: "34", rx: "2.5", ry: "1.5", fill: engineColor, opacity: String(engineOpacity) }),
+      React.createElement("ellipse", { key: "re", cx: "30.5", cy: "34", rx: "2.5", ry: "1.5", fill: engineColor, opacity: String(engineOpacity) })
+    ];
+  } else {
+    els = [
+      React.createElement("ellipse", { key: "disc", cx: "20", cy: "24", rx: "18", ry: "13", fill: fill }),
+      React.createElement("ellipse", { key: "hi", cx: "20", cy: "20", rx: "15", ry: "4", fill: hl }),
+      React.createElement("ellipse", { key: "dome", cx: "19", cy: "15", rx: "7", ry: "6", fill: cockpitColor, opacity: "0.85" }),
+      React.createElement("ellipse", { key: "e", cx: "20", cy: "36", rx: "4", ry: "1.5", fill: engineColor, opacity: String(engineOpacity) })
+    ];
+  }
+  return React.createElement("svg", { viewBox: "0 0 40 40", width: String(size), height: String(size), style: { display: "block" } },
+    defs,
+    React.createElement("g", null, els));
+}
+
 // Corner power-icon badge for crate variant blocks (types 11-16).
 function crateBadgeIcon(type, baseSize) {
   var sz = Math.max(9, baseSize * (type === 12 || type === 16 ? 0.26 : 0.24));
@@ -379,6 +450,27 @@ var VFX_ACTIVE_KEY = "cosmic-drift-vfx-active";
 var UFO_STORAGE_KEY  = "cosmic-drift-ufo-design";
 var UFO_DESIGNS_KEY  = "cosmic-drift-ufo-designs";
 var UFO_ACTIVE_KEY   = "cosmic-drift-ufo-active";
+var SHIP_DESIGNS_KEY = "cosmic-drift-ship-designs";
+var SHIP_ACTIVE_KEY  = "cosmic-drift-ship-active";
+var SHIP_DEFAULT_DESIGN = { hull: "dart", hullColor: "#ff80c0", hullColor2: "#aa3080", cockpitColor: "#80ddff", engineColor: "#ff60ff", engineOpacity: 0.8 };
+function shipLoadDesigns() {
+  return window.storage.get(SHIP_DESIGNS_KEY).then(function(result) {
+    if (!result || !result.value) return [];
+    var parsed = JSON.parse(result.value);
+    return Array.isArray(parsed) ? parsed : [];
+  }).catch(function() { return []; });
+}
+function shipSaveDesigns(designs) {
+  return window.storage.set(SHIP_DESIGNS_KEY, JSON.stringify(designs)).catch(function() {});
+}
+function shipLoadActiveId() {
+  return window.storage.get(SHIP_ACTIVE_KEY).then(function(result) {
+    return result && result.value ? result.value : null;
+  }).catch(function() { return null; });
+}
+function shipSaveActiveId(id) {
+  return window.storage.set(SHIP_ACTIVE_KEY, id || "").catch(function() {});
+}
 
 function ufoLoadDesigns() {
   return window.storage.get(UFO_DESIGNS_KEY).then(function(result) {
@@ -921,6 +1013,23 @@ export default function CosmicWorkshop() {
   var _ufoExportText = useState(""), ufoExportText = _ufoExportText[0], setUfoExportText = _ufoExportText[1];
   var _ufoCopied = useState(false), ufoCopied = _ufoCopied[0], setUfoCopied = _ufoCopied[1];
   var ufoEditDirtyRef = useRef(false);
+  // ══ HANGAR STATE ══
+  var _shipSaved = useState([]), shipSaved = _shipSaved[0], setShipSaved = _shipSaved[1];
+  var _shipActiveId = useState(null), shipActiveId = _shipActiveId[0], setShipActiveId = _shipActiveId[1];
+  var _shipView = useState("list"), shipView = _shipView[0], setShipView = _shipView[1];
+  var _shipTab = useState("hull"), shipTab = _shipTab[0], setShipTab = _shipTab[1];
+  var _shipEdit = useState(function() { return Object.assign({}, SHIP_DEFAULT_DESIGN, { name: "" }); }), shipEdit = _shipEdit[0], setShipEdit = _shipEdit[1];
+  var _shipEditId = useState(null), shipEditId = _shipEditId[0], setShipEditId = _shipEditId[1];
+  var _shipSaveStatus = useState(""), shipSaveStatus = _shipSaveStatus[0], setShipSaveStatus = _shipSaveStatus[1];
+  var _shipDeletingId = useState(null), shipDeletingId = _shipDeletingId[0], setShipDeletingId = _shipDeletingId[1];
+  var _shipBackWarn = useState(false), shipShowBackWarn = _shipBackWarn[0], setShipShowBackWarn = _shipBackWarn[1];
+  var _shipExportId = useState(null), shipExportId = _shipExportId[0], setShipExportId = _shipExportId[1];
+  var _shipExportText = useState(""), shipExportText = _shipExportText[0], setShipExportText = _shipExportText[1];
+  var _shipCopied = useState(false), shipCopied = _shipCopied[0], setShipCopied = _shipCopied[1];
+  var _shipShowImport = useState(false), shipShowImport = _shipShowImport[0], setShipShowImport = _shipShowImport[1];
+  var _shipImportText = useState(""), shipImportText = _shipImportText[0], setShipImportText = _shipImportText[1];
+  var _shipImportError = useState(""), shipImportError = _shipImportError[0], setShipImportError = _shipImportError[1];
+  var shipDirtyRef = useRef(false);
   var bdScrollRef = useRef(null);
 
   // ══ LEVEL BUILDER STATE ══
@@ -1002,6 +1111,12 @@ export default function CosmicWorkshop() {
         }).catch(function() {}); } catch(e) {}
       }
     });
+    shipLoadDesigns().then(function(designs) {
+      if (designs.length > 0) {
+        setShipSaved(designs);
+        shipLoadActiveId().then(function(id) { setShipActiveId(id); });
+      }
+    });
   }, []);
 
   // Entry animation when arriving from game splash
@@ -1019,6 +1134,7 @@ export default function CosmicWorkshop() {
         else if (openSection === "designer") { setScreen("designer"); setBdCurrentView("list"); setBdSavedTab("active"); }
         else if (openSection === "vfx") { setScreen("vfx"); setVfxCurrentView("list"); setVfxSavedTab("active"); }
         else if (openSection === "ufo") { setScreen("ufo"); setUfoView("list"); }
+        else if (openSection === "hangar") { setScreen("hangar"); setShipView("list"); }
       }
     } catch(e) {}
   }, []);
@@ -2001,6 +2117,94 @@ export default function CosmicWorkshop() {
     setUfoShowImport(false); setUfoImportText(""); setUfoImportError("");
   }
 
+  function shipGetActiveDesign() {
+    if (shipActiveId) {
+      for (var i = 0; i < shipSaved.length; i++) { if (shipSaved[i].id === shipActiveId) return shipSaved[i]; }
+    }
+    return Object.assign({}, SHIP_DEFAULT_DESIGN);
+  }
+  function shipOpenNew() {
+    shipDirtyRef.current = false;
+    setShipEditId(null);
+    setShipEdit(Object.assign({}, SHIP_DEFAULT_DESIGN, { name: "" }));
+    setShipTab("hull");
+    setShipView("editor");
+  }
+  function shipOpenEditor(design) {
+    shipDirtyRef.current = false;
+    setShipEditId(design.id);
+    setShipEdit(Object.assign({}, design));
+    setShipTab("hull");
+    setShipView("editor");
+  }
+  function shipUpdateEdit(key, val) {
+    shipDirtyRef.current = true;
+    setShipEdit(function(prev) { var next = Object.assign({}, prev); next[key] = val; return next; });
+  }
+  function shipSaveCurrent() {
+    var now = new Date().toISOString();
+    var name = (shipEdit.name || "").trim() || "My Ship";
+    var isNew = !shipEditId;
+    var id = isNew ? ("ship_" + Date.now()) : shipEditId;
+    var saved = Object.assign({}, shipEdit, { id: id, name: name, savedAt: now });
+    setShipSaved(function(prev) {
+      var list = isNew ? prev.concat([saved]) : prev.map(function(d) { return d.id === id ? saved : d; });
+      shipSaveDesigns(list);
+      return list;
+    });
+    if (isNew || !shipActiveId) {
+      setShipActiveId(id);
+      shipSaveActiveId(id);
+    }
+    setShipEditId(id);
+    shipDirtyRef.current = false;
+    setShipSaveStatus("Saved");
+    setTimeout(function() { setShipSaveStatus(""); }, 1500);
+  }
+  function shipSetActive(id) {
+    setShipActiveId(id);
+    shipSaveActiveId(id);
+  }
+  function shipDeleteDesign(id) {
+    setShipSaved(function(prev) {
+      var list = prev.filter(function(d) { return d.id !== id; });
+      shipSaveDesigns(list);
+      return list;
+    });
+    if (shipActiveId === id) {
+      setShipActiveId(null);
+      shipSaveActiveId(null);
+    }
+    setShipDeletingId(null);
+  }
+  function shipExportDesign(design) {
+    var exp = Object.assign({}, design);
+    setShipExportText(JSON.stringify(exp, null, 2));
+    setShipExportId(design.id);
+    setShipCopied(false);
+  }
+  function shipHandleImport() {
+    var text = shipImportText.trim();
+    if (!text) { setShipImportError("Paste a ship design code first"); return; }
+    var parsed;
+    try { parsed = JSON.parse(text); } catch (e) { setShipImportError("Invalid format -- not valid JSON"); return; }
+    var arr = Array.isArray(parsed) ? parsed : [parsed];
+    if (arr.length === 0) { setShipImportError("No designs found"); return; }
+    var newEntries = [];
+    for (var a = 0; a < arr.length; a++) {
+      var d = arr[a];
+      if (!d || typeof d !== "object") { setShipImportError("Item " + (a + 1) + ": not an object"); return; }
+      if (typeof d.hull !== "string") { setShipImportError("Item " + (a + 1) + ": missing hull"); return; }
+      var entry = Object.assign({}, SHIP_DEFAULT_DESIGN, d);
+      entry.id = "ship_" + Date.now() + "_" + a;
+      entry.name = d.name || "Imported Ship";
+      entry.savedAt = new Date().toISOString();
+      newEntries.push(entry);
+    }
+    setShipSaved(function(prev) { var list = prev.concat(newEntries); shipSaveDesigns(list); return list; });
+    setShipShowImport(false); setShipImportText(""); setShipImportError("");
+  }
+
   function handleSplashToGame() {
     setSplashTransition("exit");
     try { sessionStorage.setItem("cd_transition_from", "workshop"); } catch(e2) {}
@@ -2077,7 +2281,7 @@ export default function CosmicWorkshop() {
         React.createElement(WsPanel, { style: { padding: "10px" } },
           React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, paddingLeft: 2, paddingRight: 2 } },
             React.createElement(WsMono, { size: 8, ls: 2.5, color: "rgba(180,140,255,0.65)" }, "MODULES"),
-            React.createElement(WsMono, { size: 7, ls: 1, color: "rgba(180,140,255,0.3)" }, "04 / 04")
+            React.createElement(WsMono, { size: 7, ls: 1, color: "rgba(180,140,255,0.3)" }, "05 / 05")
           ),
           React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 } },
             React.createElement("div", { onClick: function() { loadSavedLevels(); setScreen("builder"); setLbScreen("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(80,200,255,0.12)", borderLeft: "3px solid #80ddff", borderRadius: 8, padding: "10px 10px 10px 10px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 6 } },
@@ -2123,7 +2327,14 @@ export default function CosmicWorkshop() {
               ),
               React.createElement("div", { style: { color: "#ddffee", fontSize: 12, fontWeight: 700, letterSpacing: 0.6, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "UFO Customizer"),
               React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 10 } }, "Configure the alien hull")
-            )
+            ),
+            React.createElement("div", { onClick: function() { setScreen("hangar"); setShipView("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(255,138,170,0.12)", borderLeft: "3px solid #ff8aaa", borderRadius: 8, padding: "10px 12px", cursor: "pointer", display: "flex", flexDirection: "row", alignItems: "center", gap: 10, gridColumn: "span 2" } },
+              React.createElement(ShipDesignSvg, { size: 32, design: shipGetActiveDesign(), uid: "splash-tile" }),
+              React.createElement("div", { style: { flex: 1, display: "flex", flexDirection: "column", gap: 4 } },
+                React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between" } },
+                  React.createElement("div", { style: { color: "#ffe0ea", fontSize: 12, fontWeight: 700, letterSpacing: 0.6, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Hangar"),
+                  React.createElement(WsMono, { size: 7, ls: 0.5, color: "rgba(255,138,170,0.45)" }, shipSaved.length + " SAVED")),
+                React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 10 } }, "Design your ship")))
           ),
 
         ),
@@ -2133,7 +2344,7 @@ export default function CosmicWorkshop() {
           React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 } },
             React.createElement(WsMono, { size: 8, ls: 2.5, color: "rgba(180,140,255,0.65)" }, "ACTIVE LOADOUT")
           ),
-          React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 5 } },
+          React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr", gap: 5 } },
             React.createElement("div", { onClick: function() { loadSavedLevels(); setScreen("builder"); setLbScreen("list"); }, style: { background: "linear-gradient(180deg, rgba(80,200,255,0.1) 0%, rgba(60,160,210,0.05) 100%)", border: "1px solid rgba(80,200,255,0.22)", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 3, marginBottom: 4 } },
                 React.createElement(WsLED, { color: "#80ddff", size: 4 }),
@@ -2165,6 +2376,14 @@ export default function CosmicWorkshop() {
               ),
               React.createElement("div", { style: { color: "#80e8c4", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, ufoSaved.length > 0 ? (ufoGetActiveDesign().name || "Active") : "Default"),
               React.createElement(WsMono, { size: 7, ls: 0, color: "rgba(100,220,180,0.3)", style: { display: "block", marginTop: 3 } }, (function() { var ad = ufoGetActiveDesign(); return ad && ad.savedAt ? new Date(ad.savedAt).toLocaleDateString() : "--"; }()))
+            ),
+            React.createElement("div", { onClick: function() { setScreen("hangar"); setShipView("list"); }, style: { background: "linear-gradient(180deg, rgba(255,138,170,0.1) 0%, rgba(220,100,140,0.05) 100%)", border: "1px solid rgba(255,138,170,0.22)", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 3, marginBottom: 4 } },
+                React.createElement(WsLED, { color: "#ff8aaa", size: 4 }),
+                React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(255,138,170,0.6)" }, "SHIP")
+              ),
+              React.createElement("div", { style: { color: "#ffb8cc", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, (function() { return shipSaved.length > 0 && shipActiveId ? (shipGetActiveDesign().name || "Custom") : "Default"; }())),
+              React.createElement(WsMono, { size: 7, ls: 0, color: "rgba(255,138,170,0.3)", style: { display: "block", marginTop: 3 } }, (function() { var ad = shipGetActiveDesign(); return shipActiveId && ad.savedAt ? new Date(ad.savedAt).toLocaleDateString() : "--"; }()))
             )
           )
         ),
@@ -2320,6 +2539,11 @@ export default function CosmicWorkshop() {
           React.createElement(UFOBlockSvg, { size: 16, design: ufoGetActiveDesign(), uid: "menu-ufo" }),
           React.createElement("span", { style: { flex: 1 } }, "UFO Customizer"),
           React.createElement("span", { style: { width: 6, height: 6, borderRadius: 6, background: "#64dcb4", boxShadow: "0 0 6px #64dcb4", flexShrink: 0 } })
+        ),
+        React.createElement("div", { onClick: function() { setShowWsMenu(false); setScreen("hangar"); setShipView("list"); }, style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 } },
+          React.createElement(ShipDesignSvg, { size: 16, design: shipGetActiveDesign(), uid: "menu-ship" }),
+          React.createElement("span", { style: { flex: 1 } }, "Hangar"),
+          React.createElement("span", { style: { width: 6, height: 6, borderRadius: 6, background: "#ff8aaa", boxShadow: "0 0 6px #ff8aaa", flexShrink: 0 } })
         ),
         React.createElement("div", { style: { height: 1, background: "rgba(80,100,140,0.2)", margin: "2px 12px" } }),
         React.createElement("div", { onClick: function() { setShowWsMenu(false); setShowWsGuide(true); }, style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 } },
@@ -2861,5 +3085,96 @@ export default function CosmicWorkshop() {
         ufoShowBackWarn && renderBackWarnOverlay(
           function() { setUfoShowBackWarn(false); },
           function() { setUfoShowBackWarn(false); setUfoView("list"); ufoEditDirtyRef.current = false; })))
+,
+
+    // ═══ HANGAR ═══
+    screen === "hangar" && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", background: WS.brushed, backgroundBlendMode: "overlay" } },
+      WsRivet({ bottom: 5, left: 5 }), WsRivet({ bottom: 5, right: 5 }),
+
+      // ── LIST VIEW ──
+      shipView === "list" && React.createElement(React.Fragment, null,
+        React.createElement(WorkshopTopBar, {
+          onBack: function() { setScreen("splash"); }, backLabel: "Workshop", title: "Hangar", color: "#ff8aaa",
+          rightContent: React.createElement("div", { style: { display: "flex", gap: 4 } },
+            React.createElement("div", { onClick: function() { setShipShowImport(true); setShipImportText(""); setShipImportError(""); }, style: BTN_TOPBAR_PURPLE }, "Import"),
+            React.createElement("div", { onClick: shipOpenNew, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #3a1030, #280820)", boxShadow: "0 0 8px rgba(255,138,170,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, "+ New"))
+        }),
+        React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "6px 10px 20px" } },
+          shipSaved.length === 0 && React.createElement("div", { style: { textAlign: "center", padding: 40 } },
+            React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 14, marginBottom: 8 } }, "No saved ship designs"),
+            React.createElement("div", { style: { color: "rgba(180,200,220,0.2)", fontSize: 12 } }, "Tap + New to design your first ship.")),
+          shipSaved.map(function(design) {
+            var isActive = design.id === shipActiveId;
+            return React.createElement("div", { key: design.id, style: CARD_STYLE },
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, marginBottom: 10 } },
+                React.createElement("div", { style: { width: 64, height: 64, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.2)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.06)", flexShrink: 0 } },
+                  React.createElement(ShipDesignSvg, { size: 56, design: design, uid: design.id })),
+                React.createElement("div", { style: { flex: 1, minWidth: 0 } },
+                  React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700, marginBottom: 3 } }, design.name || "Untitled")),
+                React.createElement("div", { onClick: function() { shipSetActive(design.id); }, style: isActive ? BTN_ISACTIVE : BTN_SETACTIVE }, isActive ? "★ Active" : "Set Active")),
+              React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" } },
+                React.createElement("div", { onClick: function() { shipOpenEditor(design); }, style: BTN_EDIT }, WsIconPencil(), "EDIT"),
+                React.createElement("div", { onClick: function() { shipDirtyRef.current = false; setShipEditId(null); setShipEdit(Object.assign({}, design, { name: (design.name || "My Ship") + " (copy)" })); setShipTab("hull"); setShipView("editor"); }, style: BTN_EDIT }, WsIconCopy(), "Edit Copy"),
+                React.createElement("div", { onClick: function() { shipExportDesign(design); }, style: BTN_EXPORT }, WsIconShare(), "SHARE"),
+                React.createElement("div", { style: { flex: 1 } }),
+                React.createElement("div", { onClick: function() { setShipDeletingId(design.id); }, style: BTN_DELETE_ICON }, WsIconTrash())));
+          })),
+        shipDeletingId && renderDeleteOverlay("Delete Ship Design?", function() { setShipDeletingId(null); }, function() { shipDeleteDesign(shipDeletingId); }),
+        shipExportId && renderExportOverlay("Export Ship Design", shipExportText, shipCopied, function() { copyToClipboard(shipExportText, setShipCopied); }, function() { setShipExportId(null); }),
+        shipShowImport && renderImportOverlay("Import Ship Design", shipImportText, setShipImportText, shipImportError, setShipImportError, shipHandleImport, function() { setShipShowImport(false); setShipImportText(""); setShipImportError(""); })),
+
+      // ── EDITOR VIEW ──
+      shipView === "editor" && React.createElement(React.Fragment, null,
+        React.createElement(WorkshopTopBar, {
+          onBack: function() {
+            if (shipDirtyRef.current) { setShipShowBackWarn(true); } else { setShipView("list"); }
+          },
+          backLabel: "My Ships", title: shipEditId ? "Edit Ship" : "New Ship", color: "#ff8aaa",
+          rightContent: React.createElement("div", { style: { display: "flex", gap: 6 } },
+            shipEditId && React.createElement("div", { onClick: function() { shipEditId === shipActiveId ? shipSetActive(null) : shipSetActive(shipEditId); }, style: Object.assign({}, BTN_TOPBAR, { color: shipEditId === shipActiveId ? "#80dd90" : "rgba(200,210,220,0.7)", border: shipEditId === shipActiveId ? "2px solid rgba(80,200,100,0.5)" : PNLB }) }, shipEditId === shipActiveId ? "★ Active" : "Set Active"),
+            React.createElement("div", { onClick: shipSaveCurrent, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #3a1030, #280820)", boxShadow: "0 0 8px rgba(255,138,170,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, shipSaveStatus || "Save"))
+        }),
+        React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "0 16px 32px" } },
+          React.createElement("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", padding: "28px 0 20px" } },
+            React.createElement(ShipDesignSvg, { size: 120, design: shipEdit, uid: "edit" })),
+          React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "12px 16px", marginBottom: 10 } },
+            React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 11, marginBottom: 6, letterSpacing: 0.5 } }, "NAME"),
+            React.createElement("input", { value: shipEdit.name || "", onChange: function(e) { shipUpdateEdit("name", e.target.value); },
+              placeholder: "My Ship", style: { width: "100%", padding: "6px 10px", borderRadius: 6, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#b0c8d8", fontSize: 16, fontFamily: "'Quicksand',sans-serif", outline: "none", boxSizing: "border-box" } })),
+          React.createElement("div", { style: { display: "flex", gap: 4, marginBottom: 12 } },
+            React.createElement("div", { onClick: function() { setShipTab("hull"); }, style: { flex: 1, padding: "8px 12px", textAlign: "center", borderRadius: 8, cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: 0.8, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase", background: shipTab === "hull" ? "rgba(255,138,170,0.2)" : "rgba(255,255,255,0.04)", border: shipTab === "hull" ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.08)", color: shipTab === "hull" ? "#ff8aaa" : "rgba(180,200,220,0.5)" } }, "Hull"),
+            React.createElement("div", { onClick: function() { setShipTab("colors"); }, style: { flex: 1, padding: "8px 12px", textAlign: "center", borderRadius: 8, cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: 0.8, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase", background: shipTab === "colors" ? "rgba(255,138,170,0.2)" : "rgba(255,255,255,0.04)", border: shipTab === "colors" ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.08)", color: shipTab === "colors" ? "#ff8aaa" : "rgba(180,200,220,0.5)" } }, "Colors")),
+          shipTab === "hull" && React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 } },
+            SHIP_HULLS.map(function(h) {
+              var isSelected = (shipEdit.hull || "dart") === h;
+              return React.createElement("div", { key: h, onClick: function() { shipUpdateEdit("hull", h); }, style: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "10px 6px", borderRadius: 8, cursor: "pointer", background: isSelected ? "rgba(255,138,170,0.12)" : "rgba(255,255,255,0.03)", border: isSelected ? "2px solid #ff8aaa" : "1px solid rgba(255,255,255,0.08)" } },
+                React.createElement(ShipDesignSvg, { size: 44, design: Object.assign({}, shipEdit, { hull: h }), uid: "hull-" + h }),
+                React.createElement("div", { style: { color: isSelected ? "#ff8aaa" : "rgba(180,200,220,0.5)", fontSize: 9, fontWeight: 700, letterSpacing: 0.5, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, SHIP_HULL_LABELS[h]));
+            })),
+          shipTab === "colors" && React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px" } },
+            React.createElement(BDColorPicker, { label: "Hull Color", value: shipEdit.hullColor,
+              presets: ["#ff80c0", "#cc3080", "#8060ff", "#40a0ff", "#80cc40", "#ff8040", "#60d0d0", "#ffffff"],
+              onChange: function(v) { shipUpdateEdit("hullColor", v); } }),
+            React.createElement(BDColorPicker, { label: "Hull Dark", value: shipEdit.hullColor2,
+              presets: ["#aa3080", "#601840", "#4030a0", "#1050a0", "#40801a", "#a04020", "#208080", "#808080"],
+              onChange: function(v) { shipUpdateEdit("hullColor2", v); } }),
+            React.createElement(BDColorPicker, { label: "Cockpit", value: shipEdit.cockpitColor,
+              presets: ["#80ddff", "#44ffee", "#ff80c0", "#ffcc44", "#80ff80", "#ffffff", "#cc80ff", "#ff8844"],
+              onChange: function(v) { shipUpdateEdit("cockpitColor", v); } }),
+            React.createElement(BDColorPicker, { label: "Engine Glow", value: shipEdit.engineColor,
+              presets: ["#ff60ff", "#ff4488", "#40a0ff", "#80ff80", "#ffcc00", "#ff6633", "#44ddff", "#ffffff"],
+              onChange: function(v) { shipUpdateEdit("engineColor", v); } }),
+            React.createElement(BDSlider, { label: "Glow Intensity", value: shipEdit.engineOpacity,
+              min: 0, max: 1, step: 0.05, displayValue: Math.round(shipEdit.engineOpacity * 100) + "%",
+              onChange: function(v) { shipUpdateEdit("engineOpacity", v); } })),
+          React.createElement("div", { style: { display: "flex", justifyContent: "center", marginTop: 20 } },
+            React.createElement("div", {
+              onClick: function() { shipDirtyRef.current = true; setShipEdit(Object.assign({}, SHIP_DEFAULT_DESIGN, { name: shipEdit.name || "" })); },
+              style: { padding: "8px 20px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.1)", color: "rgba(180,200,220,0.5)", fontSize: 11, fontFamily: "'Exo 2', sans-serif", cursor: "pointer", letterSpacing: 0.5 }
+            }, "Reset to Defaults"))),
+        shipShowBackWarn && renderBackWarnOverlay(
+          function() { setShipShowBackWarn(false); },
+          function() { setShipShowBackWarn(false); setShipView("list"); shipDirtyRef.current = false; }))
+    )
   );
 }

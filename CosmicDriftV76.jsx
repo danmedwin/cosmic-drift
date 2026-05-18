@@ -806,6 +806,80 @@ var UFO_DESIGNS_KEY  = "cosmic-drift-ufo-designs";
 var UFO_ACTIVE_KEY_G = "cosmic-drift-ufo-active";
 var UFO_DEFAULT_DESIGN = { hullColor: "#b86020", domeColor: "#44ffee", lightColor: "#4488ff", lightSpeed: 8, particleCount: 3, particleSize: 1.0, glowOpacity: 0.0, showAlien: false };
 var GAME_UFO_DESIGN = Object.assign({}, UFO_DEFAULT_DESIGN);
+var SHIP_DESIGNS_KEY  = "cosmic-drift-ship-designs";
+var SHIP_ACTIVE_KEY_G = "cosmic-drift-ship-active";
+var SHIP_DEFAULT_DESIGN = { hull: "dart", hullColor: "#ff80c0", hullColor2: "#aa3080", cockpitColor: "#80ddff", engineColor: "#ff60ff", engineOpacity: 0.8 };
+var GAME_SHIP_DESIGN = null;
+function ShipDesignSvg(props) {
+  var size = props.size || 40;
+  var uid = props.uid || "0";
+  var svgRef = props.svgRef || null;
+  var svgStyle = props.style || {};
+  var d = Object.assign({}, SHIP_DEFAULT_DESIGN, props.design || {});
+  var hull = d.hull || "dart";
+  var hullColor = d.hullColor || "#ff80c0";
+  var hullColor2 = d.hullColor2 || "#aa3080";
+  var cockpitColor = d.cockpitColor || "#80ddff";
+  var engineColor = d.engineColor || "#ff60ff";
+  var engineOpacity = typeof d.engineOpacity === "number" ? d.engineOpacity : 0.8;
+  var gradId = "shg-" + uid;
+  var fill = "url(#" + gradId + ")";
+  var hl = "rgba(255,255,255,0.13)";
+  var defs = React.createElement("defs", null,
+    React.createElement("linearGradient", { id: gradId, x1: "0", y1: "0", x2: "0", y2: "1" },
+      React.createElement("stop", { offset: "0%", stopColor: hullColor }),
+      React.createElement("stop", { offset: "100%", stopColor: hullColor2 })));
+  var els = [];
+  if (hull === "dart") {
+    els = [
+      React.createElement("path", { key: "b", d: "M20 1 L31 30 L23 24 L23 39 L17 39 L17 24 L9 30 Z", fill: fill }),
+      React.createElement("path", { key: "h", d: "M20 5 L28 28 L22 26 L22 37 L18 37 L18 26 L12 28 Z", fill: hl }),
+      React.createElement("ellipse", { key: "c", cx: "20", cy: "12", rx: "3", ry: "5", fill: cockpitColor, opacity: "0.85" }),
+      React.createElement("ellipse", { key: "e", cx: "20", cy: "38", rx: "4", ry: "2", fill: engineColor, opacity: String(engineOpacity) })
+    ];
+  } else if (hull === "raptor") {
+    els = [
+      React.createElement("path", { key: "b", d: "M20 2 L38 28 L26 20 L24 38 L16 38 L14 20 L2 28 Z", fill: fill }),
+      React.createElement("path", { key: "h", d: "M20 6 L34 26 L26 21 L24 35 L16 35 L14 21 L6 26 Z", fill: hl }),
+      React.createElement("ellipse", { key: "c", cx: "20", cy: "14", rx: "3.5", ry: "5", fill: cockpitColor, opacity: "0.85" }),
+      React.createElement("ellipse", { key: "e", cx: "20", cy: "37", rx: "4", ry: "2", fill: engineColor, opacity: String(engineOpacity) })
+    ];
+  } else if (hull === "wedge") {
+    els = [
+      React.createElement("path", { key: "b", d: "M20 2 L35 36 L20 31 L5 36 Z", fill: fill }),
+      React.createElement("path", { key: "h", d: "M20 6 L31 33 L20 29 L9 33 Z", fill: hl }),
+      React.createElement("ellipse", { key: "c", cx: "20", cy: "12", rx: "2.5", ry: "4", fill: cockpitColor, opacity: "0.85" }),
+      React.createElement("path", { key: "e", d: "M8 34 L32 34", stroke: engineColor, strokeWidth: "3", strokeLinecap: "round", opacity: String(engineOpacity) })
+    ];
+  } else if (hull === "cross") {
+    els = [
+      React.createElement("path", { key: "b", d: "M15 1 L25 1 L25 15 L39 15 L39 25 L25 25 L25 39 L15 39 L15 25 L1 25 L1 15 L15 15 Z", fill: fill }),
+      React.createElement("path", { key: "h", d: "M17 3 L23 3 L23 17 L37 17 L37 23 L23 23 L23 37 L17 37 L17 23 L3 23 L3 17 L17 17 Z", fill: hl }),
+      React.createElement("ellipse", { key: "c", cx: "20", cy: "20", rx: "4", ry: "4", fill: cockpitColor, opacity: "0.85" }),
+      React.createElement("ellipse", { key: "e", cx: "20", cy: "37", rx: "3.5", ry: "2", fill: engineColor, opacity: String(engineOpacity) })
+    ];
+  } else if (hull === "cruiser") {
+    els = [
+      React.createElement("path", { key: "b", d: "M20 1 L27 8 L27 32 L24 39 L16 39 L13 32 L13 8 Z", fill: fill }),
+      React.createElement("path", { key: "lp", d: "M12 16 L7 20 L7 33 L12 35 Z", fill: hullColor2 }),
+      React.createElement("path", { key: "rp", d: "M28 16 L33 20 L33 33 L28 35 Z", fill: hullColor2 }),
+      React.createElement("path", { key: "h", d: "M20 4 L25 10 L25 30 L22 37 L18 37 L15 30 L15 10 Z", fill: hl }),
+      React.createElement("ellipse", { key: "c", cx: "20", cy: "12", rx: "3", ry: "5", fill: cockpitColor, opacity: "0.85" }),
+      React.createElement("ellipse", { key: "le", cx: "9.5", cy: "34", rx: "2.5", ry: "1.5", fill: engineColor, opacity: String(engineOpacity) }),
+      React.createElement("ellipse", { key: "re", cx: "30.5", cy: "34", rx: "2.5", ry: "1.5", fill: engineColor, opacity: String(engineOpacity) })
+    ];
+  } else {
+    els = [
+      React.createElement("ellipse", { key: "disc", cx: "20", cy: "24", rx: "18", ry: "13", fill: fill }),
+      React.createElement("ellipse", { key: "hi", cx: "20", cy: "20", rx: "15", ry: "4", fill: hl }),
+      React.createElement("ellipse", { key: "dome", cx: "19", cy: "15", rx: "7", ry: "6", fill: cockpitColor, opacity: "0.85" }),
+      React.createElement("ellipse", { key: "e", cx: "20", cy: "36", rx: "4", ry: "1.5", fill: engineColor, opacity: String(engineOpacity) })
+    ];
+  }
+  return React.createElement("svg", { ref: svgRef, viewBox: "0 0 40 40", width: String(size), height: String(size), style: Object.assign({ display: "block" }, svgStyle) },
+    defs,
+    React.createElement("g", null, els));
+}
 var GAME_VFX_ACTIVE = {};
 var VFX_DEFAULTS = {
   acid_ooze:     { color1: "#1a6a1a", color2: "#35a035", width: 1.0, waveSize: 1.0, freq: 5, speed: 1.0, splash: 1.0 },
@@ -1588,6 +1662,24 @@ export default function CosmicDriftGame() {
           window.storage.get(UFO_STORAGE_KEY).then(function(r2) {
             if (r2 && r2.value) { GAME_UFO_DESIGN = Object.assign({}, UFO_DEFAULT_DESIGN, JSON.parse(r2.value)); }
           }).catch(function() {});
+        }
+      }).catch(function() {});
+    } catch(e) {}
+  }, []);
+  useEffect(function() {
+    try {
+      window.storage.get(SHIP_DESIGNS_KEY).then(function(r) {
+        if (r && r.value) {
+          var designs = JSON.parse(r.value);
+          if (Array.isArray(designs) && designs.length > 0) {
+            window.storage.get(SHIP_ACTIVE_KEY_G).then(function(ra) {
+              var activeId = ra && ra.value ? ra.value : null;
+              var found = null;
+              for (var i = 0; i < designs.length; i++) { if (designs[i].id === activeId) { found = designs[i]; break; } }
+              if (!found) found = null;
+              if (found) GAME_SHIP_DESIGN = Object.assign({}, SHIP_DEFAULT_DESIGN, found);
+            }).catch(function() {});
+          }
         }
       }).catch(function() {});
     } catch(e) {}
@@ -3113,7 +3205,7 @@ function logUfo(msg) {
               {new Array(COLS).fill(0).map(function (_, ci) {
                 var isActive = ci === shipCol;
                 return <div key={ci} style={{ height: 68, display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: 4, borderTop: "2px solid rgba(140,160,180," + (isActive ? "0.2" : "0.06") + ")", background: isActive ? "rgba(255,168,255,0.04)" : "transparent", transition: isDragging ? "none" : "background 0.15s, border-color 0.15s" }}>
-                  {isActive && <svg ref={shipSvgRef} viewBox="0 0 36 40" width="32" height="36" style={{ filter: "drop-shadow(0 0 10px rgba(255,168,255,0.5))", animation: shipHit ? "shipOozeHit 0.8s ease-out" : "none" }}><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ffd0ff" /><stop offset="100%" stopColor="#cc70cc" /></linearGradient></defs><path d="M18 0L4 32L12 27L18 40L24 27L32 32Z" fill="url(#sg)" /><path d="M18 4L8 30L14 26L18 36L22 26L28 30Z" fill="rgba(255,255,255,0.15)" /></svg>}
+                  {isActive && (GAME_SHIP_DESIGN ? <ShipDesignSvg svgRef={shipSvgRef} size={32} design={GAME_SHIP_DESIGN} uid="game" style={{ filter: "drop-shadow(0 0 10px rgba(255,168,255,0.5))", animation: shipHit ? "shipOozeHit 0.8s ease-out" : "none" }} /> : <svg ref={shipSvgRef} viewBox="0 0 36 40" width="32" height="36" style={{ filter: "drop-shadow(0 0 10px rgba(255,168,255,0.5))", animation: shipHit ? "shipOozeHit 0.8s ease-out" : "none" }}><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ffd0ff" /><stop offset="100%" stopColor="#cc70cc" /></linearGradient></defs><path d="M18 0L4 32L12 27L18 40L24 27L32 32Z" fill="url(#sg)" /><path d="M18 4L8 30L14 26L18 36L22 26L28 30Z" fill="rgba(255,255,255,0.15)" /></svg>)}
                 </div>;
               })}
             </div>
