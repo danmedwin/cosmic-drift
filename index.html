@@ -5428,6 +5428,8 @@ function CosmicDriftGame() {
   }
   var splashPlasmaRef = useRef(null);
   var splashAnimStartRef = useRef(0);
+  var splashShipPausedRef = useRef(false);
+  var splashPauseStartRef = useRef(0);
   var _spTick = useState(0);
   var setSplashTick = _spTick[1];
   var _tutsReset = useState(false),
@@ -5983,6 +5985,8 @@ function CosmicDriftGame() {
       var svgGap = 143 - pickRow * 26;
       var popDelay = Math.max(160, Math.round(svgGap * 1.15 / 200 * 650));
       firing = true;
+      splashShipPausedRef.current = true;
+      splashPauseStartRef.current = Date.now();
       splashPlasmaRef.current = {
         key: Date.now(),
         cx: Math.round(shipSvgX)
@@ -5995,10 +5999,18 @@ function CosmicDriftGame() {
         blocks[pickIdx].active = false;
         blocks[pickIdx].popKey = Date.now();
         splashPlasmaRef.current = null;
-        firing = false;
         setSplashTick(function (prev) {
           return prev + 1;
         });
+        setTimeout(function () {
+          if (cancelled) return;
+          splashAnimStartRef.current += Date.now() - splashPauseStartRef.current;
+          splashShipPausedRef.current = false;
+          firing = false;
+          setSplashTick(function (prev) {
+            return prev + 1;
+          });
+        }, 400);
       }, popDelay);
     }
     var firstFire = setTimeout(doFire, 1200);
@@ -6008,6 +6020,7 @@ function CosmicDriftGame() {
       clearTimeout(firstFire);
       clearInterval(interval);
       splashPlasmaRef.current = null;
+      splashShipPausedRef.current = false;
     };
   }, [screen]);
   // ?play=levelId deep link: auto-load and start a custom level (used by Workshop "Play" buttons).
@@ -10974,7 +10987,8 @@ function CosmicDriftGame() {
     });
   })), /*#__PURE__*/React.createElement("g", {
     style: {
-      animation: "splashShipDrift 10s ease-in-out infinite"
+      animation: "splashShipDrift 10s ease-in-out infinite",
+      animationPlayState: splashShipPausedRef.current ? "paused" : "running"
     }
   }, /*#__PURE__*/React.createElement("g", {
     transform: "translate(160, 248)"
