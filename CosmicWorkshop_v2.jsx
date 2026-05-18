@@ -1067,7 +1067,7 @@ var SAMPLE_LEVEL = {
 // ── Active Loadout mini-preview helpers ──
 // Tiny pixel-grid preview of a saved level's block layout.
 function renderGridMiniPreview(level, accent) {
-  var cell = 6;
+  var cell = 8;
   var grid = level && level.grid;
   var border = "1px solid " + (accent || "rgba(128,221,255,0.25)");
   if (!grid || grid.length !== COLS * ROWS) {
@@ -1081,14 +1081,16 @@ function renderGridMiniPreview(level, accent) {
   }
   return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(" + COLS + ", " + cell + "px)", gap: 0, width: COLS * cell, margin: "0 auto", borderRadius: 2, overflow: "hidden", border: border } }, cells);
 }
-// 2x5 grid of tiny BDBlockPreview thumbnails — one per block type (active or default).
+// 3x3 grid of tiny BDBlockPreview thumbnails - one per playable block type
+// (Extra Core is omitted so the 9 remaining types fit a clean 3x3).
 function renderBlocksSetPreview(activeMap, savedDesigns) {
   var items = [];
-  for (var bt = 1; bt <= 10; bt++) {
-    var design = bdResolveActiveDesign(bt, activeMap, savedDesigns);
-    if (design) items.push(React.createElement("div", { key: bt, style: { width: 10, height: 10, overflow: "hidden" } }, React.createElement(BDBlockPreview, { design: design, size: 10 })));
+  var types = [1, 2, 3, 5, 6, 7, 8, 9, 10];
+  for (var i = 0; i < types.length; i++) {
+    var design = bdResolveActiveDesign(types[i], activeMap, savedDesigns);
+    if (design) items.push(React.createElement("div", { key: types[i], style: { width: 16, height: 16, overflow: "hidden" } }, React.createElement(BDBlockPreview, { design: design, size: 16 })));
   }
-  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(5, 10px)", gap: 1, width: 54, margin: "0 auto" } }, items);
+  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(3, 16px)", gap: 2, width: 52, margin: "0 auto" } }, items);
 }
 // Compact stylized icon per VFX effect type — captures the visual signature
 // of each effect (acid drip / flame / spark burst / explosion ring) using the
@@ -1097,45 +1099,45 @@ function renderVfxMini(effectType, design) {
   var d = design || {};
   if (effectType === "acid_ooze") {
     var c1 = d.color1 || "#1a6a1a", c2 = d.color2 || "#35a035";
-    return React.createElement("svg", { width: 14, height: 18, viewBox: "0 0 16 20" },
-      React.createElement("rect", { x: 2, y: 1, width: 12, height: 4, rx: 1, fill: c1, stroke: c2, strokeWidth: 0.5 }),
-      React.createElement("path", { d: "M4 6 Q7 9 4 12 Q7 15 4 18 L 12 18 Q 9 15 12 12 Q 9 9 12 6 Z", fill: c2 }),
-      React.createElement("ellipse", { cx: 8, cy: 19, rx: 6, ry: 1.2, fill: c2, opacity: 0.7 }));
+    return React.createElement("svg", { width: 22, height: 22, viewBox: "0 0 22 22" },
+      React.createElement("rect", { x: 4, y: 2, width: 14, height: 4, rx: 1, fill: c1, stroke: c2, strokeWidth: 0.6 }),
+      React.createElement("path", { d: "M6 7 Q9 10 6 13 Q9 16 6 19 L 16 19 Q 13 16 16 13 Q 13 10 16 7 Z", fill: c2 }),
+      React.createElement("ellipse", { cx: 11, cy: 20, rx: 7, ry: 1.4, fill: c2, opacity: 0.7 }));
   }
   if (effectType === "burn") {
     var emC = d.emberColor || "#ff6633", spC = d.sparkColor || "#ffffff";
-    return React.createElement("svg", { width: 14, height: 18, viewBox: "0 0 16 20" },
-      React.createElement("path", { d: "M8 2 Q3 8 5 13 Q1.5 14 4 18 Q8 21 10 16 Q14.5 18 13 12 Q11 9 12 5 Q10 8 8 2 Z", fill: emC }),
-      React.createElement("circle", { cx: 11, cy: 7, r: 1, fill: spC, opacity: 0.9 }));
+    return React.createElement("svg", { width: 22, height: 22, viewBox: "0 0 22 22" },
+      React.createElement("path", { d: "M11 2 Q5 8 7 14 Q3 15 5.5 19 Q11 22 13 17 Q19 19 17 13 Q14.5 10 16 5 Q13 9 11 2 Z", fill: emC }),
+      React.createElement("circle", { cx: 15, cy: 8, r: 1.3, fill: spC, opacity: 0.9 }));
   }
   if (effectType === "block_destroy") {
     var bsC = d.burstColor || "#c8b8ff", acC = d.accentColor || "#80ddff";
-    return React.createElement("svg", { width: 18, height: 18, viewBox: "0 0 20 20" },
-      React.createElement("path", { d: "M10 1 L11.2 8.8 L19 10 L11.2 11.2 L10 19 L8.8 11.2 L1 10 L8.8 8.8 Z", fill: bsC }),
-      React.createElement("circle", { cx: 10, cy: 10, r: 2.2, fill: acC, opacity: 0.85 }));
+    return React.createElement("svg", { width: 22, height: 22, viewBox: "0 0 22 22" },
+      React.createElement("path", { d: "M11 1 L12.4 9.6 L21 11 L12.4 12.4 L11 21 L9.6 12.4 L1 11 L9.6 9.6 Z", fill: bsC }),
+      React.createElement("circle", { cx: 11, cy: 11, r: 2.6, fill: acC, opacity: 0.85 }));
   }
   if (effectType === "drone_explode") {
     var coreC = d.coreColor || "#ffe066", blastC = d.blastColor || "#ff6633";
     var dots = [];
     for (var i = 0; i < 6; i++) {
       var a = (i * 60) * Math.PI / 180;
-      dots.push(React.createElement("circle", { key: i, cx: 10 + Math.cos(a) * 6.5, cy: 10 + Math.sin(a) * 6.5, r: 1.4, fill: blastC }));
+      dots.push(React.createElement("circle", { key: i, cx: 11 + Math.cos(a) * 7.5, cy: 11 + Math.sin(a) * 7.5, r: 1.7, fill: blastC }));
     }
-    return React.createElement("svg", { width: 18, height: 18, viewBox: "0 0 20 20" },
-      React.createElement("circle", { cx: 10, cy: 10, r: 8.5, fill: blastC, opacity: 0.18 }),
+    return React.createElement("svg", { width: 22, height: 22, viewBox: "0 0 22 22" },
+      React.createElement("circle", { cx: 11, cy: 11, r: 9.5, fill: blastC, opacity: 0.18 }),
       dots,
-      React.createElement("circle", { cx: 10, cy: 10, r: 3, fill: coreC }));
+      React.createElement("circle", { cx: 11, cy: 11, r: 3.5, fill: coreC }));
   }
   return null;
 }
-// Row of 4 effect mini-previews — one per VFX type — using the active design's colors.
+// 2x2 grid of effect mini-previews, one per VFX type, using the active design's colors.
 function renderVfxSetPreview(activeMap, savedDesigns) {
   var types = ["acid_ooze", "burn", "block_destroy", "drone_explode"];
   var items = types.map(function(t) {
     var d = vfxResolveActive(t, activeMap, savedDesigns);
-    return React.createElement("div", { key: t, style: { display: "flex", alignItems: "center", justifyContent: "center", width: 18, height: 22 } }, renderVfxMini(t, d));
+    return React.createElement("div", { key: t, style: { display: "flex", alignItems: "center", justifyContent: "center", width: 22, height: 22 } }, renderVfxMini(t, d));
   });
-  return React.createElement("div", { style: { display: "flex", gap: 2, justifyContent: "center", alignItems: "center" } }, items);
+  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(2, 22px)", gap: 3, width: 47, margin: "0 auto" } }, items);
 }
 
 // ── Workshop cockpit design tokens + helpers ──
@@ -2891,7 +2893,7 @@ export default function CosmicWorkshop() {
               ),
               React.createElement("div", { style: { color: "#80e8c4", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: 4 } }, ufoSaved.length > 0 ? (ufoGetActiveDesign().name || "Active") : "Default"),
               React.createElement("div", { style: { display: "flex", justifyContent: "center" } },
-                React.createElement(UFOBlockSvg, { size: 44, design: ufoGetActiveDesign(), uid: "loadout-ufo" }))
+                React.createElement(UFOBlockSvg, { size: 56, design: ufoGetActiveDesign(), uid: "loadout-ufo" }))
             ),
             React.createElement("div", { onClick: function() { setScreen("hangar"); setShipView("list"); }, style: { background: "linear-gradient(180deg, rgba(255,138,170,0.1) 0%, rgba(220,100,140,0.05) 100%)", border: "1px solid rgba(255,138,170,0.22)", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 3, marginBottom: 4 } },
@@ -2900,7 +2902,7 @@ export default function CosmicWorkshop() {
               ),
               React.createElement("div", { style: { color: "#ffb8cc", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: 4 } }, (function() { return shipSaved.length > 0 && shipActiveId ? (shipGetActiveDesign().name || "Custom") : "Default"; }())),
               React.createElement("div", { style: { display: "flex", justifyContent: "center" } },
-                React.createElement(ShipDesignSvg, { size: 44, design: shipGetActiveDesign(), uid: "loadout-ship" }))
+                React.createElement(ShipDesignSvg, { size: 56, design: shipGetActiveDesign(), uid: "loadout-ship" }))
             )
           )
         ),
