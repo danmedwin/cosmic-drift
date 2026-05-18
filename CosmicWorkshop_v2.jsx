@@ -2750,12 +2750,17 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 10 } }, "Configure the alien hull")
             ),
             React.createElement("div", { onClick: function() { setScreen("hangar"); setShipView("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(255,138,170,0.12)", borderLeft: "3px solid #ff8aaa", borderRadius: 8, padding: "10px 12px", cursor: "pointer", display: "flex", flexDirection: "row", alignItems: "center", gap: 10, gridColumn: "span 2" } },
-              React.createElement(ShipDesignSvg, { size: 32, design: shipGetActiveDesign(), uid: "splash-tile" }),
+              // Module icon (basic swept-arrow, matching the Default ship silhouette)
+              React.createElement("svg", { width: "20", height: "20", viewBox: "0 0 24 24" },
+                React.createElement("polygon", { points: "12,2 22,17 16,15 12,22 8,15 2,17", fill: "none", stroke: "#ff8aaa", strokeWidth: "1.5", strokeLinejoin: "round" })),
+              // Middle: title + count + subtitle
               React.createElement("div", { style: { flex: 1, display: "flex", flexDirection: "column", gap: 4 } },
                 React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between" } },
                   React.createElement("div", { style: { color: "#ffe0ea", fontSize: 12, fontWeight: 700, letterSpacing: 0.6, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Hangar"),
                   React.createElement(WsMono, { size: 7, ls: 0.5, color: "rgba(255,138,170,0.45)" }, shipSaved.length + " SAVED")),
-                React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 10 } }, "Design your ship")))
+                React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 10 } }, "Design your ship")),
+              // Right: live preview of the player's currently active ship
+              React.createElement(ShipDesignSvg, { size: 40, design: shipGetActiveDesign(), uid: "splash-tile" }))
           ),
 
         ),

@@ -8135,11 +8135,21 @@ function CosmicWorkshop() {
       gap: 10,
       gridColumn: "span 2"
     }
-  }, React.createElement(ShipDesignSvg, {
-    size: 32,
-    design: shipGetActiveDesign(),
-    uid: "splash-tile"
-  }), React.createElement("div", {
+  },
+  // Module icon (basic swept-arrow, matching the Default ship silhouette)
+  React.createElement("svg", {
+    width: "20",
+    height: "20",
+    viewBox: "0 0 24 24"
+  }, React.createElement("polygon", {
+    points: "12,2 22,17 16,15 12,22 8,15 2,17",
+    fill: "none",
+    stroke: "#ff8aaa",
+    strokeWidth: "1.5",
+    strokeLinejoin: "round"
+  })),
+  // Middle: title + count + subtitle
+  React.createElement("div", {
     style: {
       flex: 1,
       display: "flex",
@@ -8170,7 +8180,13 @@ function CosmicWorkshop() {
       color: "rgba(170,195,215,0.45)",
       fontSize: 10
     }
-  }, "Design your ship"))))),
+  }, "Design your ship")),
+  // Right: live preview of the player's currently active ship
+  React.createElement(ShipDesignSvg, {
+    size: 40,
+    design: shipGetActiveDesign(),
+    uid: "splash-tile"
+  })))),
   // ACTIVE LOADOUT
   React.createElement(WsPanel, {
     style: {
