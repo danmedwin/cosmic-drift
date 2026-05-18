@@ -266,39 +266,66 @@ function shipRenderPart(part, key, isSelected) {
   var cr = typeof part.cr === "number" ? part.cr : 0;
   var t = "rotate(" + rot + " " + x + " " + y + ")";
   var strokeProps = bw > 0 ? { stroke: bc, strokeWidth: bw, strokeOpacity: bo } : {};
+  // Gradient fill: optional linear or radial gradient. ID must be document-
+  // unique (SVG urls resolve globally), so we include the caller's key (which
+  // already namespaces by the parent SVG's uid + part index).
+  var fillMode = part.fillMode || "solid";
+  var color2 = part.color2 || color;
+  var gradAngle = typeof part.gradAngle === "number" ? part.gradAngle : 0;
+  var fillRef = color;
+  var defsEl = null;
+  if (fillMode === "linear" || fillMode === "radial") {
+    var gradId = "shipgrad-" + key;
+    var stops = [
+      React.createElement("stop", { key: "s0", offset: "0%", stopColor: color }),
+      React.createElement("stop", { key: "s1", offset: "100%", stopColor: color2 })
+    ];
+    if (fillMode === "linear") {
+      defsEl = React.createElement("defs", { key: "d" },
+        React.createElement("linearGradient", { id: gradId, x1: "0", y1: "0", x2: "1", y2: "0", gradientTransform: "rotate(" + gradAngle + " 0.5 0.5)" }, stops));
+    } else {
+      defsEl = React.createElement("defs", { key: "d" },
+        React.createElement("radialGradient", { id: gradId, cx: "0.5", cy: "0.5", r: "0.5" }, stops));
+    }
+    fillRef = "url(#" + gradId + ")";
+  }
   var inner = null;
   if (part.type === "circle") {
-    inner = React.createElement("ellipse", Object.assign({ cx: x, cy: y, rx: w / 2, ry: h / 2, fill: color, opacity: op, transform: t }, strokeProps));
+    inner = React.createElement("ellipse", Object.assign({ cx: x, cy: y, rx: w / 2, ry: h / 2, fill: fillRef, opacity: op, transform: t }, strokeProps));
   } else if (part.type === "rect") {
-    inner = React.createElement("rect", Object.assign({ x: x - w / 2, y: y - h / 2, width: w, height: h, rx: cr, ry: cr, fill: color, opacity: op, transform: t }, strokeProps));
+    inner = React.createElement("rect", Object.assign({ x: x - w / 2, y: y - h / 2, width: w, height: h, rx: cr, ry: cr, fill: fillRef, opacity: op, transform: t }, strokeProps));
   } else if (part.type === "triangle") {
     var p1 = x + "," + (y - h / 2);
     var p2 = (x - w / 2) + "," + (y + h / 2);
     var p3 = (x + w / 2) + "," + (y + h / 2);
-    inner = React.createElement("polygon", Object.assign({ points: p1 + " " + p2 + " " + p3, fill: color, opacity: op, transform: t }, strokeProps));
+    inner = React.createElement("polygon", Object.assign({ points: p1 + " " + p2 + " " + p3, fill: fillRef, opacity: op, transform: t }, strokeProps));
   } else if (part.type === "line") {
-    inner = React.createElement("rect", Object.assign({ x: x - w / 2, y: y - Math.max(0.4, h) / 2, width: w, height: Math.max(0.4, h), fill: color, opacity: op, transform: t }, strokeProps));
+    inner = React.createElement("rect", Object.assign({ x: x - w / 2, y: y - Math.max(0.4, h) / 2, width: w, height: Math.max(0.4, h), fill: fillRef, opacity: op, transform: t }, strokeProps));
   } else if (part.type === "trapezoid") {
     var tw = typeof part.tw === "number" ? part.tw : w * 0.5;
     var tofs = typeof part.tofs === "number" ? part.tofs : 0;
     var blX = x - w / 2, brX = x + w / 2, bY = y + h / 2;
     var tlX = x - tw / 2 + tofs, trX = x + tw / 2 + tofs, tY = y - h / 2;
     var pts = tlX + "," + tY + " " + trX + "," + tY + " " + brX + "," + bY + " " + blX + "," + bY;
-    inner = React.createElement("polygon", Object.assign({ points: pts, fill: color, opacity: op, transform: t }, strokeProps));
+    inner = React.createElement("polygon", Object.assign({ points: pts, fill: fillRef, opacity: op, transform: t }, strokeProps));
   } else if (part.type === "arrow") {
     var apts = ARROW_POINTS.map(function(p){ return (x + p[0] * w) + "," + (y + p[1] * h); }).join(" ");
-    inner = React.createElement("polygon", Object.assign({ points: apts, fill: color, opacity: op, transform: t }, strokeProps));
+    inner = React.createElement("polygon", Object.assign({ points: apts, fill: fillRef, opacity: op, transform: t }, strokeProps));
   } else {
     return null;
   }
   if (isSelected) {
     var bbw = w + 2, bbh = h + 2;
     return React.createElement("g", { key: key },
+      defsEl,
       inner,
       React.createElement("rect", { x: x - bbw / 2, y: y - bbh / 2, width: bbw, height: bbh, fill: "none", stroke: "#ffd060", strokeWidth: 0.6, strokeDasharray: "1.2 0.8", transform: t, pointerEvents: "none" }));
   }
-  return React.createElement("g", { key: key }, inner);
+  return React.createElement("g", { key: key }, defsEl, inner);
 }
+// Monotonic counter for auto-generated SVG uids so gradient ID references
+// (`url(#shipgrad-...)`) stay unique across all on-screen ShipDesignSvg instances.
+var shipSvgUidCounter = 0;
 function ShipDesignSvg(props) {
   var size = props.size || 40;
   var svgRef = props.svgRef || null;
@@ -306,9 +333,12 @@ function ShipDesignSvg(props) {
   var d = props.design || SHIP_DEFAULT_DESIGN;
   var parts = Array.isArray(d.parts) ? d.parts : [];
   var selIdx = typeof props.selectedIdx === "number" ? props.selectedIdx : -1;
+  var idRef = useRef(null);
+  if (idRef.current === null) idRef.current = "auto" + (++shipSvgUidCounter);
+  var uid = props.uid || idRef.current;
   var els = [];
   for (var pi = 0; pi < parts.length; pi++) {
-    var el = shipRenderPart(parts[pi], "p-" + pi, pi === selIdx);
+    var el = shipRenderPart(parts[pi], uid + "-p" + pi, pi === selIdx);
     if (el) els.push(el);
   }
   return React.createElement("svg", { ref: svgRef, viewBox: "0 0 40 40", width: String(size), height: String(size), style: Object.assign({ display: "block" }, svgStyle) },
@@ -3770,14 +3800,33 @@ export default function CosmicWorkshop() {
             var partsList = Array.isArray(shipEdit.parts) ? shipEdit.parts : [];
             var sel = (shipSelectedPart >= 0 && shipSelectedPart < partsList.length) ? partsList[shipSelectedPart] : null;
             if (!sel) return renderShipSelectMessage();
+            var fillMode = sel.fillMode || "solid";
+            var fillModes = [
+              { id: "solid",  label: "Solid" },
+              { id: "linear", label: "Linear" },
+              { id: "radial", label: "Radial" }
+            ];
             return React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,138,170,0.25)", borderRadius: 12, padding: "12px 16px 8px" } },
               renderShipSelectedHeader(sel),
-              React.createElement(BDColorPicker, { label: "Color", value: sel.color,
+              React.createElement(BDColorPicker, { label: fillMode === "solid" ? "Color" : "Color 1", value: sel.color,
                 presets: ["#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70cc", "#a0a8b8", "#ffffff", "#222a3a"],
                 onChange: function(v) { shipUpdatePart(shipSelectedPart, "color", v); } }),
               React.createElement(BDSlider, { label: "Opacity", value: sel.opacity, min: 0, max: 1, step: 0.05, displayValue: Math.round((sel.opacity || 0) * 100) + "%",
                 onChange: function(v) { shipUpdatePart(shipSelectedPart, "opacity", v); } }),
-              React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, marginTop: 8, marginBottom: 4, letterSpacing: 0.5, textTransform: "uppercase" } }, "Border"),
+              // Fill mode selector + gradient controls (color2, angle for linear).
+              React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, marginTop: 12, marginBottom: 6, letterSpacing: 0.5, textTransform: "uppercase" } }, "Fill Mode"),
+              React.createElement("div", { style: { display: "flex", gap: 4, marginBottom: 10 } },
+                fillModes.map(function(m) {
+                  var on = fillMode === m.id;
+                  return React.createElement("div", { key: m.id, onClick: function() { shipUpdatePart(shipSelectedPart, "fillMode", m.id); },
+                    style: { flex: 1, padding: "7px 6px", textAlign: "center", borderRadius: 6, cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: 0.5, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase", background: on ? "rgba(255,138,170,0.2)" : "rgba(255,255,255,0.04)", border: on ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.1)", color: on ? "#ff8aaa" : "rgba(180,200,220,0.6)" } }, m.label);
+                })),
+              fillMode !== "solid" && React.createElement(BDColorPicker, { label: "Color 2", value: sel.color2 || sel.color,
+                presets: ["#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70cc", "#a0a8b8", "#ffffff", "#222a3a"],
+                onChange: function(v) { shipUpdatePart(shipSelectedPart, "color2", v); } }),
+              fillMode === "linear" && React.createElement(BDSlider, { label: "Gradient Angle", value: sel.gradAngle || 0, min: 0, max: 360, step: 15, displayValue: (sel.gradAngle || 0) + "°",
+                onChange: function(v) { shipUpdatePart(shipSelectedPart, "gradAngle", v); } }),
+              React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, marginTop: 12, marginBottom: 4, letterSpacing: 0.5, textTransform: "uppercase" } }, "Border"),
               React.createElement(BDColorPicker, { label: "Border Color", value: sel.bc || "#000000",
                 presets: ["#000000", "#222a3a", "#ffffff", "#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70cc"],
                 onChange: function(v) { shipUpdatePart(shipSelectedPart, "bc", v); } }),
