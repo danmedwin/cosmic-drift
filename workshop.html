@@ -4629,7 +4629,10 @@ function CosmicWorkshop() {
   var _shipView = useState("list"),
     shipView = _shipView[0],
     setShipView = _shipView[1];
-  var _shipTab = useState("hull"),
+  // Editor sub-tabs: "templates" (load a preset), "add" (add a new part),
+  // "color" (fill + border for selected part), "position" (geometry for
+  // selected part), "list" (parts list with select/copy/delete).
+  var _shipTab = useState("list"),
     shipTab = _shipTab[0],
     setShipTab = _shipTab[1];
   var _shipEdit = useState(function () {
@@ -7320,7 +7323,7 @@ function CosmicWorkshop() {
       name: "",
       parts: shipHullPresetParts("arrow")
     });
-    setShipTab("hull");
+    setShipTab("templates");
     setShipSelectedPart(-1);
     setShipView("editor");
   }
@@ -7331,7 +7334,7 @@ function CosmicWorkshop() {
     setShipEdit(Object.assign({}, migrated, {
       parts: (migrated.parts || []).slice()
     }));
-    setShipTab("hull");
+    setShipTab("list");
     setShipSelectedPart(-1);
     setShipView("editor");
   }
@@ -7636,6 +7639,117 @@ function CosmicWorkshop() {
         textTransform: "uppercase"
       }
     }, "Cancel"))));
+  }
+  // Header shown at the top of the Color / Position sub-tabs when a part is
+  // selected: part type label, name input, duplicate, delete.
+  function renderShipSelectedHeader(sel) {
+    return React.createElement(React.Fragment, null, React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: 8
+      }
+    }, React.createElement("div", {
+      style: {
+        color: "#ff8aaa",
+        fontSize: 11,
+        fontWeight: 700,
+        letterSpacing: 0.8,
+        textTransform: "uppercase",
+        fontFamily: "'Exo 2', sans-serif"
+      }
+    }, "Selected: " + (sel.name || SHIP_PART_LABELS[sel.type])), React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 6
+      }
+    }, React.createElement("div", {
+      onClick: function () {
+        shipDuplicatePart(shipSelectedPart);
+      },
+      title: "Duplicate part",
+      style: {
+        width: 28,
+        height: 28,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 6,
+        cursor: "pointer",
+        background: "rgba(128,221,255,0.12)",
+        border: "1px solid rgba(128,221,255,0.4)"
+      }
+    }, shipCopySvg(14, "#80ddff")), React.createElement("div", {
+      onClick: function () {
+        shipDeletePart(shipSelectedPart);
+      },
+      title: "Delete part",
+      style: {
+        width: 28,
+        height: 28,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 6,
+        cursor: "pointer",
+        background: "rgba(220,60,80,0.15)",
+        border: "1px solid rgba(220,60,80,0.4)"
+      }
+    }, shipTrashSvg(14, "#ff8088")))), React.createElement("div", {
+      style: {
+        marginBottom: 10
+      }
+    }, React.createElement("div", {
+      style: {
+        color: "rgba(180,200,220,0.5)",
+        fontSize: 10,
+        marginBottom: 4,
+        letterSpacing: 0.5
+      }
+    }, "NAME"), React.createElement("input", {
+      value: sel.name || "",
+      onChange: function (e) {
+        shipUpdatePart(shipSelectedPart, "name", e.target.value);
+      },
+      placeholder: SHIP_PART_LABELS[sel.type],
+      style: {
+        width: "100%",
+        padding: "5px 8px",
+        borderRadius: 6,
+        background: "rgba(0,0,0,0.3)",
+        border: "1px solid rgba(255,255,255,0.1)",
+        color: "#b0c8d8",
+        fontSize: 16,
+        fontFamily: "'Quicksand',sans-serif",
+        outline: "none",
+        boxSizing: "border-box"
+      }
+    })));
+  }
+  // Placeholder shown on the Color / Position sub-tabs when nothing is selected.
+  function renderShipSelectMessage() {
+    return React.createElement("div", {
+      style: {
+        background: "rgba(255,255,255,0.03)",
+        border: "1px solid rgba(255,255,255,0.06)",
+        borderRadius: 12,
+        padding: "18px 16px",
+        textAlign: "center"
+      }
+    }, React.createElement("div", {
+      style: {
+        color: "rgba(180,200,220,0.7)",
+        fontSize: 12,
+        fontFamily: "'Exo 2', sans-serif",
+        marginBottom: 6
+      }
+    }, "No part selected"), React.createElement("div", {
+      style: {
+        color: "rgba(180,200,220,0.4)",
+        fontSize: 11
+      }
+    }, "Tap a part on the preview, or open the LIST tab to choose one."));
   }
   function shipPreviewPointerDown(e) {
     if (e.preventDefault) e.preventDefault();
@@ -12619,7 +12733,7 @@ function CosmicWorkshop() {
         setShipEdit(Object.assign({}, design, {
           name: (design.name || "My Ship") + " (copy)"
         }));
-        setShipTab("hull");
+        setShipTab("list");
         setShipView("editor");
       },
       style: BTN_EDIT
@@ -12716,18 +12830,18 @@ function CosmicWorkshop() {
       background: "rgba(0,0,0,0.25)",
       border: "1px solid rgba(255,138,170,0.15)",
       touchAction: "none",
-      cursor: shipTab === "parts" ? "crosshair" : "default"
+      cursor: shipTab !== "templates" ? "crosshair" : "default"
     },
-    onPointerDown: shipTab === "parts" ? shipPreviewPointerDown : undefined,
-    onPointerMove: shipTab === "parts" ? shipPreviewPointerMove : undefined,
-    onPointerUp: shipTab === "parts" ? shipPreviewPointerUp : undefined,
-    onPointerCancel: shipTab === "parts" ? shipPreviewPointerUp : undefined
+    onPointerDown: shipTab !== "templates" ? shipPreviewPointerDown : undefined,
+    onPointerMove: shipTab !== "templates" ? shipPreviewPointerMove : undefined,
+    onPointerUp: shipTab !== "templates" ? shipPreviewPointerUp : undefined,
+    onPointerCancel: shipTab !== "templates" ? shipPreviewPointerUp : undefined
   }, React.createElement(ShipDesignSvg, {
     size: 120,
     design: shipEdit,
     uid: "edit",
-    selectedIdx: shipTab === "parts" ? shipSelectedPart : -1
-  })), shipTab === "parts" && React.createElement("div", {
+    selectedIdx: shipTab !== "templates" ? shipSelectedPart : -1
+  })), shipTab !== "templates" && React.createElement("div", {
     style: {
       fontSize: 10,
       color: "rgba(180,200,220,0.5)",
@@ -12767,51 +12881,65 @@ function CosmicWorkshop() {
       outline: "none",
       boxSizing: "border-box"
     }
-  })), React.createElement("div", {
+  })), function () {
+    // 5-tab sub-navigation: templates / add / color / position / list.
+    var tabs = [{
+      id: "templates",
+      label: "Templates"
+    }, {
+      id: "add",
+      label: "Add"
+    }, {
+      id: "color",
+      label: "Color"
+    }, {
+      id: "position",
+      label: "Position"
+    }, {
+      id: "list",
+      label: "List"
+    }];
+    return React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 3,
+        marginBottom: 12
+      }
+    }, tabs.map(function (t) {
+      var on = shipTab === t.id;
+      return React.createElement("div", {
+        key: t.id,
+        onClick: function () {
+          setShipTab(t.id);
+        },
+        style: {
+          flex: 1,
+          padding: "8px 4px",
+          textAlign: "center",
+          borderRadius: 8,
+          cursor: "pointer",
+          fontSize: 10,
+          fontWeight: 700,
+          letterSpacing: 0.5,
+          fontFamily: "'Exo 2', sans-serif",
+          textTransform: "uppercase",
+          background: on ? "rgba(255,138,170,0.2)" : "rgba(255,255,255,0.04)",
+          border: on ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.08)",
+          color: on ? "#ff8aaa" : "rgba(180,200,220,0.55)"
+        }
+      }, t.label);
+    }));
+  }(),
+  // ── TEMPLATES: preset hull thumbnails ──
+  shipTab === "templates" && React.createElement(React.Fragment, null, React.createElement("div", {
     style: {
-      display: "flex",
-      gap: 4,
-      marginBottom: 12
+      color: "rgba(180,200,220,0.5)",
+      fontSize: 10,
+      marginBottom: 8,
+      letterSpacing: 0.5,
+      textTransform: "uppercase"
     }
-  }, React.createElement("div", {
-    onClick: function () {
-      setShipTab("hull");
-    },
-    style: {
-      flex: 1,
-      padding: "8px 12px",
-      textAlign: "center",
-      borderRadius: 8,
-      cursor: "pointer",
-      fontSize: 11,
-      fontWeight: 700,
-      letterSpacing: 0.8,
-      fontFamily: "'Exo 2', sans-serif",
-      textTransform: "uppercase",
-      background: shipTab === "hull" ? "rgba(255,138,170,0.2)" : "rgba(255,255,255,0.04)",
-      border: shipTab === "hull" ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.08)",
-      color: shipTab === "hull" ? "#ff8aaa" : "rgba(180,200,220,0.5)"
-    }
-  }, "Hull"), React.createElement("div", {
-    onClick: function () {
-      setShipTab("parts");
-    },
-    style: {
-      flex: 1,
-      padding: "8px 12px",
-      textAlign: "center",
-      borderRadius: 8,
-      cursor: "pointer",
-      fontSize: 11,
-      fontWeight: 700,
-      letterSpacing: 0.8,
-      fontFamily: "'Exo 2', sans-serif",
-      textTransform: "uppercase",
-      background: shipTab === "parts" ? "rgba(255,138,170,0.2)" : "rgba(255,255,255,0.04)",
-      border: shipTab === "parts" ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.08)",
-      color: shipTab === "parts" ? "#ff8aaa" : "rgba(180,200,220,0.5)"
-    }
-  }, "Parts")), shipTab === "hull" && React.createElement("div", {
+  }, "Tap a template to load or merge its parts"), React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr 1fr",
@@ -12851,150 +12979,68 @@ function CosmicWorkshop() {
         textTransform: "uppercase"
       }
     }, SHIP_HULL_LABELS[h]));
-  })), shipTab === "parts" && function () {
+  }))),
+  // ── ADD: per-shape add buttons ──
+  shipTab === "add" && React.createElement("div", {
+    style: {
+      background: "rgba(255,255,255,0.03)",
+      border: "1px solid rgba(255,255,255,0.06)",
+      borderRadius: 12,
+      padding: "10px 12px"
+    }
+  }, React.createElement("div", {
+    style: {
+      color: "rgba(180,200,220,0.5)",
+      fontSize: 11,
+      marginBottom: 8,
+      letterSpacing: 0.5
+    }
+  }, "ADD PART"), React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 6
+    }
+  }, SHIP_PART_TYPES.map(function (pt) {
+    return React.createElement("div", {
+      key: pt,
+      onClick: function () {
+        shipAddPart(pt);
+        setShipTab("color");
+      },
+      style: {
+        padding: "12px 6px",
+        textAlign: "center",
+        borderRadius: 6,
+        cursor: "pointer",
+        fontSize: 12,
+        fontWeight: 700,
+        letterSpacing: 0.5,
+        fontFamily: "'Exo 2', sans-serif",
+        textTransform: "uppercase",
+        background: "rgba(255,138,170,0.08)",
+        border: "1px solid rgba(255,138,170,0.25)",
+        color: "#ff8aaa",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8
+      }
+    }, shipPartIcon(pt), React.createElement("span", null, SHIP_PART_LABELS[pt]));
+  }))),
+  // ── COLOR: fill (color, opacity) + border for the selected part ──
+  shipTab === "color" && function () {
     var partsList = Array.isArray(shipEdit.parts) ? shipEdit.parts : [];
     var sel = shipSelectedPart >= 0 && shipSelectedPart < partsList.length ? partsList[shipSelectedPart] : null;
+    if (!sel) return renderShipSelectMessage();
     return React.createElement("div", {
-      style: {
-        display: "flex",
-        flexDirection: "column",
-        gap: 10
-      }
-    }, React.createElement("div", {
-      style: {
-        background: "rgba(255,255,255,0.03)",
-        border: "1px solid rgba(255,255,255,0.06)",
-        borderRadius: 12,
-        padding: "10px 12px"
-      }
-    }, React.createElement("div", {
-      style: {
-        color: "rgba(180,200,220,0.5)",
-        fontSize: 11,
-        marginBottom: 8,
-        letterSpacing: 0.5
-      }
-    }, "ADD PART"), React.createElement("div", {
-      style: {
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr 1fr 1fr",
-        gap: 4
-      }
-    }, SHIP_PART_TYPES.map(function (pt) {
-      return React.createElement("div", {
-        key: pt,
-        onClick: function () {
-          shipAddPart(pt);
-        },
-        style: {
-          padding: "8px 4px",
-          textAlign: "center",
-          borderRadius: 6,
-          cursor: "pointer",
-          fontSize: 10,
-          fontWeight: 700,
-          letterSpacing: 0.4,
-          fontFamily: "'Exo 2', sans-serif",
-          textTransform: "uppercase",
-          background: "rgba(255,138,170,0.08)",
-          border: "1px solid rgba(255,138,170,0.25)",
-          color: "#ff8aaa",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 4
-        }
-      }, shipPartIcon(pt), React.createElement("span", null, SHIP_PART_LABELS[pt]));
-    }))), sel && React.createElement("div", {
       style: {
         background: "rgba(255,255,255,0.03)",
         border: "1px solid rgba(255,138,170,0.25)",
         borderRadius: 12,
         padding: "12px 16px 8px"
       }
-    }, React.createElement("div", {
-      style: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        marginBottom: 8
-      }
-    }, React.createElement("div", {
-      style: {
-        color: "#ff8aaa",
-        fontSize: 11,
-        fontWeight: 700,
-        letterSpacing: 0.8,
-        textTransform: "uppercase",
-        fontFamily: "'Exo 2', sans-serif"
-      }
-    }, "Selected: " + (sel.name || SHIP_PART_LABELS[sel.type])), React.createElement("div", {
-      style: {
-        display: "flex",
-        gap: 6
-      }
-    }, React.createElement("div", {
-      onClick: function () {
-        shipDuplicatePart(shipSelectedPart);
-      },
-      title: "Duplicate part",
-      style: {
-        width: 28,
-        height: 28,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: 6,
-        cursor: "pointer",
-        background: "rgba(128,221,255,0.12)",
-        border: "1px solid rgba(128,221,255,0.4)"
-      }
-    }, shipCopySvg(14, "#80ddff")), React.createElement("div", {
-      onClick: function () {
-        shipDeletePart(shipSelectedPart);
-      },
-      title: "Delete part",
-      style: {
-        width: 28,
-        height: 28,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: 6,
-        cursor: "pointer",
-        background: "rgba(220,60,80,0.15)",
-        border: "1px solid rgba(220,60,80,0.4)"
-      }
-    }, shipTrashSvg(14, "#ff8088")))), React.createElement("div", {
-      style: {
-        marginBottom: 10
-      }
-    }, React.createElement("div", {
-      style: {
-        color: "rgba(180,200,220,0.5)",
-        fontSize: 10,
-        marginBottom: 4,
-        letterSpacing: 0.5
-      }
-    }, "NAME"), React.createElement("input", {
-      value: sel.name || "",
-      onChange: function (e) {
-        shipUpdatePart(shipSelectedPart, "name", e.target.value);
-      },
-      placeholder: SHIP_PART_LABELS[sel.type],
-      style: {
-        width: "100%",
-        padding: "5px 8px",
-        borderRadius: 6,
-        background: "rgba(0,0,0,0.3)",
-        border: "1px solid rgba(255,255,255,0.1)",
-        color: "#b0c8d8",
-        fontSize: 16,
-        fontFamily: "'Quicksand',sans-serif",
-        outline: "none",
-        boxSizing: "border-box"
-      }
-    })), React.createElement(BDColorPicker, {
+    }, renderShipSelectedHeader(sel), React.createElement(BDColorPicker, {
       label: "Color",
       value: sel.color,
       presets: ["#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70cc", "#a0a8b8", "#ffffff", "#222a3a"],
@@ -13011,7 +13057,57 @@ function CosmicWorkshop() {
       onChange: function (v) {
         shipUpdatePart(shipSelectedPart, "opacity", v);
       }
+    }), React.createElement("div", {
+      style: {
+        color: "rgba(180,200,220,0.5)",
+        fontSize: 10,
+        marginTop: 8,
+        marginBottom: 4,
+        letterSpacing: 0.5,
+        textTransform: "uppercase"
+      }
+    }, "Border"), React.createElement(BDColorPicker, {
+      label: "Border Color",
+      value: sel.bc || "#000000",
+      presets: ["#000000", "#222a3a", "#ffffff", "#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70cc"],
+      onChange: function (v) {
+        shipUpdatePart(shipSelectedPart, "bc", v);
+      }
     }), React.createElement(BDSlider, {
+      label: "Border Width",
+      value: sel.bw || 0,
+      min: 0,
+      max: 4,
+      step: 0.1,
+      displayValue: (sel.bw || 0).toFixed(1),
+      onChange: function (v) {
+        shipUpdatePart(shipSelectedPart, "bw", v);
+      }
+    }), React.createElement(BDSlider, {
+      label: "Border Opacity",
+      value: typeof sel.bo === "number" ? sel.bo : 1,
+      min: 0,
+      max: 1,
+      step: 0.05,
+      displayValue: Math.round((typeof sel.bo === "number" ? sel.bo : 1) * 100) + "%",
+      onChange: function (v) {
+        shipUpdatePart(shipSelectedPart, "bo", v);
+      }
+    }));
+  }(),
+  // ── POSITION: geometry for the selected part ──
+  shipTab === "position" && function () {
+    var partsList = Array.isArray(shipEdit.parts) ? shipEdit.parts : [];
+    var sel = shipSelectedPart >= 0 && shipSelectedPart < partsList.length ? partsList[shipSelectedPart] : null;
+    if (!sel) return renderShipSelectMessage();
+    return React.createElement("div", {
+      style: {
+        background: "rgba(255,255,255,0.03)",
+        border: "1px solid rgba(255,138,170,0.25)",
+        borderRadius: 12,
+        padding: "12px 16px 8px"
+      }
+    }, renderShipSelectedHeader(sel), React.createElement(BDSlider, {
       label: "Position X",
       value: sel.x,
       min: 0,
@@ -13122,43 +13218,12 @@ function CosmicWorkshop() {
       onChange: function (v) {
         shipReorderPart(shipSelectedPart, Math.round(v));
       }
-    }), React.createElement("div", {
-      style: {
-        color: "rgba(180,200,220,0.5)",
-        fontSize: 10,
-        marginTop: 8,
-        marginBottom: 4,
-        letterSpacing: 0.5,
-        textTransform: "uppercase"
-      }
-    }, "Border"), React.createElement(BDColorPicker, {
-      label: "Border Color",
-      value: sel.bc || "#000000",
-      presets: ["#000000", "#222a3a", "#ffffff", "#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70cc"],
-      onChange: function (v) {
-        shipUpdatePart(shipSelectedPart, "bc", v);
-      }
-    }), React.createElement(BDSlider, {
-      label: "Border Width",
-      value: sel.bw || 0,
-      min: 0,
-      max: 4,
-      step: 0.1,
-      displayValue: (sel.bw || 0).toFixed(1),
-      onChange: function (v) {
-        shipUpdatePart(shipSelectedPart, "bw", v);
-      }
-    }), React.createElement(BDSlider, {
-      label: "Border Opacity",
-      value: typeof sel.bo === "number" ? sel.bo : 1,
-      min: 0,
-      max: 1,
-      step: 0.05,
-      displayValue: Math.round((typeof sel.bo === "number" ? sel.bo : 1) * 100) + "%",
-      onChange: function (v) {
-        shipUpdatePart(shipSelectedPart, "bo", v);
-      }
-    })), React.createElement("div", {
+    }));
+  }(),
+  // ── LIST: parts list + Reset to Preset ──
+  shipTab === "list" && function () {
+    var partsList = Array.isArray(shipEdit.parts) ? shipEdit.parts : [];
+    return React.createElement(React.Fragment, null, React.createElement("div", {
       style: {
         background: "rgba(255,255,255,0.03)",
         border: "1px solid rgba(255,255,255,0.06)",
@@ -13179,7 +13244,7 @@ function CosmicWorkshop() {
         fontStyle: "italic",
         padding: "6px 0"
       }
-    }, "No parts yet — add one above.") : React.createElement("div", {
+    }, "No parts yet — add one from the ADD tab.") : React.createElement("div", {
       style: {
         display: "flex",
         flexDirection: "column",
@@ -13258,34 +13323,34 @@ function CosmicWorkshop() {
           flex: "0 0 auto"
         }
       }, shipTrashSvg(12, "#ff8088")));
-    }))));
-  }(), React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "center",
-      marginTop: 20
-    }
-  }, React.createElement("div", {
-    onClick: function () {
-      shipDirtyRef.current = true;
-      var h = shipEdit.hull || "arrow";
-      setShipEdit(Object.assign({}, shipEdit, {
-        hull: h,
-        parts: shipHullPresetParts(h)
-      }));
-      setShipSelectedPart(-1);
-    },
-    style: {
-      padding: "8px 20px",
-      borderRadius: 8,
-      border: "1px solid rgba(255,255,255,0.1)",
-      color: "rgba(180,200,220,0.5)",
-      fontSize: 11,
-      fontFamily: "'Exo 2', sans-serif",
-      cursor: "pointer",
-      letterSpacing: 0.5
-    }
-  }, "Reset to Preset"))), shipShowBackWarn && renderBackWarnOverlay(function () {
+    })), React.createElement("div", {
+      style: {
+        display: "flex",
+        justifyContent: "center",
+        marginTop: 14
+      }
+    }, React.createElement("div", {
+      onClick: function () {
+        shipDirtyRef.current = true;
+        var h = shipEdit.hull || "arrow";
+        setShipEdit(Object.assign({}, shipEdit, {
+          hull: h,
+          parts: shipHullPresetParts(h)
+        }));
+        setShipSelectedPart(-1);
+      },
+      style: {
+        padding: "8px 20px",
+        borderRadius: 8,
+        border: "1px solid rgba(255,255,255,0.1)",
+        color: "rgba(180,200,220,0.5)",
+        fontSize: 11,
+        fontFamily: "'Exo 2', sans-serif",
+        cursor: "pointer",
+        letterSpacing: 0.5
+      }
+    }, "Reset to Template"))));
+  }()), shipShowBackWarn && renderBackWarnOverlay(function () {
     setShipShowBackWarn(false);
   }, function () {
     shipSaveCurrent();
