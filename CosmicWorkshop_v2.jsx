@@ -2848,16 +2848,15 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { color: "#ddffee", fontSize: 12, fontWeight: 700, letterSpacing: 0.6, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "UFO Customizer"),
               React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 10 } }, "Configure the alien hull")
             ),
-            React.createElement("div", { onClick: function() { setScreen("hangar"); setShipView("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(255,138,170,0.12)", borderLeft: "3px solid #ff8aaa", borderRadius: 8, padding: "10px 12px", cursor: "pointer", display: "flex", flexDirection: "row", alignItems: "center", gap: 12, gridColumn: "span 2" } },
-              // Left: standard module column (icon row + title + subtitle), matching the
-              // vertical form of the other module tiles.
-              React.createElement("div", { style: { flex: 1, display: "flex", flexDirection: "column", gap: 6 } },
-                React.createElement("div", { style: { display: "flex", alignItems: "flex-start", justifyContent: "space-between" } },
-                  React.createElement("svg", { width: "20", height: "20", viewBox: "0 0 24 24" },
-                    React.createElement("polygon", { points: "12,2 22,17 16,15 12,22 8,15 2,17", fill: "none", stroke: "#ff8aaa", strokeWidth: "1.5", strokeLinejoin: "round" })),
-                  React.createElement(WsMono, { size: 7, ls: 0.5, color: "rgba(255,138,170,0.45)" }, shipSaved.length + " SAVED")),
-                React.createElement("div", { style: { color: "#ffe0ea", fontSize: 12, fontWeight: 700, letterSpacing: 0.6, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Hangar"),
-                React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 10 } }, "Design your ship")))
+            React.createElement("div", { onClick: function() { setScreen("hangar"); setShipView("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(255,138,170,0.12)", borderLeft: "3px solid #ff8aaa", borderRadius: 8, padding: "10px 10px 10px 10px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 6 } },
+              React.createElement("div", { style: { display: "flex", alignItems: "flex-start", justifyContent: "space-between" } },
+                React.createElement("svg", { width: "20", height: "20", viewBox: "0 0 24 24" },
+                  React.createElement("polygon", { points: "12,2 22,17 16,15 12,22 8,15 2,17", fill: "none", stroke: "#ff8aaa", strokeWidth: "1.5", strokeLinejoin: "round" })),
+                React.createElement(WsMono, { size: 7, ls: 0.5, color: "rgba(255,138,170,0.45)" }, shipSaved.length + " SAVED")
+              ),
+              React.createElement("div", { style: { color: "#ffe0ea", fontSize: 12, fontWeight: 700, letterSpacing: 0.6, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Hangar"),
+              React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 10 } }, "Design your ship")
+            )
           ),
 
         ),
@@ -2873,7 +2872,7 @@ export default function CosmicWorkshop() {
                 React.createElement(WsLED, { color: "#80ddff", size: 4 }),
                 React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(128,221,255,0.6)" }, "GRID")
               ),
-              React.createElement("div", { style: { color: "#a8d8f0", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: 4 } }, savedLevels.length > 0 ? (savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0].name || "Untitled") : "Default"),
+              React.createElement("div", { style: { color: "#a8d8f0", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: 8 } }, savedLevels.length > 0 ? (savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0].name || "Untitled") : "Default"),
               React.createElement("div", { style: { display: "flex", justifyContent: "center" } },
                 renderGridMiniPreview(savedLevels.length > 0 ? savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0] : null, "rgba(128,221,255,0.3)"))
             ),

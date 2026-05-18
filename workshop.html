@@ -8360,20 +8360,8 @@ function CosmicWorkshop() {
       border: "1px solid rgba(255,138,170,0.12)",
       borderLeft: "3px solid #ff8aaa",
       borderRadius: 8,
-      padding: "10px 12px",
+      padding: "10px 10px 10px 10px",
       cursor: "pointer",
-      display: "flex",
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 12,
-      gridColumn: "span 2"
-    }
-  },
-  // Left: standard module column (icon row + title + subtitle), matching the
-  // vertical form of the other module tiles.
-  React.createElement("div", {
-    style: {
-      flex: 1,
       display: "flex",
       flexDirection: "column",
       gap: 6
@@ -8412,7 +8400,7 @@ function CosmicWorkshop() {
       color: "rgba(170,195,215,0.45)",
       fontSize: 10
     }
-  }, "Design your ship"))))),
+  }, "Design your ship")))),
   // ACTIVE LOADOUT
   React.createElement(WsPanel, {
     style: {
@@ -8471,7 +8459,7 @@ function CosmicWorkshop() {
       whiteSpace: "nowrap",
       overflow: "hidden",
       textOverflow: "ellipsis",
-      marginBottom: 4
+      marginBottom: 8
     }
   }, savedLevels.length > 0 ? savedLevels.slice().sort(function (a, b) {
     return new Date(b.savedAt || 0) - new Date(a.savedAt || 0);
