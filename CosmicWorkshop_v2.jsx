@@ -152,10 +152,10 @@ function UFOBlockSvg(props) {
       React.createElement("ellipse", { cx: hx - dRx * 0.22, cy: dY - dRy * 0.28, rx: dRx * 0.27, ry: dRy * 0.22, fill: "white", opacity: "0.25", transform: "rotate(-20," + (hx - dRx * 0.22) + "," + (dY - dRy * 0.28) + ")", clipPath: "url(#ufo-dc-" + uid + ")" })));
 }
 
-var SHIP_HULLS = ["arrow", "dart", "raptor", "wedge", "cruiser", "saucer", "startrack", "falcor", "none"];
-var SHIP_HULL_LABELS = { arrow: "Default", dart: "Dart", raptor: "Raptor", wedge: "Wedge", cruiser: "Cruiser", saucer: "Saucer", startrack: "Star Track", falcor: "Millenia Falcor", none: "None" };
-var SHIP_PART_TYPES = ["circle", "rect", "triangle", "line", "arrow"];
-var SHIP_PART_LABELS = { circle: "Oval", rect: "Rect", triangle: "Triangle", line: "Line", arrow: "Arrow" };
+var SHIP_HULLS = ["arrow", "dart", "raptor", "wedge", "fireflight", "saucer", "startrack", "falcor", "birdofplay", "none"];
+var SHIP_HULL_LABELS = { arrow: "Default", dart: "Dart", raptor: "Raptor", wedge: "Wedge", fireflight: "Fireflight", saucer: "Saucer", startrack: "Star Track", falcor: "Millenia Falcor", birdofplay: "Bird of Play", none: "None" };
+var SHIP_PART_TYPES = ["circle", "rect", "triangle", "trapezoid", "line", "arrow"];
+var SHIP_PART_LABELS = { circle: "Oval", rect: "Rect", triangle: "Triangle", trapezoid: "Trapezoid", line: "Line", arrow: "Arrow" };
 // Normalized 6-point swept-arrow polygon (centered, range [-0.5, 0.5]).
 // Derived from Cosmic-drift-default-ship.svg: front tip, right wing tip, right
 // inner notch, back tail, left inner notch, left wing tip.
@@ -180,14 +180,19 @@ var HULL_PRESETS = {
   wedge: [
     { type: "triangle", x: 20, y: 21, w: 34, h: 32, rot: 0, color: "#ffd0ff", opacity: 1 }
   ],
-  cruiser: [
-    { type: "rect", x: 20, y: 22, w: 9, h: 32, cr: 4.5, rot: 0, color: "#ffd0ff", opacity: 1 },
-    { type: "rect", x: 9,  y: 26, w: 5, h: 16, cr: 2.5, rot: 0, color: "#cc70cc", opacity: 1 },
-    { type: "rect", x: 31, y: 26, w: 5, h: 16, cr: 2.5, rot: 0, color: "#cc70cc", opacity: 1 }
+  // Fireflight: layer names match fireflight.svg.
+  fireflight: [
+    { type: "rect",      name: "Body",           x: 20,    y: 21.5,  w: 9.15, h: 34.95, cr: 4.58, rot: 0, color: "#b8c0c8", opacity: 1 },
+    { type: "rect",      name: "cockpit",        x: 20,    y: 4.88,  w: 5.25, h: 7.75,  cr: 2.63, rot: 0, color: "#80ddff", opacity: 0.9 },
+    { type: "rect",      name: "left-thruster",  x: 8.03,  y: 21.55, w: 4.6,  h: 9.9,   cr: 2.3,  rot: 0, color: "#b8c0c8", opacity: 1 },
+    { type: "rect",      name: "right-thruster", x: 31.98, y: 21.55, w: 4.6,  h: 9.9,   cr: 2.3,  rot: 0, color: "#b8c0c8", opacity: 1 },
+    { type: "trapezoid", name: "left-wing",      x: 12.88, y: 21.55, w: 8.5,  h: 5.2,   tw: 6.2,  tofs: 0, rot: -90, color: "#b8c0c8", opacity: 1 },
+    { type: "trapezoid", name: "right-wing",     x: 27.13, y: 21.55, w: 8.5,  h: 5.2,   tw: 6.2,  tofs: 0, rot: 90,  color: "#b8c0c8", opacity: 1 }
   ],
+  // Saucer: shallow UFO disc + centered dome (per Dan's UFO-default JSON).
   saucer: [
-    { type: "circle", x: 20, y: 24, w: 32, h: 22, rot: 0, color: "#ffd0ff", opacity: 1 },
-    { type: "circle", x: 19, y: 17, w: 12, h: 10, rot: 0, color: "#80ddff", opacity: 0.85 }
+    { type: "circle", x: 20, y: 24,   w: 32, h: 13.5, rot: 0, color: "#ffd0ff", opacity: 1 },
+    { type: "circle", x: 20, y: 17.2, w: 12, h: 11,   rot: 0, color: "#80ddff", opacity: 0.85 }
   ],
   // Star Track: layer names match star-track.svg.
   startrack: [
@@ -207,6 +212,23 @@ var HULL_PRESETS = {
     { type: "triangle", name: "Left-Mandible",  x: 16, y: 9,  w: 7.5, h: 14, rot: 12,   color: "#b8c0c8", opacity: 1 },
     { type: "triangle", name: "Right-Mandible", x: 24, y: 9,  w: 7.5, h: 14, rot: -12,  color: "#b8c0c8", opacity: 1 },
     { type: "rect",     name: "Cockpit",        x: 32, y: 15, w: 3.4, h: 8,  cr: 1,     rot: 0, color: "#b8c0c8", opacity: 1 }
+  ],
+  // Bird of Play: layer names match bird-of-play.svg. Right-triangle wing
+  // fins are rendered as degenerate trapezoids (tw=0) with tofs at the edge
+  // to put the apex at the correct corner (180° rot flips to the bottom).
+  birdofplay: [
+    { type: "rect",      name: "Rounded-Rectangle",        x: 20,    y: 28.46, w: 15.41, h: 14.45, cr: 2.61, rot: 0,   color: "#b8c0c8", opacity: 1 },
+    { type: "rect",      name: "Rounded-Rectangle-copy-2", x: 19.97, y: 14.87, w: 2.13,  h: 16.03, cr: 1.03, rot: 0,   color: "#b8c0c8", opacity: 1 },
+    { type: "circle",    name: "Circle",                   x: 20,    y: 22.10, w: 9.22,  h: 12.73, rot: 0,   color: "#b8c0c8", opacity: 1 },
+    { type: "circle",    name: "Circle-copy",              x: 20,    y: 7.72,  w: 4.54,  h: 6.81,  rot: 0,   color: "#b8c0c8", opacity: 1 },
+    { type: "circle",    name: "Circle-copy-2",            x: 2.14,  y: 7.86,  w: 2.27,  h: 3.51,  rot: 0,   color: "#b8c0c8", opacity: 1 },
+    { type: "rect",      name: "Rounded-Rectangle-copy",   x: 2.18,  y: 15.01, w: 1.24,  h: 14.38, cr: 0.62, rot: 0,   color: "#b8c0c8", opacity: 1 },
+    { type: "trapezoid", name: "Right-Triangle",           x: 7.27,  y: 28.67, w: 10.18, h: 10.60, tw: 0,    tofs: -5.09, rot: 180, color: "#b8c0c8", opacity: 1 },
+    { type: "trapezoid", name: "Right-Triangle-copy",      x: 7.27,  y: 20.07, w: 10.18, h: 6.74,  tw: 0,    tofs: -5.09, rot: 0,   color: "#b8c0c8", opacity: 1 },
+    { type: "circle",    name: "path1",                    x: 37.86, y: 7.86,  w: 2.27,  h: 3.51,  rot: 0,   color: "#b8c0c8", opacity: 1 },
+    { type: "rect",      name: "path2",                    x: 37.82, y: 15.01, w: 1.24,  h: 14.38, cr: 0.62, rot: 0,   color: "#b8c0c8", opacity: 1 },
+    { type: "trapezoid", name: "path3",                    x: 32.73, y: 28.67, w: 10.18, h: 10.60, tw: 0,    tofs: 5.09,  rot: 180, color: "#b8c0c8", opacity: 1 },
+    { type: "trapezoid", name: "path4",                    x: 32.73, y: 20.07, w: 10.18, h: 6.74,  tw: 0,    tofs: 5.09,  rot: 0,   color: "#b8c0c8", opacity: 1 }
   ],
   none: []
 };
@@ -249,6 +271,13 @@ function shipRenderPart(part, key, isSelected) {
     inner = React.createElement("polygon", Object.assign({ points: p1 + " " + p2 + " " + p3, fill: color, opacity: op, transform: t }, strokeProps));
   } else if (part.type === "line") {
     inner = React.createElement("rect", Object.assign({ x: x - w / 2, y: y - Math.max(0.4, h) / 2, width: w, height: Math.max(0.4, h), fill: color, opacity: op, transform: t }, strokeProps));
+  } else if (part.type === "trapezoid") {
+    var tw = typeof part.tw === "number" ? part.tw : w * 0.5;
+    var tofs = typeof part.tofs === "number" ? part.tofs : 0;
+    var blX = x - w / 2, brX = x + w / 2, bY = y + h / 2;
+    var tlX = x - tw / 2 + tofs, trX = x + tw / 2 + tofs, tY = y - h / 2;
+    var pts = tlX + "," + tY + " " + trX + "," + tY + " " + brX + "," + bY + " " + blX + "," + bY;
+    inner = React.createElement("polygon", Object.assign({ points: pts, fill: color, opacity: op, transform: t }, strokeProps));
   } else if (part.type === "arrow") {
     var apts = ARROW_POINTS.map(function(p){ return (x + p[0] * w) + "," + (y + p[1] * h); }).join(" ");
     inner = React.createElement("polygon", Object.assign({ points: apts, fill: color, opacity: op, transform: t }, strokeProps));
@@ -284,6 +313,7 @@ function shipPartIcon(type) {
   if (type === "circle") return React.createElement("svg", props, React.createElement("ellipse", { cx: 12, cy: 9, rx: 10, ry: 7, fill: "currentColor" }));
   if (type === "rect")   return React.createElement("svg", props, React.createElement("rect", { x: 3, y: 3, width: 18, height: 12, rx: 2, fill: "currentColor" }));
   if (type === "triangle") return React.createElement("svg", props, React.createElement("polygon", { points: "12,2 22,16 2,16", fill: "currentColor" }));
+  if (type === "trapezoid") return React.createElement("svg", props, React.createElement("polygon", { points: "6,4 18,4 22,16 2,16", fill: "currentColor" }));
   if (type === "line")   return React.createElement("svg", props, React.createElement("rect", { x: 1, y: 7, width: 22, height: 4, fill: "currentColor" }));
   if (type === "arrow")  return React.createElement("svg", props, React.createElement("polygon", { points: "12,1 22,14 17,12 12,18 7,12 2,14", fill: "currentColor" }));
   return null;
@@ -2245,15 +2275,17 @@ export default function CosmicWorkshop() {
   }
   function shipAddPart(type) {
     var defaults = {
-      circle:   { w: 6, h: 6,  color: "#80ddff" },
-      rect:     { w: 6, h: 6,  color: "#80ddff", cr: 0 },
-      triangle: { w: 7, h: 7,  color: "#80ddff" },
-      line:     { w: 10, h: 1, color: "#ffd060" },
-      arrow:    { w: 12, h: 16, color: "#efb6ed" }
+      circle:    { w: 6, h: 6,  color: "#80ddff" },
+      rect:      { w: 6, h: 6,  color: "#80ddff", cr: 0 },
+      triangle:  { w: 7, h: 7,  color: "#80ddff" },
+      trapezoid: { w: 8, h: 6,  color: "#80ddff", tw: 4, tofs: 0 },
+      line:      { w: 10, h: 1, color: "#ffd060" },
+      arrow:     { w: 12, h: 16, color: "#efb6ed" }
     };
     var dflt = defaults[type] || defaults.circle;
     var part = { type: type, x: 20, y: 22, w: dflt.w, h: dflt.h, rot: 0, color: dflt.color, opacity: 0.9, bw: 0, bc: "#000000", bo: 1 };
     if (type === "rect") part.cr = 0;
+    if (type === "trapezoid") { part.tw = dflt.tw; part.tofs = dflt.tofs; }
     shipDirtyRef.current = true;
     setShipEdit(function(prev) {
       var list = (Array.isArray(prev.parts) ? prev.parts : []).concat([part]);
@@ -3556,6 +3588,10 @@ export default function CosmicWorkshop() {
                     shipLockSvg(18, shipWhLocked))),
                 sel.type === "rect" && React.createElement(BDSlider, { label: "Corner Radius", value: sel.cr || 0, min: 0, max: Math.min(sel.w, sel.h) / 2, step: 0.25, displayValue: (sel.cr || 0).toFixed(2),
                   onChange: function(v) { shipUpdatePart(shipSelectedPart, "cr", v); } }),
+                sel.type === "trapezoid" && React.createElement(BDSlider, { label: "Top Width", value: typeof sel.tw === "number" ? sel.tw : sel.w / 2, min: 0, max: sel.w * 1.5, step: 0.25, displayValue: (typeof sel.tw === "number" ? sel.tw : sel.w / 2).toFixed(2),
+                  onChange: function(v) { shipUpdatePart(shipSelectedPart, "tw", v); } }),
+                sel.type === "trapezoid" && React.createElement(BDSlider, { label: "Top Offset", value: sel.tofs || 0, min: -sel.w / 2, max: sel.w / 2, step: 0.25, displayValue: (sel.tofs || 0).toFixed(2),
+                  onChange: function(v) { shipUpdatePart(shipSelectedPart, "tofs", v); } }),
                 React.createElement(BDSlider, { label: "Rotation", value: sel.rot || 0, min: 0, max: 360, step: 5, displayValue: (sel.rot || 0) + "°",
                   onChange: function(v) { shipUpdatePart(shipSelectedPart, "rot", v); } }),
                 partsList.length > 1 && React.createElement(BDSlider, { label: "Z (layer)", value: shipSelectedPart, min: 0, max: partsList.length - 1, step: 1, displayValue: shipSelectedPart + " / " + (partsList.length - 1),
