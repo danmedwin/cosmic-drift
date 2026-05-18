@@ -5988,7 +5988,7 @@ function CosmicDriftGame() {
       var col = cols[Math.floor(Math.random() * cols.length)];
       var targetX = (67 + col * 26 - 160) * 1.15;
       var dist = Math.abs(targetX - splashShipXRef.current);
-      var moveDur = Math.min(900, Math.max(250, Math.round(dist * 4)));
+      var moveDur = Math.min(1800, Math.max(500, Math.round(dist * 8)));
       splashShipXRef.current = targetX;
       splashMoveDurRef.current = moveDur;
       splashMovingRef.current = true;
