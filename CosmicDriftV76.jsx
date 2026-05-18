@@ -1292,10 +1292,7 @@ var GS = {
   green: "#50ffae",
   blue: "#80ddff",
 };
-function GsRivet(props) {
-  var sz = props.size || 6;
-  return <span style={Object.assign({ position: "absolute", width: sz, height: sz, borderRadius: sz, background: "radial-gradient(circle at 30% 30%, #6b7787 0%, #2a323c 70%, #15191f 100%)", boxShadow: "inset 0 1px 0 rgba(200,230,240,0.18), 0 1px 1px rgba(0,0,0,0.6)" }, props.pos || {})} />;
-}
+function GsRivet(props) { return null; }
 function GsPanel(props) {
   var isInset = props.inset;
   var noRivets = props.riveted === false || isInset;

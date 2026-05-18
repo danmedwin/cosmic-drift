@@ -818,9 +818,7 @@ var WS = {
   ib: "1px solid #14202e", is: "inset 0 2px 8px rgba(0,0,0,0.7)",
   green: "#50ffae", blue: "#80ddff",
 };
-function WsRivet(pos) {
-  return React.createElement("span", { style: Object.assign({ position: "absolute", width: 6, height: 6, borderRadius: 6, background: "radial-gradient(circle at 30% 30%, #6b7787 0%, #2a323c 70%, #15191f 100%)", boxShadow: "inset 0 1px 0 rgba(200,230,240,0.18), 0 1px 1px rgba(0,0,0,0.6)" }, pos || {}) });
-}
+function WsRivet(pos) { return null; }
 function WsPanel(props) {
   var isInset = props.inset;
   var noRivets = props.riveted === false || isInset;
