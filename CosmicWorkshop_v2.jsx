@@ -1117,6 +1117,8 @@ export default function CosmicWorkshop() {
   var _shipShowImport = useState(false), shipShowImport = _shipShowImport[0], setShipShowImport = _shipShowImport[1];
   var _shipImportText = useState(""), shipImportText = _shipImportText[0], setShipImportText = _shipImportText[1];
   var _shipImportError = useState(""), shipImportError = _shipImportError[0], setShipImportError = _shipImportError[1];
+  var _shipRenamingId = useState(null), shipRenamingId = _shipRenamingId[0], setShipRenamingId = _shipRenamingId[1];
+  var _shipRenameValue = useState(""), shipRenameValue = _shipRenameValue[0], setShipRenameValue = _shipRenameValue[1];
   var shipDirtyRef = useRef(false);
   var _shipSelectedPart = useState(-1), shipSelectedPart = _shipSelectedPart[0], setShipSelectedPart = _shipSelectedPart[1];
   var shipDragRef = useRef(null);
@@ -2459,6 +2461,27 @@ export default function CosmicWorkshop() {
     setShipActiveId(id);
     shipSaveActiveId(id);
   }
+  // Inline rename from the list. Saves on Enter/blur, cancels on Escape.
+  function shipStartRename(design) {
+    setShipRenameValue(design.name || "");
+    setShipRenamingId(design.id);
+  }
+  function shipCommitRename() {
+    var id = shipRenamingId;
+    if (!id) return;
+    var name = (shipRenameValue || "").trim() || "Untitled";
+    setShipSaved(function(prev) {
+      var list = prev.map(function(d) { return d.id === id ? Object.assign({}, d, { name: name, savedAt: new Date().toISOString() }) : d; });
+      shipSaveDesigns(list);
+      return list;
+    });
+    setShipRenamingId(null);
+    setShipRenameValue("");
+  }
+  function shipCancelRename() {
+    setShipRenamingId(null);
+    setShipRenameValue("");
+  }
   function shipDeleteDesign(id) {
     setShipSaved(function(prev) {
       var list = prev.filter(function(d) { return d.id !== id; });
@@ -3404,7 +3427,22 @@ export default function CosmicWorkshop() {
                 React.createElement("div", { style: { width: 64, height: 64, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.2)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.06)", flexShrink: 0 } },
                   React.createElement(ShipDesignSvg, { size: 56, design: design, uid: design.id })),
                 React.createElement("div", { style: { flex: 1, minWidth: 0 } },
-                  React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700, marginBottom: 3 } }, design.name || "Untitled")),
+                  shipRenamingId === design.id
+                    ? React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6, marginBottom: 3 } },
+                        React.createElement("input", {
+                          value: shipRenameValue,
+                          autoFocus: true,
+                          onChange: function(e) { setShipRenameValue(e.target.value); },
+                          onBlur: shipCommitRename,
+                          onKeyDown: function(e) { if (e.key === "Enter") shipCommitRename(); else if (e.key === "Escape") shipCancelRename(); },
+                          style: { flex: 1, minWidth: 0, padding: "4px 8px", borderRadius: 6, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,138,170,0.5)", color: "#b0c8d8", fontSize: 16, fontWeight: 700, fontFamily: "'Quicksand',sans-serif", outline: "none", boxSizing: "border-box" }
+                        }))
+                    : React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6, marginBottom: 3 } },
+                        React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, design.name || "Untitled"),
+                        React.createElement("div", { onClick: function() { shipStartRename(design); },
+                          title: "Rename ship",
+                          style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", color: "rgba(180,200,220,0.6)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", flex: "0 0 auto" } },
+                          WsIconPencil(11)))),
                 React.createElement("div", { onClick: function() { shipSetActive(design.id); }, style: isActive ? BTN_ISACTIVE : BTN_SETACTIVE }, isActive ? "★ Active" : "Set Active")),
               React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" } },
                 React.createElement("div", { onClick: function() { shipOpenEditor(design); }, style: BTN_EDIT }, WsIconPencil(), "EDIT"),
