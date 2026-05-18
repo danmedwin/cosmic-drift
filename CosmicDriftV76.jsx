@@ -2731,7 +2731,7 @@ function logUfo(msg) {
           </div>
         </GsPanel>
 
-        <div style={{ flex: 1 }} />
+        <div style={{ flex: "0 0 10px" }} />
 
         {/* Mode / Difficulty */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, flexShrink: 0, position: "relative", zIndex: 1 }}>
