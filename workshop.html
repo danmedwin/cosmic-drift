@@ -1091,7 +1091,10 @@ var HULL_PRESETS = {
     color: "#ffd070",
     color2: "#7a2010",
     fillMode: "radial",
-    opacity: 0.95
+    opacity: 0.95,
+    glowEnabled: true,
+    glowColor: "#ff6040",
+    glowIntensity: 1
   }, {
     type: "circle",
     name: "Thruster-Glow-R",
@@ -1103,7 +1106,10 @@ var HULL_PRESETS = {
     color: "#ffd070",
     color2: "#7a2010",
     fillMode: "radial",
-    opacity: 0.95
+    opacity: 0.95,
+    glowEnabled: true,
+    glowColor: "#ff6040",
+    glowIntensity: 1
   }, {
     type: "rect",
     name: "Body-Main",
@@ -1121,7 +1127,7 @@ var HULL_PRESETS = {
   }, {
     type: "circle",
     name: "Engine-Bulb",
-    x: 20.20,
+    x: 20.2,
     y: 30.75,
     w: 14,
     h: 10.5,
@@ -1143,11 +1149,14 @@ var HULL_PRESETS = {
     color2: "#a02810",
     fillMode: "radial",
     gradStop: 0.25,
-    opacity: 0.95
+    opacity: 0.95,
+    glowEnabled: true,
+    glowColor: "#ff6040",
+    glowIntensity: 1
   }, {
     type: "rect",
     name: "Neck",
-    x: 20.60,
+    x: 20.6,
     y: 10.14,
     w: 1.5,
     h: 4,
@@ -1162,7 +1171,7 @@ var HULL_PRESETS = {
     type: "rect",
     name: "Neck-copy",
     x: 19.11,
-    y: 10.20,
+    y: 10.2,
     w: 1.5,
     h: 4,
     cr: 0.6,
@@ -1322,10 +1331,10 @@ var HULL_PRESETS = {
     cr: 0.6,
     rot: -38,
     color: "#2a2f3a",
-    opacity: 1,
-    fillMode: "linear",
     color2: "#9aa3b2",
-    gradAngle: 270
+    fillMode: "linear",
+    gradAngle: 270,
+    opacity: 1
   }, {
     type: "rect",
     name: "Pylon-Right",
@@ -1336,10 +1345,10 @@ var HULL_PRESETS = {
     cr: 0.6,
     rot: 38,
     color: "#2a2f3a",
-    opacity: 1,
-    fillMode: "linear",
     color2: "#9aa3b2",
-    gradAngle: 255
+    fillMode: "linear",
+    gradAngle: 255,
+    opacity: 1
   }, {
     type: "rect",
     name: "Neck",
@@ -1350,10 +1359,10 @@ var HULL_PRESETS = {
     cr: 0.6,
     rot: 0,
     color: "#3a4150",
-    opacity: 1,
-    fillMode: "linear",
     color2: "#cfd6df",
-    gradAngle: 0
+    fillMode: "linear",
+    gradAngle: 0,
+    opacity: 1
   }, {
     type: "rect",
     name: "Secondary-Hull",
@@ -1364,10 +1373,10 @@ var HULL_PRESETS = {
     cr: 2.6,
     rot: 0,
     color: "#1a1e28",
-    opacity: 1,
-    fillMode: "linear",
     color2: "#b0b8c4",
-    gradAngle: 0
+    fillMode: "linear",
+    gradAngle: 0,
+    opacity: 1
   }, {
     type: "circle",
     name: "Deflector",
@@ -1377,9 +1386,12 @@ var HULL_PRESETS = {
     h: 1.8,
     rot: 0,
     color: "#ffd070",
-    opacity: 0.95,
+    color2: "#7a3010",
     fillMode: "radial",
-    color2: "#7a3010"
+    opacity: 0.95,
+    glowEnabled: true,
+    glowColor: "#ff6040",
+    glowIntensity: 1
   }, {
     type: "circle",
     name: "Saucer",
@@ -1389,10 +1401,10 @@ var HULL_PRESETS = {
     h: 8,
     rot: 0,
     color: "#2a2f3a",
-    opacity: 1,
-    fillMode: "radial",
     color2: "#dde3ec",
-    gradStop: 0.75
+    fillMode: "radial",
+    gradStop: 0.75,
+    opacity: 1
   }, {
     type: "circle",
     name: "Bridge",
@@ -1402,9 +1414,9 @@ var HULL_PRESETS = {
     h: 3.5,
     rot: 0,
     color: "#cfd6df",
-    opacity: 1,
+    color2: "#3a4150",
     fillMode: "radial",
-    color2: "#3a4150"
+    opacity: 1
   }, {
     type: "circle",
     name: "Bridge-Lamp",
@@ -1414,9 +1426,11 @@ var HULL_PRESETS = {
     h: 1,
     rot: 0,
     color: "#e9f6ff",
-    opacity: 0.95,
+    color2: "#4a7a8e",
     fillMode: "radial",
-    color2: "#4a7a8e"
+    opacity: 0.95,
+    glowEnabled: true,
+    glowIntensity: 1
   }, {
     type: "rect",
     name: "Nacelle-Left",
@@ -1427,10 +1441,10 @@ var HULL_PRESETS = {
     cr: 1.5,
     rot: 0,
     color: "#15181f",
-    opacity: 1,
-    fillMode: "linear",
     color2: "#6a7484",
-    gradAngle: 0
+    fillMode: "linear",
+    gradAngle: 0,
+    opacity: 1
   }, {
     type: "rect",
     name: "Nacelle-Right",
@@ -1441,38 +1455,42 @@ var HULL_PRESETS = {
     cr: 1.5,
     rot: 0,
     color: "#15181f",
-    opacity: 1,
-    fillMode: "linear",
     color2: "#6a7484",
-    gradAngle: 180
+    fillMode: "linear",
+    gradAngle: 180,
+    opacity: 1
   }, {
     type: "rect",
     name: "Warp-Glow-Left",
-    x: 9,
+    x: 9.0302316700611,
     y: 27,
     w: 1.4,
     h: 14,
     cr: 0.7,
     rot: 0,
     color: "#80ddff",
-    opacity: 0.9,
-    fillMode: "linear",
     color2: "#1a4a5e",
-    gradAngle: 0
+    fillMode: "linear",
+    gradAngle: 0,
+    opacity: 0.9,
+    glowEnabled: true,
+    glowIntensity: 1
   }, {
     type: "rect",
     name: "Warp-Glow-Right",
-    x: 31,
+    x: 31.015911405295316,
     y: 27,
     w: 1.4,
     h: 14,
     cr: 0.7,
     rot: 0,
     color: "#80ddff",
-    opacity: 0.9,
-    fillMode: "linear",
     color2: "#1a4a5e",
-    gradAngle: 180
+    fillMode: "linear",
+    gradAngle: 180,
+    opacity: 0.9,
+    glowEnabled: true,
+    glowIntensity: 1
   }, {
     type: "circle",
     name: "Bussard-Left",
@@ -1482,21 +1500,27 @@ var HULL_PRESETS = {
     h: 2.6,
     rot: 0,
     color: "#ff7a50",
-    opacity: 0.95,
+    color2: "#7a1d0e",
     fillMode: "radial",
-    color2: "#7a1d0e"
+    opacity: 0.95,
+    glowEnabled: true,
+    glowColor: "#ff6040",
+    glowIntensity: 1
   }, {
     type: "circle",
     name: "Bussard-Right",
     x: 31.04,
-    y: 16.8,
+    y: 16.83054989816701,
     w: 2.6,
     h: 2.6,
     rot: 0,
     color: "#ff7a50",
-    opacity: 0.95,
+    color2: "#7a1d0e",
     fillMode: "radial",
-    color2: "#7a1d0e"
+    opacity: 0.95,
+    glowEnabled: true,
+    glowColor: "#ff6040",
+    glowIntensity: 1
   }],
   // Millenia Falcor: layer names match Millenia Falcor.svg. Mandibles are
   // approximated as rotated isoceles triangles (the SVG quadrilaterals taper
@@ -1510,10 +1534,10 @@ var HULL_PRESETS = {
     h: 14,
     rot: 12,
     color: "#0d0d0d",
-    opacity: 1,
-    fillMode: "linear",
     color2: "#919191",
-    gradAngle: 255
+    fillMode: "linear",
+    gradAngle: 255,
+    opacity: 1
   }, {
     type: "triangle",
     name: "Right-Mandible",
@@ -1523,10 +1547,25 @@ var HULL_PRESETS = {
     h: 14,
     rot: -12,
     color: "#0c0d0d",
-    opacity: 1,
-    fillMode: "linear",
     color2: "#8c9097",
-    gradAngle: 285
+    fillMode: "linear",
+    gradAngle: 285,
+    opacity: 1
+  }, {
+    type: "circle",
+    name: "Engine glow",
+    x: 20.223077902240327,
+    y: 36.5,
+    w: 11.5,
+    h: 3,
+    rot: 0,
+    color: "#80ddff",
+    opacity: 1,
+    bw: 0,
+    bc: "#000000",
+    bo: 1,
+    glowEnabled: true,
+    glowIntensity: 2.5
   }, {
     type: "circle",
     name: "Saucer",
@@ -1536,27 +1575,28 @@ var HULL_PRESETS = {
     h: 27,
     rot: 0,
     color: "#4d4d4d",
-    opacity: 1,
-    fillMode: "radial",
     color2: "#303030",
+    fillMode: "radial",
     gradStop: 0.4,
-    bw: 0
+    opacity: 1,
+    bw: 0,
+    glowEnabled: false
   }, {
     type: "rect",
     x: 10.65,
     y: 25,
     w: 9,
     h: 4,
+    cr: 0.75,
     rot: 0,
     color: "#222a3a",
+    color2: "#6f7276",
+    fillMode: "linear",
+    gradAngle: 270,
     opacity: 1,
     bw: 0,
     bc: "#747677",
-    bo: 1,
-    cr: 0.75,
-    fillMode: "linear",
-    color2: "#6f7276",
-    gradAngle: 270
+    bo: 1
   }, {
     type: "rect",
     name: "Cockpit",
@@ -1567,55 +1607,55 @@ var HULL_PRESETS = {
     cr: 1,
     rot: 0,
     color: "#7c7e83",
-    opacity: 1,
+    color2: "#222a3a",
     fillMode: "linear",
-    color2: "#222a3a"
+    opacity: 1
   }, {
     type: "circle",
-    x: 32,
-    y: 13.30,
+    x: 31.908032077393077,
+    y: 13.575267311608961,
     w: 3.5,
     h: 1.5,
     rot: 0,
     color: "#80ddff",
+    color2: "#487c8e",
+    fillMode: "radial",
     opacity: 0.9,
     bw: 0,
     bc: "#000000",
-    bo: 1,
-    fillMode: "radial",
-    color2: "#487c8e"
+    bo: 1
   }, {
     type: "rect",
     x: 28.32,
     y: 23.14,
     w: 10.5,
     h: 3.5,
+    cr: 0.75,
     rot: 150,
     color: "#222a3a",
+    color2: "#62656a",
+    fillMode: "linear",
+    gradAngle: 105,
     opacity: 1,
     bw: 0,
     bc: "#747677",
-    bo: 1,
-    cr: 0.75,
-    fillMode: "linear",
-    color2: "#62656a",
-    gradAngle: 105
+    bo: 1
   }, {
     type: "rect",
     x: 28.88,
     y: 25,
     w: 9,
     h: 4,
+    cr: 0.75,
     rot: 0,
     color: "#222a3a",
+    color2: "#6f7276",
+    fillMode: "linear",
+    gradAngle: 270,
     opacity: 1,
     bw: 0,
     bc: "#747677",
-    bo: 1,
-    cr: 0.75,
-    fillMode: "linear",
-    color2: "#6f7276",
-    gradAngle: 270
+    bo: 1
   }, {
     type: "circle",
     x: 20,
@@ -1624,29 +1664,29 @@ var HULL_PRESETS = {
     h: 11,
     rot: 0,
     color: "#6b6b6b",
+    color2: "#283140",
+    fillMode: "radial",
+    gradStop: 0.65,
     opacity: 1,
     bw: 0,
     bc: "#000000",
-    bo: 0.2,
-    fillMode: "radial",
-    color2: "#283140",
-    gradStop: 0.65
+    bo: 0.2
   }, {
     type: "rect",
     x: 20,
     y: 13.55,
     w: 7.5,
     h: 4.1,
+    cr: 0.75,
     rot: 90,
     color: "#8c8c8c",
+    color2: "#222a3a",
+    fillMode: "linear",
+    gradAngle: 0,
     opacity: 1,
     bw: 0,
     bc: "#747677",
-    bo: 1,
-    cr: 0.75,
-    fillMode: "linear",
-    color2: "#222a3a",
-    gradAngle: 0
+    bo: 1
   }, {
     type: "circle",
     x: 20.05,
@@ -1686,7 +1726,7 @@ var HULL_PRESETS = {
   }, {
     type: "circle",
     x: 16.45,
-    y: 31.70,
+    y: 31.7,
     w: 3,
     h: 3,
     rot: 0,
@@ -1697,7 +1737,7 @@ var HULL_PRESETS = {
     bo: 1
   }, {
     type: "circle",
-    x: 15.00,
+    x: 15,
     y: 34.95,
     w: 3,
     h: 3,
@@ -1771,8 +1811,8 @@ var HULL_PRESETS = {
   }, {
     type: "trapezoid",
     name: "Wing-Lower-R",
-    x: 32.73,
-    y: 28.67,
+    x: 32.75004837067209,
+    y: 28.69068482688391,
     w: 10.18,
     h: 10.6,
     tw: 0,
@@ -1850,7 +1890,10 @@ var HULL_PRESETS = {
     color2: "#5a1808",
     fillMode: "radial",
     gradStop: 0.4,
-    opacity: 0.9
+    opacity: 0.9,
+    glowEnabled: true,
+    glowColor: "#ff6040",
+    glowIntensity: 1
   }, {
     type: "rect",
     name: "Neck",
@@ -1891,7 +1934,10 @@ var HULL_PRESETS = {
     color2: "#5a2010",
     fillMode: "linear",
     gradAngle: 180,
-    opacity: 0.95
+    opacity: 0.95,
+    glowEnabled: true,
+    glowColor: "#ff6040",
+    glowIntensity: 1
   }, {
     type: "circle",
     name: "Cannon-Cap-L",
@@ -1907,7 +1953,7 @@ var HULL_PRESETS = {
   }, {
     type: "circle",
     name: "Cannon-Cap-R",
-    x: 37.50,
+    x: 37.5,
     y: 8.42,
     w: 2.27,
     h: 3.51,
@@ -1927,7 +1973,10 @@ var HULL_PRESETS = {
     color: "#23e13c",
     color2: "#31880c",
     fillMode: "radial",
-    opacity: 0.95
+    opacity: 0.95,
+    glowEnabled: true,
+    glowColor: "#80ff80",
+    glowIntensity: 1
   }, {
     type: "circle",
     name: "Disruptor-R",
@@ -1939,7 +1988,10 @@ var HULL_PRESETS = {
     color: "#23e13c",
     color2: "#31880c",
     fillMode: "radial",
-    opacity: 0.95
+    opacity: 0.95,
+    glowEnabled: true,
+    glowColor: "#80ff80",
+    glowIntensity: 1
   }],
   vespa: [{
     type: "triangle",
@@ -1950,10 +2002,10 @@ var HULL_PRESETS = {
     h: 30,
     rot: 0,
     color: "#1a1e28",
-    opacity: 1,
-    fillMode: "linear",
     color2: "#7a8294",
-    gradAngle: 120
+    fillMode: "linear",
+    gradAngle: 120,
+    opacity: 1
   }, {
     type: "rect",
     name: "Engine-Left",
@@ -1961,13 +2013,13 @@ var HULL_PRESETS = {
     y: 37.47,
     w: 4.6,
     h: 2.6,
+    cr: 0.6,
     rot: -8,
     color: "#06080c",
-    opacity: 1,
-    fillMode: "linear",
     color2: "#1a1e28",
+    fillMode: "linear",
     gradAngle: 0,
-    cr: 0.6
+    opacity: 1
   }, {
     type: "circle",
     name: "Glow-Left",
@@ -1977,9 +2029,12 @@ var HULL_PRESETS = {
     h: 1.8,
     rot: -8,
     color: "#ffb070",
-    opacity: 0.95,
+    color2: "#7a1d0e",
     fillMode: "radial",
-    color2: "#7a1d0e"
+    opacity: 0.95,
+    glowEnabled: true,
+    glowColor: "#ff6040",
+    glowIntensity: 1
   }, {
     type: "rect",
     name: "Nacelle-Left",
@@ -1987,13 +2042,13 @@ var HULL_PRESETS = {
     y: 27.05,
     w: 4,
     h: 20,
+    cr: 1.2,
     rot: -8,
     color: "#0f1218",
-    opacity: 1,
-    fillMode: "linear",
     color2: "#5a6478",
+    fillMode: "linear",
     gradAngle: 0,
-    cr: 1.2
+    opacity: 1
   }, {
     type: "rect",
     name: "Spine",
@@ -2001,13 +2056,13 @@ var HULL_PRESETS = {
     y: 27.45,
     w: 2.4,
     h: 11.5,
+    cr: 0.5,
     rot: 0,
     color: "#0a0c12",
-    opacity: 1,
-    fillMode: "linear",
     color2: "#424752",
+    fillMode: "linear",
     gradAngle: 0,
-    cr: 0.5
+    opacity: 1
   }, {
     type: "triangle",
     name: "Fin-Left",
@@ -2017,10 +2072,10 @@ var HULL_PRESETS = {
     h: 5,
     rot: -90,
     color: "#15181f",
-    opacity: 1,
-    fillMode: "linear",
     color2: "#4a5160",
-    gradAngle: 255
+    fillMode: "linear",
+    gradAngle: 255,
+    opacity: 1
   }, {
     type: "triangle",
     name: "Fin-Right",
@@ -2030,10 +2085,10 @@ var HULL_PRESETS = {
     h: 5,
     rot: 90,
     color: "#15181f",
-    opacity: 1,
-    fillMode: "linear",
     color2: "#4a5160",
-    gradAngle: 255
+    fillMode: "linear",
+    gradAngle: 255,
+    opacity: 1
   }, {
     type: "rect",
     name: "Canopy",
@@ -2041,13 +2096,13 @@ var HULL_PRESETS = {
     y: 17,
     w: 3.6,
     h: 11,
+    cr: 1.6,
     rot: 0,
     color: "#3d6878",
-    opacity: 0.95,
-    fillMode: "linear",
     color2: "#0a1218",
+    fillMode: "linear",
     gradAngle: 180,
-    cr: 1.6
+    opacity: 0.95
   }, {
     type: "circle",
     name: "Canopy-Glint",
@@ -2057,9 +2112,11 @@ var HULL_PRESETS = {
     h: 1.2,
     rot: 0,
     color: "#cdeeff",
-    opacity: 0.9,
+    color2: "#4a7a8e",
     fillMode: "radial",
-    color2: "#4a7a8e"
+    opacity: 0.9,
+    glowEnabled: true,
+    glowIntensity: 1
   }, {
     type: "rect",
     name: "Engine-Right",
@@ -2067,13 +2124,13 @@ var HULL_PRESETS = {
     y: 37.48,
     w: 4.6,
     h: 2.6,
+    cr: 0.6,
     rot: 8,
     color: "#06080c",
-    opacity: 1,
-    fillMode: "linear",
     color2: "#1a1e28",
+    fillMode: "linear",
     gradAngle: 0,
-    cr: 0.6
+    opacity: 1
   }, {
     type: "circle",
     name: "Glow-Right",
@@ -2083,9 +2140,12 @@ var HULL_PRESETS = {
     h: 1.8,
     rot: 8,
     color: "#ffb070",
-    opacity: 0.95,
+    color2: "#7a1d0e",
     fillMode: "radial",
-    color2: "#7a1d0e"
+    opacity: 0.95,
+    glowEnabled: true,
+    glowColor: "#ff6040",
+    glowIntensity: 1
   }, {
     type: "rect",
     name: "Nacelle-Right",
@@ -2093,13 +2153,13 @@ var HULL_PRESETS = {
     y: 26.86,
     w: 4,
     h: 20,
+    cr: 1.2,
     rot: 8,
     color: "#0f1218",
-    opacity: 1,
-    fillMode: "linear",
     color2: "#5a6478",
+    fillMode: "linear",
     gradAngle: 180,
-    cr: 1.2
+    opacity: 1
   }],
   ironeye: [{
     type: "rect",
@@ -13952,17 +14012,17 @@ function CosmicWorkshop() {
       background: "rgba(0,0,0,0.25)",
       border: "1px solid rgba(255,138,170,0.15)",
       touchAction: "none",
-      cursor: shipTab !== "templates" ? "crosshair" : "default"
+      cursor: "crosshair"
     },
-    onPointerDown: shipTab !== "templates" ? shipPreviewPointerDown : undefined,
-    onPointerMove: shipTab !== "templates" ? shipPreviewPointerMove : undefined,
-    onPointerUp: shipTab !== "templates" ? shipPreviewPointerUp : undefined,
-    onPointerCancel: shipTab !== "templates" ? shipPreviewPointerUp : undefined
+    onPointerDown: shipPreviewPointerDown,
+    onPointerMove: shipPreviewPointerMove,
+    onPointerUp: shipPreviewPointerUp,
+    onPointerCancel: shipPreviewPointerUp
   }, React.createElement(ShipDesignSvg, {
     size: shipPreviewSize - 8,
     design: shipEdit,
     uid: "edit",
-    selectedIdx: shipTab !== "templates" ? shipSelectedPart : -1,
+    selectedIdx: shipSelectedPart,
     style: shipEdit.glowEnabled ? {
       filter: "drop-shadow(0 0 " + (shipEdit.glowIntensity || 10) + "px " + (shipEdit.glowColor || "#ff88aa") + ")"
     } : {}
