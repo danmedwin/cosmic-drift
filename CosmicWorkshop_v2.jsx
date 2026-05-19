@@ -4793,7 +4793,7 @@ export default function CosmicWorkshop() {
                         title: "Delete part",
                         style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", background: "rgba(220,60,80,0.12)", border: "1px solid rgba(220,60,80,0.3)", flex: "0 0 auto" } },
                         shipTrashSvg(12, "#ff8088")));
-                  })));
+                  }))));
           })()),
         shipShowBackWarn && renderBackWarnOverlay(
           function() { setShipShowBackWarn(false); },
