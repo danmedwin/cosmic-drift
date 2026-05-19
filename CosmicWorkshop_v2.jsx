@@ -1169,7 +1169,7 @@ var SAMPLE_LEVEL = {
 // ── Active Loadout mini-preview helpers ──
 // Tiny pixel-grid preview of a saved level's block layout.
 function renderGridMiniPreview(level, accent) {
-  var cell = 8;
+  var cell = 10;
   var grid = level && level.grid;
   var border = "1px solid " + (accent || "rgba(128,221,255,0.25)");
   if (!grid || grid.length !== COLS * ROWS) {
@@ -1190,9 +1190,9 @@ function renderBlocksSetPreview(activeMap, savedDesigns) {
   var types = [1, 2, 3, 5, 6, 7, 8, 9, 10];
   for (var i = 0; i < types.length; i++) {
     var design = bdResolveActiveDesign(types[i], activeMap, savedDesigns);
-    if (design) items.push(React.createElement("div", { key: types[i], style: { width: 16, height: 16, overflow: "hidden" } }, React.createElement(BDBlockPreview, { design: design, size: 16 })));
+    if (design) items.push(React.createElement("div", { key: types[i], style: { width: 20, height: 20, overflow: "hidden" } }, React.createElement(BDBlockPreview, { design: design, size: 20 })));
   }
-  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(3, 16px)", gap: 2, width: 52, margin: "0 auto" } }, items);
+  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(3, 20px)", gap: 2, width: 64, margin: "0 auto" } }, items);
 }
 // Compact stylized icon per VFX effect type — captures the visual signature
 // of each effect (acid drip / flame / spark burst / explosion ring) using the
@@ -1201,20 +1201,20 @@ function renderVfxMini(effectType, design) {
   var d = design || {};
   if (effectType === "acid_ooze") {
     var c1 = d.color1 || "#1a6a1a", c2 = d.color2 || "#35a035";
-    return React.createElement("svg", { width: 22, height: 22, viewBox: "0 0 22 22" },
+    return React.createElement("svg", { width: 28, height: 28, viewBox: "0 0 22 22" },
       React.createElement("rect", { x: 4, y: 2, width: 14, height: 4, rx: 1, fill: c1, stroke: c2, strokeWidth: 0.6 }),
       React.createElement("path", { d: "M6 7 Q9 10 6 13 Q9 16 6 19 L 16 19 Q 13 16 16 13 Q 13 10 16 7 Z", fill: c2 }),
       React.createElement("ellipse", { cx: 11, cy: 20, rx: 7, ry: 1.4, fill: c2, opacity: 0.7 }));
   }
   if (effectType === "burn") {
     var emC = d.emberColor || "#ff6633", spC = d.sparkColor || "#ffffff";
-    return React.createElement("svg", { width: 22, height: 22, viewBox: "0 0 22 22" },
+    return React.createElement("svg", { width: 28, height: 28, viewBox: "0 0 22 22" },
       React.createElement("path", { d: "M11 2 Q5 8 7 14 Q3 15 5.5 19 Q11 22 13 17 Q19 19 17 13 Q14.5 10 16 5 Q13 9 11 2 Z", fill: emC }),
       React.createElement("circle", { cx: 15, cy: 8, r: 1.3, fill: spC, opacity: 0.9 }));
   }
   if (effectType === "block_destroy") {
     var bsC = d.burstColor || "#c8b8ff", acC = d.accentColor || "#80ddff";
-    return React.createElement("svg", { width: 22, height: 22, viewBox: "0 0 22 22" },
+    return React.createElement("svg", { width: 28, height: 28, viewBox: "0 0 22 22" },
       React.createElement("path", { d: "M11 1 L12.4 9.6 L21 11 L12.4 12.4 L11 21 L9.6 12.4 L1 11 L9.6 9.6 Z", fill: bsC }),
       React.createElement("circle", { cx: 11, cy: 11, r: 2.6, fill: acC, opacity: 0.85 }));
   }
@@ -1225,7 +1225,7 @@ function renderVfxMini(effectType, design) {
       var a = (i * 60) * Math.PI / 180;
       dots.push(React.createElement("circle", { key: i, cx: 11 + Math.cos(a) * 7.5, cy: 11 + Math.sin(a) * 7.5, r: 1.7, fill: blastC }));
     }
-    return React.createElement("svg", { width: 22, height: 22, viewBox: "0 0 22 22" },
+    return React.createElement("svg", { width: 28, height: 28, viewBox: "0 0 22 22" },
       React.createElement("circle", { cx: 11, cy: 11, r: 9.5, fill: blastC, opacity: 0.18 }),
       dots,
       React.createElement("circle", { cx: 11, cy: 11, r: 3.5, fill: coreC }));
@@ -1237,9 +1237,9 @@ function renderVfxSetPreview(activeMap, savedDesigns) {
   var types = ["acid_ooze", "burn", "block_destroy", "drone_explode"];
   var items = types.map(function(t) {
     var d = vfxResolveActive(t, activeMap, savedDesigns);
-    return React.createElement("div", { key: t, style: { display: "flex", alignItems: "center", justifyContent: "center", width: 22, height: 22 } }, renderVfxMini(t, d));
+    return React.createElement("div", { key: t, style: { display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28 } }, renderVfxMini(t, d));
   });
-  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(2, 22px)", gap: 3, width: 47, margin: "0 auto" } }, items);
+  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(2, 28px)", gap: 3, width: 59, margin: "0 auto" } }, items);
 }
 
 // ── Workshop cockpit design tokens + helpers ──
@@ -3074,54 +3074,28 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 10 } }, "Design your ship")
             ),
             // ── Active column cards begin (placed in col 2 by gridAutoFlow) ──
-            React.createElement("div", { onClick: function() { setScreen("builder"); if (savedLevels.length > 0) { var latest = savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0]; openBuilder(latest); } else { loadSavedLevels(); setLbScreen("list"); } }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(80,200,255,0.22)", borderRight: "3px solid #80ddff", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 3, marginBottom: 4 } },
-                React.createElement(WsLED, { color: "#80ddff", size: 4 }),
-                React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(128,221,255,0.6)" }, "GRID")
-              ),
-              React.createElement("div", { style: { color: "#a8d8f0", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: 8 } }, savedLevels.length > 0 ? (savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0].name || "Untitled") : "Default"),
+            React.createElement("div", { onClick: function() { setScreen("builder"); if (savedLevels.length > 0) { var latest = savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0]; openBuilder(latest); } else { loadSavedLevels(); setLbScreen("list"); } }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "2px solid #80ddff", borderRadius: 7, padding: "8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6 } },
               React.createElement("div", { style: { display: "flex", justifyContent: "center" } },
-                renderGridMiniPreview(savedLevels.length > 0 ? savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0] : null, "rgba(128,221,255,0.3)"))
+                renderGridMiniPreview(savedLevels.length > 0 ? savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0] : null, "rgba(128,221,255,0.3)")),
+              React.createElement("div", { style: { color: "#a8d8f0", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%", textAlign: "center" } }, savedLevels.length > 0 ? (savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0].name || "Untitled") : "Default")
             ),
-            React.createElement("div", { onClick: function() { setScreen("designer"); setBdCurrentView("list"); setBdSavedTab("active"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(200,184,255,0.22)", borderRight: "3px solid #c8b8ff", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 3, marginBottom: 4 } },
-                React.createElement(WsLED, { color: "#c8b8ff", size: 4 }),
-                React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(200,184,255,0.6)" }, "BLOCKS")
-              ),
-              // Invisible spacer matches the name line in GRID/HULL/SHIP so previews
-              // start at the same vertical position across all tiles.
-              React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, marginBottom: 4, visibility: "hidden" } }, " "),
+            React.createElement("div", { onClick: function() { setScreen("designer"); setBdCurrentView("list"); setBdSavedTab("active"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "2px solid #c8b8ff", borderRadius: 7, padding: "8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" } },
               React.createElement("div", { style: { display: "flex", justifyContent: "center" } },
                 renderBlocksSetPreview(bdActiveMap, bdSaved))
             ),
-            React.createElement("div", { onClick: function() { setScreen("vfx"); setVfxCurrentView("list"); setVfxSavedTab("active"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(255,180,60,0.22)", borderRight: "3px solid #ffb43c", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 3, marginBottom: 4 } },
-                React.createElement(WsLED, { color: "#ffb43c", size: 4 }),
-                React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(255,180,60,0.6)" }, "VFX")
-              ),
-              React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, marginBottom: 4, visibility: "hidden" } }, " "),
-              // VFX is only a 2x2 grid; shift it down by one icon row so its
-              // bottom edge lines up with the taller Blocks (3x3) preview.
-              React.createElement("div", { style: { display: "flex", justifyContent: "center", alignItems: "center", marginTop: 25 } },
+            React.createElement("div", { onClick: function() { setScreen("vfx"); setVfxCurrentView("list"); setVfxSavedTab("active"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "2px solid #ffb43c", borderRadius: 7, padding: "8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" } },
+              React.createElement("div", { style: { display: "flex", justifyContent: "center" } },
                 renderVfxSetPreview(vfxActiveMap, vfxSaved))
             ),
-            React.createElement("div", { onClick: function() { setScreen("ufo"); var ad = ufoGetActiveDesign(); if (ad) ufoOpenEditor(ad); else setUfoView("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(100,220,180,0.22)", borderRight: "3px solid #64dcb4", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 3, marginBottom: 4 } },
-                React.createElement(WsLED, { color: "#64dcb4", size: 4 }),
-                React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(100,220,180,0.6)" }, "UFO")
-              ),
-              React.createElement("div", { style: { color: "#80e8c4", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: 4 } }, ufoSaved.length > 0 ? (ufoGetActiveDesign().name || "Active") : "Default"),
+            React.createElement("div", { onClick: function() { setScreen("ufo"); var ad = ufoGetActiveDesign(); if (ad) ufoOpenEditor(ad); else setUfoView("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "2px solid #64dcb4", borderRadius: 7, padding: "8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6 } },
               React.createElement("div", { style: { display: "flex", justifyContent: "center" } },
-                React.createElement(UFOBlockSvg, { size: 56, design: ufoGetActiveDesign(), uid: "loadout-ufo" }))
+                React.createElement(UFOBlockSvg, { size: 72, design: ufoGetActiveDesign(), uid: "loadout-ufo" })),
+              React.createElement("div", { style: { color: "#80e8c4", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%", textAlign: "center" } }, ufoSaved.length > 0 ? (ufoGetActiveDesign().name || "Active") : "Default")
             ),
-            React.createElement("div", { onClick: function() { setScreen("hangar"); var sd = null; for (var i = 0; i < shipSaved.length; i++) { if (shipSaved[i].id === shipActiveId) { sd = shipSaved[i]; break; } } if (sd) shipOpenEditor(sd); else setShipView("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(255,138,170,0.22)", borderRight: "3px solid #ff8aaa", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 3, marginBottom: 4 } },
-                React.createElement(WsLED, { color: "#ff8aaa", size: 4 }),
-                React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(255,138,170,0.6)" }, "SHIP")
-              ),
-              React.createElement("div", { style: { color: "#ffb8cc", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginBottom: 4 } }, (function() { return shipSaved.length > 0 && shipActiveId ? (shipGetActiveDesign().name || "Custom") : "Default"; }())),
+            React.createElement("div", { onClick: function() { setScreen("hangar"); var sd = null; for (var i = 0; i < shipSaved.length; i++) { if (shipSaved[i].id === shipActiveId) { sd = shipSaved[i]; break; } } if (sd) shipOpenEditor(sd); else setShipView("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "2px solid #ff8aaa", borderRadius: 7, padding: "8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6 } },
               React.createElement("div", { style: { display: "flex", justifyContent: "center" } },
-                React.createElement(ShipDesignSvg, { size: 56, design: shipGetActiveDesign(), uid: "loadout-ship" }))
+                React.createElement(ShipDesignSvg, { size: 72, design: shipGetActiveDesign(), uid: "loadout-ship" })),
+              React.createElement("div", { style: { color: "#ffb8cc", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%", textAlign: "center" } }, (function() { return shipSaved.length > 0 && shipActiveId ? (shipGetActiveDesign().name || "Custom") : "Default"; }()))
             )
           )
         ),
