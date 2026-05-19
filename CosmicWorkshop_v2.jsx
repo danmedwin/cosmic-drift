@@ -4528,10 +4528,16 @@ export default function CosmicWorkshop() {
                   style: { padding: "3px 8px", borderRadius: 5, cursor: "pointer", background: "rgba(255,138,170,0.10)", border: "1px solid rgba(255,138,170,0.35)", color: "#ff8aaa", fontSize: 9, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "All"),
                 selCount > 0 && React.createElement("div", { onClick: shipClearSelection, title: "Clear selection",
                   style: { padding: "3px 8px", borderRadius: 5, cursor: "pointer", background: "rgba(180,180,180,0.06)", border: "1px solid rgba(180,180,180,0.28)", color: "rgba(200,210,220,0.75)", fontSize: 9, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Clear"),
-                selCount >= 2 && React.createElement("div", { onClick: shipGroupSelected, title: "Group selected parts",
-                  style: { padding: "3px 8px", borderRadius: 5, cursor: "pointer", background: "rgba(200,184,255,0.10)", border: "1px solid rgba(200,184,255,0.38)", color: "#c8b8ff", fontSize: 9, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Group"),
-                shipSelectionHasGroup() && React.createElement("div", { onClick: shipUngroupSelected, title: "Ungroup",
-                  style: { padding: "3px 8px", borderRadius: 5, cursor: "pointer", background: "rgba(180,180,180,0.06)", border: "1px solid rgba(180,180,180,0.28)", color: "rgba(200,210,220,0.75)", fontSize: 9, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Ungroup"),
+                // Single Group/Ungroup chip: when the selection contains any
+                // grouped part it ungroups; otherwise (with 2+ selected) it
+                // creates a group. Hidden when neither action applies.
+                (function() {
+                  var grouped = shipSelectionHasGroup();
+                  if (!grouped && selCount < 2) return null;
+                  return React.createElement("div", { onClick: grouped ? shipUngroupSelected : shipGroupSelected,
+                    title: grouped ? "Ungroup" : "Group selected parts",
+                    style: { padding: "3px 8px", borderRadius: 5, cursor: "pointer", background: grouped ? "rgba(180,180,180,0.06)" : "rgba(200,184,255,0.10)", border: grouped ? "1px solid rgba(180,180,180,0.28)" : "1px solid rgba(200,184,255,0.38)", color: grouped ? "rgba(200,210,220,0.75)" : "#c8b8ff", fontSize: 9, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, grouped ? "Ungroup" : "Group");
+                })(),
                 React.createElement("div", { style: { flex: 1, minWidth: 0 } }),
                 selCount > 0 && React.createElement("div", { onClick: shipDuplicateSelected, title: selCount > 1 ? ("Duplicate " + selCount + " parts") : "Duplicate",
                   style: { width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 5, cursor: "pointer", background: "rgba(128,221,255,0.10)", border: "1px solid rgba(128,221,255,0.38)" } },
@@ -4566,7 +4572,6 @@ export default function CosmicWorkshop() {
             })()),
           // ── TEMPLATES: preset hull thumbnails ──
           shipTab === "templates" && React.createElement(React.Fragment, null,
-            React.createElement("div", { style: { color: "rgba(180,200,220,0.4)", fontSize: 10, marginBottom: 8, letterSpacing: 0.5, textTransform: "uppercase" } }, "Tap to load — replaces current parts"),
             React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 } },
               SHIP_HULLS.map(function(h) {
                 var isSelected = (shipEdit.hull || "arrow") === h;
