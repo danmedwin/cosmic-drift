@@ -3000,16 +3000,21 @@ export default function CosmicWorkshop() {
       // ── SCROLLABLE BODY ──
       React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "8px 10px 6px", display: "flex", flexDirection: "column", gap: 8 } },
 
-        // MODULES + ACTIVE row (vertical columns, side by side)
-        React.createElement("div", { style: { display: "flex", flexDirection: "row", gap: 8, alignItems: "stretch" } },
-
-        // MODULES PANEL
-        React.createElement(WsPanel, { style: { padding: "10px", flex: 3, display: "flex", flexDirection: "column" } },
-          React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, paddingLeft: 2, paddingRight: 2 } },
-            React.createElement(WsMono, { size: 8, ls: 2.5, color: "rgba(180,140,255,0.65)" }, "MODULES"),
-            React.createElement(WsMono, { size: 7, ls: 1, color: "rgba(180,140,255,0.3)" }, "05 / 05")
+        // COMBINED MODULES + ACTIVE PANEL (single frame, two columns)
+        React.createElement(WsPanel, { style: { padding: "10px", display: "flex", flexDirection: "column" } },
+          // Header row aligned to body columns (MODULES over col 1, ACTIVE over col 2)
+          React.createElement("div", { style: { display: "grid", gridTemplateColumns: "3fr 1fr", gap: 6, marginBottom: 8 } },
+            React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", paddingLeft: 2, paddingRight: 2 } },
+              React.createElement(WsMono, { size: 8, ls: 2.5, color: "rgba(180,140,255,0.65)" }, "MODULES"),
+              React.createElement(WsMono, { size: 7, ls: 1, color: "rgba(180,140,255,0.3)" }, "05 / 05")
+            ),
+            React.createElement("div", { style: { display: "flex", alignItems: "center", paddingLeft: 2, paddingRight: 2 } },
+              React.createElement(WsMono, { size: 8, ls: 2.5, color: "rgba(180,140,255,0.65)" }, "ACTIVE")
+            )
           ),
-          React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr", gridAutoRows: "1fr", gap: 6, flex: 1 } },
+          // Body 2-column grid; column-flow places first 5 cards in col 1 (modules),
+          // next 5 in col 2 (active), so each pair shares a row.
+          React.createElement("div", { style: { display: "grid", gridTemplateColumns: "3fr 1fr", gridTemplateRows: "repeat(5, auto)", gridAutoFlow: "column", gap: 6, flex: 1 } },
             React.createElement("div", { onClick: function() { loadSavedLevels(); setScreen("builder"); setLbScreen("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(80,200,255,0.12)", borderLeft: "3px solid #80ddff", borderRadius: 8, padding: "10px 10px 10px 10px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 6 } },
               React.createElement("div", { style: { display: "flex", alignItems: "flex-start", justifyContent: "space-between" } },
                 React.createElement("svg", { width: "20", height: "20", viewBox: "0 0 24 24" },
@@ -3067,17 +3072,8 @@ export default function CosmicWorkshop() {
               ),
               React.createElement("div", { style: { color: "#ffe0ea", fontSize: 22, fontWeight: 700, letterSpacing: 0.6, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Hangar"),
               React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 10 } }, "Design your ship")
-            )
-          ),
-
-        ),
-
-        // ACTIVE
-        React.createElement(WsPanel, { style: { padding: "8px 10px", flex: 1, display: "flex", flexDirection: "column" } },
-          React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 } },
-            React.createElement(WsMono, { size: 8, ls: 2.5, color: "rgba(180,140,255,0.65)" }, "ACTIVE")
-          ),
-          React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr", gridAutoRows: "1fr", gap: 6, flex: 1 } },
+            ),
+            // ── Active column cards begin (placed in col 2 by gridAutoFlow) ──
             React.createElement("div", { onClick: function() { setScreen("builder"); if (savedLevels.length > 0) { var latest = savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0]; openBuilder(latest); } else { loadSavedLevels(); setLbScreen("list"); } }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(80,200,255,0.22)", borderTop: "3px solid #80ddff", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 3, marginBottom: 4 } },
                 React.createElement(WsLED, { color: "#80ddff", size: 4 }),
@@ -3128,9 +3124,7 @@ export default function CosmicWorkshop() {
                 React.createElement(ShipDesignSvg, { size: 56, design: shipGetActiveDesign(), uid: "loadout-ship" }))
             )
           )
-        )
-
-        ), // end MODULES + ACTIVE row
+        ),
 
         // FLEX SPACER — pushes the credit + Resume + Bridge to bottom
         React.createElement("div", { style: { flex: 1, minHeight: 8 } }),
