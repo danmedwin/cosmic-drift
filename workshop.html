@@ -11488,39 +11488,9 @@ function CosmicWorkshop() {
     fill: "currentColor"
   })), "Save & Play")), React.createElement("div", {
     style: {
-      flex: 1,
-      background: SCRN,
-      border: SCRNB,
-      borderRadius: 4,
-      padding: "4px 8px",
-      boxShadow: SCRNS
+      flex: 1
     }
-  }, React.createElement("input", {
-    value: builderLevelName,
-    onChange: function (e) {
-      var v = e.target.value;
-      setBuilderLevelName(v);
-      setBuilderDirty(true);
-      lbHistoryPush({
-        grid: builderGrid,
-        shipStart: builderShipStart,
-        name: v,
-        plasma: builderPlasma
-      }, "name");
-    },
-    placeholder: "Level name...",
-    style: {
-      width: "100%",
-      background: "transparent",
-      border: "none",
-      outline: "none",
-      color: "#b0c8d8",
-      fontSize: 16,
-      fontWeight: 600,
-      fontFamily: "'Quicksand',sans-serif",
-      letterSpacing: 0.5
-    }
-  })), React.createElement("div", {
+  }), React.createElement("div", {
     onClick: function () {
       setBuilderTourStep(0);
     },
@@ -11554,7 +11524,53 @@ function CosmicWorkshop() {
     fill: "rgba(180,200,220,0.5)",
     fontSize: "10",
     fontWeight: "700"
-  }, "?")))), builderWarn && React.createElement("div", {
+  }, "?")))),
+  // ── Name input on its own row so the button row has room to breathe ──
+  React.createElement("div", {
+    style: {
+      display: "flex",
+      padding: "6px 10px",
+      background: WS.brushed,
+      backgroundBlendMode: "overlay",
+      borderBottom: PNLB,
+      position: "relative",
+      zIndex: 2
+    }
+  }, React.createElement("div", {
+    style: {
+      flex: 1,
+      background: SCRN,
+      border: SCRNB,
+      borderRadius: 4,
+      padding: "4px 10px",
+      boxShadow: SCRNS
+    }
+  }, React.createElement("input", {
+    value: builderLevelName,
+    onChange: function (e) {
+      var v = e.target.value;
+      setBuilderLevelName(v);
+      setBuilderDirty(true);
+      lbHistoryPush({
+        grid: builderGrid,
+        shipStart: builderShipStart,
+        name: v,
+        plasma: builderPlasma
+      }, "name");
+    },
+    placeholder: "Level name...",
+    style: {
+      width: "100%",
+      background: "transparent",
+      border: "none",
+      outline: "none",
+      color: "#b0c8d8",
+      fontSize: 16,
+      fontWeight: 600,
+      fontFamily: "'Quicksand',sans-serif",
+      letterSpacing: 0.5
+    }
+  }))), builderWarn && React.createElement("div", {
     style: {
       padding: "6px 12px",
       textAlign: "center",
