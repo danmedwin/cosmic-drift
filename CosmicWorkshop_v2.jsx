@@ -1294,6 +1294,11 @@ export default function CosmicWorkshop() {
 
   // ══ BLOCK DESIGNER STATE ══
   var _bdDesign = useState(function() { return bdDefaultDesign(); }), bdDesign = _bdDesign[0], setBdDesign = _bdDesign[1];
+  // Undo/redo: stack of bdDesign snapshots. coalesceKey + lastTime collapse
+  // continuous edits (slider scrubs, color drags) into a single history step
+  // so one Undo reverts the whole drag rather than each frame of it.
+  var bdHistoryRef = useRef({ stack: [], idx: -1, lastKey: null, lastTime: 0 });
+  var _bdHistVersion = useState(0), bdHistVersion = _bdHistVersion[0], setBdHistVersion = _bdHistVersion[1];
   var _bdSaved = useState([]), bdSaved = _bdSaved[0], setBdSaved = _bdSaved[1];
   var _bdActive = useState({}), bdActiveMap = _bdActive[0], setBdActiveMap = _bdActive[1];
   var _bdEditId = useState(null), bdEditId = _bdEditId[0], setBdEditId = _bdEditId[1];
@@ -1771,16 +1776,69 @@ export default function CosmicWorkshop() {
   // BLOCK DESIGNER FUNCTIONS
   // ═══════════════════════════════════════
 
+  // ── Undo/redo plumbing ──
+  // History stores deep-cloned snapshots of bdDesign. We push *after* a
+  // change so stack[idx] is always "current". A coalesce key (typically the
+  // field name) collapses runs of same-key updates (slider scrubs, color
+  // drags) into one undo step within HISTORY_COALESCE_MS.
+  function bdHistoryReset(state) {
+    bdHistoryRef.current = { stack: [JSON.parse(JSON.stringify(state))], idx: 0, lastKey: null, lastTime: 0 };
+    setBdHistVersion(function(v) { return v + 1; });
+  }
+  function bdHistoryPush(state, coalesceKey) {
+    var h = bdHistoryRef.current;
+    var now = Date.now();
+    var snap = JSON.parse(JSON.stringify(state));
+    if (coalesceKey && h.lastKey === coalesceKey && now - h.lastTime < 600 && h.idx >= 0) {
+      // Same field touched again recently — overwrite the top of the stack
+      // instead of pushing a new step, so the whole drag collapses.
+      h.stack[h.idx] = snap;
+      h.lastTime = now;
+    } else {
+      // Truncate any redo branch and push a fresh entry, then cap at 50.
+      h.stack = h.stack.slice(0, h.idx + 1);
+      h.stack.push(snap);
+      if (h.stack.length > 50) { h.stack.shift(); }
+      h.idx = h.stack.length - 1;
+      h.lastKey = coalesceKey || null;
+      h.lastTime = now;
+    }
+    setBdHistVersion(function(v) { return v + 1; });
+  }
+  function bdUndo() {
+    var h = bdHistoryRef.current;
+    if (h.idx <= 0) return;
+    h.idx -= 1;
+    h.lastKey = null;
+    setBdDesign(JSON.parse(JSON.stringify(h.stack[h.idx])));
+    setBdDirty(true);
+    setBdHistVersion(function(v) { return v + 1; });
+  }
+  function bdRedo() {
+    var h = bdHistoryRef.current;
+    if (h.idx >= h.stack.length - 1) return;
+    h.idx += 1;
+    h.lastKey = null;
+    setBdDesign(JSON.parse(JSON.stringify(h.stack[h.idx])));
+    setBdDirty(true);
+    setBdHistVersion(function(v) { return v + 1; });
+  }
+  var bdCanUndo = bdHistoryRef.current.idx > 0;
+  var bdCanRedo = bdHistoryRef.current.idx < bdHistoryRef.current.stack.length - 1;
+
   function bdUpdateDesign(key, value) {
-    setBdDesign(function(prev) {
-      var next = {}; Object.keys(prev).forEach(function(k) { next[k] = prev[k]; });
-      if (bdPhase > 1 && PHASE_PROPS.indexOf(key) >= 0 && next.phases) {
-        var newPhases = {}; Object.keys(next.phases).forEach(function(p) { newPhases[p] = {}; Object.keys(next.phases[p]).forEach(function(pk) { newPhases[p][pk] = next.phases[p][pk]; }); });
-        if (!newPhases[bdPhase]) newPhases[bdPhase] = {};
-        newPhases[bdPhase][key] = value; next.phases = newPhases;
-      } else { next[key] = value; }
-      return next;
-    });
+    // Compute next state synchronously so we can both snapshot and apply it.
+    var prev = bdDesign;
+    var next = {}; Object.keys(prev).forEach(function(k) { next[k] = prev[k]; });
+    if (bdPhase > 1 && PHASE_PROPS.indexOf(key) >= 0 && next.phases) {
+      var newPhases = {}; Object.keys(next.phases).forEach(function(p) { newPhases[p] = {}; Object.keys(next.phases[p]).forEach(function(pk) { newPhases[p][pk] = next.phases[p][pk]; }); });
+      if (!newPhases[bdPhase]) newPhases[bdPhase] = {};
+      newPhases[bdPhase][key] = value; next.phases = newPhases;
+    } else { next[key] = value; }
+    // Coalesce key includes phase so toggling phases doesn't collapse with an
+    // edit of the same field on a different phase.
+    bdHistoryPush(next, key + "@" + bdPhase);
+    setBdDesign(next);
     setBdDirty(true);
   }
 
@@ -1855,14 +1913,16 @@ export default function CosmicWorkshop() {
   }
 
   function bdOpenEditor(design) {
+    var initial;
     if (design) {
-      var loaded = {}; Object.keys(design).forEach(function(k) { loaded[k] = design[k]; });
-      setBdDesign(loaded);
+      initial = {}; Object.keys(design).forEach(function(k) { initial[k] = design[k]; });
       setBdEditId(design.id || null);
     } else {
-      setBdDesign(bdDefaultDesign());
+      initial = bdDefaultDesign();
       setBdEditId(null);
     }
+    setBdDesign(initial);
+    bdHistoryReset(initial);
     setBdPhase(1);
     setBdDirty(false);
     setBdSaveStatus("");
@@ -1875,6 +1935,7 @@ export default function CosmicWorkshop() {
     var copy = {}; Object.keys(preset).forEach(function(k) { copy[k] = preset[k]; });
     copy.isFactory = false; copy.id = null; copy.name = preset.name + " (custom)";
     setBdDesign(copy);
+    bdHistoryReset(copy);
     setBdEditId(null);
     setBdDirty(true);
     setBdPhase(1);
@@ -3482,6 +3543,17 @@ export default function CosmicWorkshop() {
       bdCurrentView === "editor" && React.createElement(React.Fragment, null,
         React.createElement(WorkshopTopBar, { onBack: bdHandleBack, backLabel: "My Blocks", title: "Block Designer", color: "#c8b8ff", fontFamily: "'Exo 2', sans-serif",
           rightContent: React.createElement("div", { style: { display: "flex", gap: 4, alignItems: "center" } },
+            // ── Undo / Redo (pilot) ──
+            React.createElement("div", { onClick: bdUndo, title: "Undo",
+              style: Object.assign({}, BTN_TOPBAR, { padding: "6px 8px", opacity: bdCanUndo ? 1 : 0.35, cursor: bdCanUndo ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center" }) },
+              React.createElement("svg", { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round" },
+                React.createElement("path", { d: "M9 14L4 9l5-5" }),
+                React.createElement("path", { d: "M4 9h11a5 5 0 0 1 5 5v0a5 5 0 0 1-5 5h-3" }))),
+            React.createElement("div", { onClick: bdRedo, title: "Redo",
+              style: Object.assign({}, BTN_TOPBAR, { padding: "6px 8px", opacity: bdCanRedo ? 1 : 0.35, cursor: bdCanRedo ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center" }) },
+              React.createElement("svg", { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round" },
+                React.createElement("path", { d: "M15 14l5-5-5-5" }),
+                React.createElement("path", { d: "M20 9H9a5 5 0 0 0-5 5v0a5 5 0 0 0 5 5h3" }))),
             React.createElement("div", { onClick: bdSaveCurrentDesign, style: BTN_SAVE }, "Save"),
             React.createElement("div", { onClick: function() {
               if (!bdDesign.assignedTo) { setBdSaveStatus("Choose a Block type first"); setTimeout(function() { setBdSaveStatus(""); }, 2500); return; }
