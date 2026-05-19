@@ -386,14 +386,20 @@ function shipRenderPart(part, key, isSelected) {
   } else {
     return null;
   }
+  // Per-part glow: wrap the shape (but not the selection bbox or gradient
+  // defs) in a <g> with a CSS drop-shadow filter so the halo follows the
+  // part's actual silhouette.
+  var shapeNode = part.glowEnabled
+    ? React.createElement("g", { style: { filter: "drop-shadow(0 0 " + (part.glowIntensity || 4) + "px " + (part.glowColor || "#80ddff") + ")" } }, inner)
+    : inner;
   if (isSelected) {
     var bbw = w + 2, bbh = h + 2;
     return React.createElement("g", { key: key },
       defsEl,
-      inner,
+      shapeNode,
       React.createElement("rect", { x: x - bbw / 2, y: y - bbh / 2, width: bbw, height: bbh, fill: "none", stroke: "#ffd060", strokeWidth: 0.6, strokeDasharray: "1.2 0.8", transform: t, pointerEvents: "none" }));
   }
-  return React.createElement("g", { key: key }, defsEl, inner);
+  return React.createElement("g", { key: key }, defsEl, shapeNode);
 }
 // Monotonic counter for auto-generated SVG uids so gradient ID references
 // (`url(#shipgrad-...)`) stay unique across all on-screen ShipDesignSvg instances.
@@ -3985,7 +3991,17 @@ export default function CosmicWorkshop() {
               React.createElement(BDSlider, { label: "Border Width", value: sel.bw || 0, min: 0, max: 4, step: 0.1, displayValue: (sel.bw || 0).toFixed(1),
                 onChange: function(v) { shipUpdatePart(shipSelectedPart, "bw", v); } }),
               React.createElement(BDSlider, { label: "Border Opacity", value: typeof sel.bo === "number" ? sel.bo : 1, min: 0, max: 1, step: 0.05, displayValue: Math.round((typeof sel.bo === "number" ? sel.bo : 1) * 100) + "%",
-                onChange: function(v) { shipUpdatePart(shipSelectedPart, "bo", v); } }));
+                onChange: function(v) { shipUpdatePart(shipSelectedPart, "bo", v); } }),
+              // ── Glow: per-part halo via CSS drop-shadow filter ──
+              React.createElement("div", { style: { marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between" } },
+                React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, letterSpacing: 0.5, textTransform: "uppercase" } }, "Glow"),
+                React.createElement(BDToggle, { value: sel.glowEnabled || false, onChange: function(v) { shipUpdatePart(shipSelectedPart, "glowEnabled", v); } })),
+              sel.glowEnabled && React.createElement(React.Fragment, null,
+                React.createElement(BDColorPicker, { label: "Glow Color", value: sel.glowColor || "#80ddff",
+                  presets: ["#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70ff", "#ffffff", "#ff6040", "#40c8ff"],
+                  onChange: function(v) { shipUpdatePart(shipSelectedPart, "glowColor", v); } }),
+                React.createElement(BDSlider, { label: "Glow Intensity", value: sel.glowIntensity || 4, min: 1, max: 20, step: 0.5, displayValue: (sel.glowIntensity || 4) + "px",
+                  onChange: function(v) { shipUpdatePart(shipSelectedPart, "glowIntensity", v); } })));
           })(),
           // ── POSITION: geometry for the selected part ──
           shipTab === "position" && (function() {
