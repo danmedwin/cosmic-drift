@@ -1146,7 +1146,9 @@ var CARD_STYLE = { background: "rgba(20,20,35,0.6)", border: "1px solid rgba(60,
 
 // Overlay background
 var OVERLAY_BG = { position: "fixed", inset: 0, zIndex: 500, background: "rgba(5,5,20,0.7)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center" };
-var OVERLAY_BOX = { background: "linear-gradient(170deg,#151040,#1a0a2e)", borderRadius: 16, padding: "20px 24px", textAlign: "center", maxWidth: 300, animation: "introFadeIn 0.25s ease-out" };
+// Import/export "cards" use the workshop's brushed-metal texture so the
+// dialogs feel like part of the same cockpit chassis as the panels behind.
+var OVERLAY_BOX = { background: "linear-gradient(180deg, #3a4250 0%, #2c333f 35%, #1f2530 70%, #1a1f2a 100%), repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 3px)", backgroundBlendMode: "overlay", borderRadius: 16, padding: "20px 24px", textAlign: "center", maxWidth: 300, animation: "introFadeIn 0.25s ease-out", boxShadow: "inset 0 1px 0 rgba(200,230,240,0.10), inset 0 -2px 4px rgba(0,0,0,0.55), 0 6px 18px rgba(0,0,0,0.5)" };
 
 // ═══════════════════════════════════════════════════════════════
 // STORAGE KEYS

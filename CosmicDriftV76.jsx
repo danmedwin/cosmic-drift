@@ -3294,7 +3294,7 @@ function logUfo(msg) {
           <div style={{ background: GS.inset, border: GS.ib, borderRadius: 6, padding: "5px 12px", boxShadow: GS.is, display: "flex", alignItems: "center", gap: 8, flex: 1, marginRight: 6 }}>
             <GsLED color={customLevelMode ? "#c8b8ff" : GS.blue} size={5} />
             <span style={{ fontFamily: "'JetBrains Mono', monospace", color: customLevelMode ? "#c8b8ff" : GS.blue, fontSize: 10, fontWeight: 700, letterSpacing: 2, textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textShadow: "0 0 8px " + (customLevelMode ? "rgba(200,184,255,0.35)" : "rgba(128,221,255,0.35)") }}>{customLevelMode ? customLevelName : (getLevelName(level) ? "Lvl " + level + " \u00B7 " + getLevelName(level) : "Level " + level)}</span>
-            <GsLED color={customLevelMode ? "#c8b8ff" : GS.blue} size={5} />
+            <GsLED color={difficulty === "hard" ? "#ff5050" : difficulty === "easy" ? "#50ff80" : "#ffd060"} size={5} />
           </div>
           <div onClick={function () { setGameMenuOpen(!gameMenuOpen); }} style={{ width: 36, height: 36, borderRadius: 8, background: gameMenuOpen ? "rgba(40,40,55,0.9)" : GS.brushedSolid, border: gameMenuOpen ? "2px solid rgba(80,200,255,0.3)" : GS.pbl, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, cursor: "pointer", flexShrink: 0, boxShadow: gameMenuOpen ? "0 0 12px rgba(80,200,255,0.25), 0 2px 4px rgba(0,0,0,0.5)" : "inset 0 1px 0 rgba(200,230,240,0.14), inset 0 -2px 3px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.5)" }}>
             <div style={{ width: 14, height: 2, borderRadius: 1, background: gameMenuOpen ? "#80ddff" : "rgba(200,210,220,0.6)" }} />
