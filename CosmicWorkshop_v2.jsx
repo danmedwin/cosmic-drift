@@ -4514,7 +4514,6 @@ export default function CosmicWorkshop() {
               return React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", padding: "6px 8px", marginTop: 8, marginLeft: 14, marginRight: 14, background: "rgba(255,138,170,0.05)", border: "1px solid rgba(255,138,170,0.18)", borderRadius: 8, width: "calc(100% - 28px)", boxSizing: "border-box" } },
                 // Title for the bar
                 React.createElement("div", { style: { color: "rgba(180,200,220,0.55)", fontSize: 11, fontWeight: 700, letterSpacing: 1.2, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Select"),
-                selCount > 0 && React.createElement("div", { style: { color: "#ff8aaa", fontSize: 10, fontWeight: 700, letterSpacing: 0.4, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase", padding: "2px 6px", borderRadius: 4, background: "rgba(255,138,170,0.18)" } }, selCount + " sel"),
                 // Multi label + inline toggle. The inline toggle is sized to
                 // match the chip heights so everything in the bar shares a
                 // common vertical centerline.
