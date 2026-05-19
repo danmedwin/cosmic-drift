@@ -816,47 +816,57 @@ var HULL_PRESETS = {
   arrow: [
     { type: "arrow", name: "Triangle", x: 20, y: 20, w: 24, h: 36, rot: 0, color: "#efb6ed", opacity: 1, bw: 1, bc: "#a45ba3", bo: 1 }
   ],
-  dart: [
-    { type: "triangle", x: 20, y: 22, w: 16, h: 34, rot: 0, color: "#ffd0ff", opacity: 1 }
-  ],
-  raptor: [
-    { type: "triangle", x: 20, y: 22, w: 16, h: 30, rot: 0, color: "#ffd0ff", opacity: 1 },
-    { type: "triangle", x: 8,  y: 30, w: 10, h: 14, rot: 0, color: "#cc70cc", opacity: 1 },
-    { type: "triangle", x: 32, y: 30, w: 10, h: 14, rot: 0, color: "#cc70cc", opacity: 1 }
-  ],
-  wedge: [
-    { type: "triangle", x: 20, y: 21, w: 34, h: 32, rot: 0, color: "#ffd0ff", opacity: 1 }
-  ],
   fireflight: [
-    { type: "rect",      name: "Body",           x: 20,    y: 21.5,  w: 9.15, h: 34.95, cr: 4.58, rot: 0, color: "#b8c0c8", opacity: 1 },
-    { type: "rect",      name: "cockpit",        x: 20,    y: 4.88,  w: 5.25, h: 7.75,  cr: 2.63, rot: 0, color: "#80ddff", opacity: 0.9 },
-    { type: "rect",      name: "left-thruster",  x: 8.03,  y: 21.55, w: 4.6,  h: 9.9,   cr: 2.3,  rot: 0, color: "#b8c0c8", opacity: 1 },
-    { type: "rect",      name: "right-thruster", x: 31.98, y: 21.55, w: 4.6,  h: 9.9,   cr: 2.3,  rot: 0, color: "#b8c0c8", opacity: 1 },
-    { type: "trapezoid", name: "left-wing",      x: 12.88, y: 21.55, w: 8.5,  h: 5.2,   tw: 6.2,  tofs: 0, rot: -90, color: "#b8c0c8", opacity: 1 },
-    { type: "trapezoid", name: "right-wing",     x: 27.13, y: 21.55, w: 8.5,  h: 5.2,   tw: 6.2,  tofs: 0, rot: 90,  color: "#b8c0c8", opacity: 1 }
+    { type: "trapezoid", name: "Wing-Left",          x: 12,    y: 22,    w: 8,    h: 6,    tw: 5, tofs: -1, rot: -90, color: "#3a2e1f", color2: "#b89a6e", fillMode: "linear", gradAngle: 270, opacity: 1 },
+    { type: "trapezoid", name: "Wing-Right",         x: 28,    y: 22,    w: 8,    h: 6,    tw: 5, tofs: 1,  rot: 90,  color: "#3a2e1f", color2: "#b89a6e", fillMode: "linear", gradAngle: 270, opacity: 1 },
+    { type: "rect",      name: "Thruster-Pod-L",     x: 6,     y: 22,    w: 5,    h: 10,   cr: 2.3,  rot: 0, color: "#2a2014", color2: "#a08458", fillMode: "linear", gradAngle: 0,   opacity: 1 },
+    { type: "rect",      name: "Thruster-Pod-R",     x: 34,    y: 22.02, w: 5,    h: 10,   cr: 2.3,  rot: 0, color: "#2a2014", color2: "#a08458", fillMode: "linear", gradAngle: 180, opacity: 1 },
+    { type: "circle",    name: "Thruster-Glow-L",    x: 6,     y: 26,    w: 3,    h: 2,    rot: 0, color: "#ffd070", color2: "#7a2010", fillMode: "radial", opacity: 0.95 },
+    { type: "circle",    name: "Thruster-Glow-R",    x: 34.01, y: 26,    w: 3,    h: 2,    rot: 0, color: "#ffd070", color2: "#7a2010", fillMode: "radial", opacity: 0.95 },
+    { type: "rect",      name: "Body-Main",          x: 20,    y: 17,    w: 10,   h: 16,   cr: 3.5,  rot: 0, color: "#3a2e1f", color2: "#c4a878", fillMode: "linear", gradAngle: 180, opacity: 1 },
+    { type: "circle",    name: "Engine-Bulb",        x: 20.20, y: 30.75, w: 14,   h: 10.5, rot: 0, color: "#b6996d", color2: "#3a2e1f", fillMode: "radial", gradStop: 0.25, opacity: 1 },
+    { type: "circle",    name: "Engine-Glow-Core",   x: 20.39, y: 32.47, w: 9,    h: 6.5,  rot: 0, color: "#fff4a0", color2: "#a02810", fillMode: "radial", gradStop: 0.25, opacity: 0.95 },
+    { type: "rect",      name: "Neck",               x: 20.60, y: 10.14, w: 1.5,  h: 4,    cr: 0.6,  rot: 0,   color: "#2a2014", color2: "#a08458", fillMode: "linear", gradAngle: 180, opacity: 1 },
+    { type: "rect",      name: "Neck-copy",          x: 19.11, y: 10.20, w: 1.5,  h: 4,    cr: 0.6,  rot: 180, color: "#2a2014", color2: "#a08458", fillMode: "linear", gradAngle: 180, opacity: 1 },
+    { type: "circle",    name: "Cockpit-Head",       x: 19.91, y: 6.74,  w: 8.5,  h: 7,    rot: 0, color: "#b6986d", color2: "#3a2e1f", fillMode: "radial", gradStop: 0.2, opacity: 1 },
+    { type: "rect",      name: "Cockpit-Glass",      x: 20,    y: 5.2,   w: 5.5,  h: 2,    cr: 1,    rot: 0, color: "#80ddff", color2: "#0f2a3a", fillMode: "linear", gradAngle: 90,  opacity: 0.9 }
   ],
   saucer: [
-    { type: "circle", x: 20, y: 24,   w: 32, h: 13.5, rot: 0, color: "#ffd0ff", opacity: 1 },
-    { type: "circle", x: 20, y: 17.2, w: 12, h: 11,   rot: 0, color: "#80ddff", opacity: 0.85 }
+    { type: "rect",      x: 19.75, y: 12.43, w: 1,     h: 3.5,  cr: 0.5,  rot: 0,  color: "#ffffff", color2: "#222a3a", fillMode: "linear", gradAngle: 270, opacity: 0.9 },
+    { type: "circle",    x: 19.76, y: 18.15, w: 15,    h: 9.5,  rot: 0,  color: "#c9effd", color2: "#222a3a", fillMode: "radial", gradStop: 0,    opacity: 0.55 },
+    { type: "circle",    x: 19.59, y: 22.14, w: 27.46, h: 7,    rot: 0,  color: "#80ddff", color2: "#1b263b", fillMode: "radial", opacity: 0.9 },
+    { type: "rect",      x: 19.64, y: 22.33, w: 1.28,  h: 30,   cr: 0.5,  rot: 90, color: "#80ddff", color2: "#222a3a", fillMode: "linear", gradAngle: 195, opacity: 0.9 },
+    { type: "trapezoid", x: 19.84, y: 33.31, w: 8,     h: 10,   tw: 4, tofs: 0, rot: 0,  color: "#80ddff", color2: "#222a3a", fillMode: "linear", gradAngle: 90, opacity: 0.45 },
+    { type: "circle",    x: 19.88, y: 28.15, w: 5.5,   h: 2,    rot: 0,  color: "#80ddff", color2: "#222a3a", fillMode: "radial", gradStop: 0.45, opacity: 0.9 },
+    { type: "circle",    x: 19.96, y: 22.26, w: 1.5,   h: 1.5,  rot: 0,  color: "#fff7e5", color2: "#c9a54f", fillMode: "radial", opacity: 0.95 },
+    { type: "circle",    x: 34.17, y: 22.41, w: 1,     h: 1,    rot: 0,  color: "#fff7e5", color2: "#c9a54f", fillMode: "radial", opacity: 0.95 },
+    { type: "circle",    x: 5.10,  y: 22.40, w: 1,     h: 1,    rot: 0,  color: "#fff7e5", color2: "#c9a54f", fillMode: "radial", opacity: 0.95 }
   ],
   startrack: [
-    { type: "line",   name: "left-arm",      x: 15.4, y: 27.3, w: 12,   h: 1.35, rot: -47, color: "#878787", opacity: 1 },
-    { type: "line",   name: "right-arm",     x: 24.6, y: 27.3, w: 12,   h: 1.35, rot: 47,  color: "#878787", opacity: 1 },
-    { type: "rect",   name: "Body",          x: 20,   y: 24.5, w: 4.4,  h: 16.2, cr: 2.2,  rot: 0,   color: "#878787", opacity: 1 },
-    { type: "rect",   name: "left-nacelle",  x: 11.3, y: 29.1, w: 2.4,  h: 19.8, cr: 1.2,  rot: 0,   color: "#80ddff", opacity: 1 },
-    { type: "rect",   name: "right-nacelle", x: 28.7, y: 29.1, w: 2.4,  h: 19.8, cr: 1.2,  rot: 0,   color: "#80ddff", opacity: 1 },
-    { type: "circle", name: "Saucer",        x: 20,   y: 10,   w: 17,   h: 17,   rot: 0,   color: "#b8c0c8", opacity: 1 },
-    { type: "circle", name: "Dome",          x: 20,   y: 6.78, w: 9,    h: 4,    rot: 0,   color: "#80ddff", opacity: 0.55 }
+    { type: "rect",   name: "Pylon-Left",      x: 13.89, y: 27,    w: 10,   h: 1.6,  cr: 0.6, rot: -38, color: "#2a2f3a", opacity: 1, fillMode: "linear", color2: "#9aa3b2", gradAngle: 270 },
+    { type: "rect",   name: "Pylon-Right",     x: 25.81, y: 26.95, w: 10,   h: 1.6,  cr: 0.6, rot: 38,  color: "#2a2f3a", opacity: 1, fillMode: "linear", color2: "#9aa3b2", gradAngle: 255 },
+    { type: "rect",   name: "Neck",            x: 20,    y: 17.47, w: 2.6,  h: 6,    cr: 0.6, rot: 0,   color: "#3a4150", opacity: 1, fillMode: "linear", color2: "#cfd6df", gradAngle: 0 },
+    { type: "rect",   name: "Secondary-Hull",  x: 20,    y: 26.5,  w: 5.6,  h: 13,   cr: 2.6, rot: 0,   color: "#1a1e28", opacity: 1, fillMode: "linear", color2: "#b0b8c4", gradAngle: 0 },
+    { type: "circle", name: "Deflector",       x: 20,    y: 21.5,  w: 3.2,  h: 1.8,  rot: 0,   color: "#ffd070", opacity: 0.95, fillMode: "radial", color2: "#7a3010" },
+    { type: "circle", name: "Saucer",          x: 19.69, y: 12.97, w: 22,   h: 8,    rot: 0,   color: "#2a2f3a", opacity: 1, fillMode: "radial", color2: "#dde3ec", gradStop: 0.75 },
+    { type: "circle", name: "Bridge",          x: 19.93, y: 11.01, w: 6.5,  h: 3.5,  rot: 0,   color: "#cfd6df", opacity: 1, fillMode: "radial", color2: "#3a4150" },
+    { type: "circle", name: "Bridge-Lamp",     x: 19.92, y: 10,    w: 1.4,  h: 1,    rot: 0,   color: "#e9f6ff", opacity: 0.95, fillMode: "radial", color2: "#4a7a8e" },
+    { type: "rect",   name: "Nacelle-Left",    x: 9,     y: 25,    w: 3,    h: 20,   cr: 1.5, rot: 0,   color: "#15181f", opacity: 1, fillMode: "linear", color2: "#6a7484", gradAngle: 0 },
+    { type: "rect",   name: "Nacelle-Right",   x: 31,    y: 25,    w: 3,    h: 20,   cr: 1.5, rot: 0,   color: "#15181f", opacity: 1, fillMode: "linear", color2: "#6a7484", gradAngle: 180 },
+    { type: "rect",   name: "Warp-Glow-Left",  x: 9,     y: 27,    w: 1.4,  h: 14,   cr: 0.7, rot: 0,   color: "#80ddff", opacity: 0.9, fillMode: "linear", color2: "#1a4a5e", gradAngle: 0 },
+    { type: "rect",   name: "Warp-Glow-Right", x: 31,    y: 27,    w: 1.4,  h: 14,   cr: 0.7, rot: 0,   color: "#80ddff", opacity: 0.9, fillMode: "linear", color2: "#1a4a5e", gradAngle: 180 },
+    { type: "circle", name: "Bussard-Left",    x: 9,     y: 16.8,  w: 2.6,  h: 2.6,  rot: 0,   color: "#ff7a50", opacity: 0.95, fillMode: "radial", color2: "#7a1d0e" },
+    { type: "circle", name: "Bussard-Right",   x: 31.04, y: 16.8,  w: 2.6,  h: 2.6,  rot: 0,   color: "#ff7a50", opacity: 0.95, fillMode: "radial", color2: "#7a1d0e" }
   ],
   falcor: [
-    { type: "triangle", name: "Left-Mandible",  x: 15.94,  y: 9.37,  w: 7.5,  h: 14, rot: 12,  color: "#222a3a", opacity: 1, fillMode: "linear", color2: "#a0a8b8", gradAngle: 270 },
-    { type: "triangle", name: "Right-Mandible", x: 24.02,  y: 9.12,  w: 7.5,  h: 14, rot: -12, color: "#222a3a", opacity: 1, fillMode: "linear", color2: "#a0a8b8", gradAngle: 285 },
-    { type: "circle",   name: "Saucer",         x: 20.18,  y: 25.36, w: 27,   h: 27, rot: 0,   color: "#222a3a", opacity: 1, fillMode: "radial", color2: "#64676d", gradStop: 0.5, bw: 0 },
-    { type: "rect",     x: 28.32,  y: 23.14, w: 10.5, h: 3.5, rot: 150, color: "#222a3a", opacity: 1, bw: 0, bc: "#747677", bo: 1, cr: 0.75, fillMode: "linear", color2: "#62656a", gradAngle: 105 },
-    { type: "rect",     x: 10.65,  y: 25.62, w: 9,    h: 4,   rot: 0,   color: "#222a3a", opacity: 1, bw: 0, bc: "#747677", bo: 1, cr: 0.75, fillMode: "linear", color2: "#6f7276", gradAngle: 270 },
-    { type: "rect",     x: 28.88,  y: 26.24, w: 9,    h: 4,   rot: 0,   color: "#222a3a", opacity: 1, bw: 0, bc: "#747677", bo: 1, cr: 0.75, fillMode: "linear", color2: "#6f7276", gradAngle: 270 },
+    { type: "triangle", name: "Left-Mandible",  x: 15.94,  y: 9.37,  w: 7.5,  h: 14, rot: 12,  color: "#0d0d0d", opacity: 1, fillMode: "linear", color2: "#919191", gradAngle: 255 },
+    { type: "triangle", name: "Right-Mandible", x: 24.02,  y: 9.12,  w: 7.5,  h: 14, rot: -12, color: "#0c0d0d", opacity: 1, fillMode: "linear", color2: "#8c9097", gradAngle: 285 },
+    { type: "circle",   name: "Saucer",         x: 20.18,  y: 25.36, w: 27,   h: 27, rot: 0,   color: "#4d4d4d", opacity: 1, fillMode: "radial", color2: "#303030", gradStop: 0.4, bw: 0 },
+    { type: "rect",     x: 10.65,  y: 25,    w: 9,    h: 4,   rot: 0,   color: "#222a3a", opacity: 1, bw: 0, bc: "#747677", bo: 1, cr: 0.75, fillMode: "linear", color2: "#6f7276", gradAngle: 270 },
     { type: "rect",     name: "Cockpit",        x: 31.96,  y: 16.89, w: 3.5,  h: 8,  cr: 1,    rot: 0, color: "#7c7e83", opacity: 1, fillMode: "linear", color2: "#222a3a" },
     { type: "circle",   x: 32,     y: 13.30, w: 3.5,  h: 1.5, rot: 0,   color: "#80ddff", opacity: 0.9, bw: 0, bc: "#000000", bo: 1, fillMode: "radial", color2: "#487c8e" },
+    { type: "rect",     x: 28.32,  y: 23.14, w: 10.5, h: 3.5, rot: 150, color: "#222a3a", opacity: 1, bw: 0, bc: "#747677", bo: 1, cr: 0.75, fillMode: "linear", color2: "#62656a", gradAngle: 105 },
+    { type: "rect",     x: 28.88,  y: 25,    w: 9,    h: 4,   rot: 0,   color: "#222a3a", opacity: 1, bw: 0, bc: "#747677", bo: 1, cr: 0.75, fillMode: "linear", color2: "#6f7276", gradAngle: 270 },
     { type: "circle",   x: 20,     y: 25,    w: 11,   h: 11,  rot: 0,   color: "#6b6b6b", opacity: 1, bw: 0, bc: "#000000", bo: 0.2, fillMode: "radial", color2: "#283140", gradStop: 0.65 },
     { type: "rect",     x: 20,     y: 13.55, w: 7.5,  h: 4.1, rot: 90,  color: "#8c8c8c", opacity: 1, bw: 0, bc: "#747677", bo: 1, cr: 0.75, fillMode: "linear", color2: "#222a3a", gradAngle: 0 },
     { type: "circle",   x: 20.05,  y: 32.56, w: 3,    h: 3,   rot: 0,   color: "#4f4f4f", opacity: 1, bw: 0.2, bc: "#b0b0b0", bo: 1 },
@@ -867,18 +877,69 @@ var HULL_PRESETS = {
     { type: "circle",   x: 20.06,  y: 36.21, w: 3,    h: 3,   rot: 0,   color: "#4f4f4f", opacity: 1, bw: 0.2, bc: "#b0b0b0", bo: 1 }
   ],
   birdofplay: [
-    { type: "rect",      name: "Rounded-Rectangle",        x: 20,    y: 28.46, w: 15.41, h: 14.45, cr: 2.61, rot: 0,   color: "#b8c0c8", opacity: 1 },
-    { type: "rect",      name: "Rounded-Rectangle-copy-2", x: 19.97, y: 14.87, w: 2.13,  h: 16.03, cr: 1.03, rot: 0,   color: "#b8c0c8", opacity: 1 },
-    { type: "circle",    name: "Circle",                   x: 20,    y: 22.10, w: 9.22,  h: 12.73, rot: 0,   color: "#b8c0c8", opacity: 1 },
-    { type: "circle",    name: "Circle-copy",              x: 20,    y: 7.72,  w: 4.54,  h: 6.81,  rot: 0,   color: "#b8c0c8", opacity: 1 },
-    { type: "circle",    name: "Circle-copy-2",            x: 2.14,  y: 7.86,  w: 2.27,  h: 3.51,  rot: 0,   color: "#b8c0c8", opacity: 1 },
-    { type: "rect",      name: "Rounded-Rectangle-copy",   x: 2.18,  y: 15.01, w: 1.24,  h: 14.38, cr: 0.62, rot: 0,   color: "#b8c0c8", opacity: 1 },
-    { type: "trapezoid", name: "Right-Triangle",           x: 7.27,  y: 28.67, w: 10.18, h: 10.60, tw: 0,    tofs: -5.09, rot: 180, color: "#b8c0c8", opacity: 1 },
-    { type: "trapezoid", name: "Right-Triangle-copy",      x: 7.27,  y: 20.07, w: 10.18, h: 6.74,  tw: 0,    tofs: -5.09, rot: 0,   color: "#b8c0c8", opacity: 1 },
-    { type: "circle",    name: "path1",                    x: 37.86, y: 7.86,  w: 2.27,  h: 3.51,  rot: 0,   color: "#b8c0c8", opacity: 1 },
-    { type: "rect",      name: "path2",                    x: 37.82, y: 15.01, w: 1.24,  h: 14.38, cr: 0.62, rot: 0,   color: "#b8c0c8", opacity: 1 },
-    { type: "trapezoid", name: "path3",                    x: 32.73, y: 28.67, w: 10.18, h: 10.60, tw: 0,    tofs: 5.09,  rot: 180, color: "#b8c0c8", opacity: 1 },
-    { type: "trapezoid", name: "path4",                    x: 32.73, y: 20.07, w: 10.18, h: 6.74,  tw: 0,    tofs: 5.09,  rot: 0,   color: "#b8c0c8", opacity: 1 }
+    { type: "trapezoid", name: "Wing-Upper-L",   x: 7.27,  y: 20.07, w: 10.18, h: 6.74,  tw: 0, tofs: -5.09, rot: 0,   color: "#1f2a22", color2: "#8a9a82", fillMode: "linear", gradAngle: 195, opacity: 1 },
+    { type: "trapezoid", name: "Wing-Lower-L",   x: 7.27,  y: 28.67, w: 10.18, h: 10.6,  tw: 0, tofs: -5.09, rot: 180, color: "#1a241d", color2: "#6d7e68", fillMode: "linear", gradAngle: 0,   opacity: 1 },
+    { type: "trapezoid", name: "Wing-Upper-R",   x: 32.73, y: 20.07, w: 10.18, h: 6.74,  tw: 0, tofs: 5.09,  rot: 0,   color: "#1f2a22", color2: "#8a9a82", fillMode: "linear", gradAngle: 345, opacity: 1 },
+    { type: "trapezoid", name: "Wing-Lower-R",   x: 32.73, y: 28.67, w: 10.18, h: 10.6,  tw: 0, tofs: 5.09,  rot: 180, color: "#1a241d", color2: "#6d7e68", fillMode: "linear", gradAngle: 180, opacity: 1 },
+    { type: "rect",      name: "Cannon-Stalk-L", x: 2.18,  y: 15.01, w: 1.24,  h: 14.38, cr: 0.62, rot: 0,   color: "#0f1612", color2: "#5a6a55", fillMode: "linear", gradAngle: 0,   opacity: 1 },
+    { type: "rect",      name: "Cannon-Stalk-R", x: 37.82, y: 15.03, w: 1.24,  h: 14.38, cr: 0.62, rot: 0,   color: "#0f1612", color2: "#5a6a55", fillMode: "linear", gradAngle: 180, opacity: 1 },
+    { type: "rect",      name: "Body-Main",      x: 20,    y: 28.46, w: 15.41, h: 14.45, cr: 2.61, rot: 0,   color: "#1a241d", color2: "#a8b8a0", fillMode: "linear", gradAngle: 270, opacity: 1 },
+    { type: "circle",    name: "Body-Saucer",    x: 20,    y: 22.1,  w: 9.22,  h: 12.73, rot: 0,   color: "#91a08a", color2: "#1a251e", fillMode: "radial", gradStop: 0.2, opacity: 1 },
+    { type: "circle",    name: "Engine-Glow",    x: 20.17, y: 34.19, w: 9,     h: 3,     rot: 0,   color: "#ff9050", color2: "#5a1808", fillMode: "radial", gradStop: 0.4, opacity: 0.9 },
+    { type: "rect",      name: "Neck",           x: 19.97, y: 14.87, w: 2.13,  h: 16.03, cr: 1.03, rot: 0,   color: "#15201a", color2: "#7a8a72", fillMode: "linear", gradAngle: 180, opacity: 1 },
+    { type: "circle",    name: "Head",           x: 20,    y: 7.72,  w: 4.54,  h: 6.81,  rot: 0,   color: "#c0d0b8", color2: "#222a3a", fillMode: "radial", gradStop: 0,   opacity: 1 },
+    { type: "rect",      name: "Cockpit-Slit",   x: 20,    y: 7.4,   w: 2.2,   h: 0.9,   cr: 0.45, rot: 0,   color: "#ffb050", color2: "#5a2010", fillMode: "linear", gradAngle: 180, opacity: 0.95 },
+    { type: "circle",    name: "Cannon-Cap-L",   x: 2.22,  y: 7.76,  w: 2.27,  h: 3.51,  rot: 0,   color: "#a0c8a0", color2: "#222a3a", fillMode: "radial", opacity: 1 },
+    { type: "circle",    name: "Cannon-Cap-R",   x: 37.50, y: 8.42,  w: 2.27,  h: 3.51,  rot: 0,   color: "#a0c8a0", color2: "#222a3a", fillMode: "radial", opacity: 1 },
+    { type: "circle",    name: "Disruptor-L",    x: 2.19,  y: 7.71,  w: 1.4,   h: 2,     rot: 0,   color: "#23e13c", color2: "#31880c", fillMode: "radial", opacity: 0.95 },
+    { type: "circle",    name: "Disruptor-R",    x: 37.46, y: 8.36,  w: 1.4,   h: 2,     rot: 0,   color: "#23e13c", color2: "#31880c", fillMode: "radial", opacity: 0.95 }
+  ],
+  vespa: [
+    { type: "triangle", name: "Main-Hull",     x: 20,     y: 22,    w: 14,   h: 30,  rot: 0,   color: "#1a1e28", opacity: 1, fillMode: "linear", color2: "#7a8294", gradAngle: 120 },
+    { type: "rect",     name: "Engine-Left",   x: 12.09,  y: 37.47, w: 4.6,  h: 2.6, rot: -8,  color: "#06080c", opacity: 1, fillMode: "linear", color2: "#1a1e28", gradAngle: 0,   cr: 0.6 },
+    { type: "circle",   name: "Glow-Left",     x: 12.59,  y: 37.75, w: 3.2,  h: 1.8, rot: -8,  color: "#ffb070", opacity: 0.95, fillMode: "radial", color2: "#7a1d0e" },
+    { type: "rect",     name: "Nacelle-Left",  x: 11,     y: 27.05, w: 4,    h: 20,  rot: -8,  color: "#0f1218", opacity: 1, fillMode: "linear", color2: "#5a6478", gradAngle: 0,   cr: 1.2 },
+    { type: "rect",     name: "Spine",         x: 19.96,  y: 27.45, w: 2.4,  h: 11.5, rot: 0,  color: "#0a0c12", opacity: 1, fillMode: "linear", color2: "#424752", gradAngle: 0,   cr: 0.5 },
+    { type: "triangle", name: "Fin-Left",      x: 7.12,   y: 32.98, w: 8,    h: 5,   rot: -90, color: "#15181f", opacity: 1, fillMode: "linear", color2: "#4a5160", gradAngle: 255 },
+    { type: "triangle", name: "Fin-Right",     x: 33.01,  y: 34,    w: 8,    h: 5,   rot: 90,  color: "#15181f", opacity: 1, fillMode: "linear", color2: "#4a5160", gradAngle: 255 },
+    { type: "rect",     name: "Canopy",        x: 20,     y: 17,    w: 3.6,  h: 11,  rot: 0,   color: "#3d6878", opacity: 0.95, fillMode: "linear", color2: "#0a1218", gradAngle: 180, cr: 1.6 },
+    { type: "circle",   name: "Canopy-Glint",  x: 20,     y: 12.7,  w: 2.4,  h: 1.2, rot: 0,   color: "#cdeeff", opacity: 0.9, fillMode: "radial", color2: "#4a7a8e" },
+    { type: "rect",     name: "Engine-Right",  x: 28.02,  y: 37.48, w: 4.6,  h: 2.6, rot: 8,   color: "#06080c", opacity: 1, fillMode: "linear", color2: "#1a1e28", gradAngle: 0,   cr: 0.6 },
+    { type: "circle",   name: "Glow-Right",    x: 27.52,  y: 37.51, w: 3.2,  h: 1.8, rot: 8,   color: "#ffb070", opacity: 0.95, fillMode: "radial", color2: "#7a1d0e" },
+    { type: "rect",     name: "Nacelle-Right", x: 28.86,  y: 26.86, w: 4,    h: 20,  rot: 8,   color: "#0f1218", opacity: 1, fillMode: "linear", color2: "#5a6478", gradAngle: 180, cr: 1.2 }
+  ],
+  ironeye: [
+    { type: "rect",      name: "Strut-Left",    x: 12,    y: 22.5,  w: 8,     h: 1.5,  cr: 0.3,  rot: 0,   color: "#0a0c12", color2: "#4a5060", fillMode: "linear", gradAngle: 270, opacity: 1 },
+    { type: "trapezoid", name: "Wing-R-Upper",  x: 29.82, y: 18.11, w: 12.5,  h: 9,    tw: 5, tofs: 0, rot: 0,   color: "#0a0c12", color2: "#383e4a", fillMode: "linear", gradAngle: 90,  opacity: 1, bw: 0.5, bc: "#a0a8b8" },
+    { type: "trapezoid", name: "Wing-R-Lower",  x: 29.80, y: 27.17, w: 12.5,  h: 9,    tw: 5, tofs: 0, rot: 180, color: "#0a0c12", color2: "#383e4a", fillMode: "linear", gradAngle: 90,  opacity: 1, bw: 0.5, bc: "#a0a8b8" },
+    { type: "line",                             x: 29.5,  y: 22.5,  w: 19,    h: 0.5,  rot: 105, color: "#a0a8b8", opacity: 1 },
+    { type: "line",                             x: 29.83, y: 22.69, w: 19,    h: 0.5,  rot: 75,  color: "#a0a8b8", opacity: 1 },
+    { type: "rect",      name: "Strut-Right",   x: 27,    y: 22.5,  w: 6.5,   h: 2.5,  cr: 1,    rot: 0,   color: "#0a0c12", color2: "#4a5060", fillMode: "linear", gradAngle: 270, opacity: 1 },
+    { type: "circle",    name: "Cockpit-Ball",  x: 20.08, y: 22.60, w: 16,    h: 16,   rot: 0,   color: "#6a7080", color2: "#222a3a", fillMode: "radial", gradStop: 0.15, opacity: 1 },
+    { type: "circle",    name: "Cockpit-Frame", x: 20,    y: 22.53, w: 7,     h: 7,    rot: 0,   color: "#000000", color2: "#a0a8b8", fillMode: "radial", gradStop: 0.8,  opacity: 1 },
+    { type: "circle",    name: "Pilot-Glow",    x: 19.98, y: 22.45, w: 2.4,   h: 2.4,  rot: 0,   color: "#ff5040", color2: "#5a0808", fillMode: "radial", gradStop: 0.4,  opacity: 0.95 },
+    { type: "trapezoid", name: "Wing-L-Upper",  x: 8.5,   y: 17.92, w: 12.5,  h: 9,    tw: 5, tofs: 0, rot: 0,   color: "#222a3a", color2: "#383e4a", fillMode: "linear", gradAngle: 90,  opacity: 1, bw: 0.5, bc: "#a0a8b8" },
+    { type: "trapezoid", name: "Wing-L-Lower",  x: 8.5,   y: 26.91, w: 12.5,  h: 9,    tw: 5, tofs: 0, rot: 180, color: "#0a0c12", color2: "#383e4a", fillMode: "linear", gradAngle: 90,  opacity: 1, bw: 0.5, bc: "#a0a8b8" },
+    { type: "line",                             x: 8.5,   y: 22.48, w: 19,    h: 0.5,  rot: 105, color: "#a0a8b8", opacity: 1 },
+    { type: "line",                             x: 8.5,   y: 22.46, w: 19,    h: 0.5,  rot: 75,  color: "#a0a8b8", opacity: 1 }
+  ],
+  callbox: [
+    { type: "rect", name: "Roof", x: 20, y: 14, w: 17, h: 2, cr: 0.4, rot: 0, color: "#0f2244", color2: "#1a3a6a", fillMode: "linear", gradAngle: 180, opacity: 1 },
+    { type: "rect", name: "Sign-Panel", x: 20, y: 16.5, w: 15, h: 2.2, cr: 0.3, rot: 0, color: "#d8c878", color2: "#7a6428", fillMode: "linear", gradAngle: 90, opacity: 1 },
+    { type: "rect", name: "Body", x: 20, y: 29.5, w: 14, h: 22, cr: 0.4, rot: 0, color: "#2a5a9a", color2: "#0f2244", fillMode: "linear", gradAngle: 0, opacity: 1 },
+    { type: "rect", name: "Door-Divide", x: 20, y: 29.5, w: 0.5, h: 22.5, cr: 0, rot: 0, color: "#0a1830", color2: "#1a3a6a", fillMode: "linear", gradAngle: 0, opacity: 1 },
+    { type: "rect", name: "Lamp-Base", x: 20, y: 12.4, w: 3, h: 1.2, cr: 0.2, rot: 0, color: "#1a2a3a", color2: "#4a5a6a", fillMode: "linear", gradAngle: 180, opacity: 1 },
+    { type: "circle", name: "Lamp", x: 19.871858465608465, y: 10, w: 3.4, h: 4, rot: 0, color: "#fff8a0", color2: "#3a2a08", fillMode: "radial", gradStop: 0.2, opacity: 1 },
+    { type: "rect", x: 16.311590608465607, y: 29.5, w: 5, h: 19, rot: 0, color: "#80ddff", opacity: 0, bw: 0.2, bc: "#000000", bo: 1, cr: 0 },
+    { type: "rect", x: 23.358132845188287, y: 29.5, w: 5, h: 19, rot: 0, color: "#80ddff", opacity: 0, bw: 0.2, bc: "#000000", bo: 1, cr: 0 },
+    { type: "rect", x: 16.27799985056784, y: 27, w: 3.1, h: 3.5, rot: 0, color: "#80ddff", opacity: 0.35, bw: 0.2, bc: "#000000", bo: 1, cr: 0 },
+    { type: "rect", x: 23.3, y: 27, w: 3.1, h: 3.5, rot: 0, color: "#222a3a", opacity: 0.25, bw: 0.2, bc: "#000000", bo: 1, cr: 0 },
+    { type: "rect", x: 23.3, y: 31.5, w: 3.1, h: 3.5, rot: 0, color: "#222a3a", opacity: 0.25, bw: 0.2, bc: "#000000", bo: 1, cr: 0 },
+    { type: "rect", x: 23.3, y: 36, w: 3.1, h: 3.5, rot: 0, color: "#222a3a", opacity: 0.25, bw: 0.2, bc: "#000000", bo: 1, cr: 0 },
+    { type: "rect", x: 16.2919904363419, y: 31.5, w: 3.1, h: 3.5, rot: 0, color: "#222a3a", opacity: 0.25, bw: 0.2, bc: "#000000", bo: 1, cr: 0 },
+    { type: "rect", x: 16.27510460251046, y: 36, w: 3.1, h: 3.5, rot: 0, color: "#222a3a", opacity: 0.25, bw: 0.2, bc: "#000000", bo: 1, cr: 0 },
+    { type: "rect", name: "Window", x: 16.25, y: 22.5, w: 3.5, h: 3.5, cr: 0.2, rot: 0, color: "#a8c8dc", color2: "#1a3a4a", fillMode: "linear", gradAngle: 90, opacity: 1 },
+    { type: "rect", name: "Window copy", x: 23.3, y: 22.5, w: 3.5, h: 3.5, cr: 0.2, rot: 0, color: "#a8c8dc", color2: "#1a3a4a", fillMode: "linear", gradAngle: 90, opacity: 1 }
   ],
   none: []
 };
@@ -932,26 +993,26 @@ function shipRenderPart(part, key) {
   }
   var inner = null;
   if (part.type === "circle") {
-    inner = React.createElement("ellipse", Object.assign({ cx: x, cy: y, rx: w / 2, ry: h / 2, fill: fillRef, opacity: op, transform: t }, strokeProps));
+    inner = React.createElement("ellipse", Object.assign({ cx: x, cy: y, rx: w / 2, ry: h / 2, fill: fillRef, fillOpacity: op, transform: t }, strokeProps));
   } else if (part.type === "rect") {
-    inner = React.createElement("rect", Object.assign({ x: x - w / 2, y: y - h / 2, width: w, height: h, rx: cr, ry: cr, fill: fillRef, opacity: op, transform: t }, strokeProps));
+    inner = React.createElement("rect", Object.assign({ x: x - w / 2, y: y - h / 2, width: w, height: h, rx: cr, ry: cr, fill: fillRef, fillOpacity: op, transform: t }, strokeProps));
   } else if (part.type === "triangle") {
     var p1 = x + "," + (y - h / 2);
     var p2 = (x - w / 2) + "," + (y + h / 2);
     var p3 = (x + w / 2) + "," + (y + h / 2);
-    inner = React.createElement("polygon", Object.assign({ points: p1 + " " + p2 + " " + p3, fill: fillRef, opacity: op, transform: t }, strokeProps));
+    inner = React.createElement("polygon", Object.assign({ points: p1 + " " + p2 + " " + p3, fill: fillRef, fillOpacity: op, transform: t }, strokeProps));
   } else if (part.type === "line") {
-    inner = React.createElement("rect", Object.assign({ x: x - w / 2, y: y - Math.max(0.4, h) / 2, width: w, height: Math.max(0.4, h), fill: fillRef, opacity: op, transform: t }, strokeProps));
+    inner = React.createElement("rect", Object.assign({ x: x - w / 2, y: y - Math.max(0.4, h) / 2, width: w, height: Math.max(0.4, h), fill: fillRef, fillOpacity: op, transform: t }, strokeProps));
   } else if (part.type === "trapezoid") {
     var ttw = typeof part.tw === "number" ? part.tw : w * 0.5;
     var ttofs = typeof part.tofs === "number" ? part.tofs : 0;
     var tblX = x - w / 2, tbrX = x + w / 2, tbY = y + h / 2;
     var ttlX = x - ttw / 2 + ttofs, ttrX = x + ttw / 2 + ttofs, ttY = y - h / 2;
     var tpts = ttlX + "," + ttY + " " + ttrX + "," + ttY + " " + tbrX + "," + tbY + " " + tblX + "," + tbY;
-    inner = React.createElement("polygon", Object.assign({ points: tpts, fill: fillRef, opacity: op, transform: t }, strokeProps));
+    inner = React.createElement("polygon", Object.assign({ points: tpts, fill: fillRef, fillOpacity: op, transform: t }, strokeProps));
   } else if (part.type === "arrow") {
     var apts = ARROW_POINTS.map(function(p){ return (x + p[0] * w) + "," + (y + p[1] * h); }).join(" ");
-    inner = React.createElement("polygon", Object.assign({ points: apts, fill: fillRef, opacity: op, transform: t }, strokeProps));
+    inner = React.createElement("polygon", Object.assign({ points: apts, fill: fillRef, fillOpacity: op, transform: t }, strokeProps));
   } else {
     return null;
   }
@@ -1145,7 +1206,7 @@ function LegendOverlay(props) {
 }
 function ConfirmOverlay(props) { if (!props.open) return null; return <div style={{ position: "fixed", inset: 0, zIndex: 250, background: "rgba(5,5,20,0.7)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center" }}><GsPanel style={{ maxWidth: 300, padding: "20px 24px", textAlign: "center" }}><GsMono size={12} ls={1} style={{ display: "block", marginBottom: 6 }}>RESTART LEVEL?</GsMono><GsMono size={10} color={GS.green + "66"} style={{ display: "block", marginBottom: 18 }}>USES 1 REACTOR CORE</GsMono><div style={{ display: "flex", gap: 12, justifyContent: "center" }}><div onClick={props.onCancel} style={{ padding: "8px 20px", borderRadius: 6, background: GS.brushedSolid, border: GS.pbl, color: "#b0c8d8", fontSize: 12, fontWeight: 600, cursor: "pointer", boxShadow: GS.ps }}>Cancel</div><div onClick={props.onConfirm} style={{ padding: "8px 20px", borderRadius: 6, background: "linear-gradient(135deg,#6a4a9a,#8a60c0)", border: "1px solid rgba(160,120,255,0.4)", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", boxShadow: "0 2px 8px rgba(120,80,255,0.3)" }}>Restart</div></div></GsPanel></div>; }
 
-var ANIM_CSS = "@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@700;800&family=JetBrains+Mono:wght@400;700&display=swap');\n@keyframes plasmaZip{0%{transform:translate(0,0) scale(1);opacity:1}80%{opacity:1}100%{transform:translate(var(--endX),var(--endY)) scale(0.5);opacity:0}}\n@keyframes csPlasma{0%{transform:translate(0,0) scale(1);opacity:1}70%{opacity:0.8}100%{transform:translate(var(--endX),var(--endY)) scale(0.5);opacity:0}}\n@keyframes lightningFlash{0%{opacity:0}10%{opacity:1}50%{opacity:1}60%{opacity:0.3}70%{opacity:1}100%{opacity:0}}\n@keyframes explodeParticle{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--px),var(--py)) scale(0.2);opacity:0}}\n@keyframes explodeRing{0%{transform:scale(0.2);opacity:1}100%{transform:scale(1.8);opacity:0}}\n@keyframes explodeFlash{0%{transform:scale(0.5);opacity:1}50%{transform:scale(1);opacity:0.8}100%{transform:scale(1.5);opacity:0}}\n@keyframes blockPop{0%{transform:scale(1);opacity:1}30%{transform:scale(1.1);filter:brightness(1.8)}100%{transform:scale(0);opacity:0}}\n@keyframes blockShake{0%{transform:translateX(0)}15%{transform:translateX(-4px)}30%{transform:translateX(4px)}45%{transform:translateX(-3px)}60%{transform:translateX(3px)}75%{transform:translateX(-1px)}100%{transform:translateX(0)}}\n@keyframes shipPulse{0%{filter:drop-shadow(0 0 10px rgba(255,168,255,0.5))}50%{filter:drop-shadow(0 0 20px rgba(80,200,255,0.8)) brightness(1.3)}100%{filter:drop-shadow(0 0 10px rgba(255,168,255,0.5))}}\n@keyframes plasmaImpact{0%{transform:scale(0.3);opacity:1}50%{transform:scale(1.2);opacity:0.8}100%{transform:scale(1.8);opacity:0}}\n@keyframes plasmaShatter{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--px),var(--py)) scale(0);opacity:0}}\n@keyframes fizzle{0%{transform:scale(1,1);opacity:1}30%{transform:scale(1.4,0.4);opacity:0.8}60%{transform:scale(1.6,0.2);opacity:0.5}100%{transform:scale(2,0);opacity:0}}\n@keyframes fizzleSpark{0%{transform:translate(0,0);opacity:1}100%{transform:translate(var(--sx),var(--sy));opacity:0}}\n@keyframes bonusCharge{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--endX),var(--endY)) scale(0.3);opacity:0}}\n@keyframes scoreFlash{0%{transform:scale(1)}50%{transform:scale(1.15);color:#50c8ff}100%{transform:scale(1)}}\n@keyframes coreFly{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--endX),var(--endY)) scale(0.8);opacity:0.5}}\n@keyframes droneMoveX{0%{transform:translateX(0)}100%{transform:translateX(var(--dx))}}\n@keyframes droneMoveY{0%{transform:translateY(0) rotate(var(--startRot)) scale(1)}35%{transform:translateY(var(--peak)) rotate(0deg) scale(1.6)}100%{transform:translateY(var(--dy)) rotate(var(--endRot)) scale(1)}}\n@keyframes shipOozeHit{0%{filter:drop-shadow(0 0 10px rgba(255,168,255,0.5))}15%{filter:drop-shadow(0 0 20px rgba(80,255,80,0.9)) brightness(1.4) hue-rotate(90deg)}30%{filter:drop-shadow(0 0 8px rgba(80,255,80,0.3))}45%{filter:drop-shadow(0 0 20px rgba(80,255,80,0.8)) brightness(1.3) hue-rotate(90deg)}60%{filter:drop-shadow(0 0 6px rgba(80,255,80,0.2))}75%{filter:drop-shadow(0 0 15px rgba(80,255,80,0.6)) brightness(1.2) hue-rotate(60deg)}100%{filter:drop-shadow(0 0 10px rgba(255,168,255,0.5))}}\n@keyframes oozeDrip{0%{transform:scaleY(0);opacity:0.8}100%{transform:scaleY(1);opacity:0.6}}\n@keyframes oozeFlow{0%{transform:scaleY(0)}40%{transform:scaleY(0.6)}100%{transform:scaleY(1)}}\n@keyframes oozeWaveFlow{0%{transform:translateY(0)}100%{transform:translateY(50%)}}\n@keyframes oozePuddleSpread{0%{transform:scaleX(0.3) scaleY(0.2);opacity:0}20%{transform:scaleX(1.1) scaleY(0.9);opacity:0.8}40%{transform:scaleX(1) scaleY(1);opacity:0.7}100%{transform:scaleX(0.8) scaleY(0.6);opacity:0}}\n@keyframes blockBurn{0%{transform:scale(1);opacity:1}100%{transform:scale(1);opacity:0}}\n@keyframes burnPixel{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--px),var(--py)) scale(0);opacity:0}}\n@keyframes burnSpark{0%{transform:translate(0,0);opacity:0.8}100%{transform:translate(var(--vx),var(--vy));opacity:0}}\n@keyframes itemFly{0%{transform:translate(0,0) scale(1);opacity:1}50%{transform:translate(calc(var(--endX)*0.5),calc(var(--endY)*0.5 - 20px)) scale(1.2)}100%{transform:translate(var(--endX),var(--endY)) scale(0.8);opacity:0.5}}\n@keyframes blockErupt{0%{transform:translate(0,0) scale(0.3);opacity:0.8}40%{transform:translate(calc(var(--endX)*0.3),calc(var(--endY)*0.3 - 30px)) scale(1.2);opacity:1}100%{transform:translate(var(--endX),var(--endY)) scale(1);opacity:0.6}}\n@keyframes tutFadeIn{0%{opacity:0;transform:translateX(-50%) translateY(-8px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}\n@keyframes introFadeIn{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}\n@keyframes convertGlow{0%{box-shadow:0 0 4px rgba(48,192,208,0.3)}30%{box-shadow:0 0 20px rgba(48,192,208,0.8),inset 0 0 10px rgba(48,192,208,0.3)}100%{box-shadow:0 0 4px rgba(48,192,208,0)}}\n@keyframes tutPulseGlow{0%{box-shadow:0 0 8px rgba(80,200,255,0.3),inset 0 0 4px rgba(80,200,255,0.1)}50%{box-shadow:0 0 20px rgba(80,200,255,0.6),inset 0 0 8px rgba(80,200,255,0.2)}100%{box-shadow:0 0 8px rgba(80,200,255,0.3),inset 0 0 4px rgba(80,200,255,0.1)}}\n@keyframes targetPulse{0%{transform:scale(1);opacity:0.5;box-shadow:0 0 8px rgba(80,200,255,0.4)}50%{transform:scale(1.08);opacity:1;box-shadow:0 0 20px rgba(80,200,255,0.7)}100%{transform:scale(1);opacity:0.5;box-shadow:0 0 8px rgba(80,200,255,0.4)}}\n@keyframes targetArrow{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}\n@keyframes rechargePulse{0%{box-shadow:0 0 6px rgba(48,192,208,0.3),inset 0 0 4px rgba(48,192,208,0.1)}50%{box-shadow:0 0 20px rgba(48,192,208,0.8),inset 0 0 12px rgba(48,192,208,0.3)}100%{box-shadow:0 0 6px rgba(48,192,208,0.3),inset 0 0 4px rgba(48,192,208,0.1)}}\n@keyframes starDrift{0%{transform:translateY(-50%)}100%{transform:translateY(0)}}\n@keyframes splashShipDrift{0%{transform:translateX(-100px)}50%{transform:translateX(100px)}100%{transform:translateX(-100px)}}\n@keyframes confettiBurst{0%{transform:translate(0,0) rotate(0deg);opacity:1}100%{transform:translate(var(--cx),var(--cy)) rotate(var(--cr));opacity:0}}\n@keyframes splashPlasma{0%{transform:translateY(0);opacity:0}2%{transform:translateY(0);opacity:1}22%{transform:translateY(-120px);opacity:0}100%{transform:translateY(-120px);opacity:0}}@keyframes splashPlasmaBall{from{transform:translateY(0);opacity:1}to{transform:translateY(-200px);opacity:0}}\n@keyframes hammerSwing{0%{transform:rotate(0deg);opacity:1}8%{transform:rotate(5deg);opacity:1}65%{transform:rotate(-90deg);opacity:1}80%{transform:rotate(-78deg);opacity:0.7}92%{transform:rotate(-84deg);opacity:0.3}100%{transform:rotate(-86deg);opacity:0}}\n@keyframes crosshairPulse{0%{opacity:0.5;transform:translate(-50%,-50%) scale(0.9)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}100%{opacity:0.5;transform:translate(-50%,-50%) scale(0.9)}}\n@keyframes crosshairFadeIn{0%{opacity:0;transform:translate(-50%,-50%) scale(0.3)}100%{opacity:0.7;transform:translate(-50%,-50%) scale(1)}}\n@keyframes wallFieldPulse{0%{opacity:0;transform:scaleX(0)}15%{opacity:0.8;transform:scaleX(1.1)}30%{opacity:0.7;transform:scaleX(1)}70%{opacity:0.6;transform:scaleX(1)}100%{opacity:0;transform:scaleX(0)}}@keyframes ufoWarpOut{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}@keyframes ufoWarpIn{0%{transform:scale(0.05);opacity:0}60%{transform:scale(1.08);opacity:0.9}100%{transform:scale(1);opacity:1}}@keyframes ufoLightSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}@keyframes empFallDown{from{transform:translateY(0)}to{transform:translateY(var(--empDist))}}@keyframes empBloomExp{0%{transform:scale(0.1);opacity:0.95}28%{transform:scale(1);opacity:0.82}100%{transform:scale(1);opacity:0}}@keyframes empCellGlow{0%,100%{opacity:0}15%,80%{opacity:1}}@keyframes cdSplashExitLeft{0%{transform:scale(1) translateX(0)}22%{transform:scale(1.05) translateX(0)}100%{transform:scale(1.05) translateX(-106vw)}}@keyframes cdSplashEnterFromWs{0%{transform:translateX(-100vw);filter:brightness(0.7)}100%{transform:translateX(0);filter:brightness(1)}}";
+var ANIM_CSS = "@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@700;800&family=JetBrains+Mono:wght@400;700&display=swap');\n@keyframes plasmaZip{0%{transform:translate(0,0) scale(1);opacity:1}80%{opacity:1}100%{transform:translate(var(--endX),var(--endY)) scale(0.5);opacity:0}}\n@keyframes csPlasma{0%{transform:translate(0,0) scale(1);opacity:1}70%{opacity:0.8}100%{transform:translate(var(--endX),var(--endY)) scale(0.5);opacity:0}}\n@keyframes lightningFlash{0%{opacity:0}10%{opacity:1}50%{opacity:1}60%{opacity:0.3}70%{opacity:1}100%{opacity:0}}\n@keyframes explodeParticle{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--px),var(--py)) scale(0.2);opacity:0}}\n@keyframes explodeRing{0%{transform:scale(0.2);opacity:1}100%{transform:scale(1.8);opacity:0}}\n@keyframes explodeFlash{0%{transform:scale(0.5);opacity:1}50%{transform:scale(1);opacity:0.8}100%{transform:scale(1.5);opacity:0}}\n@keyframes blockPop{0%{transform:scale(1);opacity:1}30%{transform:scale(1.1);filter:brightness(1.8)}100%{transform:scale(0);opacity:0}}\n@keyframes blockShake{0%{transform:translateX(0)}15%{transform:translateX(-4px)}30%{transform:translateX(4px)}45%{transform:translateX(-3px)}60%{transform:translateX(3px)}75%{transform:translateX(-1px)}100%{transform:translateX(0)}}\n@keyframes shipPulse{0%{filter:drop-shadow(0 0 10px rgba(255,168,255,0.5))}50%{filter:drop-shadow(0 0 20px rgba(80,200,255,0.8)) brightness(1.3)}100%{filter:drop-shadow(0 0 10px rgba(255,168,255,0.5))}}\n@keyframes plasmaImpact{0%{transform:scale(0.3);opacity:1}50%{transform:scale(1.2);opacity:0.8}100%{transform:scale(1.8);opacity:0}}\n@keyframes plasmaShatter{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--px),var(--py)) scale(0);opacity:0}}\n@keyframes fizzle{0%{transform:scale(1,1);opacity:1}30%{transform:scale(1.4,0.4);opacity:0.8}60%{transform:scale(1.6,0.2);opacity:0.5}100%{transform:scale(2,0);opacity:0}}\n@keyframes fizzleSpark{0%{transform:translate(0,0);opacity:1}100%{transform:translate(var(--sx),var(--sy));opacity:0}}\n@keyframes bonusCharge{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--endX),var(--endY)) scale(0.3);opacity:0}}\n@keyframes scoreFlash{0%{transform:scale(1)}50%{transform:scale(1.15);color:#50c8ff}100%{transform:scale(1)}}\n@keyframes coreFly{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--endX),var(--endY)) scale(0.8);opacity:0.5}}\n@keyframes droneMoveX{0%{transform:translateX(0)}100%{transform:translateX(var(--dx))}}\n@keyframes droneMoveY{0%{transform:translateY(0) rotate(var(--startRot)) scale(1)}35%{transform:translateY(var(--peak)) rotate(0deg) scale(1.6)}100%{transform:translateY(var(--dy)) rotate(var(--endRot)) scale(1)}}\n@keyframes shipOozeHit{0%{filter:drop-shadow(0 0 10px rgba(255,168,255,0.5))}15%{filter:drop-shadow(0 0 20px rgba(80,255,80,0.9)) brightness(1.4) hue-rotate(90deg)}30%{filter:drop-shadow(0 0 8px rgba(80,255,80,0.3))}45%{filter:drop-shadow(0 0 20px rgba(80,255,80,0.8)) brightness(1.3) hue-rotate(90deg)}60%{filter:drop-shadow(0 0 6px rgba(80,255,80,0.2))}75%{filter:drop-shadow(0 0 15px rgba(80,255,80,0.6)) brightness(1.2) hue-rotate(60deg)}100%{filter:drop-shadow(0 0 10px rgba(255,168,255,0.5))}}\n@keyframes oozeDrip{0%{transform:scaleY(0);opacity:0.8}100%{transform:scaleY(1);opacity:0.6}}\n@keyframes oozeFlow{0%{transform:scaleY(0)}40%{transform:scaleY(0.6)}100%{transform:scaleY(1)}}\n@keyframes oozeWaveFlow{0%{transform:translateY(0)}100%{transform:translateY(50%)}}\n@keyframes oozePuddleSpread{0%{transform:scaleX(0.3) scaleY(0.2);opacity:0}20%{transform:scaleX(1.1) scaleY(0.9);opacity:0.8}40%{transform:scaleX(1) scaleY(1);opacity:0.7}100%{transform:scaleX(0.8) scaleY(0.6);opacity:0}}\n@keyframes blockBurn{0%{transform:scale(1);opacity:1}100%{transform:scale(1);opacity:0}}\n@keyframes burnPixel{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--px),var(--py)) scale(0);opacity:0}}\n@keyframes burnSpark{0%{transform:translate(0,0);opacity:0.8}100%{transform:translate(var(--vx),var(--vy));opacity:0}}\n@keyframes itemFly{0%{transform:translate(0,0) scale(1);opacity:1}50%{transform:translate(calc(var(--endX)*0.5),calc(var(--endY)*0.5 - 20px)) scale(1.2)}100%{transform:translate(var(--endX),var(--endY)) scale(0.8);opacity:0.5}}\n@keyframes blockErupt{0%{transform:translate(0,0) scale(0.3);opacity:0.8}40%{transform:translate(calc(var(--endX)*0.3),calc(var(--endY)*0.3 - 30px)) scale(1.2);opacity:1}100%{transform:translate(var(--endX),var(--endY)) scale(1);opacity:0.6}}\n@keyframes tutFadeIn{0%{opacity:0;transform:translateX(-50%) translateY(-8px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}\n@keyframes introFadeIn{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}\n@keyframes convertGlow{0%{box-shadow:0 0 4px rgba(48,192,208,0.3)}30%{box-shadow:0 0 20px rgba(48,192,208,0.8),inset 0 0 10px rgba(48,192,208,0.3)}100%{box-shadow:0 0 4px rgba(48,192,208,0)}}\n@keyframes tutPulseGlow{0%{box-shadow:0 0 8px rgba(80,200,255,0.3),inset 0 0 4px rgba(80,200,255,0.1)}50%{box-shadow:0 0 20px rgba(80,200,255,0.6),inset 0 0 8px rgba(80,200,255,0.2)}100%{box-shadow:0 0 8px rgba(80,200,255,0.3),inset 0 0 4px rgba(80,200,255,0.1)}}\n@keyframes targetPulse{0%{transform:scale(1);opacity:0.5;box-shadow:0 0 8px rgba(80,200,255,0.4)}50%{transform:scale(1.08);opacity:1;box-shadow:0 0 20px rgba(80,200,255,0.7)}100%{transform:scale(1);opacity:0.5;box-shadow:0 0 8px rgba(80,200,255,0.4)}}\n@keyframes targetArrow{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}\n@keyframes rechargePulse{0%{box-shadow:0 0 6px rgba(48,192,208,0.3),inset 0 0 4px rgba(48,192,208,0.1)}50%{box-shadow:0 0 20px rgba(48,192,208,0.8),inset 0 0 12px rgba(48,192,208,0.3)}100%{box-shadow:0 0 6px rgba(48,192,208,0.3),inset 0 0 4px rgba(48,192,208,0.1)}}\n@keyframes starDrift{0%{transform:translateY(-50%)}100%{transform:translateY(0)}}\n@keyframes splashShipDrift{0%{transform:translateX(-100px)}50%{transform:translateX(100px)}100%{transform:translateX(-100px)}}\n@keyframes confettiBurst{0%{transform:translate(0,0) rotate(0deg);opacity:1}100%{transform:translate(var(--cx),var(--cy)) rotate(var(--cr));opacity:0}}\n@keyframes splashPlasma{0%{transform:translateY(0);opacity:0}2%{transform:translateY(0);opacity:1}22%{transform:translateY(-120px);opacity:0}100%{transform:translateY(-120px);opacity:0}}@keyframes splashPlasmaBall{from{transform:translateY(0);opacity:1}to{transform:translateY(-200px);opacity:0}}\n@keyframes hammerSwing{0%{transform:rotate(0deg);opacity:1}8%{transform:rotate(5deg);opacity:1}65%{transform:rotate(-90deg);opacity:1}80%{transform:rotate(-78deg);opacity:0.7}92%{transform:rotate(-84deg);opacity:0.3}100%{transform:rotate(-86deg);opacity:0}}\n@keyframes crosshairPulse{0%{opacity:0.5;transform:translate(-50%,-50%) scale(0.9)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}100%{opacity:0.5;transform:translate(-50%,-50%) scale(0.9)}}\n@keyframes crosshairFadeIn{0%{opacity:0;transform:translate(-50%,-50%) scale(0.3)}100%{opacity:0.7;transform:translate(-50%,-50%) scale(1)}}\n@keyframes wallFieldPulse{0%{opacity:0;transform:scaleX(0)}15%{opacity:0.8;transform:scaleX(1.1)}30%{opacity:0.7;transform:scaleX(1)}70%{opacity:0.6;transform:scaleX(1)}100%{opacity:0;transform:scaleX(0)}}@keyframes ufoWarpOut{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}@keyframes ufoWarpIn{0%{transform:scale(0.05);opacity:0}60%{transform:scale(1.08);opacity:0.9}100%{transform:scale(1);opacity:1}}@keyframes ufoLightSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}@keyframes empFallDown{from{transform:translateY(0)}to{transform:translateY(var(--empDist))}}@keyframes empBloomExp{0%{transform:scale(0.1);opacity:0.95}28%{transform:scale(1);opacity:0.82}100%{transform:scale(1);opacity:0}}@keyframes empCellGlow{0%,100%{opacity:0}15%,80%{opacity:1}}@keyframes cdSplashExitLeft{0%{transform:scale(1) translateX(0)}22%{transform:scale(1.05) translateX(0)}100%{transform:scale(1.05) translateX(-106vw)}}@keyframes cdSplashEnterFromWs{0%{transform:translateX(-100vw);filter:brightness(0.7)}100%{transform:translateX(0);filter:brightness(1)}}input[type=range]{-webkit-appearance:none;appearance:none;background:rgba(255,255,255,0.1);border-radius:4px;height:6px;outline:none}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:32px;height:32px;border-radius:50%;background:#4488ff;border:3px solid #88bbff;cursor:pointer;box-shadow:0 0 8px rgba(68,136,255,0.4)}input[type=range]::-moz-range-thumb{width:32px;height:32px;border-radius:50%;background:#4488ff;border:3px solid #88bbff;cursor:pointer;box-shadow:0 0 8px rgba(68,136,255,0.4)}";
 
 // ── CANVAS PARTICLE SYSTEM ──
 var _cvfxParticles = [];
@@ -1331,11 +1392,14 @@ function HudPanel(props) {
   var baseCores = props.baseCores, extraCores = props.extraCores, plasma = props.plasma;
   var maxPlasma = props.maxPlasma, score = props.score, scoreFlash = props.scoreFlash;
   var gameState = props.gameState, setGameState = props.setGameState;
+  var shipDisplaySize = props.shipDisplaySize || 64;
+  var showShipSizeSlider = props.showShipSizeSlider || false;
+  var onToggleShipSizeSlider = props.onToggleShipSizeSlider || function () {};
   var baseSlots = []; for (var bsi = 0; bsi < 3; bsi++) baseSlots.push(<div key={"b" + bsi} style={{ opacity: bsi < baseCores ? 1 : 0.15 }}><CoreIcon size={18} mode="lit" /></div>);
   var extraDisplay = [];
   for (var ei2 = 0; ei2 < extraCores; ei2++) extraDisplay.push(<CoreIcon key={"e" + ei2} size={14} mode="lit" />);
   return <div style={{ display: "flex", gap: 5, alignItems: "stretch" }}>
-    <div onClick={function () { if (gameState === "needsRecharge") setGameState("recharging"); }} style={{ flex: 1.3, background: GS.inset, border: GS.ib, borderRadius: 6, padding: "4px 6px 6px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: GS.is, minHeight: 60, cursor: gameState === "needsRecharge" ? "pointer" : "default" }}>
+    <div onClick={function () { if (gameState === "needsRecharge") setGameState("recharging"); }} style={{ flex: 1, background: GS.inset, border: GS.ib, borderRadius: 6, padding: "4px 6px 6px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", boxShadow: GS.is, minHeight: 60, cursor: gameState === "needsRecharge" ? "pointer" : "default" }}>
       <div style={{ fontFamily: "'JetBrains Mono', monospace", color: "rgba(80,221,255,0.5)", fontSize: 7, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 400, marginBottom: 3 }}>Reactor Cores</div>
       <div style={{ display: "flex", gap: 3, justifyContent: "center", alignItems: "center", marginBottom: extraCores > 0 ? 2 : 0 }}>{baseSlots}</div>
       {extraCores > 0 && <div style={{ display: "flex", gap: 3, justifyContent: "center", alignItems: "center", position: "relative" }}>{extraDisplay}</div>}
@@ -1344,9 +1408,16 @@ function HudPanel(props) {
       <div style={{ fontFamily: "'JetBrains Mono', monospace", color: gameState === "needsRecharge" ? "rgba(48,192,208,0.8)" : "rgba(80,221,255,0.5)", fontSize: 7, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 400, marginBottom: 2 }}>{gameState === "needsRecharge" ? "Tap!" : "Plasma"}</div>
       <PlasmaContainer current={plasma} max={maxPlasma} />
     </div>
-    <div style={{ flex: 1.3, background: GS.inset, border: GS.ib, borderRadius: 6, padding: "6px 8px", boxShadow: gameState === "bonus" ? "inset 0 0 12px rgba(48,192,208,0.25), inset 0 0 24px rgba(48,192,208,0.1), " + GS.is : GS.is, transition: "box-shadow 0.3s", display: "flex", flexDirection: "column", alignItems: "center" }}>
+    <div style={{ flex: 1, background: GS.inset, border: GS.ib, borderRadius: 6, padding: "6px 8px", boxShadow: gameState === "bonus" ? "inset 0 0 12px rgba(48,192,208,0.25), inset 0 0 24px rgba(48,192,208,0.1), " + GS.is : GS.is, transition: "box-shadow 0.3s", display: "flex", flexDirection: "column", alignItems: "center" }}>
       <div style={{ fontFamily: "'JetBrains Mono', monospace", color: GS.blue + "bb", fontSize: 7, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 400, marginBottom: 3 }}>Score</div>
       <div style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 18, color: GS.blue, letterSpacing: 1.5, textShadow: "0 0 10px " + GS.blue + ", 0 0 4px " + GS.blue + "cc", animation: scoreFlash ? "scoreFlash 0.2s ease-out" : "none", lineHeight: 1 }}>{score}</div>
+    </div>
+    <div onClick={function () { onToggleShipSizeSlider(); }} style={{ flex: "0 0 32px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, padding: "4px 4px", borderRadius: 6, background: showShipSizeSlider ? "rgba(30,60,100,0.7)" : GS.inset, border: showShipSizeSlider ? "2px solid rgba(80,180,255,0.5)" : GS.ib, cursor: "pointer", boxShadow: showShipSizeSlider ? "0 0 8px rgba(80,180,255,0.25), " + GS.is : GS.is, minHeight: 60 }}>
+      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 7, fontWeight: 700, color: showShipSizeSlider ? "#80ddff" : "rgba(140,180,210,0.6)", letterSpacing: 0.3, lineHeight: 1 }}>{Math.round(shipDisplaySize / 68 * 100) + "%"}</div>
+      <svg width="14" height="14" viewBox="0 0 24 24">
+        <path d="M15 3h6v6l-2.3-2.3-3.4 3.4-1.4-1.4 3.4-3.4L15 3z" fill={showShipSizeSlider ? "rgba(80,200,255,0.85)" : "rgba(140,160,180,0.5)"} />
+        <path d="M9 21H3v-6l2.3 2.3 3.4-3.4 1.4 1.4-3.4 3.4L9 21z" fill={showShipSizeSlider ? "rgba(80,200,255,0.85)" : "rgba(140,160,180,0.5)"} />
+      </svg>
     </div>
   </div>;
 }
@@ -1552,6 +1623,8 @@ export default function CosmicDriftGame() {
   var _ihm = useState(0), invHammers = _ihm[0], setInvHammers = _ihm[1];
   var _ai = useState(null), armedItem = _ai[0], setArmedItem = _ai[1]; // null | "drone" | "lightning"
   var _sh = useState(false), shipHit = _sh[0], setShipHit = _sh[1];
+  var _sds = useState(64), shipDisplaySize = _sds[0], setShipDisplaySize = _sds[1];
+  var _ssso = useState(false), showShipSizeSlider = _ssso[0], setShowShipSizeSlider = _ssso[1];
   var _be = useState(0), bonusEarned = _be[0], setBonusEarned = _be[1];
   var _lcs = useState(null), levelClearStats = _lcs[0], setLevelClearStats = _lcs[1];
   var _lce = useState(false), showLevelClearExit = _lce[0], setShowLevelClearExit = _lce[1];
@@ -1719,6 +1792,7 @@ export default function CosmicDriftGame() {
   useEffect(function () { try { window.storage.get("cosmic_drift_skip_popup").then(function (r) { if (r && r.value) setNpSavedChoice(r.value); }).catch(function () {}); } catch (e) {} }, []);
   useEffect(function () { try { window.storage.get("cosmic_drift_ios_prompt_dismissed").then(function (r) { if (r && r.value === "true") setIosPromptDismissed(true); }).catch(function () {}); } catch (e) {} }, []);
   useEffect(function () { try { window.storage.get("cosmic_drift_difficulty").then(function (r) { if (r && r.value) { difficultyRef.current = r.value; setDifficulty(r.value); } }).catch(function () {}); } catch (e) {} }, []);
+  useEffect(function () { try { window.storage.get("cosmic_drift_ship_size").then(function (r) { if (r && r.value) { var v = Number(r.value); if (v >= 34 && v <= 204) setShipDisplaySize(v); else if (v > 204) setShipDisplaySize(204); else if (v < 34) setShipDisplaySize(34); } }).catch(function () {}); } catch (e) {} }, []);
   // Migrate old high scores to "regular" difficulty (one-time)
   useEffect(function () { try { window.storage.get("cosmic_drift_best_score").then(function (r) { if (r && r.value) { window.storage.get("cosmic_drift_best_score_regular").then(function (r2) { if (!r2 || !r2.value) { window.storage.set("cosmic_drift_best_score_regular", r.value); window.storage.set("cosmic_drift_best_level_regular", "0"); } window.storage.get("cosmic_drift_best_level").then(function (r3) { if (r3 && r3.value) { window.storage.get("cosmic_drift_best_level_regular").then(function (r4) { if (!r4 || !r4.value || r4.value === "0") window.storage.set("cosmic_drift_best_level_regular", r3.value); }); } }); }).catch(function () {}); } }).catch(function () {}); } catch (e) {} }, []);
   function loadBestForDifficulty(diff) {
@@ -3295,16 +3369,27 @@ function logUfo(msg) {
           {/* Ship zone */}
           {showShipRowHint && <div style={{ position: "absolute", left: BOARD_PAD - 4, right: BOARD_PAD - 4, bottom: 0, height: 72, borderRadius: 10, border: "2px solid rgba(80,200,255,0.4)", animation: "targetPulse 1.5s ease-in-out infinite", pointerEvents: "none", zIndex: 5 }} />}
           <div ref={shipZoneRef} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onMouseDown={handleShipMouseDown} onMouseMove={handleShipMouseMove} onMouseUp={handleShipMouseUp} onMouseLeave={function () { mouseDragRef.current = null; }} style={{ position: "relative", zIndex: 2, padding: "0 " + BOARD_PAD + "px", cursor: "pointer", userSelect: "none", WebkitUserSelect: "none" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(" + COLS + "," + blockSize + "px)", gap: GAP + "px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(" + COLS + "," + blockSize + "px)", gap: GAP + "px", overflow: "visible" }}>
               {new Array(COLS).fill(0).map(function (_, ci) {
                 var isActive = ci === shipCol;
-                return <div key={ci} style={{ height: 68, display: "flex", alignItems: "flex-end", justifyContent: "center", paddingBottom: 4, borderTop: "2px solid rgba(140,160,180," + (isActive ? "0.2" : "0.06") + ")", background: isActive ? "rgba(255,168,255,0.04)" : "transparent", transition: isDragging ? "none" : "background 0.15s, border-color 0.15s" }}>
-                  {isActive && <ShipDesignSvg svgRef={shipSvgRef} size={44} design={GAME_SHIP_DESIGN} uid="game" style={{ filter: "drop-shadow(0 0 10px rgba(255,168,255,0.5))", animation: shipHit ? "shipOozeHit 0.8s ease-out" : "none" }} />}
+                return <div key={ci} style={{ height: 68, position: "relative", overflow: "visible", cursor: "pointer", borderTop: "2px solid rgba(140,160,180," + (isActive ? "0.2" : "0.06") + ")", background: isActive ? "rgba(255,168,255,0.04)" : "transparent", transition: isDragging ? "none" : "background 0.15s, border-color 0.15s" }}>
+                  {isActive && <ShipDesignSvg svgRef={shipSvgRef} size={shipDisplaySize} design={GAME_SHIP_DESIGN} uid="game" style={{ position: "absolute", bottom: 2, left: "50%", transform: "translateX(-50%)", filter: GAME_SHIP_DESIGN.glowEnabled ? "drop-shadow(0 0 " + (GAME_SHIP_DESIGN.glowIntensity || 10) + "px " + (GAME_SHIP_DESIGN.glowColor || "rgba(255,168,255,0.5)") + ")" : "none", animation: shipHit ? "shipOozeHit 0.8s ease-out" : "none" }} />}
                 </div>;
               })}
             </div>
           </div>
         </div>
+
+        {/* ═══ SHIP SIZE SLIDER OVERLAY ═══ */}
+        {showShipSizeSlider && <div onClick={function () { setShowShipSizeSlider(false); }} style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", alignItems: "flex-end" }}>
+          <div onClick={function (e) { e.stopPropagation(); }} style={{ width: "100%", maxWidth: 420, margin: "0 auto", background: GS.brushed, borderTop: "2px solid rgba(80,140,200,0.25)", borderRadius: "14px 14px 0 0", padding: "18px 20px 32px", boxSizing: "border-box", boxShadow: "0 -4px 24px rgba(0,0,0,0.6)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+              <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(140,180,210,0.5)", letterSpacing: 2.5, textTransform: "uppercase" }}>Ship Size</div>
+              <div style={{ fontSize: 26, fontWeight: 700, color: "#80ddff", fontFamily: "'JetBrains Mono', monospace", letterSpacing: 1, textShadow: "0 0 10px rgba(80,200,255,0.4)" }}>{Math.round(shipDisplaySize / 68 * 100) + "%"}</div>
+            </div>
+            <input type="range" min={34} max={204} step={1} value={shipDisplaySize} onChange={function (e) { var v = Number(e.target.value); setShipDisplaySize(v); try { window.storage.set("cosmic_drift_ship_size", String(v)); } catch (ex) {} }} style={{ width: "100%", fontSize: 16 }} />
+          </div>
+        </div>}
 
         {/* ═══ COCKPIT DASHBOARD - METALLIC PANEL ═══ */}
         <div ref={hudRef} style={{ position: "relative", zIndex: 2, flexShrink: 0, background: GS.brushed, backgroundBlendMode: "overlay", borderTop: "3px solid #404a58", padding: "6px 6px 8px", boxShadow: "0 -4px 12px rgba(0,0,0,0.55), inset 0 1px 0 rgba(200,230,240,0.08)" }}>
@@ -3315,7 +3400,7 @@ function logUfo(msg) {
           <GsRivet pos={{ top: 1, right: 2 }} />
           <GsRivet pos={{ bottom: 59, left: 2 }} />
 
-          <HudPanelMemo baseCores={baseCores} extraCores={extraCores} plasma={plasma} maxPlasma={customGridRef.current ? customPlasmaRef.current : getLevelPlasma(level)} score={score} scoreFlash={scoreFlash} gameState={gameState} setGameState={setGameState} />
+          <HudPanelMemo baseCores={baseCores} extraCores={extraCores} plasma={plasma} maxPlasma={customGridRef.current ? customPlasmaRef.current : getLevelPlasma(level)} score={score} scoreFlash={scoreFlash} gameState={gameState} setGameState={setGameState} shipDisplaySize={shipDisplaySize} showShipSizeSlider={showShipSizeSlider} onToggleShipSizeSlider={function () { setShowShipSizeSlider(function (prev) { return !prev; }); }} />
 
           {/* Power-ups tray */}
           <InventoryBarMemo invDrones={invDrones} invLightnings={invLightnings} invCrossShots={invCrossShots} invAngleBounces={invAngleBounces} invHammers={invHammers} armedItem={armedItem} onArmItem={setArmedItem} level={level} tutPhase={tutPhase} convertOffer={convertOffer} convertFlash={convertFlash} onConvert={setConvertOffer} isStuck={isStuck} hasPowerUps={hasPowerUps} coreCount={baseCores + extraCores} gameState={gameState} />

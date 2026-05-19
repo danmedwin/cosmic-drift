@@ -975,17 +975,17 @@ function UFOBlockSvg(props) {
     clipPath: "url(#ufo-dc-" + uid + ")"
   })));
 }
-var SHIP_HULLS = ["arrow", "dart", "raptor", "wedge", "fireflight", "saucer", "startrack", "falcor", "birdofplay", "none"];
+var SHIP_HULLS = ["arrow", "fireflight", "saucer", "startrack", "falcor", "birdofplay", "vespa", "ironeye", "callbox"];
 var SHIP_HULL_LABELS = {
   arrow: "Default",
-  dart: "Dart",
-  raptor: "Raptor",
-  wedge: "Wedge",
   fireflight: "Fireflight",
   saucer: "Saucer",
   startrack: "Star Track",
   falcor: "Millenia Falcor",
   birdofplay: "Bird of Play",
+  vespa: "Stinger-II",
+  ironeye: "Hex Fighter",
+  callbox: "Police Box",
   none: "None"
 };
 var SHIP_PART_TYPES = ["circle", "rect", "triangle", "trapezoid", "line", "arrow"];
@@ -1021,219 +1021,482 @@ var HULL_PRESETS = {
     bc: "#a45ba3",
     bo: 1
   }],
-  dart: [{
-    type: "triangle",
-    x: 20,
-    y: 22,
-    w: 16,
-    h: 34,
-    rot: 0,
-    color: "#ffd0ff",
-    opacity: 1
-  }],
-  raptor: [{
-    type: "triangle",
-    x: 20,
-    y: 22,
-    w: 16,
-    h: 30,
-    rot: 0,
-    color: "#ffd0ff",
-    opacity: 1
-  }, {
-    type: "triangle",
-    x: 8,
-    y: 30,
-    w: 10,
-    h: 14,
-    rot: 0,
-    color: "#cc70cc",
-    opacity: 1
-  }, {
-    type: "triangle",
-    x: 32,
-    y: 30,
-    w: 10,
-    h: 14,
-    rot: 0,
-    color: "#cc70cc",
-    opacity: 1
-  }],
-  wedge: [{
-    type: "triangle",
-    x: 20,
-    y: 21,
-    w: 34,
-    h: 32,
-    rot: 0,
-    color: "#ffd0ff",
-    opacity: 1
-  }],
   // Fireflight: layer names match fireflight.svg.
   fireflight: [{
-    type: "rect",
-    name: "Body",
-    x: 20,
-    y: 21.5,
-    w: 9.15,
-    h: 34.95,
-    cr: 4.58,
-    rot: 0,
-    color: "#b8c0c8",
+    type: "trapezoid",
+    name: "Wing-Left",
+    x: 12,
+    y: 22,
+    w: 8,
+    h: 6,
+    tw: 5,
+    tofs: -1,
+    rot: -90,
+    color: "#3a2e1f",
+    color2: "#b89a6e",
+    fillMode: "linear",
+    gradAngle: 270,
+    opacity: 1
+  }, {
+    type: "trapezoid",
+    name: "Wing-Right",
+    x: 28,
+    y: 22,
+    w: 8,
+    h: 6,
+    tw: 5,
+    tofs: 1,
+    rot: 90,
+    color: "#3a2e1f",
+    color2: "#b89a6e",
+    fillMode: "linear",
+    gradAngle: 270,
     opacity: 1
   }, {
     type: "rect",
-    name: "cockpit",
+    name: "Thruster-Pod-L",
+    x: 6,
+    y: 22,
+    w: 5,
+    h: 10,
+    cr: 2.3,
+    rot: 0,
+    color: "#2a2014",
+    color2: "#a08458",
+    fillMode: "linear",
+    gradAngle: 0,
+    opacity: 1
+  }, {
+    type: "rect",
+    name: "Thruster-Pod-R",
+    x: 34,
+    y: 22.02,
+    w: 5,
+    h: 10,
+    cr: 2.3,
+    rot: 0,
+    color: "#2a2014",
+    color2: "#a08458",
+    fillMode: "linear",
+    gradAngle: 180,
+    opacity: 1
+  }, {
+    type: "circle",
+    name: "Thruster-Glow-L",
+    x: 6,
+    y: 26,
+    w: 3,
+    h: 2,
+    rot: 0,
+    color: "#ffd070",
+    color2: "#7a2010",
+    fillMode: "radial",
+    opacity: 0.95
+  }, {
+    type: "circle",
+    name: "Thruster-Glow-R",
+    x: 34.01,
+    y: 26,
+    w: 3,
+    h: 2,
+    rot: 0,
+    color: "#ffd070",
+    color2: "#7a2010",
+    fillMode: "radial",
+    opacity: 0.95
+  }, {
+    type: "rect",
+    name: "Body-Main",
     x: 20,
-    y: 4.88,
-    w: 5.25,
-    h: 7.75,
-    cr: 2.63,
+    y: 17,
+    w: 10,
+    h: 16,
+    cr: 3.5,
+    rot: 0,
+    color: "#3a2e1f",
+    color2: "#c4a878",
+    fillMode: "linear",
+    gradAngle: 180,
+    opacity: 1
+  }, {
+    type: "circle",
+    name: "Engine-Bulb",
+    x: 20.20,
+    y: 30.75,
+    w: 14,
+    h: 10.5,
+    rot: 0,
+    color: "#b6996d",
+    color2: "#3a2e1f",
+    fillMode: "radial",
+    gradStop: 0.25,
+    opacity: 1
+  }, {
+    type: "circle",
+    name: "Engine-Glow-Core",
+    x: 20.39,
+    y: 32.47,
+    w: 9,
+    h: 6.5,
+    rot: 0,
+    color: "#fff4a0",
+    color2: "#a02810",
+    fillMode: "radial",
+    gradStop: 0.25,
+    opacity: 0.95
+  }, {
+    type: "rect",
+    name: "Neck",
+    x: 20.60,
+    y: 10.14,
+    w: 1.5,
+    h: 4,
+    cr: 0.6,
+    rot: 0,
+    color: "#2a2014",
+    color2: "#a08458",
+    fillMode: "linear",
+    gradAngle: 180,
+    opacity: 1
+  }, {
+    type: "rect",
+    name: "Neck-copy",
+    x: 19.11,
+    y: 10.20,
+    w: 1.5,
+    h: 4,
+    cr: 0.6,
+    rot: 180,
+    color: "#2a2014",
+    color2: "#a08458",
+    fillMode: "linear",
+    gradAngle: 180,
+    opacity: 1
+  }, {
+    type: "circle",
+    name: "Cockpit-Head",
+    x: 19.91,
+    y: 6.74,
+    w: 8.5,
+    h: 7,
+    rot: 0,
+    color: "#b6986d",
+    color2: "#3a2e1f",
+    fillMode: "radial",
+    gradStop: 0.2,
+    opacity: 1
+  }, {
+    type: "rect",
+    name: "Cockpit-Glass",
+    x: 20,
+    y: 5.2,
+    w: 5.5,
+    h: 2,
+    cr: 1,
     rot: 0,
     color: "#80ddff",
+    color2: "#0f2a3a",
+    fillMode: "linear",
+    gradAngle: 90,
     opacity: 0.9
-  }, {
-    type: "rect",
-    name: "left-thruster",
-    x: 8.03,
-    y: 21.55,
-    w: 4.6,
-    h: 9.9,
-    cr: 2.3,
-    rot: 0,
-    color: "#b8c0c8",
-    opacity: 1
-  }, {
-    type: "rect",
-    name: "right-thruster",
-    x: 31.98,
-    y: 21.55,
-    w: 4.6,
-    h: 9.9,
-    cr: 2.3,
-    rot: 0,
-    color: "#b8c0c8",
-    opacity: 1
-  }, {
-    type: "trapezoid",
-    name: "left-wing",
-    x: 12.88,
-    y: 21.55,
-    w: 8.5,
-    h: 5.2,
-    tw: 6.2,
-    tofs: 0,
-    rot: -90,
-    color: "#b8c0c8",
-    opacity: 1
-  }, {
-    type: "trapezoid",
-    name: "right-wing",
-    x: 27.13,
-    y: 21.55,
-    w: 8.5,
-    h: 5.2,
-    tw: 6.2,
-    tofs: 0,
-    rot: 90,
-    color: "#b8c0c8",
-    opacity: 1
   }],
   // Saucer: shallow UFO disc + centered dome (per Dan's UFO-default JSON).
   saucer: [{
-    type: "circle",
-    x: 20,
-    y: 24,
-    w: 32,
-    h: 13.5,
+    type: "rect",
+    x: 19.75,
+    y: 12.43,
+    w: 1,
+    h: 3.5,
+    cr: 0.5,
     rot: 0,
-    color: "#ffd0ff",
-    opacity: 1
+    color: "#ffffff",
+    color2: "#222a3a",
+    fillMode: "linear",
+    gradAngle: 270,
+    opacity: 0.9
   }, {
     type: "circle",
-    x: 20,
-    y: 17.2,
-    w: 12,
-    h: 11,
+    x: 19.76,
+    y: 18.15,
+    w: 15,
+    h: 9.5,
+    rot: 0,
+    color: "#c9effd",
+    color2: "#222a3a",
+    fillMode: "radial",
+    gradStop: 0,
+    opacity: 0.55
+  }, {
+    type: "circle",
+    x: 19.59,
+    y: 22.14,
+    w: 27.46,
+    h: 7,
     rot: 0,
     color: "#80ddff",
-    opacity: 0.85
+    color2: "#1b263b",
+    fillMode: "radial",
+    opacity: 0.9
+  }, {
+    type: "rect",
+    x: 19.64,
+    y: 22.33,
+    w: 1.28,
+    h: 30,
+    cr: 0.5,
+    rot: 90,
+    color: "#80ddff",
+    color2: "#222a3a",
+    fillMode: "linear",
+    gradAngle: 195,
+    opacity: 0.9
+  }, {
+    type: "trapezoid",
+    x: 19.84,
+    y: 33.31,
+    w: 8,
+    h: 10,
+    tw: 4,
+    tofs: 0,
+    rot: 0,
+    color: "#80ddff",
+    color2: "#222a3a",
+    fillMode: "linear",
+    gradAngle: 90,
+    opacity: 0.45
+  }, {
+    type: "circle",
+    x: 19.88,
+    y: 28.15,
+    w: 5.5,
+    h: 2,
+    rot: 0,
+    color: "#80ddff",
+    color2: "#222a3a",
+    fillMode: "radial",
+    gradStop: 0.45,
+    opacity: 0.9
+  }, {
+    type: "circle",
+    x: 19.96,
+    y: 22.26,
+    w: 1.5,
+    h: 1.5,
+    rot: 0,
+    color: "#fff7e5",
+    color2: "#c9a54f",
+    fillMode: "radial",
+    opacity: 0.95
+  }, {
+    type: "circle",
+    x: 34.17,
+    y: 22.41,
+    w: 1,
+    h: 1,
+    rot: 0,
+    color: "#fff7e5",
+    color2: "#c9a54f",
+    fillMode: "radial",
+    opacity: 0.95
+  }, {
+    type: "circle",
+    x: 5.10,
+    y: 22.40,
+    w: 1,
+    h: 1,
+    rot: 0,
+    color: "#fff7e5",
+    color2: "#c9a54f",
+    fillMode: "radial",
+    opacity: 0.95
   }],
   // Star Track: layer names match star-track.svg. Render order puts arms
   // and body at the back so the saucer + dome sit on top.
   startrack: [{
-    type: "line",
-    name: "left-arm",
-    x: 15.4,
-    y: 27.3,
-    w: 12,
-    h: 1.35,
-    rot: -47,
-    color: "#878787",
-    opacity: 1
-  }, {
-    type: "line",
-    name: "right-arm",
-    x: 24.6,
-    y: 27.3,
-    w: 12,
-    h: 1.35,
-    rot: 47,
-    color: "#878787",
-    opacity: 1
+    type: "rect",
+    name: "Pylon-Left",
+    x: 13.89,
+    y: 27,
+    w: 10,
+    h: 1.6,
+    cr: 0.6,
+    rot: -38,
+    color: "#2a2f3a",
+    opacity: 1,
+    fillMode: "linear",
+    color2: "#9aa3b2",
+    gradAngle: 270
   }, {
     type: "rect",
-    name: "Body",
+    name: "Pylon-Right",
+    x: 25.81,
+    y: 26.95,
+    w: 10,
+    h: 1.6,
+    cr: 0.6,
+    rot: 38,
+    color: "#2a2f3a",
+    opacity: 1,
+    fillMode: "linear",
+    color2: "#9aa3b2",
+    gradAngle: 255
+  }, {
+    type: "rect",
+    name: "Neck",
     x: 20,
-    y: 24.5,
-    w: 4.4,
-    h: 16.2,
-    cr: 2.2,
+    y: 17.47,
+    w: 2.6,
+    h: 6,
+    cr: 0.6,
     rot: 0,
-    color: "#878787",
-    opacity: 1
+    color: "#3a4150",
+    opacity: 1,
+    fillMode: "linear",
+    color2: "#cfd6df",
+    gradAngle: 0
   }, {
     type: "rect",
-    name: "left-nacelle",
-    x: 11.3,
-    y: 29.1,
-    w: 2.4,
-    h: 19.8,
-    cr: 1.2,
+    name: "Secondary-Hull",
+    x: 20,
+    y: 26.5,
+    w: 5.6,
+    h: 13,
+    cr: 2.6,
     rot: 0,
-    color: "#80ddff",
-    opacity: 1
+    color: "#1a1e28",
+    opacity: 1,
+    fillMode: "linear",
+    color2: "#b0b8c4",
+    gradAngle: 0
   }, {
-    type: "rect",
-    name: "right-nacelle",
-    x: 28.7,
-    y: 29.1,
-    w: 2.4,
-    h: 19.8,
-    cr: 1.2,
+    type: "circle",
+    name: "Deflector",
+    x: 20,
+    y: 21.5,
+    w: 3.2,
+    h: 1.8,
     rot: 0,
-    color: "#80ddff",
-    opacity: 1
+    color: "#ffd070",
+    opacity: 0.95,
+    fillMode: "radial",
+    color2: "#7a3010"
   }, {
     type: "circle",
     name: "Saucer",
-    x: 20,
-    y: 10,
-    w: 17,
-    h: 17,
+    x: 19.69,
+    y: 12.97,
+    w: 22,
+    h: 8,
     rot: 0,
-    color: "#b8c0c8",
-    opacity: 1
+    color: "#2a2f3a",
+    opacity: 1,
+    fillMode: "radial",
+    color2: "#dde3ec",
+    gradStop: 0.75
   }, {
     type: "circle",
-    name: "Dome",
-    x: 20,
-    y: 6.78,
-    w: 9,
-    h: 4,
+    name: "Bridge",
+    x: 19.93,
+    y: 11.01,
+    w: 6.5,
+    h: 3.5,
+    rot: 0,
+    color: "#cfd6df",
+    opacity: 1,
+    fillMode: "radial",
+    color2: "#3a4150"
+  }, {
+    type: "circle",
+    name: "Bridge-Lamp",
+    x: 19.92,
+    y: 10,
+    w: 1.4,
+    h: 1,
+    rot: 0,
+    color: "#e9f6ff",
+    opacity: 0.95,
+    fillMode: "radial",
+    color2: "#4a7a8e"
+  }, {
+    type: "rect",
+    name: "Nacelle-Left",
+    x: 9,
+    y: 25,
+    w: 3,
+    h: 20,
+    cr: 1.5,
+    rot: 0,
+    color: "#15181f",
+    opacity: 1,
+    fillMode: "linear",
+    color2: "#6a7484",
+    gradAngle: 0
+  }, {
+    type: "rect",
+    name: "Nacelle-Right",
+    x: 31,
+    y: 25,
+    w: 3,
+    h: 20,
+    cr: 1.5,
+    rot: 0,
+    color: "#15181f",
+    opacity: 1,
+    fillMode: "linear",
+    color2: "#6a7484",
+    gradAngle: 180
+  }, {
+    type: "rect",
+    name: "Warp-Glow-Left",
+    x: 9,
+    y: 27,
+    w: 1.4,
+    h: 14,
+    cr: 0.7,
     rot: 0,
     color: "#80ddff",
-    opacity: 0.55
+    opacity: 0.9,
+    fillMode: "linear",
+    color2: "#1a4a5e",
+    gradAngle: 0
+  }, {
+    type: "rect",
+    name: "Warp-Glow-Right",
+    x: 31,
+    y: 27,
+    w: 1.4,
+    h: 14,
+    cr: 0.7,
+    rot: 0,
+    color: "#80ddff",
+    opacity: 0.9,
+    fillMode: "linear",
+    color2: "#1a4a5e",
+    gradAngle: 180
+  }, {
+    type: "circle",
+    name: "Bussard-Left",
+    x: 9,
+    y: 16.8,
+    w: 2.6,
+    h: 2.6,
+    rot: 0,
+    color: "#ff7a50",
+    opacity: 0.95,
+    fillMode: "radial",
+    color2: "#7a1d0e"
+  }, {
+    type: "circle",
+    name: "Bussard-Right",
+    x: 31.04,
+    y: 16.8,
+    w: 2.6,
+    h: 2.6,
+    rot: 0,
+    color: "#ff7a50",
+    opacity: 0.95,
+    fillMode: "radial",
+    color2: "#7a1d0e"
   }],
   // Millenia Falcor: layer names match Millenia Falcor.svg. Mandibles are
   // approximated as rotated isoceles triangles (the SVG quadrilaterals taper
@@ -1246,11 +1509,11 @@ var HULL_PRESETS = {
     w: 7.5,
     h: 14,
     rot: 12,
-    color: "#222a3a",
+    color: "#0d0d0d",
     opacity: 1,
     fillMode: "linear",
-    color2: "#a0a8b8",
-    gradAngle: 270
+    color2: "#919191",
+    gradAngle: 255
   }, {
     type: "triangle",
     name: "Right-Mandible",
@@ -1259,10 +1522,10 @@ var HULL_PRESETS = {
     w: 7.5,
     h: 14,
     rot: -12,
-    color: "#222a3a",
+    color: "#0c0d0d",
     opacity: 1,
     fillMode: "linear",
-    color2: "#a0a8b8",
+    color2: "#8c9097",
     gradAngle: 285
   }, {
     type: "circle",
@@ -1272,48 +1535,16 @@ var HULL_PRESETS = {
     w: 27,
     h: 27,
     rot: 0,
-    color: "#222a3a",
+    color: "#4d4d4d",
     opacity: 1,
     fillMode: "radial",
-    color2: "#64676d",
-    gradStop: 0.5,
+    color2: "#303030",
+    gradStop: 0.4,
     bw: 0
   }, {
     type: "rect",
-    x: 28.32,
-    y: 23.14,
-    w: 10.5,
-    h: 3.5,
-    rot: 150,
-    color: "#222a3a",
-    opacity: 1,
-    bw: 0,
-    bc: "#747677",
-    bo: 1,
-    cr: 0.75,
-    fillMode: "linear",
-    color2: "#62656a",
-    gradAngle: 105
-  }, {
-    type: "rect",
     x: 10.65,
-    y: 25.62,
-    w: 9,
-    h: 4,
-    rot: 0,
-    color: "#222a3a",
-    opacity: 1,
-    bw: 0,
-    bc: "#747677",
-    bo: 1,
-    cr: 0.75,
-    fillMode: "linear",
-    color2: "#6f7276",
-    gradAngle: 270
-  }, {
-    type: "rect",
-    x: 28.88,
-    y: 26.24,
+    y: 25,
     w: 9,
     h: 4,
     rot: 0,
@@ -1353,6 +1584,38 @@ var HULL_PRESETS = {
     bo: 1,
     fillMode: "radial",
     color2: "#487c8e"
+  }, {
+    type: "rect",
+    x: 28.32,
+    y: 23.14,
+    w: 10.5,
+    h: 3.5,
+    rot: 150,
+    color: "#222a3a",
+    opacity: 1,
+    bw: 0,
+    bc: "#747677",
+    bo: 1,
+    cr: 0.75,
+    fillMode: "linear",
+    color2: "#62656a",
+    gradAngle: 105
+  }, {
+    type: "rect",
+    x: 28.88,
+    y: 25,
+    w: 9,
+    h: 4,
+    rot: 0,
+    color: "#222a3a",
+    opacity: 1,
+    bw: 0,
+    bc: "#747677",
+    bo: 1,
+    cr: 0.75,
+    fillMode: "linear",
+    color2: "#6f7276",
+    gradAngle: 270
   }, {
     type: "circle",
     x: 20,
@@ -1461,136 +1724,769 @@ var HULL_PRESETS = {
   // fins are rendered as degenerate trapezoids (tw=0) with tofs at the edge
   // to put the apex at the correct corner (180° rot flips to the bottom).
   birdofplay: [{
-    type: "rect",
-    name: "Rounded-Rectangle",
-    x: 20,
-    y: 28.46,
-    w: 15.41,
-    h: 14.45,
-    cr: 2.61,
+    type: "trapezoid",
+    name: "Wing-Upper-L",
+    x: 7.27,
+    y: 20.07,
+    w: 10.18,
+    h: 6.74,
+    tw: 0,
+    tofs: -5.09,
     rot: 0,
-    color: "#b8c0c8",
+    color: "#1f2a22",
+    color2: "#8a9a82",
+    fillMode: "linear",
+    gradAngle: 195,
+    opacity: 1
+  }, {
+    type: "trapezoid",
+    name: "Wing-Lower-L",
+    x: 7.27,
+    y: 28.67,
+    w: 10.18,
+    h: 10.6,
+    tw: 0,
+    tofs: -5.09,
+    rot: 180,
+    color: "#1a241d",
+    color2: "#6d7e68",
+    fillMode: "linear",
+    gradAngle: 0,
+    opacity: 1
+  }, {
+    type: "trapezoid",
+    name: "Wing-Upper-R",
+    x: 32.73,
+    y: 20.07,
+    w: 10.18,
+    h: 6.74,
+    tw: 0,
+    tofs: 5.09,
+    rot: 0,
+    color: "#1f2a22",
+    color2: "#8a9a82",
+    fillMode: "linear",
+    gradAngle: 345,
+    opacity: 1
+  }, {
+    type: "trapezoid",
+    name: "Wing-Lower-R",
+    x: 32.73,
+    y: 28.67,
+    w: 10.18,
+    h: 10.6,
+    tw: 0,
+    tofs: 5.09,
+    rot: 180,
+    color: "#1a241d",
+    color2: "#6d7e68",
+    fillMode: "linear",
+    gradAngle: 180,
     opacity: 1
   }, {
     type: "rect",
-    name: "Rounded-Rectangle-copy-2",
-    x: 19.97,
-    y: 14.87,
-    w: 2.13,
-    h: 16.03,
-    cr: 1.03,
-    rot: 0,
-    color: "#b8c0c8",
-    opacity: 1
-  }, {
-    type: "circle",
-    name: "Circle",
-    x: 20,
-    y: 22.10,
-    w: 9.22,
-    h: 12.73,
-    rot: 0,
-    color: "#b8c0c8",
-    opacity: 1
-  }, {
-    type: "circle",
-    name: "Circle-copy",
-    x: 20,
-    y: 7.72,
-    w: 4.54,
-    h: 6.81,
-    rot: 0,
-    color: "#b8c0c8",
-    opacity: 1
-  }, {
-    type: "circle",
-    name: "Circle-copy-2",
-    x: 2.14,
-    y: 7.86,
-    w: 2.27,
-    h: 3.51,
-    rot: 0,
-    color: "#b8c0c8",
-    opacity: 1
-  }, {
-    type: "rect",
-    name: "Rounded-Rectangle-copy",
+    name: "Cannon-Stalk-L",
     x: 2.18,
     y: 15.01,
     w: 1.24,
     h: 14.38,
     cr: 0.62,
     rot: 0,
-    color: "#b8c0c8",
-    opacity: 1
-  }, {
-    type: "trapezoid",
-    name: "Right-Triangle",
-    x: 7.27,
-    y: 28.67,
-    w: 10.18,
-    h: 10.60,
-    tw: 0,
-    tofs: -5.09,
-    rot: 180,
-    color: "#b8c0c8",
-    opacity: 1
-  }, {
-    type: "trapezoid",
-    name: "Right-Triangle-copy",
-    x: 7.27,
-    y: 20.07,
-    w: 10.18,
-    h: 6.74,
-    tw: 0,
-    tofs: -5.09,
-    rot: 0,
-    color: "#b8c0c8",
-    opacity: 1
-  }, {
-    type: "circle",
-    name: "path1",
-    x: 37.86,
-    y: 7.86,
-    w: 2.27,
-    h: 3.51,
-    rot: 0,
-    color: "#b8c0c8",
+    color: "#0f1612",
+    color2: "#5a6a55",
+    fillMode: "linear",
+    gradAngle: 0,
     opacity: 1
   }, {
     type: "rect",
-    name: "path2",
+    name: "Cannon-Stalk-R",
     x: 37.82,
-    y: 15.01,
+    y: 15.03,
     w: 1.24,
     h: 14.38,
     cr: 0.62,
     rot: 0,
-    color: "#b8c0c8",
+    color: "#0f1612",
+    color2: "#5a6a55",
+    fillMode: "linear",
+    gradAngle: 180,
     opacity: 1
   }, {
-    type: "trapezoid",
-    name: "path3",
-    x: 32.73,
-    y: 28.67,
-    w: 10.18,
-    h: 10.60,
-    tw: 0,
-    tofs: 5.09,
-    rot: 180,
-    color: "#b8c0c8",
-    opacity: 1
-  }, {
-    type: "trapezoid",
-    name: "path4",
-    x: 32.73,
-    y: 20.07,
-    w: 10.18,
-    h: 6.74,
-    tw: 0,
-    tofs: 5.09,
+    type: "rect",
+    name: "Body-Main",
+    x: 20,
+    y: 28.46,
+    w: 15.41,
+    h: 14.45,
+    cr: 2.61,
     rot: 0,
-    color: "#b8c0c8",
+    color: "#1a241d",
+    color2: "#a8b8a0",
+    fillMode: "linear",
+    gradAngle: 270,
+    opacity: 1
+  }, {
+    type: "circle",
+    name: "Body-Saucer",
+    x: 20,
+    y: 22.1,
+    w: 9.22,
+    h: 12.73,
+    rot: 0,
+    color: "#91a08a",
+    color2: "#1a251e",
+    fillMode: "radial",
+    gradStop: 0.2,
+    opacity: 1
+  }, {
+    type: "circle",
+    name: "Engine-Glow",
+    x: 20.17,
+    y: 34.19,
+    w: 9,
+    h: 3,
+    rot: 0,
+    color: "#ff9050",
+    color2: "#5a1808",
+    fillMode: "radial",
+    gradStop: 0.4,
+    opacity: 0.9
+  }, {
+    type: "rect",
+    name: "Neck",
+    x: 19.97,
+    y: 14.87,
+    w: 2.13,
+    h: 16.03,
+    cr: 1.03,
+    rot: 0,
+    color: "#15201a",
+    color2: "#7a8a72",
+    fillMode: "linear",
+    gradAngle: 180,
+    opacity: 1
+  }, {
+    type: "circle",
+    name: "Head",
+    x: 20,
+    y: 7.72,
+    w: 4.54,
+    h: 6.81,
+    rot: 0,
+    color: "#c0d0b8",
+    color2: "#222a3a",
+    fillMode: "radial",
+    gradStop: 0,
+    opacity: 1
+  }, {
+    type: "rect",
+    name: "Cockpit-Slit",
+    x: 20,
+    y: 7.4,
+    w: 2.2,
+    h: 0.9,
+    cr: 0.45,
+    rot: 0,
+    color: "#ffb050",
+    color2: "#5a2010",
+    fillMode: "linear",
+    gradAngle: 180,
+    opacity: 0.95
+  }, {
+    type: "circle",
+    name: "Cannon-Cap-L",
+    x: 2.22,
+    y: 7.76,
+    w: 2.27,
+    h: 3.51,
+    rot: 0,
+    color: "#a0c8a0",
+    color2: "#222a3a",
+    fillMode: "radial",
+    opacity: 1
+  }, {
+    type: "circle",
+    name: "Cannon-Cap-R",
+    x: 37.50,
+    y: 8.42,
+    w: 2.27,
+    h: 3.51,
+    rot: 0,
+    color: "#a0c8a0",
+    color2: "#222a3a",
+    fillMode: "radial",
+    opacity: 1
+  }, {
+    type: "circle",
+    name: "Disruptor-L",
+    x: 2.19,
+    y: 7.71,
+    w: 1.4,
+    h: 2,
+    rot: 0,
+    color: "#23e13c",
+    color2: "#31880c",
+    fillMode: "radial",
+    opacity: 0.95
+  }, {
+    type: "circle",
+    name: "Disruptor-R",
+    x: 37.46,
+    y: 8.36,
+    w: 1.4,
+    h: 2,
+    rot: 0,
+    color: "#23e13c",
+    color2: "#31880c",
+    fillMode: "radial",
+    opacity: 0.95
+  }],
+  vespa: [{
+    type: "triangle",
+    name: "Main-Hull",
+    x: 20,
+    y: 22,
+    w: 14,
+    h: 30,
+    rot: 0,
+    color: "#1a1e28",
+    opacity: 1,
+    fillMode: "linear",
+    color2: "#7a8294",
+    gradAngle: 120
+  }, {
+    type: "rect",
+    name: "Engine-Left",
+    x: 12.09,
+    y: 37.47,
+    w: 4.6,
+    h: 2.6,
+    rot: -8,
+    color: "#06080c",
+    opacity: 1,
+    fillMode: "linear",
+    color2: "#1a1e28",
+    gradAngle: 0,
+    cr: 0.6
+  }, {
+    type: "circle",
+    name: "Glow-Left",
+    x: 12.59,
+    y: 37.75,
+    w: 3.2,
+    h: 1.8,
+    rot: -8,
+    color: "#ffb070",
+    opacity: 0.95,
+    fillMode: "radial",
+    color2: "#7a1d0e"
+  }, {
+    type: "rect",
+    name: "Nacelle-Left",
+    x: 11,
+    y: 27.05,
+    w: 4,
+    h: 20,
+    rot: -8,
+    color: "#0f1218",
+    opacity: 1,
+    fillMode: "linear",
+    color2: "#5a6478",
+    gradAngle: 0,
+    cr: 1.2
+  }, {
+    type: "rect",
+    name: "Spine",
+    x: 19.96,
+    y: 27.45,
+    w: 2.4,
+    h: 11.5,
+    rot: 0,
+    color: "#0a0c12",
+    opacity: 1,
+    fillMode: "linear",
+    color2: "#424752",
+    gradAngle: 0,
+    cr: 0.5
+  }, {
+    type: "triangle",
+    name: "Fin-Left",
+    x: 7.12,
+    y: 32.98,
+    w: 8,
+    h: 5,
+    rot: -90,
+    color: "#15181f",
+    opacity: 1,
+    fillMode: "linear",
+    color2: "#4a5160",
+    gradAngle: 255
+  }, {
+    type: "triangle",
+    name: "Fin-Right",
+    x: 33.01,
+    y: 34,
+    w: 8,
+    h: 5,
+    rot: 90,
+    color: "#15181f",
+    opacity: 1,
+    fillMode: "linear",
+    color2: "#4a5160",
+    gradAngle: 255
+  }, {
+    type: "rect",
+    name: "Canopy",
+    x: 20,
+    y: 17,
+    w: 3.6,
+    h: 11,
+    rot: 0,
+    color: "#3d6878",
+    opacity: 0.95,
+    fillMode: "linear",
+    color2: "#0a1218",
+    gradAngle: 180,
+    cr: 1.6
+  }, {
+    type: "circle",
+    name: "Canopy-Glint",
+    x: 20,
+    y: 12.7,
+    w: 2.4,
+    h: 1.2,
+    rot: 0,
+    color: "#cdeeff",
+    opacity: 0.9,
+    fillMode: "radial",
+    color2: "#4a7a8e"
+  }, {
+    type: "rect",
+    name: "Engine-Right",
+    x: 28.02,
+    y: 37.48,
+    w: 4.6,
+    h: 2.6,
+    rot: 8,
+    color: "#06080c",
+    opacity: 1,
+    fillMode: "linear",
+    color2: "#1a1e28",
+    gradAngle: 0,
+    cr: 0.6
+  }, {
+    type: "circle",
+    name: "Glow-Right",
+    x: 27.52,
+    y: 37.51,
+    w: 3.2,
+    h: 1.8,
+    rot: 8,
+    color: "#ffb070",
+    opacity: 0.95,
+    fillMode: "radial",
+    color2: "#7a1d0e"
+  }, {
+    type: "rect",
+    name: "Nacelle-Right",
+    x: 28.86,
+    y: 26.86,
+    w: 4,
+    h: 20,
+    rot: 8,
+    color: "#0f1218",
+    opacity: 1,
+    fillMode: "linear",
+    color2: "#5a6478",
+    gradAngle: 180,
+    cr: 1.2
+  }],
+  ironeye: [{
+    type: "rect",
+    name: "Strut-Left",
+    x: 12,
+    y: 22.5,
+    w: 8,
+    h: 1.5,
+    cr: 0.3,
+    rot: 0,
+    color: "#0a0c12",
+    color2: "#4a5060",
+    fillMode: "linear",
+    gradAngle: 270,
+    opacity: 1
+  }, {
+    type: "trapezoid",
+    name: "Wing-R-Upper",
+    x: 29.82,
+    y: 18.11,
+    w: 12.5,
+    h: 9,
+    tw: 5,
+    tofs: 0,
+    rot: 0,
+    color: "#0a0c12",
+    color2: "#383e4a",
+    fillMode: "linear",
+    gradAngle: 90,
+    opacity: 1,
+    bw: 0.5,
+    bc: "#a0a8b8"
+  }, {
+    type: "trapezoid",
+    name: "Wing-R-Lower",
+    x: 29.80,
+    y: 27.17,
+    w: 12.5,
+    h: 9,
+    tw: 5,
+    tofs: 0,
+    rot: 180,
+    color: "#0a0c12",
+    color2: "#383e4a",
+    fillMode: "linear",
+    gradAngle: 90,
+    opacity: 1,
+    bw: 0.5,
+    bc: "#a0a8b8"
+  }, {
+    type: "line",
+    x: 29.5,
+    y: 22.5,
+    w: 19,
+    h: 0.5,
+    rot: 105,
+    color: "#a0a8b8",
+    opacity: 1
+  }, {
+    type: "line",
+    x: 29.83,
+    y: 22.69,
+    w: 19,
+    h: 0.5,
+    rot: 75,
+    color: "#a0a8b8",
+    opacity: 1
+  }, {
+    type: "rect",
+    name: "Strut-Right",
+    x: 27,
+    y: 22.5,
+    w: 6.5,
+    h: 2.5,
+    cr: 1,
+    rot: 0,
+    color: "#0a0c12",
+    color2: "#4a5060",
+    fillMode: "linear",
+    gradAngle: 270,
+    opacity: 1
+  }, {
+    type: "circle",
+    name: "Cockpit-Ball",
+    x: 20.08,
+    y: 22.60,
+    w: 16,
+    h: 16,
+    rot: 0,
+    color: "#6a7080",
+    color2: "#222a3a",
+    fillMode: "radial",
+    gradStop: 0.15,
+    opacity: 1
+  }, {
+    type: "circle",
+    name: "Cockpit-Frame",
+    x: 20,
+    y: 22.53,
+    w: 7,
+    h: 7,
+    rot: 0,
+    color: "#000000",
+    color2: "#a0a8b8",
+    fillMode: "radial",
+    gradStop: 0.8,
+    opacity: 1
+  }, {
+    type: "circle",
+    name: "Pilot-Glow",
+    x: 19.98,
+    y: 22.45,
+    w: 2.4,
+    h: 2.4,
+    rot: 0,
+    color: "#ff5040",
+    color2: "#5a0808",
+    fillMode: "radial",
+    gradStop: 0.4,
+    opacity: 0.95
+  }, {
+    type: "trapezoid",
+    name: "Wing-L-Upper",
+    x: 8.5,
+    y: 17.92,
+    w: 12.5,
+    h: 9,
+    tw: 5,
+    tofs: 0,
+    rot: 0,
+    color: "#222a3a",
+    color2: "#383e4a",
+    fillMode: "linear",
+    gradAngle: 90,
+    opacity: 1,
+    bw: 0.5,
+    bc: "#a0a8b8"
+  }, {
+    type: "trapezoid",
+    name: "Wing-L-Lower",
+    x: 8.5,
+    y: 26.91,
+    w: 12.5,
+    h: 9,
+    tw: 5,
+    tofs: 0,
+    rot: 180,
+    color: "#0a0c12",
+    color2: "#383e4a",
+    fillMode: "linear",
+    gradAngle: 90,
+    opacity: 1,
+    bw: 0.5,
+    bc: "#a0a8b8"
+  }, {
+    type: "line",
+    x: 8.5,
+    y: 22.48,
+    w: 19,
+    h: 0.5,
+    rot: 105,
+    color: "#a0a8b8",
+    opacity: 1
+  }, {
+    type: "line",
+    x: 8.5,
+    y: 22.46,
+    w: 19,
+    h: 0.5,
+    rot: 75,
+    color: "#a0a8b8",
+    opacity: 1
+  }],
+  callbox: [{
+    type: "rect",
+    name: "Roof",
+    x: 20,
+    y: 14,
+    w: 17,
+    h: 2,
+    cr: 0.4,
+    rot: 0,
+    color: "#0f2244",
+    color2: "#1a3a6a",
+    fillMode: "linear",
+    gradAngle: 180,
+    opacity: 1
+  }, {
+    type: "rect",
+    name: "Sign-Panel",
+    x: 20,
+    y: 16.5,
+    w: 15,
+    h: 2.2,
+    cr: 0.3,
+    rot: 0,
+    color: "#d8c878",
+    color2: "#7a6428",
+    fillMode: "linear",
+    gradAngle: 90,
+    opacity: 1
+  }, {
+    type: "rect",
+    name: "Body",
+    x: 20,
+    y: 29.5,
+    w: 14,
+    h: 22,
+    cr: 0.4,
+    rot: 0,
+    color: "#2a5a9a",
+    color2: "#0f2244",
+    fillMode: "linear",
+    gradAngle: 0,
+    opacity: 1
+  }, {
+    type: "rect",
+    name: "Door-Divide",
+    x: 20,
+    y: 29.5,
+    w: 0.5,
+    h: 22.5,
+    cr: 0,
+    rot: 0,
+    color: "#0a1830",
+    color2: "#1a3a6a",
+    fillMode: "linear",
+    gradAngle: 0,
+    opacity: 1
+  }, {
+    type: "rect",
+    name: "Lamp-Base",
+    x: 20,
+    y: 12.4,
+    w: 3,
+    h: 1.2,
+    cr: 0.2,
+    rot: 0,
+    color: "#1a2a3a",
+    color2: "#4a5a6a",
+    fillMode: "linear",
+    gradAngle: 180,
+    opacity: 1
+  }, {
+    type: "circle",
+    name: "Lamp",
+    x: 19.871858465608465,
+    y: 10,
+    w: 3.4,
+    h: 4,
+    rot: 0,
+    color: "#fff8a0",
+    color2: "#3a2a08",
+    fillMode: "radial",
+    gradStop: 0.2,
+    opacity: 1
+  }, {
+    type: "rect",
+    x: 16.311590608465607,
+    y: 29.5,
+    w: 5,
+    h: 19,
+    rot: 0,
+    color: "#80ddff",
+    opacity: 0,
+    bw: 0.2,
+    bc: "#000000",
+    bo: 1,
+    cr: 0
+  }, {
+    type: "rect",
+    x: 23.358132845188287,
+    y: 29.5,
+    w: 5,
+    h: 19,
+    rot: 0,
+    color: "#80ddff",
+    opacity: 0,
+    bw: 0.2,
+    bc: "#000000",
+    bo: 1,
+    cr: 0
+  }, {
+    type: "rect",
+    x: 16.27799985056784,
+    y: 27,
+    w: 3.1,
+    h: 3.5,
+    rot: 0,
+    color: "#80ddff",
+    opacity: 0.35,
+    bw: 0.2,
+    bc: "#000000",
+    bo: 1,
+    cr: 0
+  }, {
+    type: "rect",
+    x: 23.3,
+    y: 27,
+    w: 3.1,
+    h: 3.5,
+    rot: 0,
+    color: "#222a3a",
+    opacity: 0.25,
+    bw: 0.2,
+    bc: "#000000",
+    bo: 1,
+    cr: 0
+  }, {
+    type: "rect",
+    x: 23.3,
+    y: 31.5,
+    w: 3.1,
+    h: 3.5,
+    rot: 0,
+    color: "#222a3a",
+    opacity: 0.25,
+    bw: 0.2,
+    bc: "#000000",
+    bo: 1,
+    cr: 0
+  }, {
+    type: "rect",
+    x: 23.3,
+    y: 36,
+    w: 3.1,
+    h: 3.5,
+    rot: 0,
+    color: "#222a3a",
+    opacity: 0.25,
+    bw: 0.2,
+    bc: "#000000",
+    bo: 1,
+    cr: 0
+  }, {
+    type: "rect",
+    x: 16.2919904363419,
+    y: 31.5,
+    w: 3.1,
+    h: 3.5,
+    rot: 0,
+    color: "#222a3a",
+    opacity: 0.25,
+    bw: 0.2,
+    bc: "#000000",
+    bo: 1,
+    cr: 0
+  }, {
+    type: "rect",
+    x: 16.27510460251046,
+    y: 36,
+    w: 3.1,
+    h: 3.5,
+    rot: 0,
+    color: "#222a3a",
+    opacity: 0.25,
+    bw: 0.2,
+    bc: "#000000",
+    bo: 1,
+    cr: 0
+  }, {
+    type: "rect",
+    name: "Window",
+    x: 16.25,
+    y: 22.5,
+    w: 3.5,
+    h: 3.5,
+    cr: 0.2,
+    rot: 0,
+    color: "#a8c8dc",
+    color2: "#1a3a4a",
+    fillMode: "linear",
+    gradAngle: 90,
+    opacity: 1
+  }, {
+    type: "rect",
+    name: "Window copy",
+    x: 23.3,
+    y: 22.5,
+    w: 3.5,
+    h: 3.5,
+    cr: 0.2,
+    rot: 0,
+    color: "#a8c8dc",
+    color2: "#1a3a4a",
+    fillMode: "linear",
+    gradAngle: 90,
     opacity: 1
   }],
   none: []
@@ -1689,7 +2585,7 @@ function shipRenderPart(part, key, isSelected) {
       rx: w / 2,
       ry: h / 2,
       fill: fillRef,
-      opacity: op,
+      fillOpacity: op,
       transform: t
     }, strokeProps));
   } else if (part.type === "rect") {
@@ -1701,7 +2597,7 @@ function shipRenderPart(part, key, isSelected) {
       rx: cr,
       ry: cr,
       fill: fillRef,
-      opacity: op,
+      fillOpacity: op,
       transform: t
     }, strokeProps));
   } else if (part.type === "triangle") {
@@ -1711,7 +2607,7 @@ function shipRenderPart(part, key, isSelected) {
     inner = React.createElement("polygon", Object.assign({
       points: p1 + " " + p2 + " " + p3,
       fill: fillRef,
-      opacity: op,
+      fillOpacity: op,
       transform: t
     }, strokeProps));
   } else if (part.type === "line") {
@@ -1721,7 +2617,7 @@ function shipRenderPart(part, key, isSelected) {
       width: w,
       height: Math.max(0.4, h),
       fill: fillRef,
-      opacity: op,
+      fillOpacity: op,
       transform: t
     }, strokeProps));
   } else if (part.type === "trapezoid") {
@@ -1737,7 +2633,7 @@ function shipRenderPart(part, key, isSelected) {
     inner = React.createElement("polygon", Object.assign({
       points: pts,
       fill: fillRef,
-      opacity: op,
+      fillOpacity: op,
       transform: t
     }, strokeProps));
   } else if (part.type === "arrow") {
@@ -1747,7 +2643,7 @@ function shipRenderPart(part, key, isSelected) {
     inner = React.createElement("polygon", Object.assign({
       points: apts,
       fill: fillRef,
-      opacity: op,
+      fillOpacity: op,
       transform: t
     }, strokeProps));
   } else {
@@ -4833,6 +5729,14 @@ function CosmicWorkshop() {
   var _shipImportError = useState(""),
     shipImportError = _shipImportError[0],
     setShipImportError = _shipImportError[1];
+  var _shipPvSize = useState(128),
+    shipPreviewSize = _shipPvSize[0],
+    setShipPreviewSize = _shipPvSize[1];
+  var _shipPvFull = useState(false),
+    shipPreviewFull = _shipPvFull[0],
+    setShipPreviewFull = _shipPvFull[1];
+  var shipResizeDragRef = useRef(null);
+  var shipPreviewStickyRef = useRef(null);
   var _shipRenamingId = useState(null),
     shipRenamingId = _shipRenamingId[0],
     setShipRenamingId = _shipRenamingId[1];
@@ -4844,6 +5748,15 @@ function CosmicWorkshop() {
   var _shipRenameValue = useState(""),
     shipRenameValue = _shipRenameValue[0],
     setShipRenameValue = _shipRenameValue[1];
+  var _shipPartRenamingIdx = useState(null),
+    shipPartRenamingIdx = _shipPartRenamingIdx[0],
+    setShipPartRenamingIdx = _shipPartRenamingIdx[1];
+  var _shipPartRenameVal = useState(""),
+    shipPartRenameVal = _shipPartRenameVal[0],
+    setShipPartRenameVal = _shipPartRenameVal[1];
+  var _shipResetConfirm = useState(false),
+    shipResetConfirm = _shipResetConfirm[0],
+    setShipResetConfirm = _shipResetConfirm[1];
   var shipDirtyRef = useRef(false);
   var _shipSelectedPart = useState(-1),
     shipSelectedPart = _shipSelectedPart[0],
@@ -7585,13 +8498,7 @@ function CosmicWorkshop() {
     setShipSelectedPart(-1);
   }
   function shipOnHullTileTap(hullId) {
-    var existing = Array.isArray(shipEdit.parts) ? shipEdit.parts : [];
-    if (existing.length === 0 || hullId === "none") {
-      // Nothing to lose — just apply (or clear for None).
-      shipApplyHullPreset(hullId, "replace");
-      return;
-    }
-    setShipHullPromptId(hullId);
+    shipApplyHullPreset(hullId, "replace");
   }
   function shipUpdatePart(idx, key, val) {
     shipDirtyRef.current = true;
@@ -7859,36 +8766,7 @@ function CosmicWorkshop() {
         background: "rgba(220,60,80,0.15)",
         border: "1px solid rgba(220,60,80,0.4)"
       }
-    }, shipTrashSvg(14, "#ff8088")))), React.createElement("div", {
-      style: {
-        marginBottom: 10
-      }
-    }, React.createElement("div", {
-      style: {
-        color: "rgba(180,200,220,0.5)",
-        fontSize: 10,
-        marginBottom: 4,
-        letterSpacing: 0.5
-      }
-    }, "NAME"), React.createElement("input", {
-      value: sel.name || "",
-      onChange: function (e) {
-        shipUpdatePart(shipSelectedPart, "name", e.target.value);
-      },
-      placeholder: SHIP_PART_LABELS[sel.type],
-      style: {
-        width: "100%",
-        padding: "5px 8px",
-        borderRadius: 6,
-        background: "rgba(0,0,0,0.3)",
-        border: "1px solid rgba(255,255,255,0.1)",
-        color: "#b0c8d8",
-        fontSize: 16,
-        fontFamily: "'Quicksand',sans-serif",
-        outline: "none",
-        boxSizing: "border-box"
-      }
-    })));
+    }, shipTrashSvg(14, "#ff8088")))));
   }
   // Placeholder shown on the Color / Position sub-tabs when nothing is selected.
   function renderShipSelectMessage() {
@@ -7969,6 +8847,46 @@ function CosmicWorkshop() {
   }
   function shipPreviewPointerUp(e) {
     shipDragRef.current = null;
+  }
+  function shipResizePointerDown(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    if (e.target.setPointerCapture && e.pointerId != null) {
+      try {
+        e.target.setPointerCapture(e.pointerId);
+      } catch (err) {}
+    }
+    shipResizeDragRef.current = {
+      startY: e.clientY,
+      startSize: shipPreviewSize,
+      moved: false
+    };
+  }
+  function shipResizePointerMove(e) {
+    if (!shipResizeDragRef.current) return;
+    e.stopPropagation();
+    var dy = e.clientY - shipResizeDragRef.current.startY;
+    if (Math.abs(dy) > 4) shipResizeDragRef.current.moved = true;
+    var fullW = shipPreviewStickyRef.current ? shipPreviewStickyRef.current.offsetWidth - 24 : 340;
+    var newSize = Math.max(80, Math.min(fullW, shipResizeDragRef.current.startSize + dy));
+    setShipPreviewSize(Math.round(newSize));
+    setShipPreviewFull(newSize >= fullW - 4);
+  }
+  function shipResizePointerUp(e) {
+    if (!shipResizeDragRef.current) return;
+    e.stopPropagation();
+    var moved = shipResizeDragRef.current.moved;
+    shipResizeDragRef.current = null;
+    if (!moved) {
+      if (shipPreviewFull) {
+        setShipPreviewSize(128);
+        setShipPreviewFull(false);
+      } else {
+        var fullW = shipPreviewStickyRef.current ? shipPreviewStickyRef.current.offsetWidth - 24 : 340;
+        setShipPreviewSize(Math.round(fullW));
+        setShipPreviewFull(true);
+      }
+    }
   }
   // Parts-list row-drag handlers. The grip on each row owns the pointer
   // capture; while dragging, we measure other rows' bounding rects to figure
@@ -13064,6 +13982,7 @@ function CosmicWorkshop() {
   // Sticky preview: pinned to the top of the scroll container so the
   // ship stays visible while editing controls farther down.
   React.createElement("div", {
+    ref: shipPreviewStickyRef,
     style: {
       position: "sticky",
       top: 0,
@@ -13080,8 +13999,13 @@ function CosmicWorkshop() {
     }
   }, React.createElement("div", {
     style: {
-      width: 128,
-      height: 128,
+      position: "relative",
+      display: "inline-block"
+    }
+  }, React.createElement("div", {
+    style: {
+      width: shipPreviewSize,
+      height: shipPreviewSize,
       padding: 4,
       borderRadius: 12,
       background: "rgba(0,0,0,0.25)",
@@ -13094,11 +14018,67 @@ function CosmicWorkshop() {
     onPointerUp: shipTab !== "templates" ? shipPreviewPointerUp : undefined,
     onPointerCancel: shipTab !== "templates" ? shipPreviewPointerUp : undefined
   }, React.createElement(ShipDesignSvg, {
-    size: 120,
+    size: shipPreviewSize - 8,
     design: shipEdit,
     uid: "edit",
-    selectedIdx: shipTab !== "templates" ? shipSelectedPart : -1
-  })), shipTab !== "templates" && React.createElement("div", {
+    selectedIdx: shipTab !== "templates" ? shipSelectedPart : -1,
+    style: shipEdit.glowEnabled ? {
+      filter: "drop-shadow(0 0 " + (shipEdit.glowIntensity || 10) + "px " + (shipEdit.glowColor || "#ff88aa") + ")"
+    } : {}
+  })), React.createElement("div", {
+    onPointerDown: shipResizePointerDown,
+    onPointerMove: shipResizePointerMove,
+    onPointerUp: shipResizePointerUp,
+    onPointerCancel: shipResizePointerUp,
+    title: shipPreviewFull ? "Tap to reset size" : "Drag to resize · Tap for full width",
+    style: {
+      position: "absolute",
+      bottom: -1,
+      right: -1,
+      width: 22,
+      height: 22,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 6,
+      background: "rgba(14,18,28,0.85)",
+      border: "1px solid rgba(255,138,170,0.5)",
+      cursor: "nwse-resize",
+      touchAction: "none",
+      zIndex: 20
+    }
+  }, React.createElement("svg", {
+    width: "12",
+    height: "12",
+    viewBox: "0 0 12 12",
+    style: {
+      display: "block"
+    }
+  }, React.createElement("line", {
+    x1: "2",
+    y1: "10",
+    x2: "10",
+    y2: "2",
+    stroke: "#ff8aaa",
+    strokeWidth: "1.5",
+    strokeLinecap: "round"
+  }), React.createElement("line", {
+    x1: "6",
+    y1: "10",
+    x2: "10",
+    y2: "6",
+    stroke: "#ff8aaa",
+    strokeWidth: "1.5",
+    strokeLinecap: "round"
+  }), React.createElement("line", {
+    x1: "10",
+    y1: "10",
+    x2: "10",
+    y2: "10",
+    stroke: "#ff8aaa",
+    strokeWidth: "2.5",
+    strokeLinecap: "round"
+  })))), shipTab !== "templates" && React.createElement("div", {
     style: {
       fontSize: 10,
       color: "rgba(180,200,220,0.5)",
@@ -13138,7 +14118,43 @@ function CosmicWorkshop() {
       outline: "none",
       boxSizing: "border-box"
     }
-  })), function () {
+  }), React.createElement("div", {
+    style: {
+      marginTop: 12,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between"
+    }
+  }, React.createElement("div", {
+    style: {
+      color: "rgba(180,200,220,0.5)",
+      fontSize: 10,
+      letterSpacing: 0.5,
+      textTransform: "uppercase"
+    }
+  }, "Ship Glow"), React.createElement(BDToggle, {
+    value: shipEdit.glowEnabled || false,
+    onChange: function (v) {
+      shipUpdateEdit("glowEnabled", v);
+    }
+  })), shipEdit.glowEnabled && React.createElement(React.Fragment, null, React.createElement(BDColorPicker, {
+    label: "Glow Color",
+    value: shipEdit.glowColor || "#ff88aa",
+    presets: ["#ff88aa", "#80ddff", "#ffd060", "#80ff80", "#cc70ff", "#ffffff", "#ff6040", "#40c8ff"],
+    onChange: function (v) {
+      shipUpdateEdit("glowColor", v);
+    }
+  }), React.createElement(BDSlider, {
+    label: "Glow Intensity",
+    value: shipEdit.glowIntensity || 10,
+    min: 2,
+    max: 30,
+    step: 1,
+    displayValue: (shipEdit.glowIntensity || 10) + "px",
+    onChange: function (v) {
+      shipUpdateEdit("glowIntensity", v);
+    }
+  }))), function () {
     // 5-tab sub-navigation: templates / add / color / position / list.
     var tabs = [{
       id: "templates",
@@ -13190,13 +14206,13 @@ function CosmicWorkshop() {
   // ── TEMPLATES: preset hull thumbnails ──
   shipTab === "templates" && React.createElement(React.Fragment, null, React.createElement("div", {
     style: {
-      color: "rgba(180,200,220,0.5)",
+      color: "rgba(180,200,220,0.4)",
       fontSize: 10,
       marginBottom: 8,
       letterSpacing: 0.5,
       textTransform: "uppercase"
     }
-  }, "Tap a template to load or merge its parts"), React.createElement("div", {
+  }, "Tap to load — replaces current parts"), React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr 1fr",
@@ -13236,7 +14252,45 @@ function CosmicWorkshop() {
         textTransform: "uppercase"
       }
     }, SHIP_HULL_LABELS[h]));
-  }))),
+  })), React.createElement("div", {
+    onClick: function () {
+      setShipResetConfirm(true);
+    },
+    style: {
+      marginTop: 12,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 7,
+      padding: "10px 14px",
+      borderRadius: 8,
+      cursor: "pointer",
+      background: WS.brushed,
+      backgroundBlendMode: "overlay",
+      border: "1px solid rgba(255,100,80,0.3)",
+      boxShadow: WS.ps
+    }
+  }, React.createElement("svg", {
+    width: 14,
+    height: 14,
+    viewBox: "0 0 24 24",
+    fill: "none"
+  }, React.createElement("path", {
+    d: "M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6",
+    stroke: "rgba(255,120,100,0.75)",
+    strokeWidth: "1.8",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  })), React.createElement("div", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      color: "rgba(255,120,100,0.75)",
+      letterSpacing: 1,
+      textTransform: "uppercase",
+      fontFamily: "'Exo 2', sans-serif"
+    }
+  }, "Reset — Clear All Parts"))),
   // ── ADD: per-shape add buttons ──
   shipTab === "add" && React.createElement("div", {
     style: {
@@ -13593,6 +14647,7 @@ function CosmicWorkshop() {
       var idx = partsList.length - 1 - displayIdx;
       var isSel = idx === shipSelectedPart;
       var displayName = p.name || SHIP_PART_LABELS[p.type];
+      var isRenaming = shipPartRenamingIdx === idx;
       return React.createElement("div", Object.assign({
         key: idx,
         onClick: function () {
@@ -13670,7 +14725,41 @@ function CosmicWorkshop() {
           border: "1px solid rgba(255,255,255,0.2)",
           flex: "0 0 auto"
         }
-      }), React.createElement("div", {
+      }), isRenaming ? React.createElement("input", {
+        autoFocus: true,
+        value: shipPartRenameVal,
+        onChange: function (e) {
+          setShipPartRenameVal(e.target.value);
+        },
+        onBlur: function () {
+          shipUpdatePart(idx, "name", shipPartRenameVal.trim() || null);
+          setShipPartRenamingIdx(null);
+        },
+        onKeyDown: function (e) {
+          if (e.key === "Enter") {
+            shipUpdatePart(idx, "name", shipPartRenameVal.trim() || null);
+            setShipPartRenamingIdx(null);
+          }
+          if (e.key === "Escape") {
+            setShipPartRenamingIdx(null);
+          }
+        },
+        onClick: function (e) {
+          e.stopPropagation();
+        },
+        style: {
+          flex: 1,
+          background: "rgba(0,0,0,0.4)",
+          border: "1px solid rgba(255,138,170,0.5)",
+          borderRadius: 4,
+          color: "#ff8aaa",
+          padding: "2px 6px",
+          outline: "none",
+          boxSizing: "border-box",
+          fontFamily: "'Exo 2', sans-serif",
+          fontSize: 16
+        }
+      }) : React.createElement("div", {
         style: {
           flex: 1,
           color: isSel ? "#ff8aaa" : "rgba(200,210,220,0.7)",
@@ -13680,6 +14769,36 @@ function CosmicWorkshop() {
           letterSpacing: 0.4
         }
       }, displayName + " · (" + p.x.toFixed(0) + "," + p.y.toFixed(0) + ")"), React.createElement("div", {
+        onClick: function (e) {
+          e.stopPropagation();
+          setShipPartRenamingIdx(idx);
+          setShipPartRenameVal(p.name || "");
+        },
+        title: "Rename part",
+        style: {
+          width: 22,
+          height: 22,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: 4,
+          cursor: "pointer",
+          background: isRenaming ? "rgba(255,138,170,0.2)" : "rgba(255,200,80,0.1)",
+          border: isRenaming ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,200,80,0.3)",
+          flex: "0 0 auto"
+        }
+      }, React.createElement("svg", {
+        width: "12",
+        height: "12",
+        viewBox: "0 0 24 24",
+        fill: "none"
+      }, React.createElement("path", {
+        d: "M16.474 5.408l2.118 2.117m-13.071 8.43L3 21l5.046-2.521 9.865-9.864a1.5 1.5 0 000-2.121L15.793 4.37a1.5 1.5 0 00-2.121 0L5.521 12.52z",
+        stroke: isRenaming ? "#ff8aaa" : "#ffc840",
+        strokeWidth: "1.8",
+        strokeLinecap: "round",
+        strokeLinejoin: "round"
+      }))), React.createElement("div", {
         onClick: function (e) {
           e.stopPropagation();
           shipDuplicatePart(idx);
@@ -13759,7 +14878,97 @@ function CosmicWorkshop() {
   }, function (mode) {
     shipApplyHullPreset(shipHullPromptId, mode);
     setShipHullPromptId(null);
-  }))));
+  }), shipResetConfirm && React.createElement("div", {
+    onClick: function () {
+      setShipResetConfirm(false);
+    },
+    style: {
+      position: "absolute",
+      inset: 0,
+      background: "rgba(0,0,0,0.65)",
+      zIndex: 20,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 20
+    }
+  }, React.createElement("div", {
+    onClick: function (e) {
+      e.stopPropagation();
+    },
+    style: {
+      background: WS.brushed,
+      backgroundBlendMode: "overlay",
+      border: "1px solid rgba(255,100,80,0.35)",
+      borderRadius: 12,
+      padding: "20px 18px 14px",
+      maxWidth: 300,
+      width: "100%",
+      boxShadow: "0 8px 24px rgba(0,0,0,0.6), " + WS.ps
+    }
+  }, React.createElement("div", {
+    style: {
+      color: "rgba(255,140,120,0.9)",
+      fontSize: 13,
+      fontWeight: 700,
+      letterSpacing: 1,
+      textTransform: "uppercase",
+      fontFamily: "'Exo 2', sans-serif",
+      marginBottom: 8
+    }
+  }, "Clear All Parts?"), React.createElement("div", {
+    style: {
+      color: "rgba(180,200,220,0.65)",
+      fontSize: 12,
+      lineHeight: 1.5,
+      marginBottom: 16
+    }
+  }, "This will remove every part from your ship. The hull will be set to blank."), React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 6
+    }
+  }, React.createElement("div", {
+    onClick: function () {
+      shipApplyHullPreset("none", "replace");
+      setShipResetConfirm(false);
+    },
+    style: {
+      padding: "10px 12px",
+      textAlign: "center",
+      borderRadius: 6,
+      cursor: "pointer",
+      background: "rgba(255,80,60,0.18)",
+      border: "1px solid rgba(255,100,80,0.5)",
+      color: "rgba(255,140,120,0.9)",
+      fontSize: 12,
+      fontWeight: 700,
+      letterSpacing: 0.5,
+      textTransform: "uppercase",
+      fontFamily: "'Exo 2', sans-serif"
+    }
+  }, "Clear All"), React.createElement("div", {
+    onClick: function () {
+      setShipResetConfirm(false);
+    },
+    style: {
+      padding: "10px 12px",
+      textAlign: "center",
+      borderRadius: 6,
+      cursor: "pointer",
+      background: WS.brushed,
+      backgroundBlendMode: "overlay",
+      border: WS.pb,
+      color: "rgba(180,200,220,0.7)",
+      fontSize: 12,
+      fontWeight: 700,
+      letterSpacing: 0.5,
+      textTransform: "uppercase",
+      fontFamily: "'Exo 2', sans-serif",
+      boxShadow: WS.ps
+    }
+  }, "Cancel")))))));
 }
 var root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(React.createElement(CosmicWorkshop));
