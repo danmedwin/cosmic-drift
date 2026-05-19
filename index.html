@@ -7821,10 +7821,14 @@ function CosmicDriftGame() {
     if (!boardRef.current) return 0;
     return boardRef.current.getBoundingClientRect().left + getColCenter(col);
   }, [getColCenter]);
+  // Ship is anchored to the bottom of shipZone via `bottom: 2`, so the top
+  // edge of the rendered SVG sits at `zone.bottom - 2 - shipDisplaySize`.
+  // Using a fixed offset from zone.top placed the plasma origin behind the
+  // ship once the size slider grew it past the default ~64.
   var getShipY = useCallback(function () {
     if (!shipZoneRef.current) return 0;
-    return shipZoneRef.current.getBoundingClientRect().top + 28;
-  }, []);
+    return shipZoneRef.current.getBoundingClientRect().bottom - 2 - shipDisplaySize;
+  }, [shipDisplaySize]);
   var getHudPos = useCallback(function (w) {
     if (!hudRef.current) return {
       x: 200,

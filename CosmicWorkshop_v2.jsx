@@ -3867,7 +3867,10 @@ export default function CosmicWorkshop() {
           },
           backLabel: "My Ships", title: shipEditId ? "Edit Ship" : "New Ship", color: "#ff8aaa",
           rightContent: React.createElement("div", { style: { display: "flex", gap: 6 } },
-            shipEditId && React.createElement("div", { onClick: function() { shipEditId === shipActiveId ? shipSetActive(null) : shipSetActive(shipEditId); }, style: Object.assign({}, BTN_TOPBAR, { color: shipEditId === shipActiveId ? "#80dd90" : "rgba(200,210,220,0.7)", border: shipEditId === shipActiveId ? "2px solid rgba(80,200,100,0.5)" : PNLB }) }, shipEditId === shipActiveId ? "★ Active" : "Set Active"),
+            React.createElement("div", { onClick: function() {
+              if (!shipEditId || shipDirtyRef.current) { setShipSaveStatus("Save the ship first"); setTimeout(function() { setShipSaveStatus(""); }, 2500); return; }
+              shipEditId === shipActiveId ? shipSetActive(null) : shipSetActive(shipEditId);
+            }, style: Object.assign({}, BTN_TOPBAR, { color: shipEditId === shipActiveId ? "#80dd90" : "rgba(200,210,220,0.7)", border: shipEditId === shipActiveId ? "2px solid rgba(80,200,100,0.5)" : PNLB }) }, shipEditId === shipActiveId ? "★ Active" : "Set Active"),
             React.createElement("div", { onClick: shipSaveCurrent, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #3a1030, #280820)", boxShadow: "0 0 8px rgba(255,138,170,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, shipSaveStatus || "Save"))
         }),
         React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "0 16px 32px" } },

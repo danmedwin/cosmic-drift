@@ -1962,7 +1962,11 @@ export default function CosmicDriftGame() {
   var getGridTop = useCallback(function () { if (!gridAreaRef.current) return 0; return gridAreaRef.current.getBoundingClientRect().top + gridPadTop; }, []);
   var getBlockY = useCallback(function (row) { return getGridTop() + row * (blockSize + GAP) + blockSize / 2; }, [blockSize, getGridTop]);
   var getBlockX = useCallback(function (col) { if (!boardRef.current) return 0; return boardRef.current.getBoundingClientRect().left + getColCenter(col); }, [getColCenter]);
-  var getShipY = useCallback(function () { if (!shipZoneRef.current) return 0; return shipZoneRef.current.getBoundingClientRect().top + 28; }, []);
+  // Ship is anchored to the bottom of shipZone via `bottom: 2`, so the top
+  // edge of the rendered SVG sits at `zone.bottom - 2 - shipDisplaySize`.
+  // Using a fixed offset from zone.top placed the plasma origin behind the
+  // ship once the size slider grew it past the default ~64.
+  var getShipY = useCallback(function () { if (!shipZoneRef.current) return 0; return shipZoneRef.current.getBoundingClientRect().bottom - 2 - shipDisplaySize; }, [shipDisplaySize]);
   var getHudPos = useCallback(function (w) { if (!hudRef.current) return { x: 200, y: 20 }; var r = hudRef.current.getBoundingClientRect(); if (w === "cores") return { x: r.left + r.width * 0.22, y: r.top + 22 }; if (w === "extras") return { x: r.left + r.width * 0.22, y: r.top + 40 }; if (w === "plasma") return { x: r.left + r.width / 2, y: r.top + 28 }; if (w === "score") return { x: r.right - r.width * 0.18, y: r.top + 24 }; return { x: r.left + 40, y: r.top + 24 }; }, []);
   // Get inventory tray position
   var getInvPos = useCallback(function (which) { if (!hudRef.current) return { x: 200, y: 600 }; var r = hudRef.current.getBoundingClientRect(); var slotW = (r.width - 16 - 20) / 5; var baseX = r.left + 8; if (which === "drone") return { x: baseX + slotW * 0.5, y: r.bottom - 25 }; if (which === "lightning") return { x: baseX + slotW * 1.5, y: r.bottom - 25 }; if (which === "crossshot") return { x: baseX + slotW * 2.5, y: r.bottom - 25 }; if (which === "anglebounce") return { x: baseX + slotW * 3.5, y: r.bottom - 25 }; if (which === "hammer") return { x: baseX + slotW * 4.5, y: r.bottom - 25 }; return { x: r.left + r.width / 2, y: r.bottom - 25 }; }, []);

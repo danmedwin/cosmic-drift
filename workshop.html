@@ -13958,8 +13958,15 @@ function CosmicWorkshop() {
         display: "flex",
         gap: 6
       }
-    }, shipEditId && React.createElement("div", {
+    }, React.createElement("div", {
       onClick: function () {
+        if (!shipEditId || shipDirtyRef.current) {
+          setShipSaveStatus("Save the ship first");
+          setTimeout(function () {
+            setShipSaveStatus("");
+          }, 2500);
+          return;
+        }
         shipEditId === shipActiveId ? shipSetActive(null) : shipSetActive(shipEditId);
       },
       style: Object.assign({}, BTN_TOPBAR, {
