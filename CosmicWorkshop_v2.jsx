@@ -3263,25 +3263,7 @@ export default function CosmicWorkshop() {
   function renderShipSelectedHeader(sel) {
     var selCount = shipGetSelected().length;
     var heading = selCount > 1 ? (selCount + " parts selected") : ("Selected: " + (sel.name || SHIP_PART_LABELS[sel.type]));
-    return React.createElement(React.Fragment, null,
-      React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, gap: 6, flexWrap: "wrap" } },
-        React.createElement("div", { style: { color: "#ff8aaa", fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", fontFamily: "'Exo 2', sans-serif" } }, heading),
-        React.createElement("div", { style: { display: "flex", gap: 6 } },
-          // Group / Ungroup chips. Group appears when 2+ selected; Ungroup
-          // appears whenever any selected part has a groupId.
-          selCount >= 2 && React.createElement("div", { onClick: shipGroupSelected, title: "Group selected parts",
-            style: { padding: "4px 8px", borderRadius: 6, cursor: "pointer", background: "rgba(200,184,255,0.12)", border: "1px solid rgba(200,184,255,0.4)", color: "#c8b8ff", fontSize: 10, fontWeight: 700, letterSpacing: 0.4, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Group"),
-          shipSelectionHasGroup() && React.createElement("div", { onClick: shipUngroupSelected, title: "Ungroup",
-            style: { padding: "4px 8px", borderRadius: 6, cursor: "pointer", background: "rgba(180,180,180,0.08)", border: "1px solid rgba(180,180,180,0.3)", color: "rgba(200,210,220,0.7)", fontSize: 10, fontWeight: 700, letterSpacing: 0.4, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Ungroup"),
-          React.createElement("div", { onClick: shipDuplicateSelected,
-            title: selCount > 1 ? ("Duplicate " + selCount + " parts") : "Duplicate part",
-            style: { width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, cursor: "pointer", background: "rgba(128,221,255,0.12)", border: "1px solid rgba(128,221,255,0.4)" } },
-            shipCopySvg(14, "#80ddff")),
-          React.createElement("div", { onClick: shipDeleteSelected,
-            title: selCount > 1 ? ("Delete " + selCount + " parts") : "Delete part",
-            style: { width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, cursor: "pointer", background: "rgba(220,60,80,0.15)", border: "1px solid rgba(220,60,80,0.4)" } },
-            shipTrashSvg(14, "#ff8088")))),
-      );
+    return React.createElement("div", { style: { color: "#ff8aaa", fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", fontFamily: "'Exo 2', sans-serif", marginBottom: 8 } }, heading);
   }
   // Placeholder shown on the Color / Position sub-tabs when nothing is selected.
   function renderShipSelectMessage() {
@@ -4518,20 +4500,37 @@ export default function CosmicWorkshop() {
                   React.createElement("line", { x1: "2", y1: "10", x2: "10", y2: "2", stroke: "#ff8aaa", strokeWidth: "1.5", strokeLinecap: "round" }),
                   React.createElement("line", { x1: "6", y1: "10", x2: "10", y2: "6", stroke: "#ff8aaa", strokeWidth: "1.5", strokeLinecap: "round" }),
                   React.createElement("line", { x1: "10", y1: "10", x2: "10", y2: "10", stroke: "#ff8aaa", strokeWidth: "2.5", strokeLinecap: "round" })))),
-            shipTab !== "templates" && React.createElement("div", { style: { fontSize: 10, color: "rgba(180,200,220,0.5)", marginTop: 4, letterSpacing: 0.5 } }, "Tap a part on the ship to select. Drag to move.")),
+            shipTab !== "templates" && React.createElement("div", { style: { fontSize: 10, color: "rgba(180,200,220,0.5)", marginTop: 4, letterSpacing: 0.5 } }, "Tap a part on the ship to select. Drag to move."),
+            // ── Selection Bar: persistent toolbar for everything about the
+            // current selection. Shows under the preview whenever we're
+            // editing (not on the Templates tab). ──
+            shipTab !== "templates" && (function() {
+              var selCount = shipGetSelected().length;
+              return React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", padding: "6px 8px", marginTop: 8, marginLeft: 14, marginRight: 14, background: "rgba(255,138,170,0.05)", border: "1px solid rgba(255,138,170,0.18)", borderRadius: 8, width: "calc(100% - 28px)", boxSizing: "border-box" } },
+                selCount > 0 && React.createElement("div", { style: { color: "#ff8aaa", fontSize: 10, fontWeight: 700, letterSpacing: 0.4, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase", padding: "2px 6px", borderRadius: 4, background: "rgba(255,138,170,0.18)" } }, selCount + " sel"),
+                React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 4 } },
+                  React.createElement("div", { style: { color: "rgba(180,200,220,0.55)", fontSize: 9, letterSpacing: 0.4, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Multi"),
+                  React.createElement(BDToggle, { value: shipMultiSelectOn, onChange: function(v) { setShipMultiSelectOn(v); } })),
+                React.createElement("div", { onClick: shipSelectAll, title: "Select all parts",
+                  style: { padding: "3px 8px", borderRadius: 5, cursor: "pointer", background: "rgba(255,138,170,0.10)", border: "1px solid rgba(255,138,170,0.35)", color: "#ff8aaa", fontSize: 9, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "All"),
+                selCount > 0 && React.createElement("div", { onClick: shipClearSelection, title: "Clear selection",
+                  style: { padding: "3px 8px", borderRadius: 5, cursor: "pointer", background: "rgba(180,180,180,0.06)", border: "1px solid rgba(180,180,180,0.28)", color: "rgba(200,210,220,0.75)", fontSize: 9, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Clear"),
+                selCount >= 2 && React.createElement("div", { onClick: shipGroupSelected, title: "Group selected parts",
+                  style: { padding: "3px 8px", borderRadius: 5, cursor: "pointer", background: "rgba(200,184,255,0.10)", border: "1px solid rgba(200,184,255,0.38)", color: "#c8b8ff", fontSize: 9, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Group"),
+                shipSelectionHasGroup() && React.createElement("div", { onClick: shipUngroupSelected, title: "Ungroup",
+                  style: { padding: "3px 8px", borderRadius: 5, cursor: "pointer", background: "rgba(180,180,180,0.06)", border: "1px solid rgba(180,180,180,0.28)", color: "rgba(200,210,220,0.75)", fontSize: 9, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Ungroup"),
+                React.createElement("div", { style: { flex: 1, minWidth: 0 } }),
+                selCount > 0 && React.createElement("div", { onClick: shipDuplicateSelected, title: selCount > 1 ? ("Duplicate " + selCount + " parts") : "Duplicate",
+                  style: { width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 5, cursor: "pointer", background: "rgba(128,221,255,0.10)", border: "1px solid rgba(128,221,255,0.38)" } },
+                  shipCopySvg(12, "#80ddff")),
+                selCount > 0 && React.createElement("div", { onClick: shipDeleteSelected, title: selCount > 1 ? ("Delete " + selCount + " parts") : "Delete",
+                  style: { width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 5, cursor: "pointer", background: "rgba(220,60,80,0.10)", border: "1px solid rgba(220,60,80,0.38)" } },
+                  shipTrashSvg(12, "#ff8088")));
+            })()),
           React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "12px 16px", marginBottom: 10 } },
             React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 11, marginBottom: 6, letterSpacing: 0.5 } }, "NAME"),
             React.createElement("input", { value: shipEdit.name || "", onChange: function(e) { shipUpdateEdit("name", e.target.value); },
               placeholder: "My Ship", style: { width: "100%", padding: "6px 10px", borderRadius: 6, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#b0c8d8", fontSize: 16, fontFamily: "'Quicksand',sans-serif", outline: "none", boxSizing: "border-box" } }),
-            // Multi-Select toggle + Select All / Clear chips on the left, on
-            // the row beneath the name input. (Ship Glow stays on its own row.)
-            React.createElement("div", { style: { marginTop: 10, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" } },
-              React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, letterSpacing: 0.5, textTransform: "uppercase" } }, "Multi-Select"),
-              React.createElement(BDToggle, { value: shipMultiSelectOn, onChange: function(v) { setShipMultiSelectOn(v); } }),
-              shipMultiSelectOn && React.createElement("div", { onClick: shipSelectAll, title: "Select all parts",
-                style: { padding: "4px 10px", borderRadius: 6, cursor: "pointer", background: "rgba(255,138,170,0.12)", border: "1px solid rgba(255,138,170,0.4)", color: "#ff8aaa", fontSize: 10, fontWeight: 700, letterSpacing: 0.4, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Select All"),
-              shipMultiSelectOn && React.createElement("div", { onClick: shipClearSelection, title: "Clear selection",
-                style: { padding: "4px 10px", borderRadius: 6, cursor: "pointer", background: "rgba(180,180,180,0.08)", border: "1px solid rgba(180,180,180,0.3)", color: "rgba(200,210,220,0.7)", fontSize: 10, fontWeight: 700, letterSpacing: 0.4, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Clear")),
             React.createElement("div", { style: { marginTop: 12, display: "flex", alignItems: "center", gap: 8 } },
               React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, letterSpacing: 0.5, textTransform: "uppercase" } }, "Ship Glow"),
               React.createElement(BDToggle, { value: shipEdit.glowEnabled || false, onChange: function(v) { shipUpdateEdit("glowEnabled", v); } })),
