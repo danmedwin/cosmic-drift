@@ -4507,11 +4507,19 @@ export default function CosmicWorkshop() {
             shipTab !== "templates" && (function() {
               var selCount = shipGetSelected().length;
               return React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", padding: "6px 8px", marginTop: 8, marginLeft: 14, marginRight: 14, background: "rgba(255,138,170,0.05)", border: "1px solid rgba(255,138,170,0.18)", borderRadius: 8, width: "calc(100% - 28px)", boxSizing: "border-box" } },
+                // Title for the bar
+                React.createElement("div", { style: { color: "rgba(180,200,220,0.55)", fontSize: 11, fontWeight: 700, letterSpacing: 1.2, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Select"),
                 selCount > 0 && React.createElement("div", { style: { color: "#ff8aaa", fontSize: 10, fontWeight: 700, letterSpacing: 0.4, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase", padding: "2px 6px", borderRadius: 4, background: "rgba(255,138,170,0.18)" } }, selCount + " sel"),
-                React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 4 } },
-                  React.createElement("div", { style: { color: "rgba(180,200,220,0.55)", fontSize: 9, letterSpacing: 0.4, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Multi"),
-                  React.createElement(BDToggle, { value: shipMultiSelectOn, onChange: function(v) { setShipMultiSelectOn(v); } })),
-                React.createElement("div", { onClick: shipSelectAll, title: "Select all parts",
+                // Multi label + inline toggle. The inline toggle is sized to
+                // match the chip heights so everything in the bar shares a
+                // common vertical centerline.
+                React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 5 } },
+                  React.createElement("div", { style: { color: "rgba(180,200,220,0.6)", fontSize: 9, letterSpacing: 0.4, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Multi"),
+                  React.createElement("button", { onClick: function() { setShipMultiSelectOn(!shipMultiSelectOn); },
+                    title: shipMultiSelectOn ? "Turn off multi-select" : "Turn on multi-select (canvas taps add)",
+                    style: { width: 32, height: 18, borderRadius: 9, border: "none", background: shipMultiSelectOn ? "#ff8aaa" : "rgba(255,255,255,0.18)", position: "relative", cursor: "pointer", transition: "background 0.18s", padding: 0, flex: "0 0 auto", WebkitTapHighlightColor: "transparent" } },
+                    React.createElement("div", { style: { width: 14, height: 14, borderRadius: 7, background: "#fff", position: "absolute", top: 2, left: shipMultiSelectOn ? 16 : 2, transition: "left 0.18s", boxShadow: "0 1px 2px rgba(0,0,0,0.3)" } }))),
+                shipMultiSelectOn && React.createElement("div", { onClick: shipSelectAll, title: "Select all parts",
                   style: { padding: "3px 8px", borderRadius: 5, cursor: "pointer", background: "rgba(255,138,170,0.10)", border: "1px solid rgba(255,138,170,0.35)", color: "#ff8aaa", fontSize: 9, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "All"),
                 selCount > 0 && React.createElement("div", { onClick: shipClearSelection, title: "Clear selection",
                   style: { padding: "3px 8px", borderRadius: 5, cursor: "pointer", background: "rgba(180,180,180,0.06)", border: "1px solid rgba(180,180,180,0.28)", color: "rgba(200,210,220,0.75)", fontSize: 9, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Clear"),
@@ -4530,17 +4538,7 @@ export default function CosmicWorkshop() {
           React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "12px 16px", marginBottom: 10 } },
             React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 11, marginBottom: 6, letterSpacing: 0.5 } }, "NAME"),
             React.createElement("input", { value: shipEdit.name || "", onChange: function(e) { shipUpdateEdit("name", e.target.value); },
-              placeholder: "My Ship", style: { width: "100%", padding: "6px 10px", borderRadius: 6, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#b0c8d8", fontSize: 16, fontFamily: "'Quicksand',sans-serif", outline: "none", boxSizing: "border-box" } }),
-            React.createElement("div", { style: { marginTop: 12, display: "flex", alignItems: "center", gap: 8 } },
-              React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, letterSpacing: 0.5, textTransform: "uppercase" } }, "Ship Glow"),
-              React.createElement(BDToggle, { value: shipEdit.glowEnabled || false, onChange: function(v) { shipUpdateEdit("glowEnabled", v); } })),
-            shipEdit.glowEnabled && React.createElement(React.Fragment, null,
-              React.createElement(BDColorPicker, { label: shipMixedLbl("glowColor", "Glow Color"), value: shipEdit.glowColor || "#ff88aa",
-                presets: ["#ff88aa", "#80ddff", "#ffd060", "#80ff80", "#cc70ff", "#ffffff", "#ff6040", "#40c8ff"],
-                onChange: function(v) { shipUpdateEdit("glowColor", v); } }),
-              React.createElement(BDSlider, { label: shipMixedLbl("glowIntensity", "Glow Intensity"), value: shipEdit.glowIntensity || 10, min: 2, max: 30, step: 1,
-                displayValue: (shipEdit.glowIntensity || 10) + "px",
-                onChange: function(v) { shipUpdateEdit("glowIntensity", v); } }))),
+              placeholder: "My Ship", style: { width: "100%", padding: "6px 10px", borderRadius: 6, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#b0c8d8", fontSize: 16, fontFamily: "'Quicksand',sans-serif", outline: "none", boxSizing: "border-box" } })),
           (function() {
             // 5-tab sub-navigation: templates / add / color / position / list.
             var tabs = [
@@ -4587,14 +4585,30 @@ export default function CosmicWorkshop() {
           shipTab === "color" && (function() {
             var partsList = Array.isArray(shipEdit.parts) ? shipEdit.parts : [];
             var sel = (shipSelectedPart >= 0 && shipSelectedPart < partsList.length) ? partsList[shipSelectedPart] : null;
-            if (!sel) return renderShipSelectMessage();
+            // Ship-level glow lives at the top of the Color tab, always
+            // visible regardless of which part is selected. It applies to
+            // the whole rendered ship.
+            var shipGlowPanel = React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,138,170,0.18)", borderRadius: 12, padding: "12px 16px", marginBottom: 10 } },
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10 } },
+                React.createElement("div", { style: { color: "rgba(180,200,220,0.55)", fontSize: 11, letterSpacing: 0.6, textTransform: "uppercase", fontFamily: "'Exo 2', sans-serif", fontWeight: 700 } }, "Ship Glow"),
+                React.createElement(BDToggle, { value: shipEdit.glowEnabled || false, onChange: function(v) { shipUpdateEdit("glowEnabled", v); } })),
+              shipEdit.glowEnabled && React.createElement(React.Fragment, null,
+                React.createElement(BDColorPicker, { label: "Glow Color", value: shipEdit.glowColor || "#ff88aa",
+                  presets: ["#ff88aa", "#80ddff", "#ffd060", "#80ff80", "#cc70ff", "#ffffff", "#ff6040", "#40c8ff"],
+                  onChange: function(v) { shipUpdateEdit("glowColor", v); } }),
+                React.createElement(BDSlider, { label: "Glow Intensity", value: shipEdit.glowIntensity || 10, min: 2, max: 30, step: 1,
+                  displayValue: (shipEdit.glowIntensity || 10) + "px",
+                  onChange: function(v) { shipUpdateEdit("glowIntensity", v); } })));
+            if (!sel) return React.createElement(React.Fragment, null, shipGlowPanel, renderShipSelectMessage());
             var fillMode = sel.fillMode || "solid";
             var fillModes = [
               { id: "solid",  label: "Solid" },
               { id: "linear", label: "Linear" },
               { id: "radial", label: "Radial" }
             ];
-            return React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,138,170,0.25)", borderRadius: 12, padding: "12px 16px 8px" } },
+            return React.createElement(React.Fragment, null,
+              shipGlowPanel,
+              React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,138,170,0.25)", borderRadius: 12, padding: "12px 16px 8px" } },
               renderShipSelectedHeader(sel),
               React.createElement(BDColorPicker, { label: shipMixedLbl("color", fillMode === "solid" ? "Color" : "Color 1"), value: sel.color,
                 presets: ["#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70cc", "#a0a8b8", "#ffffff", "#222a3a"],
@@ -4633,7 +4647,7 @@ export default function CosmicWorkshop() {
                   presets: ["#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70ff", "#ffffff", "#ff6040", "#40c8ff"],
                   onChange: function(v) { shipUpdateSelected("glowColor", v); } }),
                 React.createElement(BDSlider, { label: shipMixedLbl("glowIntensity", "Glow Intensity"), value: sel.glowIntensity || 4, min: 1, max: 20, step: 0.5, displayValue: (sel.glowIntensity || 4) + "px",
-                  onChange: function(v) { shipUpdateSelected("glowIntensity", v); } })));
+                  onChange: function(v) { shipUpdateSelected("glowIntensity", v); } }))));
           })(),
           // ── POSITION: geometry for the selected part ──
           shipTab === "position" && (function() {
