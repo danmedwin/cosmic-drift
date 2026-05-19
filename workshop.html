@@ -15103,12 +15103,11 @@ function CosmicWorkshop() {
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
-      padding: "12px 0 10px",
+      padding: "12px 0 2px",
       margin: "0 -16px",
       background: "rgba(14,18,28,0.92)",
       backdropFilter: "blur(4px)",
-      WebkitBackdropFilter: "blur(4px)",
-      borderBottom: "1px solid rgba(255,138,170,0.12)"
+      WebkitBackdropFilter: "blur(4px)"
     }
   }, React.createElement("div", {
     style: {
@@ -15191,18 +15190,11 @@ function CosmicWorkshop() {
     stroke: "#ff8aaa",
     strokeWidth: "2.5",
     strokeLinecap: "round"
-  })))), shipTab !== "templates" && React.createElement("div", {
-    style: {
-      fontSize: 10,
-      color: "rgba(180,200,220,0.5)",
-      marginTop: 4,
-      letterSpacing: 0.5
-    }
-  }, "Tap a part on the ship to select. Drag to move."),
+  })))),
   // ── Selection Bar: persistent toolbar for everything about the
-  // current selection. Shows under the preview whenever we're
-  // editing (not on the Templates tab). ──
-  shipTab !== "templates" && function () {
+  // current selection. Always visible in the sticky band so the
+  // multi-select toggle is reachable from any tab. ──
+  function () {
     var selCount = shipGetSelected().length;
     return React.createElement("div", {
       style: {
@@ -15390,9 +15382,9 @@ function CosmicWorkshop() {
       }
     }, shipTrashSvg(12, "#ff8088")));
   }(),
-  // Tab bar lives in the same sticky band so it's always reachable.
-  // The thin top divider visually separates "selection tools" above
-  // from "editor sections" below.
+  // Tab bar + tongue: the active tab loses its bottom border /
+  // bottom corner radius, then a 6px pink "tongue" below the
+  // active tab's column visually drips into the content area.
   function () {
     var tabs = [{
       id: "templates",
@@ -15410,11 +15402,11 @@ function CosmicWorkshop() {
       id: "list",
       label: "List"
     }];
-    return React.createElement("div", {
+    return React.createElement(React.Fragment, null, React.createElement("div", {
       style: {
         display: "flex",
         gap: 3,
-        padding: "8px 14px 4px",
+        padding: "8px 14px 0",
         marginTop: 8,
         borderTop: "1px solid rgba(255,255,255,0.09)",
         width: "100%",
@@ -15431,7 +15423,10 @@ function CosmicWorkshop() {
           flex: 1,
           padding: "8px 4px",
           textAlign: "center",
-          borderRadius: 8,
+          borderTopLeftRadius: 8,
+          borderTopRightRadius: 8,
+          borderBottomLeftRadius: on ? 0 : 8,
+          borderBottomRightRadius: on ? 0 : 8,
           cursor: "pointer",
           fontSize: 10,
           fontWeight: 700,
@@ -15440,10 +15435,31 @@ function CosmicWorkshop() {
           textTransform: "uppercase",
           background: on ? "rgba(255,138,170,0.2)" : "rgba(255,255,255,0.04)",
           border: on ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.08)",
+          borderBottom: on ? "none" : "1px solid rgba(255,255,255,0.08)",
           color: on ? "#ff8aaa" : "rgba(180,200,220,0.55)"
         }
       }, t.label);
-    }));
+    })), React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 3,
+        padding: "0 14px",
+        width: "100%",
+        boxSizing: "border-box",
+        height: 6
+      }
+    }, tabs.map(function (t) {
+      var on = shipTab === t.id;
+      return React.createElement("div", {
+        key: "tongue_" + t.id,
+        style: {
+          flex: 1,
+          background: on ? "rgba(255,138,170,0.2)" : "transparent",
+          borderLeft: on ? "1px solid rgba(255,138,170,0.5)" : "1px solid transparent",
+          borderRight: on ? "1px solid rgba(255,138,170,0.5)" : "1px solid transparent"
+        }
+      });
+    })));
   }()),
   // ── TEMPLATES: preset hull thumbnails ──
   shipTab === "templates" && React.createElement(React.Fragment, null, React.createElement("div", {

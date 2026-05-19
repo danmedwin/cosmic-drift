@@ -4484,7 +4484,7 @@ export default function CosmicWorkshop() {
               placeholder: "My Ship", style: { width: "100%", padding: "6px 10px", borderRadius: 6, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#b0c8d8", fontSize: 16, fontFamily: "'Quicksand',sans-serif", outline: "none", boxSizing: "border-box" } })),
           // Sticky preview: pinned to the top of the scroll container so the
           // ship stays visible while editing controls farther down.
-          React.createElement("div", { ref: shipPreviewStickyRef, style: { position: "sticky", top: 0, zIndex: 5, display: "flex", flexDirection: "column", alignItems: "center", padding: "12px 0 10px", margin: "0 -16px", background: "rgba(14,18,28,0.92)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)", borderBottom: "1px solid rgba(255,138,170,0.12)" } },
+          React.createElement("div", { ref: shipPreviewStickyRef, style: { position: "sticky", top: 0, zIndex: 5, display: "flex", flexDirection: "column", alignItems: "center", padding: "12px 0 2px", margin: "0 -16px", background: "rgba(14,18,28,0.92)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)" } },
             React.createElement("div", { style: { position: "relative", display: "inline-block" } },
               React.createElement("div", {
                 style: { width: shipPreviewSize, height: shipPreviewSize, padding: 4, borderRadius: 12, background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,138,170,0.15)", touchAction: "none", cursor: "crosshair" },
@@ -4506,11 +4506,10 @@ export default function CosmicWorkshop() {
                   React.createElement("line", { x1: "2", y1: "10", x2: "10", y2: "2", stroke: "#ff8aaa", strokeWidth: "1.5", strokeLinecap: "round" }),
                   React.createElement("line", { x1: "6", y1: "10", x2: "10", y2: "6", stroke: "#ff8aaa", strokeWidth: "1.5", strokeLinecap: "round" }),
                   React.createElement("line", { x1: "10", y1: "10", x2: "10", y2: "10", stroke: "#ff8aaa", strokeWidth: "2.5", strokeLinecap: "round" })))),
-            shipTab !== "templates" && React.createElement("div", { style: { fontSize: 10, color: "rgba(180,200,220,0.5)", marginTop: 4, letterSpacing: 0.5 } }, "Tap a part on the ship to select. Drag to move."),
             // ── Selection Bar: persistent toolbar for everything about the
-            // current selection. Shows under the preview whenever we're
-            // editing (not on the Templates tab). ──
-            shipTab !== "templates" && (function() {
+            // current selection. Always visible in the sticky band so the
+            // multi-select toggle is reachable from any tab. ──
+            (function() {
               var selCount = shipGetSelected().length;
               return React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", padding: "6px 8px", marginTop: 8, marginLeft: 14, marginRight: 14, background: "rgba(255,138,170,0.05)", border: "1px solid rgba(255,138,170,0.18)", borderRadius: 8, width: "calc(100% - 28px)", boxSizing: "border-box" } },
                 // Title for the bar
@@ -4541,9 +4540,9 @@ export default function CosmicWorkshop() {
                   style: { width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 5, cursor: "pointer", background: "rgba(220,60,80,0.10)", border: "1px solid rgba(220,60,80,0.38)" } },
                   shipTrashSvg(12, "#ff8088")));
             })(),
-            // Tab bar lives in the same sticky band so it's always reachable.
-            // The thin top divider visually separates "selection tools" above
-            // from "editor sections" below.
+            // Tab bar + tongue: the active tab loses its bottom border /
+            // bottom corner radius, then a 6px pink "tongue" below the
+            // active tab's column visually drips into the content area.
             (function() {
               var tabs = [
                 { id: "templates", label: "Templates" },
@@ -4552,12 +4551,18 @@ export default function CosmicWorkshop() {
                 { id: "position",  label: "Position" },
                 { id: "list",      label: "List" }
               ];
-              return React.createElement("div", { style: { display: "flex", gap: 3, padding: "8px 14px 4px", marginTop: 8, borderTop: "1px solid rgba(255,255,255,0.09)", width: "100%", boxSizing: "border-box" } },
-                tabs.map(function(t) {
-                  var on = shipTab === t.id;
-                  return React.createElement("div", { key: t.id, onClick: function() { setShipTab(t.id); },
-                    style: { flex: 1, padding: "8px 4px", textAlign: "center", borderRadius: 8, cursor: "pointer", fontSize: 10, fontWeight: 700, letterSpacing: 0.5, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase", background: on ? "rgba(255,138,170,0.2)" : "rgba(255,255,255,0.04)", border: on ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.08)", color: on ? "#ff8aaa" : "rgba(180,200,220,0.55)" } }, t.label);
-                }));
+              return React.createElement(React.Fragment, null,
+                React.createElement("div", { style: { display: "flex", gap: 3, padding: "8px 14px 0", marginTop: 8, borderTop: "1px solid rgba(255,255,255,0.09)", width: "100%", boxSizing: "border-box" } },
+                  tabs.map(function(t) {
+                    var on = shipTab === t.id;
+                    return React.createElement("div", { key: t.id, onClick: function() { setShipTab(t.id); },
+                      style: { flex: 1, padding: "8px 4px", textAlign: "center", borderTopLeftRadius: 8, borderTopRightRadius: 8, borderBottomLeftRadius: on ? 0 : 8, borderBottomRightRadius: on ? 0 : 8, cursor: "pointer", fontSize: 10, fontWeight: 700, letterSpacing: 0.5, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase", background: on ? "rgba(255,138,170,0.2)" : "rgba(255,255,255,0.04)", border: on ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.08)", borderBottom: on ? "none" : "1px solid rgba(255,255,255,0.08)", color: on ? "#ff8aaa" : "rgba(180,200,220,0.55)" } }, t.label);
+                  })),
+                React.createElement("div", { style: { display: "flex", gap: 3, padding: "0 14px", width: "100%", boxSizing: "border-box", height: 6 } },
+                  tabs.map(function(t) {
+                    var on = shipTab === t.id;
+                    return React.createElement("div", { key: "tongue_" + t.id, style: { flex: 1, background: on ? "rgba(255,138,170,0.2)" : "transparent", borderLeft: on ? "1px solid rgba(255,138,170,0.5)" : "1px solid transparent", borderRight: on ? "1px solid rgba(255,138,170,0.5)" : "1px solid transparent" } });
+                  })));
             })()),
           // ── TEMPLATES: preset hull thumbnails ──
           shipTab === "templates" && React.createElement(React.Fragment, null,
