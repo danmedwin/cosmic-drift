@@ -3074,7 +3074,7 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 10 } }, "Design your ship")
             ),
             // ── Active column cards begin (placed in col 2 by gridAutoFlow) ──
-            React.createElement("div", { onClick: function() { setScreen("builder"); if (savedLevels.length > 0) { var latest = savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0]; openBuilder(latest); } else { loadSavedLevels(); setLbScreen("list"); } }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(80,200,255,0.22)", borderTop: "3px solid #80ddff", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
+            React.createElement("div", { onClick: function() { setScreen("builder"); if (savedLevels.length > 0) { var latest = savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0]; openBuilder(latest); } else { loadSavedLevels(); setLbScreen("list"); } }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(80,200,255,0.22)", borderRight: "3px solid #80ddff", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 3, marginBottom: 4 } },
                 React.createElement(WsLED, { color: "#80ddff", size: 4 }),
                 React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(128,221,255,0.6)" }, "GRID")
@@ -3083,7 +3083,7 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { display: "flex", justifyContent: "center" } },
                 renderGridMiniPreview(savedLevels.length > 0 ? savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0] : null, "rgba(128,221,255,0.3)"))
             ),
-            React.createElement("div", { onClick: function() { setScreen("designer"); setBdCurrentView("list"); setBdSavedTab("active"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(200,184,255,0.22)", borderTop: "3px solid #c8b8ff", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
+            React.createElement("div", { onClick: function() { setScreen("designer"); setBdCurrentView("list"); setBdSavedTab("active"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(200,184,255,0.22)", borderRight: "3px solid #c8b8ff", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 3, marginBottom: 4 } },
                 React.createElement(WsLED, { color: "#c8b8ff", size: 4 }),
                 React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(200,184,255,0.6)" }, "BLOCKS")
@@ -3094,7 +3094,7 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { display: "flex", justifyContent: "center" } },
                 renderBlocksSetPreview(bdActiveMap, bdSaved))
             ),
-            React.createElement("div", { onClick: function() { setScreen("vfx"); setVfxCurrentView("list"); setVfxSavedTab("active"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(255,180,60,0.22)", borderTop: "3px solid #ffb43c", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
+            React.createElement("div", { onClick: function() { setScreen("vfx"); setVfxCurrentView("list"); setVfxSavedTab("active"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(255,180,60,0.22)", borderRight: "3px solid #ffb43c", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 3, marginBottom: 4 } },
                 React.createElement(WsLED, { color: "#ffb43c", size: 4 }),
                 React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(255,180,60,0.6)" }, "VFX")
@@ -3105,7 +3105,7 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { display: "flex", justifyContent: "center", alignItems: "center", marginTop: 25 } },
                 renderVfxSetPreview(vfxActiveMap, vfxSaved))
             ),
-            React.createElement("div", { onClick: function() { setScreen("ufo"); var ad = ufoGetActiveDesign(); if (ad) ufoOpenEditor(ad); else setUfoView("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(100,220,180,0.22)", borderTop: "3px solid #64dcb4", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
+            React.createElement("div", { onClick: function() { setScreen("ufo"); var ad = ufoGetActiveDesign(); if (ad) ufoOpenEditor(ad); else setUfoView("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(100,220,180,0.22)", borderRight: "3px solid #64dcb4", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 3, marginBottom: 4 } },
                 React.createElement(WsLED, { color: "#64dcb4", size: 4 }),
                 React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(100,220,180,0.6)" }, "UFO")
@@ -3114,7 +3114,7 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { display: "flex", justifyContent: "center" } },
                 React.createElement(UFOBlockSvg, { size: 56, design: ufoGetActiveDesign(), uid: "loadout-ufo" }))
             ),
-            React.createElement("div", { onClick: function() { setScreen("hangar"); var sd = null; for (var i = 0; i < shipSaved.length; i++) { if (shipSaved[i].id === shipActiveId) { sd = shipSaved[i]; break; } } if (sd) shipOpenEditor(sd); else setShipView("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(255,138,170,0.22)", borderTop: "3px solid #ff8aaa", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
+            React.createElement("div", { onClick: function() { setScreen("hangar"); var sd = null; for (var i = 0; i < shipSaved.length; i++) { if (shipSaved[i].id === shipActiveId) { sd = shipSaved[i]; break; } } if (sd) shipOpenEditor(sd); else setShipView("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(255,138,170,0.22)", borderRight: "3px solid #ff8aaa", borderRadius: 7, padding: "7px 8px", cursor: "pointer" } },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 3, marginBottom: 4 } },
                 React.createElement(WsLED, { color: "#ff8aaa", size: 4 }),
                 React.createElement(WsMono, { size: 6.5, ls: 0.5, color: "rgba(255,138,170,0.6)" }, "SHIP")
