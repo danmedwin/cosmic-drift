@@ -412,12 +412,16 @@ function ShipDesignSvg(props) {
   var d = props.design || SHIP_DEFAULT_DESIGN;
   var parts = Array.isArray(d.parts) ? d.parts : [];
   var selIdx = typeof props.selectedIdx === "number" ? props.selectedIdx : -1;
+  // selectedIndices is the multi-select extension; falls back to single selIdx
+  // when not provided so existing callers keep working.
+  var selSet = Array.isArray(props.selectedIndices) ? props.selectedIndices : null;
   var idRef = useRef(null);
   if (idRef.current === null) idRef.current = "auto" + (++shipSvgUidCounter);
   var uid = props.uid || idRef.current;
   var els = [];
   for (var pi = 0; pi < parts.length; pi++) {
-    var el = shipRenderPart(parts[pi], uid + "-p" + pi, pi === selIdx);
+    var isSel = selSet ? selSet.indexOf(pi) >= 0 : (pi === selIdx);
+    var el = shipRenderPart(parts[pi], uid + "-p" + pi, isSel);
     if (el) els.push(el);
   }
   return React.createElement("svg", { ref: svgRef, viewBox: "0 0 40 40", width: String(size), height: String(size), style: Object.assign({ display: "block" }, svgStyle) },
@@ -1402,6 +1406,10 @@ export default function CosmicWorkshop() {
   var _shipResetConfirm = useState(false), shipResetConfirm = _shipResetConfirm[0], setShipResetConfirm = _shipResetConfirm[1];
   var shipDirtyRef = useRef(false);
   var _shipSelectedPart = useState(-1), shipSelectedPart = _shipSelectedPart[0], setShipSelectedPart = _shipSelectedPart[1];
+  // Multi-select: extra indices beyond the primary. Effective selection is
+  // shipSelectedPart (if >= 0) ∪ shipSelectedExtras. Canvas taps clear extras
+  // (single-select gesture); the checkbox in the LIST tab toggles extras.
+  var _shipSelectedExtras = useState([]), shipSelectedExtras = _shipSelectedExtras[0], setShipSelectedExtras = _shipSelectedExtras[1];
   var shipDragRef = useRef(null);
   // Tracks an active row-drag in the parts list (Z-order reordering by drag).
   var shipDragHandleRef = useRef(null);
@@ -2798,6 +2806,7 @@ export default function CosmicWorkshop() {
     shipHistoryReset(initial);
     setShipTab("templates");
     setShipSelectedPart(-1);
+    setShipSelectedExtras([]);
     setShipView("editor");
   }
   function shipOpenEditor(design) {
@@ -2809,6 +2818,7 @@ export default function CosmicWorkshop() {
     shipHistoryReset(initial);
     setShipTab("list");
     setShipSelectedPart(-1);
+    setShipSelectedExtras([]);
     setShipView("editor");
   }
   function shipAddPart(type) {
@@ -2935,6 +2945,89 @@ export default function CosmicWorkshop() {
       return Object.assign({}, prev, { parts: list });
     }, "size_" + idx + "_" + key);
   }
+  // ── Multi-select helpers ──
+  // Effective selection = primary index ∪ extras (deduped, in canvas order).
+  function shipGetSelected() {
+    var out = [];
+    var seen = {};
+    if (shipSelectedPart >= 0) { out.push(shipSelectedPart); seen[shipSelectedPart] = 1; }
+    for (var i = 0; i < shipSelectedExtras.length; i++) {
+      var ix = shipSelectedExtras[i];
+      if (!seen[ix]) { out.push(ix); seen[ix] = 1; }
+    }
+    return out;
+  }
+  function shipIsSelected(idx) {
+    if (idx === shipSelectedPart) return true;
+    for (var i = 0; i < shipSelectedExtras.length; i++) if (shipSelectedExtras[i] === idx) return true;
+    return false;
+  }
+  // Checkbox tap on a part row toggles it in/out of extras. When the toggled
+  // row equals the primary, we shift primary off and promote the first extra
+  // (if any) instead of leaving an orphan primary.
+  function shipToggleSelected(idx) {
+    if (idx === shipSelectedPart) {
+      // Removing primary: promote first remaining extra (if any) to primary.
+      if (shipSelectedExtras.length > 0) {
+        var promoted = shipSelectedExtras[0];
+        setShipSelectedPart(promoted);
+        setShipSelectedExtras(shipSelectedExtras.slice(1));
+      } else {
+        setShipSelectedPart(-1);
+      }
+      return;
+    }
+    var inExtras = false;
+    var next = [];
+    for (var i = 0; i < shipSelectedExtras.length; i++) {
+      if (shipSelectedExtras[i] === idx) { inExtras = true; }
+      else next.push(shipSelectedExtras[i]);
+    }
+    if (inExtras) {
+      setShipSelectedExtras(next);
+    } else if (shipSelectedPart < 0) {
+      // No primary yet — make this the primary instead of adding to extras.
+      setShipSelectedPart(idx);
+    } else {
+      setShipSelectedExtras(next.concat([idx]));
+    }
+  }
+  // Fan-out property edit to every selected part as one history step.
+  function shipUpdateSelected(key, val) {
+    var sels = shipGetSelected();
+    if (sels.length === 0) return;
+    if (sels.length === 1) { shipUpdatePart(sels[0], key, val); return; }
+    shipDirtyRef.current = true;
+    shipApplyEdit(function(prev) {
+      var list = (prev.parts || []).slice();
+      for (var i = 0; i < sels.length; i++) {
+        var ix = sels[i];
+        if (list[ix] === undefined) continue;
+        var patch = {}; patch[key] = val;
+        list[ix] = Object.assign({}, list[ix], patch);
+      }
+      return Object.assign({}, prev, { parts: list });
+    }, "multiEdit_" + key);
+  }
+  // Size-aware fan-out: respects shipWhLocked per-part.
+  function shipUpdatePartSizeSelected(key, val) {
+    var sels = shipGetSelected();
+    if (sels.length === 0) return;
+    if (sels.length === 1) { shipUpdatePartSize(sels[0], key, val); return; }
+    shipDirtyRef.current = true;
+    shipApplyEdit(function(prev) {
+      var list = (prev.parts || []).slice();
+      for (var i = 0; i < sels.length; i++) {
+        var ix = sels[i];
+        var p = list[ix]; if (!p) continue;
+        var nw = p.w, nh = p.h;
+        if (key === "w") { nw = val; if (shipWhLocked && p.w > 0) nh = p.h * (val / p.w); }
+        else { nh = val; if (shipWhLocked && p.h > 0) nw = p.w * (val / p.h); }
+        list[ix] = Object.assign({}, p, { w: Math.max(0.5, nw), h: Math.max(0.5, nh) });
+      }
+      return Object.assign({}, prev, { parts: list });
+    }, "multiSize_" + key);
+  }
   // Replace / Add / Cancel popup shown when tapping a hull preset that would
   // overwrite existing parts.
   function renderHullPresetOverlay(hullId, onCancel, onChoose) {
@@ -2989,6 +3082,7 @@ export default function CosmicWorkshop() {
       var hw = ((p.w || 8) / 2) + 1.5, hh = ((p.h || 8) / 2) + 1.5;
       if (px >= p.x - hw && px <= p.x + hw && py >= p.y - hh && py <= p.y + hh) {
         setShipSelectedPart(i);
+        setShipSelectedExtras([]);
         shipDragRef.current = { idx: i, offX: px - p.x, offY: py - p.y };
         if (e.currentTarget.setPointerCapture && e.pointerId != null) {
           try { e.currentTarget.setPointerCapture(e.pointerId); } catch(err) {}
@@ -2997,6 +3091,7 @@ export default function CosmicWorkshop() {
       }
     }
     setShipSelectedPart(-1);
+    setShipSelectedExtras([]);
   }
   function shipPreviewPointerMove(e) {
     if (!shipDragRef.current) return;
@@ -4185,7 +4280,7 @@ export default function CosmicWorkshop() {
                 onPointerUp:   shipPreviewPointerUp,
                 onPointerCancel: shipPreviewPointerUp
               },
-                React.createElement(ShipDesignSvg, { size: shipPreviewSize - 8, design: shipEdit, uid: "edit", selectedIdx: shipSelectedPart, style: shipEdit.glowEnabled ? { filter: "drop-shadow(0 0 " + (shipEdit.glowIntensity || 10) + "px " + (shipEdit.glowColor || "#ff88aa") + ")" } : {} })),
+                React.createElement(ShipDesignSvg, { size: shipPreviewSize - 8, design: shipEdit, uid: "edit", selectedIndices: shipGetSelected(), style: shipEdit.glowEnabled ? { filter: "drop-shadow(0 0 " + (shipEdit.glowIntensity || 10) + "px " + (shipEdit.glowColor || "#ff88aa") + ")" } : {} })),
               React.createElement("div", {
                 onPointerDown: shipResizePointerDown,
                 onPointerMove: shipResizePointerMove,
@@ -4270,42 +4365,42 @@ export default function CosmicWorkshop() {
               renderShipSelectedHeader(sel),
               React.createElement(BDColorPicker, { label: fillMode === "solid" ? "Color" : "Color 1", value: sel.color,
                 presets: ["#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70cc", "#a0a8b8", "#ffffff", "#222a3a"],
-                onChange: function(v) { shipUpdatePart(shipSelectedPart, "color", v); } }),
+                onChange: function(v) { shipUpdateSelected("color", v); } }),
               React.createElement(BDSlider, { label: "Opacity", value: sel.opacity, min: 0, max: 1, step: 0.05, displayValue: Math.round((sel.opacity || 0) * 100) + "%",
-                onChange: function(v) { shipUpdatePart(shipSelectedPart, "opacity", v); } }),
+                onChange: function(v) { shipUpdateSelected("opacity", v); } }),
               // Fill mode selector + gradient controls (color2, angle for linear).
               React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, marginTop: 12, marginBottom: 6, letterSpacing: 0.5, textTransform: "uppercase" } }, "Fill Mode"),
               React.createElement("div", { style: { display: "flex", gap: 4, marginBottom: 10 } },
                 fillModes.map(function(m) {
                   var on = fillMode === m.id;
-                  return React.createElement("div", { key: m.id, onClick: function() { shipUpdatePart(shipSelectedPart, "fillMode", m.id); },
+                  return React.createElement("div", { key: m.id, onClick: function() { shipUpdateSelected("fillMode", m.id); },
                     style: { flex: 1, padding: "7px 6px", textAlign: "center", borderRadius: 6, cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: 0.5, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase", background: on ? "rgba(255,138,170,0.2)" : "rgba(255,255,255,0.04)", border: on ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.1)", color: on ? "#ff8aaa" : "rgba(180,200,220,0.6)" } }, m.label);
                 })),
               fillMode !== "solid" && React.createElement(BDColorPicker, { label: "Color 2", value: sel.color2 || sel.color,
                 presets: ["#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70cc", "#a0a8b8", "#ffffff", "#222a3a"],
-                onChange: function(v) { shipUpdatePart(shipSelectedPart, "color2", v); } }),
+                onChange: function(v) { shipUpdateSelected("color2", v); } }),
               fillMode === "linear" && React.createElement(BDSlider, { label: "Gradient Angle", value: sel.gradAngle || 0, min: 0, max: 360, step: 15, displayValue: (sel.gradAngle || 0) + "°",
-                onChange: function(v) { shipUpdatePart(shipSelectedPart, "gradAngle", v); } }),
+                onChange: function(v) { shipUpdateSelected("gradAngle", v); } }),
               fillMode === "radial" && React.createElement(BDSlider, { label: "Center Size", value: sel.gradStop || 0, min: 0, max: 0.95, step: 0.05, displayValue: Math.round((sel.gradStop || 0) * 100) + "%",
-                onChange: function(v) { shipUpdatePart(shipSelectedPart, "gradStop", v); } }),
+                onChange: function(v) { shipUpdateSelected("gradStop", v); } }),
               React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, marginTop: 12, marginBottom: 4, letterSpacing: 0.5, textTransform: "uppercase" } }, "Border"),
               React.createElement(BDColorPicker, { label: "Border Color", value: sel.bc || "#000000",
                 presets: ["#000000", "#222a3a", "#ffffff", "#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70cc"],
-                onChange: function(v) { shipUpdatePart(shipSelectedPart, "bc", v); } }),
+                onChange: function(v) { shipUpdateSelected("bc", v); } }),
               React.createElement(BDSlider, { label: "Border Width", value: sel.bw || 0, min: 0, max: 4, step: 0.1, displayValue: (sel.bw || 0).toFixed(1),
-                onChange: function(v) { shipUpdatePart(shipSelectedPart, "bw", v); } }),
+                onChange: function(v) { shipUpdateSelected("bw", v); } }),
               React.createElement(BDSlider, { label: "Border Opacity", value: typeof sel.bo === "number" ? sel.bo : 1, min: 0, max: 1, step: 0.05, displayValue: Math.round((typeof sel.bo === "number" ? sel.bo : 1) * 100) + "%",
-                onChange: function(v) { shipUpdatePart(shipSelectedPart, "bo", v); } }),
+                onChange: function(v) { shipUpdateSelected("bo", v); } }),
               // ── Glow: per-part halo via CSS drop-shadow filter ──
               React.createElement("div", { style: { marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between" } },
                 React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, letterSpacing: 0.5, textTransform: "uppercase" } }, "Glow"),
-                React.createElement(BDToggle, { value: sel.glowEnabled || false, onChange: function(v) { shipUpdatePart(shipSelectedPart, "glowEnabled", v); } })),
+                React.createElement(BDToggle, { value: sel.glowEnabled || false, onChange: function(v) { shipUpdateSelected("glowEnabled", v); } })),
               sel.glowEnabled && React.createElement(React.Fragment, null,
                 React.createElement(BDColorPicker, { label: "Glow Color", value: sel.glowColor || "#80ddff",
                   presets: ["#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70ff", "#ffffff", "#ff6040", "#40c8ff"],
-                  onChange: function(v) { shipUpdatePart(shipSelectedPart, "glowColor", v); } }),
+                  onChange: function(v) { shipUpdateSelected("glowColor", v); } }),
                 React.createElement(BDSlider, { label: "Glow Intensity", value: sel.glowIntensity || 4, min: 1, max: 20, step: 0.5, displayValue: (sel.glowIntensity || 4) + "px",
-                  onChange: function(v) { shipUpdatePart(shipSelectedPart, "glowIntensity", v); } })));
+                  onChange: function(v) { shipUpdateSelected("glowIntensity", v); } })));
           })(),
           // ── POSITION: geometry for the selected part ──
           shipTab === "position" && (function() {
@@ -4315,15 +4410,15 @@ export default function CosmicWorkshop() {
             return React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,138,170,0.25)", borderRadius: 12, padding: "12px 16px 8px" } },
               renderShipSelectedHeader(sel),
               React.createElement(BDSlider, { label: "Position X", value: sel.x, min: 0, max: 40, step: 0.5, displayValue: sel.x.toFixed(1),
-                onChange: function(v) { shipUpdatePart(shipSelectedPart, "x", v); } }),
+                onChange: function(v) { shipUpdateSelected("x", v); } }),
               React.createElement(BDSlider, { label: "Position Y", value: sel.y, min: 0, max: 40, step: 0.5, displayValue: sel.y.toFixed(1),
-                onChange: function(v) { shipUpdatePart(shipSelectedPart, "y", v); } }),
+                onChange: function(v) { shipUpdateSelected("y", v); } }),
               React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 36px", gap: 8, alignItems: "stretch" } },
                 React.createElement("div", null,
                   React.createElement(BDSlider, { label: "Width", value: sel.w, min: 1, max: 30, step: 0.5, displayValue: sel.w.toFixed(1),
-                    onChange: function(v) { shipUpdatePartSize(shipSelectedPart, "w", v); } }),
+                    onChange: function(v) { shipUpdatePartSizeSelected("w", v); } }),
                   React.createElement(BDSlider, { label: "Height", value: sel.h, min: 0.5, max: 30, step: 0.5, displayValue: sel.h.toFixed(1),
-                    onChange: function(v) { shipUpdatePartSize(shipSelectedPart, "h", v); } })),
+                    onChange: function(v) { shipUpdatePartSizeSelected("h", v); } })),
                 React.createElement("div", {
                   onClick: function() { setShipWhLocked(!shipWhLocked); },
                   title: shipWhLocked ? "Width/Height locked" : "Lock width/height ratio",
@@ -4332,13 +4427,13 @@ export default function CosmicWorkshop() {
                     border: shipWhLocked ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.1)" } },
                   shipLockSvg(18, shipWhLocked))),
               sel.type === "rect" && React.createElement(BDSlider, { label: "Corner Radius", value: sel.cr || 0, min: 0, max: Math.min(sel.w, sel.h) / 2, step: 0.25, displayValue: (sel.cr || 0).toFixed(2),
-                onChange: function(v) { shipUpdatePart(shipSelectedPart, "cr", v); } }),
+                onChange: function(v) { shipUpdateSelected("cr", v); } }),
               sel.type === "trapezoid" && React.createElement(BDSlider, { label: "Top Width", value: typeof sel.tw === "number" ? sel.tw : sel.w / 2, min: 0, max: sel.w * 1.5, step: 0.25, displayValue: (typeof sel.tw === "number" ? sel.tw : sel.w / 2).toFixed(2),
-                onChange: function(v) { shipUpdatePart(shipSelectedPart, "tw", v); } }),
+                onChange: function(v) { shipUpdateSelected("tw", v); } }),
               sel.type === "trapezoid" && React.createElement(BDSlider, { label: "Top Offset", value: sel.tofs || 0, min: -sel.w / 2, max: sel.w / 2, step: 0.25, displayValue: (sel.tofs || 0).toFixed(2),
-                onChange: function(v) { shipUpdatePart(shipSelectedPart, "tofs", v); } }),
+                onChange: function(v) { shipUpdateSelected("tofs", v); } }),
               React.createElement(BDSlider, { label: "Rotation", value: sel.rot || 0, min: 0, max: 360, step: 5, displayValue: (sel.rot || 0) + "°",
-                onChange: function(v) { shipUpdatePart(shipSelectedPart, "rot", v); } }),
+                onChange: function(v) { shipUpdateSelected("rot", v); } }),
               partsList.length > 1 && React.createElement(BDSlider, { label: "Z (layer)", value: shipSelectedPart, min: 0, max: partsList.length - 1, step: 1, displayValue: shipSelectedPart + " / " + (partsList.length - 1),
                 onChange: function(v) { shipReorderPart(shipSelectedPart, Math.round(v)); } }));
           })(),
@@ -4355,11 +4450,19 @@ export default function CosmicWorkshop() {
                   // is unchanged; we just iterate from the end.
                   partsList.slice().reverse().map(function(p, displayIdx) {
                     var idx = partsList.length - 1 - displayIdx;
-                    var isSel = idx === shipSelectedPart;
+                    var isPrimary = idx === shipSelectedPart;
+                    var isSel = shipIsSelected(idx);
                     var displayName = p.name || SHIP_PART_LABELS[p.type];
                     var isRenaming = shipPartRenamingIdx === idx;
-                    return React.createElement("div", Object.assign({ key: idx, onClick: function() { setShipSelectedPart(idx); },
-                      style: { display: "flex", alignItems: "center", gap: 6, padding: "6px 6px", borderRadius: 6, cursor: "pointer", background: isSel ? "rgba(255,138,170,0.12)" : "rgba(255,255,255,0.02)", border: isSel ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.05)" } }, { "data-shippart-row": "1", "data-shippart-actual-idx": String(idx) }),
+                    return React.createElement("div", Object.assign({ key: idx, onClick: function() { setShipSelectedPart(idx); setShipSelectedExtras([]); },
+                      style: { display: "flex", alignItems: "center", gap: 6, padding: "6px 6px", borderRadius: 6, cursor: "pointer", background: isSel ? "rgba(255,138,170,0.12)" : "rgba(255,255,255,0.02)", border: isPrimary ? "1px solid rgba(255,138,170,0.6)" : (isSel ? "1px solid rgba(255,138,170,0.3)" : "1px solid rgba(255,255,255,0.05)") } }, { "data-shippart-row": "1", "data-shippart-actual-idx": String(idx) }),
+                      // Multi-select checkbox. Tap toggles in/out of the selection
+                      // without disturbing the row tap (which replaces selection).
+                      React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipToggleSelected(idx); },
+                        title: isSel ? "Remove from selection" : "Add to selection",
+                        style: { width: 18, height: 18, borderRadius: 4, border: isSel ? "1.5px solid #ff8aaa" : "1.5px solid rgba(180,200,220,0.35)", background: isSel ? "#ff8aaa" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flex: "0 0 auto" } },
+                        isSel && React.createElement("svg", { width: 12, height: 12, viewBox: "0 0 24 24", fill: "none", stroke: "#1a0820", strokeWidth: 3.2, strokeLinecap: "round", strokeLinejoin: "round" },
+                          React.createElement("path", { d: "M5 12l5 5L20 7" }))),
                       // Drag handle (6-dot grip) for reordering Z-layer
                       React.createElement("div", {
                         onPointerDown: function(e) { shipDragHandleStart(idx, e); },

@@ -2749,12 +2749,16 @@ function ShipDesignSvg(props) {
   var d = props.design || SHIP_DEFAULT_DESIGN;
   var parts = Array.isArray(d.parts) ? d.parts : [];
   var selIdx = typeof props.selectedIdx === "number" ? props.selectedIdx : -1;
+  // selectedIndices is the multi-select extension; falls back to single selIdx
+  // when not provided so existing callers keep working.
+  var selSet = Array.isArray(props.selectedIndices) ? props.selectedIndices : null;
   var idRef = useRef(null);
   if (idRef.current === null) idRef.current = "auto" + ++shipSvgUidCounter;
   var uid = props.uid || idRef.current;
   var els = [];
   for (var pi = 0; pi < parts.length; pi++) {
-    var el = shipRenderPart(parts[pi], uid + "-p" + pi, pi === selIdx);
+    var isSel = selSet ? selSet.indexOf(pi) >= 0 : pi === selIdx;
+    var el = shipRenderPart(parts[pi], uid + "-p" + pi, isSel);
     if (el) els.push(el);
   }
   return React.createElement("svg", {
@@ -5873,6 +5877,12 @@ function CosmicWorkshop() {
   var _shipSelectedPart = useState(-1),
     shipSelectedPart = _shipSelectedPart[0],
     setShipSelectedPart = _shipSelectedPart[1];
+  // Multi-select: extra indices beyond the primary. Effective selection is
+  // shipSelectedPart (if >= 0) ∪ shipSelectedExtras. Canvas taps clear extras
+  // (single-select gesture); the checkbox in the LIST tab toggles extras.
+  var _shipSelectedExtras = useState([]),
+    shipSelectedExtras = _shipSelectedExtras[0],
+    setShipSelectedExtras = _shipSelectedExtras[1];
   var shipDragRef = useRef(null);
   // Tracks an active row-drag in the parts list (Z-order reordering by drag).
   var shipDragHandleRef = useRef(null);
@@ -8897,6 +8907,7 @@ function CosmicWorkshop() {
     shipHistoryReset(initial);
     setShipTab("templates");
     setShipSelectedPart(-1);
+    setShipSelectedExtras([]);
     setShipView("editor");
   }
   function shipOpenEditor(design) {
@@ -8910,6 +8921,7 @@ function CosmicWorkshop() {
     shipHistoryReset(initial);
     setShipTab("list");
     setShipSelectedPart(-1);
+    setShipSelectedExtras([]);
     setShipView("editor");
   }
   function shipAddPart(type) {
@@ -9104,6 +9116,117 @@ function CosmicWorkshop() {
         parts: list
       });
     }, "size_" + idx + "_" + key);
+  }
+  // ── Multi-select helpers ──
+  // Effective selection = primary index ∪ extras (deduped, in canvas order).
+  function shipGetSelected() {
+    var out = [];
+    var seen = {};
+    if (shipSelectedPart >= 0) {
+      out.push(shipSelectedPart);
+      seen[shipSelectedPart] = 1;
+    }
+    for (var i = 0; i < shipSelectedExtras.length; i++) {
+      var ix = shipSelectedExtras[i];
+      if (!seen[ix]) {
+        out.push(ix);
+        seen[ix] = 1;
+      }
+    }
+    return out;
+  }
+  function shipIsSelected(idx) {
+    if (idx === shipSelectedPart) return true;
+    for (var i = 0; i < shipSelectedExtras.length; i++) if (shipSelectedExtras[i] === idx) return true;
+    return false;
+  }
+  // Checkbox tap on a part row toggles it in/out of extras. When the toggled
+  // row equals the primary, we shift primary off and promote the first extra
+  // (if any) instead of leaving an orphan primary.
+  function shipToggleSelected(idx) {
+    if (idx === shipSelectedPart) {
+      // Removing primary: promote first remaining extra (if any) to primary.
+      if (shipSelectedExtras.length > 0) {
+        var promoted = shipSelectedExtras[0];
+        setShipSelectedPart(promoted);
+        setShipSelectedExtras(shipSelectedExtras.slice(1));
+      } else {
+        setShipSelectedPart(-1);
+      }
+      return;
+    }
+    var inExtras = false;
+    var next = [];
+    for (var i = 0; i < shipSelectedExtras.length; i++) {
+      if (shipSelectedExtras[i] === idx) {
+        inExtras = true;
+      } else next.push(shipSelectedExtras[i]);
+    }
+    if (inExtras) {
+      setShipSelectedExtras(next);
+    } else if (shipSelectedPart < 0) {
+      // No primary yet — make this the primary instead of adding to extras.
+      setShipSelectedPart(idx);
+    } else {
+      setShipSelectedExtras(next.concat([idx]));
+    }
+  }
+  // Fan-out property edit to every selected part as one history step.
+  function shipUpdateSelected(key, val) {
+    var sels = shipGetSelected();
+    if (sels.length === 0) return;
+    if (sels.length === 1) {
+      shipUpdatePart(sels[0], key, val);
+      return;
+    }
+    shipDirtyRef.current = true;
+    shipApplyEdit(function (prev) {
+      var list = (prev.parts || []).slice();
+      for (var i = 0; i < sels.length; i++) {
+        var ix = sels[i];
+        if (list[ix] === undefined) continue;
+        var patch = {};
+        patch[key] = val;
+        list[ix] = Object.assign({}, list[ix], patch);
+      }
+      return Object.assign({}, prev, {
+        parts: list
+      });
+    }, "multiEdit_" + key);
+  }
+  // Size-aware fan-out: respects shipWhLocked per-part.
+  function shipUpdatePartSizeSelected(key, val) {
+    var sels = shipGetSelected();
+    if (sels.length === 0) return;
+    if (sels.length === 1) {
+      shipUpdatePartSize(sels[0], key, val);
+      return;
+    }
+    shipDirtyRef.current = true;
+    shipApplyEdit(function (prev) {
+      var list = (prev.parts || []).slice();
+      for (var i = 0; i < sels.length; i++) {
+        var ix = sels[i];
+        var p = list[ix];
+        if (!p) continue;
+        var nw = p.w,
+          nh = p.h;
+        if (key === "w") {
+          nw = val;
+          if (shipWhLocked && p.w > 0) nh = p.h * (val / p.w);
+        } else {
+          nh = val;
+          if (shipWhLocked && p.h > 0) nw = p.w * (val / p.h);
+        }
+        list[ix] = Object.assign({}, p, {
+          w: Math.max(0.5, nw),
+          h: Math.max(0.5, nh)
+        });
+      }
+      return Object.assign({}, prev, {
+        parts: list
+      });
+    }, "multiSize_" + key);
   }
   // Replace / Add / Cancel popup shown when tapping a hull preset that would
   // overwrite existing parts.
@@ -9304,6 +9427,7 @@ function CosmicWorkshop() {
         hh = (p.h || 8) / 2 + 1.5;
       if (px >= p.x - hw && px <= p.x + hw && py >= p.y - hh && py <= p.y + hh) {
         setShipSelectedPart(i);
+        setShipSelectedExtras([]);
         shipDragRef.current = {
           idx: i,
           offX: px - p.x,
@@ -9318,6 +9442,7 @@ function CosmicWorkshop() {
       }
     }
     setShipSelectedPart(-1);
+    setShipSelectedExtras([]);
   }
   function shipPreviewPointerMove(e) {
     if (!shipDragRef.current) return;
@@ -14740,7 +14865,7 @@ function CosmicWorkshop() {
     size: shipPreviewSize - 8,
     design: shipEdit,
     uid: "edit",
-    selectedIdx: shipSelectedPart,
+    selectedIndices: shipGetSelected(),
     style: shipEdit.glowEnabled ? {
       filter: "drop-shadow(0 0 " + (shipEdit.glowIntensity || 10) + "px " + (shipEdit.glowColor || "#ff88aa") + ")"
     } : {}
@@ -15086,7 +15211,7 @@ function CosmicWorkshop() {
       value: sel.color,
       presets: ["#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70cc", "#a0a8b8", "#ffffff", "#222a3a"],
       onChange: function (v) {
-        shipUpdatePart(shipSelectedPart, "color", v);
+        shipUpdateSelected("color", v);
       }
     }), React.createElement(BDSlider, {
       label: "Opacity",
@@ -15096,7 +15221,7 @@ function CosmicWorkshop() {
       step: 0.05,
       displayValue: Math.round((sel.opacity || 0) * 100) + "%",
       onChange: function (v) {
-        shipUpdatePart(shipSelectedPart, "opacity", v);
+        shipUpdateSelected("opacity", v);
       }
     }),
     // Fill mode selector + gradient controls (color2, angle for linear).
@@ -15120,7 +15245,7 @@ function CosmicWorkshop() {
       return React.createElement("div", {
         key: m.id,
         onClick: function () {
-          shipUpdatePart(shipSelectedPart, "fillMode", m.id);
+          shipUpdateSelected("fillMode", m.id);
         },
         style: {
           flex: 1,
@@ -15143,7 +15268,7 @@ function CosmicWorkshop() {
       value: sel.color2 || sel.color,
       presets: ["#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70cc", "#a0a8b8", "#ffffff", "#222a3a"],
       onChange: function (v) {
-        shipUpdatePart(shipSelectedPart, "color2", v);
+        shipUpdateSelected("color2", v);
       }
     }), fillMode === "linear" && React.createElement(BDSlider, {
       label: "Gradient Angle",
@@ -15153,7 +15278,7 @@ function CosmicWorkshop() {
       step: 15,
       displayValue: (sel.gradAngle || 0) + "°",
       onChange: function (v) {
-        shipUpdatePart(shipSelectedPart, "gradAngle", v);
+        shipUpdateSelected("gradAngle", v);
       }
     }), fillMode === "radial" && React.createElement(BDSlider, {
       label: "Center Size",
@@ -15163,7 +15288,7 @@ function CosmicWorkshop() {
       step: 0.05,
       displayValue: Math.round((sel.gradStop || 0) * 100) + "%",
       onChange: function (v) {
-        shipUpdatePart(shipSelectedPart, "gradStop", v);
+        shipUpdateSelected("gradStop", v);
       }
     }), React.createElement("div", {
       style: {
@@ -15179,7 +15304,7 @@ function CosmicWorkshop() {
       value: sel.bc || "#000000",
       presets: ["#000000", "#222a3a", "#ffffff", "#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70cc"],
       onChange: function (v) {
-        shipUpdatePart(shipSelectedPart, "bc", v);
+        shipUpdateSelected("bc", v);
       }
     }), React.createElement(BDSlider, {
       label: "Border Width",
@@ -15189,7 +15314,7 @@ function CosmicWorkshop() {
       step: 0.1,
       displayValue: (sel.bw || 0).toFixed(1),
       onChange: function (v) {
-        shipUpdatePart(shipSelectedPart, "bw", v);
+        shipUpdateSelected("bw", v);
       }
     }), React.createElement(BDSlider, {
       label: "Border Opacity",
@@ -15199,7 +15324,7 @@ function CosmicWorkshop() {
       step: 0.05,
       displayValue: Math.round((typeof sel.bo === "number" ? sel.bo : 1) * 100) + "%",
       onChange: function (v) {
-        shipUpdatePart(shipSelectedPart, "bo", v);
+        shipUpdateSelected("bo", v);
       }
     }),
     // ── Glow: per-part halo via CSS drop-shadow filter ──
@@ -15220,14 +15345,14 @@ function CosmicWorkshop() {
     }, "Glow"), React.createElement(BDToggle, {
       value: sel.glowEnabled || false,
       onChange: function (v) {
-        shipUpdatePart(shipSelectedPart, "glowEnabled", v);
+        shipUpdateSelected("glowEnabled", v);
       }
     })), sel.glowEnabled && React.createElement(React.Fragment, null, React.createElement(BDColorPicker, {
       label: "Glow Color",
       value: sel.glowColor || "#80ddff",
       presets: ["#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70ff", "#ffffff", "#ff6040", "#40c8ff"],
       onChange: function (v) {
-        shipUpdatePart(shipSelectedPart, "glowColor", v);
+        shipUpdateSelected("glowColor", v);
       }
     }), React.createElement(BDSlider, {
       label: "Glow Intensity",
@@ -15237,7 +15362,7 @@ function CosmicWorkshop() {
       step: 0.5,
       displayValue: (sel.glowIntensity || 4) + "px",
       onChange: function (v) {
-        shipUpdatePart(shipSelectedPart, "glowIntensity", v);
+        shipUpdateSelected("glowIntensity", v);
       }
     })));
   }(),
@@ -15261,7 +15386,7 @@ function CosmicWorkshop() {
       step: 0.5,
       displayValue: sel.x.toFixed(1),
       onChange: function (v) {
-        shipUpdatePart(shipSelectedPart, "x", v);
+        shipUpdateSelected("x", v);
       }
     }), React.createElement(BDSlider, {
       label: "Position Y",
@@ -15271,7 +15396,7 @@ function CosmicWorkshop() {
       step: 0.5,
       displayValue: sel.y.toFixed(1),
       onChange: function (v) {
-        shipUpdatePart(shipSelectedPart, "y", v);
+        shipUpdateSelected("y", v);
       }
     }), React.createElement("div", {
       style: {
@@ -15288,7 +15413,7 @@ function CosmicWorkshop() {
       step: 0.5,
       displayValue: sel.w.toFixed(1),
       onChange: function (v) {
-        shipUpdatePartSize(shipSelectedPart, "w", v);
+        shipUpdatePartSizeSelected("w", v);
       }
     }), React.createElement(BDSlider, {
       label: "Height",
@@ -15298,7 +15423,7 @@ function CosmicWorkshop() {
       step: 0.5,
       displayValue: sel.h.toFixed(1),
       onChange: function (v) {
-        shipUpdatePartSize(shipSelectedPart, "h", v);
+        shipUpdatePartSizeSelected("h", v);
       }
     })), React.createElement("div", {
       onClick: function () {
@@ -15322,7 +15447,7 @@ function CosmicWorkshop() {
       step: 0.25,
       displayValue: (sel.cr || 0).toFixed(2),
       onChange: function (v) {
-        shipUpdatePart(shipSelectedPart, "cr", v);
+        shipUpdateSelected("cr", v);
       }
     }), sel.type === "trapezoid" && React.createElement(BDSlider, {
       label: "Top Width",
@@ -15332,7 +15457,7 @@ function CosmicWorkshop() {
       step: 0.25,
       displayValue: (typeof sel.tw === "number" ? sel.tw : sel.w / 2).toFixed(2),
       onChange: function (v) {
-        shipUpdatePart(shipSelectedPart, "tw", v);
+        shipUpdateSelected("tw", v);
       }
     }), sel.type === "trapezoid" && React.createElement(BDSlider, {
       label: "Top Offset",
@@ -15342,7 +15467,7 @@ function CosmicWorkshop() {
       step: 0.25,
       displayValue: (sel.tofs || 0).toFixed(2),
       onChange: function (v) {
-        shipUpdatePart(shipSelectedPart, "tofs", v);
+        shipUpdateSelected("tofs", v);
       }
     }), React.createElement(BDSlider, {
       label: "Rotation",
@@ -15352,7 +15477,7 @@ function CosmicWorkshop() {
       step: 5,
       displayValue: (sel.rot || 0) + "°",
       onChange: function (v) {
-        shipUpdatePart(shipSelectedPart, "rot", v);
+        shipUpdateSelected("rot", v);
       }
     }), partsList.length > 1 && React.createElement(BDSlider, {
       label: "Z (layer)",
@@ -15402,13 +15527,15 @@ function CosmicWorkshop() {
     // is unchanged; we just iterate from the end.
     partsList.slice().reverse().map(function (p, displayIdx) {
       var idx = partsList.length - 1 - displayIdx;
-      var isSel = idx === shipSelectedPart;
+      var isPrimary = idx === shipSelectedPart;
+      var isSel = shipIsSelected(idx);
       var displayName = p.name || SHIP_PART_LABELS[p.type];
       var isRenaming = shipPartRenamingIdx === idx;
       return React.createElement("div", Object.assign({
         key: idx,
         onClick: function () {
           setShipSelectedPart(idx);
+          setShipSelectedExtras([]);
         },
         style: {
           display: "flex",
@@ -15418,12 +15545,44 @@ function CosmicWorkshop() {
           borderRadius: 6,
           cursor: "pointer",
           background: isSel ? "rgba(255,138,170,0.12)" : "rgba(255,255,255,0.02)",
-          border: isSel ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.05)"
+          border: isPrimary ? "1px solid rgba(255,138,170,0.6)" : isSel ? "1px solid rgba(255,138,170,0.3)" : "1px solid rgba(255,255,255,0.05)"
         }
       }, {
         "data-shippart-row": "1",
         "data-shippart-actual-idx": String(idx)
       }),
+      // Multi-select checkbox. Tap toggles in/out of the selection
+      // without disturbing the row tap (which replaces selection).
+      React.createElement("div", {
+        onClick: function (e) {
+          e.stopPropagation();
+          shipToggleSelected(idx);
+        },
+        title: isSel ? "Remove from selection" : "Add to selection",
+        style: {
+          width: 18,
+          height: 18,
+          borderRadius: 4,
+          border: isSel ? "1.5px solid #ff8aaa" : "1.5px solid rgba(180,200,220,0.35)",
+          background: isSel ? "#ff8aaa" : "transparent",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          flex: "0 0 auto"
+        }
+      }, isSel && React.createElement("svg", {
+        width: 12,
+        height: 12,
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "#1a0820",
+        strokeWidth: 3.2,
+        strokeLinecap: "round",
+        strokeLinejoin: "round"
+      }, React.createElement("path", {
+        d: "M5 12l5 5L20 7"
+      }))),
       // Drag handle (6-dot grip) for reordering Z-layer
       React.createElement("div", {
         onPointerDown: function (e) {
