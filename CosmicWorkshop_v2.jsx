@@ -3559,8 +3559,7 @@ export default function CosmicWorkshop() {
               if (!bdDesign.assignedTo) { setBdSaveStatus("Choose a Block type first"); setTimeout(function() { setBdSaveStatus(""); }, 2500); return; }
               if (!bdEditId || bdDirty) { setBdSaveStatus("Save the design first"); setTimeout(function() { setBdSaveStatus(""); }, 2500); return; }
               bdToggleActive({ id: bdEditId, assignedTo: bdDesign.assignedTo });
-            }, style: Object.assign({}, BTN_TOPBAR, { color: bdIsActive ? "#80dd90" : "rgba(200,210,220,0.7)", border: bdIsActive ? "2px solid rgba(80,200,100,0.5)" : PNLB }) }, bdIsActive ? "★ Active" : "Set Active"),
-            React.createElement("div", { style: { marginLeft: 4 } }, React.createElement(BDBlockPreview, { design: bdDisplayDesign, size: 36 }))) }),
+            }, style: Object.assign({}, BTN_TOPBAR, { color: bdIsActive ? "#80dd90" : "rgba(200,210,220,0.7)", border: bdIsActive ? "2px solid rgba(80,200,100,0.5)" : PNLB }) }, bdIsActive ? "★ Active" : "Set Active")) }),
         bdSaveStatus && React.createElement("div", { style: { padding: "6px 12px", textAlign: "center", fontSize: 12, fontWeight: 600, color: "#80dd90", background: "rgba(80,200,100,0.1)", zIndex: 2, position: "relative" } }, bdSaveStatus),
         React.createElement("div", { ref: bdScrollRef, style: { flex: 1, overflowY: "auto", fontFamily: "'Exo 2', sans-serif" } },
           // Preview area with 3x3 grid + main preview
