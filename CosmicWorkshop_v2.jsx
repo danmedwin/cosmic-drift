@@ -1330,6 +1330,9 @@ export default function CosmicWorkshop() {
   var _vfxSavedTab = useState("custom"), vfxSavedTab = _vfxSavedTab[0], setVfxSavedTab = _vfxSavedTab[1];
   var _vfxSortMode = useState("date_new"), vfxSortMode = _vfxSortMode[0], setVfxSortMode = _vfxSortMode[1];
   var _vfxEditDesign = useState(function() { return vfxDefaultDesign(null); }), vfxEditDesign = _vfxEditDesign[0], setVfxEditDesign = _vfxEditDesign[1];
+  // Undo/redo (same pattern as BD: see bdHistoryPush comment for details).
+  var vfxHistoryRef = useRef({ stack: [], idx: -1, lastKey: null, lastTime: 0 });
+  var _vfxHistVersion = useState(0), vfxHistVersion = _vfxHistVersion[0], setVfxHistVersion = _vfxHistVersion[1];
   var _vfxEditId = useState(null), vfxEditId = _vfxEditId[0], setVfxEditId = _vfxEditId[1];
   var _vfxDirty = useState(false), vfxDirty = _vfxDirty[0], setVfxDirty = _vfxDirty[1];
   var _vfxPrevKey = useState(0), vfxPrevKey = _vfxPrevKey[0], setVfxPrevKey = _vfxPrevKey[1];
@@ -1352,6 +1355,8 @@ export default function CosmicWorkshop() {
   var _ufoView = useState("list"), ufoView = _ufoView[0], setUfoView = _ufoView[1];
   var _ufoEditDesign = useState(function() { return Object.assign({}, UFO_DEFAULT_DESIGN, { name: "" }); }), ufoEditDesign = _ufoEditDesign[0], setUfoEditDesign = _ufoEditDesign[1];
   var _ufoEditId = useState(null), ufoEditId = _ufoEditId[0], setUfoEditId = _ufoEditId[1];
+  var ufoHistoryRef = useRef({ stack: [], idx: -1, lastKey: null, lastTime: 0 });
+  var _ufoHistVersion = useState(0), ufoHistVersion = _ufoHistVersion[0], setUfoHistVersion = _ufoHistVersion[1];
   var _ufoSaveStatus = useState(""), ufoSaveStatus = _ufoSaveStatus[0], setUfoSaveStatus = _ufoSaveStatus[1];
   var _ufoDeletingId = useState(null), ufoDeletingId = _ufoDeletingId[0], setUfoDeletingId = _ufoDeletingId[1];
   var _ufoBackWarn = useState(false), ufoShowBackWarn = _ufoBackWarn[0], setUfoShowBackWarn = _ufoBackWarn[1];
@@ -1372,6 +1377,8 @@ export default function CosmicWorkshop() {
   var _shipTab = useState("list"), shipTab = _shipTab[0], setShipTab = _shipTab[1];
   var _shipEdit = useState(function() { return Object.assign({}, SHIP_DEFAULT_DESIGN, { name: "" }); }), shipEdit = _shipEdit[0], setShipEdit = _shipEdit[1];
   var _shipEditId = useState(null), shipEditId = _shipEditId[0], setShipEditId = _shipEditId[1];
+  var shipHistoryRef = useRef({ stack: [], idx: -1, lastKey: null, lastTime: 0 });
+  var _shipHistVersion = useState(0), shipHistVersion = _shipHistVersion[0], setShipHistVersion = _shipHistVersion[1];
   var _shipSaveStatus = useState(""), shipSaveStatus = _shipSaveStatus[0], setShipSaveStatus = _shipSaveStatus[1];
   var _shipDeletingId = useState(null), shipDeletingId = _shipDeletingId[0], setShipDeletingId = _shipDeletingId[1];
   var _shipBackWarn = useState(false), shipShowBackWarn = _shipBackWarn[0], setShipShowBackWarn = _shipBackWarn[1];
@@ -1405,6 +1412,11 @@ export default function CosmicWorkshop() {
   // ══ LEVEL BUILDER STATE ══
   var _lbScreen = useState("list"), lbScreen = _lbScreen[0], setLbScreen = _lbScreen[1];
   var _bg = useState(function() { return new Array(COLS * ROWS).fill(0); }), builderGrid = _bg[0], setBuilderGrid = _bg[1];
+  // Undo/redo: snapshot is { grid, shipStart, name, plasma } since all four
+  // are editable in the builder. Drag-paint and name typing coalesce within
+  // a 600 ms window per key so one Undo reverts the whole stroke.
+  var lbHistoryRef = useRef({ stack: [], idx: -1, lastKey: null, lastTime: 0 });
+  var _lbHistVersion = useState(0), lbHistVersion = _lbHistVersion[0], setLbHistVersion = _lbHistVersion[1];
   var _bss = useState(3), builderShipStart = _bss[0], setBuilderShipStart = _bss[1];
   var _sbt = useState(null), selectedBlockType = _sbt[0], setSelectedBlockType = _sbt[1];
   var _cratePanel = useState(false), crateSubPanelOpen = _cratePanel[0], setCrateSubPanelOpen = _cratePanel[1];
@@ -1637,20 +1649,59 @@ export default function CosmicWorkshop() {
     openBuilder({ grid: lv.grid.slice(), shipStart: lv.shipStart, startPlasma: lv.startPlasma, id: null, name: (lv.name || "Untitled") + " (copy)" });
   }
 
-  function openBuilder(levelData) {
-    if (levelData) {
-      setBuilderGrid(levelData.grid.slice());
-      setBuilderShipStart(levelData.shipStart != null ? levelData.shipStart : 3);
-      setEditingLevelId(levelData.id || null);
-      setBuilderLevelName(levelData.name || "");
-      setBuilderPlasma(levelData.startPlasma || START_PLASMA);
+  // ── Undo/redo plumbing ──
+  function lbHistoryReset(state) {
+    lbHistoryRef.current = { stack: [JSON.parse(JSON.stringify(state))], idx: 0, lastKey: null, lastTime: 0 };
+    setLbHistVersion(function(v) { return v + 1; });
+  }
+  function lbHistoryPush(state, coalesceKey) {
+    var h = lbHistoryRef.current; var now = Date.now();
+    var snap = JSON.parse(JSON.stringify(state));
+    if (coalesceKey && h.lastKey === coalesceKey && now - h.lastTime < 600 && h.idx >= 0) {
+      h.stack[h.idx] = snap; h.lastTime = now;
     } else {
-      setBuilderGrid(new Array(COLS * ROWS).fill(0));
-      setBuilderShipStart(3);
-      setEditingLevelId(null);
-      setBuilderLevelName("");
-      setBuilderPlasma(START_PLASMA);
+      h.stack = h.stack.slice(0, h.idx + 1); h.stack.push(snap);
+      if (h.stack.length > 50) { h.stack.shift(); }
+      h.idx = h.stack.length - 1; h.lastKey = coalesceKey || null; h.lastTime = now;
     }
+    setLbHistVersion(function(v) { return v + 1; });
+  }
+  function lbApplyHistorySnap(s) {
+    setBuilderGrid(s.grid.slice());
+    setBuilderShipStart(s.shipStart);
+    setBuilderLevelName(s.name);
+    setBuilderPlasma(s.plasma);
+    setBuilderDirty(true);
+  }
+  function lbUndo() {
+    var h = lbHistoryRef.current; if (h.idx <= 0) return;
+    h.idx -= 1; h.lastKey = null;
+    lbApplyHistorySnap(h.stack[h.idx]);
+    setLbHistVersion(function(v) { return v + 1; });
+  }
+  function lbRedo() {
+    var h = lbHistoryRef.current; if (h.idx >= h.stack.length - 1) return;
+    h.idx += 1; h.lastKey = null;
+    lbApplyHistorySnap(h.stack[h.idx]);
+    setLbHistVersion(function(v) { return v + 1; });
+  }
+  var lbCanUndo = lbHistoryRef.current.idx > 0;
+  var lbCanRedo = lbHistoryRef.current.idx < lbHistoryRef.current.stack.length - 1;
+
+  function openBuilder(levelData) {
+    var initial;
+    if (levelData) {
+      initial = { grid: levelData.grid.slice(), shipStart: levelData.shipStart != null ? levelData.shipStart : 3, name: levelData.name || "", plasma: levelData.startPlasma || START_PLASMA };
+      setEditingLevelId(levelData.id || null);
+    } else {
+      initial = { grid: new Array(COLS * ROWS).fill(0), shipStart: 3, name: "", plasma: START_PLASMA };
+      setEditingLevelId(null);
+    }
+    setBuilderGrid(initial.grid.slice());
+    setBuilderShipStart(initial.shipStart);
+    setBuilderLevelName(initial.name);
+    setBuilderPlasma(initial.plasma);
+    lbHistoryReset(initial);
     setSelectedBlockType(null);
     setEraserActive(false);
     setBuilderDirty(false);
@@ -1676,6 +1727,7 @@ export default function CosmicWorkshop() {
         if (g[idx] > 0) g[idx] = 0;
         else return prev;
       }
+      lbHistoryPush({ grid: g, shipStart: builderShipStart, name: builderLevelName, plasma: builderPlasma }, eraserActive ? "erase" : "paint");
       return g;
     });
     setBuilderDirty(true);
@@ -1692,10 +1744,10 @@ export default function CosmicWorkshop() {
   }
 
   function handleBuilderGridTS(e) { e.preventDefault(); builderTouchUsedRef.current = true; var t = e.touches[0]; var canDrag = selectedBlockType !== null || eraserActive; builderDragRef.current = { lastIdx: -1, active: canDrag }; var idx = getBuilderIdxFromTouch(t); if (idx >= 0) { builderCellAction(idx); builderDragRef.current.lastIdx = idx; } }
-  function handleBuilderGridTM(e) { e.preventDefault(); if (!builderDragRef.current || !builderDragRef.current.active) return; var t = e.touches[0]; var idx = getBuilderIdxFromTouch(t); if (idx >= 0 && idx !== builderDragRef.current.lastIdx) { setBuilderGrid(function(prev) { var g = prev.slice(); if (eraserActive) { g[idx] = 0; } else if (selectedBlockType !== null && g[idx] !== selectedBlockType) { if (selectedBlockType === 17 && g.indexOf(17) >= 0) return prev; g[idx] = selectedBlockType; } return g; }); setBuilderDirty(true); builderDragRef.current.lastIdx = idx; } }
+  function handleBuilderGridTM(e) { e.preventDefault(); if (!builderDragRef.current || !builderDragRef.current.active) return; var t = e.touches[0]; var idx = getBuilderIdxFromTouch(t); if (idx >= 0 && idx !== builderDragRef.current.lastIdx) { setBuilderGrid(function(prev) { var g = prev.slice(); var changed = false; if (eraserActive) { if (g[idx] !== 0) { g[idx] = 0; changed = true; } } else if (selectedBlockType !== null && g[idx] !== selectedBlockType) { if (selectedBlockType === 17 && g.indexOf(17) >= 0) return prev; g[idx] = selectedBlockType; changed = true; } if (!changed) return prev; lbHistoryPush({ grid: g, shipStart: builderShipStart, name: builderLevelName, plasma: builderPlasma }, eraserActive ? "erase" : "paint"); return g; }); setBuilderDirty(true); builderDragRef.current.lastIdx = idx; } }
   function handleBuilderGridTE(e) { e.preventDefault(); builderDragRef.current = null; setTimeout(function() { builderTouchUsedRef.current = false; }, 300); }
   function handleBuilderGridMD(e) { if (builderTouchUsedRef.current) return; builderTouchUsedRef.current = true; var canDrag = selectedBlockType !== null || eraserActive; builderDragRef.current = { lastIdx: -1, active: canDrag }; var idx = getBuilderIdxFromTouch(e); if (idx >= 0) { builderCellAction(idx); builderDragRef.current.lastIdx = idx; } }
-  function handleBuilderGridMM(e) { if (!builderDragRef.current || !builderDragRef.current.active) return; var idx = getBuilderIdxFromTouch(e); if (idx >= 0 && idx !== builderDragRef.current.lastIdx) { setBuilderGrid(function(prev) { var g = prev.slice(); if (eraserActive) { g[idx] = 0; } else if (selectedBlockType !== null && g[idx] !== selectedBlockType) { if (selectedBlockType === 17 && g.indexOf(17) >= 0) return prev; g[idx] = selectedBlockType; } return g; }); setBuilderDirty(true); builderDragRef.current.lastIdx = idx; } }
+  function handleBuilderGridMM(e) { if (!builderDragRef.current || !builderDragRef.current.active) return; var idx = getBuilderIdxFromTouch(e); if (idx >= 0 && idx !== builderDragRef.current.lastIdx) { setBuilderGrid(function(prev) { var g = prev.slice(); var changed = false; if (eraserActive) { if (g[idx] !== 0) { g[idx] = 0; changed = true; } } else if (selectedBlockType !== null && g[idx] !== selectedBlockType) { if (selectedBlockType === 17 && g.indexOf(17) >= 0) return prev; g[idx] = selectedBlockType; changed = true; } if (!changed) return prev; lbHistoryPush({ grid: g, shipStart: builderShipStart, name: builderLevelName, plasma: builderPlasma }, eraserActive ? "erase" : "paint"); return g; }); setBuilderDirty(true); builderDragRef.current.lastIdx = idx; } }
   function handleBuilderGridMU() { builderDragRef.current = null; setTimeout(function() { builderTouchUsedRef.current = false; }, 100); }
   function handleBuilderGridClick(e) { if (builderTouchUsedRef.current) return; if (!builderGridRef.current) return; var r = builderGridRef.current.getBoundingClientRect(); var x = e.clientX - r.left, y = e.clientY - r.top; var col = Math.floor(x / (r.width / COLS)); var row = Math.floor(y / (r.height / ROWS)); if (col >= 0 && col < COLS && row >= 0 && row < ROWS) { builderCellAction(row * COLS + col); } }
 
@@ -2036,11 +2088,46 @@ export default function CosmicWorkshop() {
   }
 
   // ── VFX Studio: design list / editor (mirrors the bd* functions) ──
+  // ── Undo/redo plumbing (matches the BD pilot) ──
+  function vfxHistoryReset(state) {
+    vfxHistoryRef.current = { stack: [JSON.parse(JSON.stringify(state))], idx: 0, lastKey: null, lastTime: 0 };
+    setVfxHistVersion(function(v) { return v + 1; });
+  }
+  function vfxHistoryPush(state, coalesceKey) {
+    var h = vfxHistoryRef.current; var now = Date.now();
+    var snap = JSON.parse(JSON.stringify(state));
+    if (coalesceKey && h.lastKey === coalesceKey && now - h.lastTime < 600 && h.idx >= 0) {
+      h.stack[h.idx] = snap; h.lastTime = now;
+    } else {
+      h.stack = h.stack.slice(0, h.idx + 1); h.stack.push(snap);
+      if (h.stack.length > 50) { h.stack.shift(); }
+      h.idx = h.stack.length - 1; h.lastKey = coalesceKey || null; h.lastTime = now;
+    }
+    setVfxHistVersion(function(v) { return v + 1; });
+  }
+  function vfxUndo() {
+    var h = vfxHistoryRef.current; if (h.idx <= 0) return;
+    h.idx -= 1; h.lastKey = null;
+    setVfxEditDesign(JSON.parse(JSON.stringify(h.stack[h.idx])));
+    setVfxDirty(true); setVfxPrevKey(function(k) { return k + 1; });
+    setVfxHistVersion(function(v) { return v + 1; });
+  }
+  function vfxRedo() {
+    var h = vfxHistoryRef.current; if (h.idx >= h.stack.length - 1) return;
+    h.idx += 1; h.lastKey = null;
+    setVfxEditDesign(JSON.parse(JSON.stringify(h.stack[h.idx])));
+    setVfxDirty(true); setVfxPrevKey(function(k) { return k + 1; });
+    setVfxHistVersion(function(v) { return v + 1; });
+  }
+  var vfxCanUndo = vfxHistoryRef.current.idx > 0;
+  var vfxCanRedo = vfxHistoryRef.current.idx < vfxHistoryRef.current.stack.length - 1;
+
   function vfxUpdateDesign(key, value) {
-    setVfxEditDesign(function(prev) {
-      var next = {}; Object.keys(prev).forEach(function(k) { next[k] = prev[k]; });
-      next[key] = value; return next;
-    });
+    var prev = vfxEditDesign;
+    var next = {}; Object.keys(prev).forEach(function(k) { next[k] = prev[k]; });
+    next[key] = value;
+    vfxHistoryPush(next, key);
+    setVfxEditDesign(next);
     setVfxDirty(true);
     // Bump the preview key so its whole subtree remounts and every particle
     // animation restarts in sync. Without this, changing e.g. Count adds/removes
@@ -2097,14 +2184,16 @@ export default function CosmicWorkshop() {
     setVfxRenamingId(null);
   }
   function vfxOpenEditor(design) {
+    var initial;
     if (design) {
-      var loaded = {}; Object.keys(design).forEach(function(k) { loaded[k] = design[k]; });
-      setVfxEditDesign(loaded);
+      initial = {}; Object.keys(design).forEach(function(k) { initial[k] = design[k]; });
       setVfxEditId(design.id || null);
     } else {
-      setVfxEditDesign(vfxDefaultDesign(null));
+      initial = vfxDefaultDesign(null);
       setVfxEditId(null);
     }
+    setVfxEditDesign(initial);
+    vfxHistoryReset(initial);
     setVfxDirty(false);
     setVfxSaveStatus("");
     setVfxCurrentView("editor");
@@ -2113,6 +2202,7 @@ export default function CosmicWorkshop() {
     var copy = {}; Object.keys(preset).forEach(function(k) { if (k !== "isFactory" && k !== "id") copy[k] = preset[k]; });
     copy.name = preset.name + " (custom)";
     setVfxEditDesign(copy);
+    vfxHistoryReset(copy);
     setVfxEditId(null);
     setVfxDirty(true);
     setVfxSaveStatus("");
@@ -2120,13 +2210,13 @@ export default function CosmicWorkshop() {
   }
   function vfxResetDesign() {
     var params = VFX_DEFAULTS[vfxEditDesign.effectType] || {};
-    setVfxEditDesign(function(prev) {
-      var next = { name: prev.name, effectType: prev.effectType };
-      if (prev.id) next.id = prev.id;
-      if (prev.createdAt) next.createdAt = prev.createdAt;
-      Object.keys(params).forEach(function(k) { next[k] = params[k]; });
-      return next;
-    });
+    var prev = vfxEditDesign;
+    var next = { name: prev.name, effectType: prev.effectType };
+    if (prev.id) next.id = prev.id;
+    if (prev.createdAt) next.createdAt = prev.createdAt;
+    Object.keys(params).forEach(function(k) { next[k] = params[k]; });
+    vfxHistoryPush(next, "__reset_" + Date.now());
+    setVfxEditDesign(next);
     setVfxDirty(true);
     setVfxPrevKey(function(k) { return k + 1; });
   }
@@ -2136,13 +2226,13 @@ export default function CosmicWorkshop() {
   function vfxPickEffectType(type) {
     if (vfxEditDesign.effectType === type) return;
     var params = VFX_DEFAULTS[type] || {};
-    setVfxEditDesign(function(prev) {
-      var next = { name: prev.name, effectType: type };
-      if (prev.id) next.id = prev.id;
-      if (prev.createdAt) next.createdAt = prev.createdAt;
-      Object.keys(params).forEach(function(k) { next[k] = params[k]; });
-      return next;
-    });
+    var prev = vfxEditDesign;
+    var next = { name: prev.name, effectType: type };
+    if (prev.id) next.id = prev.id;
+    if (prev.createdAt) next.createdAt = prev.createdAt;
+    Object.keys(params).forEach(function(k) { next[k] = params[k]; });
+    vfxHistoryPush(next, "__pickType_" + Date.now());
+    setVfxEditDesign(next);
     setVfxDirty(true);
   }
   function vfxHandleBack() {
@@ -2521,21 +2611,63 @@ export default function CosmicWorkshop() {
     }
     return Object.assign({}, UFO_DEFAULT_DESIGN);
   }
+  // ── Undo/redo plumbing ──
+  function ufoHistoryReset(state) {
+    ufoHistoryRef.current = { stack: [JSON.parse(JSON.stringify(state))], idx: 0, lastKey: null, lastTime: 0 };
+    setUfoHistVersion(function(v) { return v + 1; });
+  }
+  function ufoHistoryPush(state, coalesceKey) {
+    var h = ufoHistoryRef.current; var now = Date.now();
+    var snap = JSON.parse(JSON.stringify(state));
+    if (coalesceKey && h.lastKey === coalesceKey && now - h.lastTime < 600 && h.idx >= 0) {
+      h.stack[h.idx] = snap; h.lastTime = now;
+    } else {
+      h.stack = h.stack.slice(0, h.idx + 1); h.stack.push(snap);
+      if (h.stack.length > 50) { h.stack.shift(); }
+      h.idx = h.stack.length - 1; h.lastKey = coalesceKey || null; h.lastTime = now;
+    }
+    setUfoHistVersion(function(v) { return v + 1; });
+  }
+  function ufoUndo() {
+    var h = ufoHistoryRef.current; if (h.idx <= 0) return;
+    h.idx -= 1; h.lastKey = null;
+    setUfoEditDesign(JSON.parse(JSON.stringify(h.stack[h.idx])));
+    ufoEditDirtyRef.current = true;
+    setUfoHistVersion(function(v) { return v + 1; });
+  }
+  function ufoRedo() {
+    var h = ufoHistoryRef.current; if (h.idx >= h.stack.length - 1) return;
+    h.idx += 1; h.lastKey = null;
+    setUfoEditDesign(JSON.parse(JSON.stringify(h.stack[h.idx])));
+    ufoEditDirtyRef.current = true;
+    setUfoHistVersion(function(v) { return v + 1; });
+  }
+  var ufoCanUndo = ufoHistoryRef.current.idx > 0;
+  var ufoCanRedo = ufoHistoryRef.current.idx < ufoHistoryRef.current.stack.length - 1;
+
   function ufoOpenNew() {
     ufoEditDirtyRef.current = false;
     setUfoEditId(null);
-    setUfoEditDesign(Object.assign({}, UFO_DEFAULT_DESIGN, { name: "" }));
+    var initial = Object.assign({}, UFO_DEFAULT_DESIGN, { name: "" });
+    setUfoEditDesign(initial);
+    ufoHistoryReset(initial);
     setUfoView("editor");
   }
   function ufoOpenEditor(design) {
     ufoEditDirtyRef.current = false;
     setUfoEditId(design.id);
-    setUfoEditDesign(Object.assign({}, design));
+    var initial = Object.assign({}, design);
+    setUfoEditDesign(initial);
+    ufoHistoryReset(initial);
     setUfoView("editor");
   }
   function ufoUpdateEdit(key, val) {
     ufoEditDirtyRef.current = true;
-    setUfoEditDesign(function(prev) { var next = {}; Object.keys(prev).forEach(function(k) { next[k] = prev[k]; }); next[key] = val; return next; });
+    var prev = ufoEditDesign;
+    var next = {}; Object.keys(prev).forEach(function(k) { next[k] = prev[k]; });
+    next[key] = val;
+    ufoHistoryPush(next, key);
+    setUfoEditDesign(next);
   }
   function ufoSaveCurrent() {
     var now = new Date().toISOString();
@@ -2611,10 +2743,59 @@ export default function CosmicWorkshop() {
     }
     return { hull: "arrow", parts: shipHullPresetParts("arrow") };
   }
+  // ── Undo/redo plumbing. shipApplyEdit wraps every shipEdit mutation so the
+  // coalesce key + 600 ms window collapses drags (preview move, slider scrubs)
+  // into a single undo step while keeping discrete actions (add/delete/reorder)
+  // as their own entries. ──
+  function shipHistoryReset(state) {
+    shipHistoryRef.current = { stack: [JSON.parse(JSON.stringify(state))], idx: 0, lastKey: null, lastTime: 0 };
+    setShipHistVersion(function(v) { return v + 1; });
+  }
+  function shipHistoryPush(state, coalesceKey) {
+    var h = shipHistoryRef.current; var now = Date.now();
+    var snap = JSON.parse(JSON.stringify(state));
+    if (coalesceKey && h.lastKey === coalesceKey && now - h.lastTime < 600 && h.idx >= 0) {
+      h.stack[h.idx] = snap; h.lastTime = now;
+    } else {
+      h.stack = h.stack.slice(0, h.idx + 1); h.stack.push(snap);
+      if (h.stack.length > 50) { h.stack.shift(); }
+      h.idx = h.stack.length - 1; h.lastKey = coalesceKey || null; h.lastTime = now;
+    }
+    setShipHistVersion(function(v) { return v + 1; });
+  }
+  function shipUndo() {
+    var h = shipHistoryRef.current; if (h.idx <= 0) return;
+    h.idx -= 1; h.lastKey = null;
+    setShipEdit(JSON.parse(JSON.stringify(h.stack[h.idx])));
+    shipDirtyRef.current = true;
+    setShipHistVersion(function(v) { return v + 1; });
+  }
+  function shipRedo() {
+    var h = shipHistoryRef.current; if (h.idx >= h.stack.length - 1) return;
+    h.idx += 1; h.lastKey = null;
+    setShipEdit(JSON.parse(JSON.stringify(h.stack[h.idx])));
+    shipDirtyRef.current = true;
+    setShipHistVersion(function(v) { return v + 1; });
+  }
+  var shipCanUndo = shipHistoryRef.current.idx > 0;
+  var shipCanRedo = shipHistoryRef.current.idx < shipHistoryRef.current.stack.length - 1;
+  // Wrapper used by every mutation site. updater(prev) -> next; returning prev
+  // unchanged signals "no-op" and skips history.
+  function shipApplyEdit(updater, coalesceKey) {
+    setShipEdit(function(prev) {
+      var next = updater(prev);
+      if (next === prev) return prev;
+      shipHistoryPush(next, coalesceKey);
+      return next;
+    });
+  }
+
   function shipOpenNew() {
     shipDirtyRef.current = false;
     setShipEditId(null);
-    setShipEdit({ hull: "arrow", name: "", parts: shipHullPresetParts("arrow") });
+    var initial = { hull: "arrow", name: "", parts: shipHullPresetParts("arrow") };
+    setShipEdit(initial);
+    shipHistoryReset(initial);
     setShipTab("templates");
     setShipSelectedPart(-1);
     setShipView("editor");
@@ -2623,7 +2804,9 @@ export default function CosmicWorkshop() {
     shipDirtyRef.current = false;
     var migrated = shipMigrateDesign(design);
     setShipEditId(design.id);
-    setShipEdit(Object.assign({}, migrated, { parts: (migrated.parts || []).slice() }));
+    var initial = Object.assign({}, migrated, { parts: (migrated.parts || []).slice() });
+    setShipEdit(initial);
+    shipHistoryReset(initial);
     setShipTab("list");
     setShipSelectedPart(-1);
     setShipView("editor");
@@ -2642,18 +2825,18 @@ export default function CosmicWorkshop() {
     if (type === "rect") part.cr = 0;
     if (type === "trapezoid") { part.tw = dflt.tw; part.tofs = dflt.tofs; }
     shipDirtyRef.current = true;
-    setShipEdit(function(prev) {
+    shipApplyEdit(function(prev) {
       var list = (Array.isArray(prev.parts) ? prev.parts : []).concat([part]);
       var next = Object.assign({}, prev, { parts: list });
       setShipSelectedPart(list.length - 1);
       return next;
-    });
+    }, "__addPart_" + Date.now());
   }
   // Replace/Add/Cancel flow for hull-tab tile taps.
   function shipApplyHullPreset(hullId, mode) {
     var presetParts = shipHullPresetParts(hullId);
     shipDirtyRef.current = true;
-    setShipEdit(function(prev) {
+    shipApplyEdit(function(prev) {
       var nextParts;
       if (mode === "add") {
         nextParts = (Array.isArray(prev.parts) ? prev.parts : []).concat(presetParts);
@@ -2661,7 +2844,7 @@ export default function CosmicWorkshop() {
         nextParts = presetParts;
       }
       return Object.assign({}, prev, { hull: hullId, parts: nextParts });
-    });
+    }, "__hullPreset_" + hullId + "_" + Date.now());
     setShipSelectedPart(-1);
   }
   function shipOnHullTileTap(hullId) {
@@ -2669,18 +2852,18 @@ export default function CosmicWorkshop() {
   }
   function shipUpdatePart(idx, key, val) {
     shipDirtyRef.current = true;
-    setShipEdit(function(prev) {
+    shipApplyEdit(function(prev) {
       var list = (prev.parts || []).slice();
       if (!list[idx]) return prev;
       list[idx] = Object.assign({}, list[idx], (function(){ var o = {}; o[key] = val; return o; })());
       return Object.assign({}, prev, { parts: list });
-    });
+    }, "part_" + idx + "_" + key);
   }
   // Duplicate the part at idx: deep-copies, nudges by (1.5, 1.5) so the copy is
   // visible, inserts right after the original, and selects the new copy.
   function shipDuplicatePart(idx) {
     shipDirtyRef.current = true;
-    setShipEdit(function(prev) {
+    shipApplyEdit(function(prev) {
       var list = (prev.parts || []).slice();
       if (idx < 0 || idx >= list.length) return prev;
       var src = list[idx];
@@ -2691,15 +2874,15 @@ export default function CosmicWorkshop() {
       list.splice(idx + 1, 0, copy);
       setShipSelectedPart(idx + 1);
       return Object.assign({}, prev, { parts: list });
-    });
+    }, "__dupPart_" + Date.now());
   }
   function shipDeletePart(idx) {
     shipDirtyRef.current = true;
-    setShipEdit(function(prev) {
+    shipApplyEdit(function(prev) {
       var list = (prev.parts || []).slice();
       list.splice(idx, 1);
       return Object.assign({}, prev, { parts: list });
-    });
+    }, "__delPart_" + Date.now());
     setShipSelectedPart(function(prevSel) {
       if (prevSel === idx) return -1;
       if (prevSel > idx) return prevSel - 1;
@@ -2707,7 +2890,7 @@ export default function CosmicWorkshop() {
     });
   }
   function shipMovePart(idx, dir) {
-    setShipEdit(function(prev) {
+    shipApplyEdit(function(prev) {
       var list = (prev.parts || []).slice();
       var j = idx + dir;
       if (j < 0 || j >= list.length) return prev;
@@ -2715,13 +2898,13 @@ export default function CosmicWorkshop() {
       shipDirtyRef.current = true;
       setShipSelectedPart(j);
       return Object.assign({}, prev, { parts: list });
-    });
+    }, "__movePart_" + Date.now());
   }
   // Moves a part from its current index to `toIdx`, shifting others.
   // Used by the Z (layer) slider.
   function shipReorderPart(fromIdx, toIdx) {
     if (fromIdx === toIdx) return;
-    setShipEdit(function(prev) {
+    shipApplyEdit(function(prev) {
       var list = (prev.parts || []).slice();
       if (fromIdx < 0 || fromIdx >= list.length) return prev;
       var t = Math.max(0, Math.min(list.length - 1, toIdx));
@@ -2731,12 +2914,12 @@ export default function CosmicWorkshop() {
       shipDirtyRef.current = true;
       setShipSelectedPart(t);
       return Object.assign({}, prev, { parts: list });
-    });
+    }, "reorder_" + fromIdx);
   }
   // Width/height edit that respects the shipWhLocked toggle (preserves ratio).
   function shipUpdatePartSize(idx, key, val) {
     shipDirtyRef.current = true;
-    setShipEdit(function(prev) {
+    shipApplyEdit(function(prev) {
       var list = (prev.parts || []).slice();
       if (!list[idx]) return prev;
       var p = list[idx];
@@ -2750,7 +2933,7 @@ export default function CosmicWorkshop() {
       }
       list[idx] = Object.assign({}, p, { w: Math.max(0.5, nw), h: Math.max(0.5, nh) });
       return Object.assign({}, prev, { parts: list });
-    });
+    }, "size_" + idx + "_" + key);
   }
   // Replace / Add / Cancel popup shown when tapping a hull preset that would
   // overwrite existing parts.
@@ -2826,13 +3009,13 @@ export default function CosmicWorkshop() {
     var di = shipDragRef.current;
     var nx = Math.max(0, Math.min(40, px - di.offX));
     var ny = Math.max(0, Math.min(40, py - di.offY));
-    setShipEdit(function(prev) {
+    shipApplyEdit(function(prev) {
       var list = (prev.parts || []).slice();
       if (!list[di.idx]) return prev;
       list[di.idx] = Object.assign({}, list[di.idx], { x: nx, y: ny });
       shipDirtyRef.current = true;
       return Object.assign({}, prev, { parts: list });
-    });
+    }, "pos_" + di.idx);
   }
   function shipPreviewPointerUp(e) {
     shipDragRef.current = null;
@@ -2911,7 +3094,7 @@ export default function CosmicWorkshop() {
   }
   function shipUpdateEdit(key, val) {
     shipDirtyRef.current = true;
-    setShipEdit(function(prev) { var next = Object.assign({}, prev); next[key] = val; return next; });
+    shipApplyEdit(function(prev) { var next = Object.assign({}, prev); next[key] = val; return next; }, "edit_" + key);
   }
   function shipSaveCurrent() {
     var now = new Date().toISOString();
@@ -3376,11 +3559,22 @@ export default function CosmicWorkshop() {
         React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 5, padding: "6px 8px", background: WS.brushed, backgroundBlendMode: "overlay", borderBottom: PNLB, boxShadow: "0 3px 6px rgba(0,0,0,0.4)", position: "relative", zIndex: 2 } },
           WsRivet({ top: 4, left: 4 }), WsRivet({ top: 4, right: 4 }),
           React.createElement("div", { onClick: handleBuilderBack, style: Object.assign({}, BTN_TOPBAR, { display: "flex", alignItems: "center", gap: 3 }) }, React.createElement("svg", { width: "8", height: "8", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M15 18l-6-6 6-6", fill: "none", stroke: "currentColor", strokeWidth: "3", strokeLinecap: "round", strokeLinejoin: "round" })), "My Levels"),
+          React.createElement("div", { style: { display: "flex", gap: 3 } },
+            React.createElement("div", { onClick: lbUndo, title: "Undo",
+              style: Object.assign({}, BTN_TOPBAR, { padding: "6px 7px", opacity: lbCanUndo ? 1 : 0.35, cursor: lbCanUndo ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center" }) },
+              React.createElement("svg", { width: 13, height: 13, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round" },
+                React.createElement("path", { d: "M9 14L4 9l5-5" }),
+                React.createElement("path", { d: "M4 9h11a5 5 0 0 1 5 5v0a5 5 0 0 1-5 5h-3" }))),
+            React.createElement("div", { onClick: lbRedo, title: "Redo",
+              style: Object.assign({}, BTN_TOPBAR, { padding: "6px 7px", opacity: lbCanRedo ? 1 : 0.35, cursor: lbCanRedo ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center" }) },
+              React.createElement("svg", { width: 13, height: 13, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round" },
+                React.createElement("path", { d: "M15 14l5-5-5-5" }),
+                React.createElement("path", { d: "M20 9H9a5 5 0 0 0-5 5v0a5 5 0 0 0 5 5h3" })))),
           React.createElement("div", { ref: tourSaveRef, style: { display: "flex", gap: 5 } },
             React.createElement("div", { onClick: handleBuilderSave, style: BTN_SAVE }, "Save"),
             React.createElement("div", { onClick: handleBuilderSaveAndPlay, style: Object.assign({}, BTN_SAVE, { display: "flex", alignItems: "center", gap: 3 }) }, React.createElement("svg", { width: "8", height: "8", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M5 3 L20 12 L5 21 Z", fill: "currentColor" })), "Save & Play")),
           React.createElement("div", { style: { flex: 1, background: SCRN, border: SCRNB, borderRadius: 4, padding: "4px 8px", boxShadow: SCRNS } },
-            React.createElement("input", { value: builderLevelName, onChange: function(e) { setBuilderLevelName(e.target.value); setBuilderDirty(true); }, placeholder: "Level name...", style: { width: "100%", background: "transparent", border: "none", outline: "none", color: "#b0c8d8", fontSize: 16, fontWeight: 600, fontFamily: "'Quicksand',sans-serif", letterSpacing: 0.5 } })),
+            React.createElement("input", { value: builderLevelName, onChange: function(e) { var v = e.target.value; setBuilderLevelName(v); setBuilderDirty(true); lbHistoryPush({ grid: builderGrid, shipStart: builderShipStart, name: v, plasma: builderPlasma }, "name"); }, placeholder: "Level name...", style: { width: "100%", background: "transparent", border: "none", outline: "none", color: "#b0c8d8", fontSize: 16, fontWeight: 600, fontFamily: "'Quicksand',sans-serif", letterSpacing: 0.5 } })),
           React.createElement("div", { onClick: function() { setBuilderTourStep(0); }, style: { width: 28, height: 28, borderRadius: 4, background: PNL, border: PNLB, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" } }, React.createElement("svg", { width: "12", height: "12", viewBox: "0 0 16 16" }, React.createElement("circle", { cx: "8", cy: "8", r: "7", fill: "none", stroke: "rgba(180,200,220,0.5)", strokeWidth: "1.5" }), React.createElement("text", { x: "8", y: "12", textAnchor: "middle", fill: "rgba(180,200,220,0.5)", fontSize: "10", fontWeight: "700" }, "?")))),
         builderWarn && React.createElement("div", { style: { padding: "6px 12px", textAlign: "center", fontSize: 12, fontWeight: 600, color: builderWarn.indexOf("Saved") === 0 ? "#80dd90" : "#ff8866", background: builderWarn.indexOf("Saved") === 0 ? "rgba(80,200,100,0.1)" : "rgba(255,80,60,0.1)", zIndex: 2, position: "relative" } }, builderWarn),
         React.createElement("div", { style: { flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "10px 10px 0", position: "relative", zIndex: 1, overflow: "hidden" } },
@@ -3394,15 +3588,15 @@ export default function CosmicWorkshop() {
             React.createElement("div", { style: { position: "absolute", bottom: 0, left: 0, right: 0, height: 2, background: "rgba(140,160,180,0.06)" } }),
             [0,1,2,3,4,5,6,7].map(function(c) {
               var isSelected = c === builderShipStart;
-              return React.createElement("div", { key: c, onClick: function() { setBuilderShipStart(c); setBuilderDirty(true); }, style: { position: "absolute", left: (c / COLS * 100) + "%", width: (100 / COLS) + "%", top: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" } },
+              return React.createElement("div", { key: c, onClick: function() { setBuilderShipStart(c); setBuilderDirty(true); lbHistoryPush({ grid: builderGrid, shipStart: c, name: builderLevelName, plasma: builderPlasma }, "shipStart"); }, style: { position: "absolute", left: (c / COLS * 100) + "%", width: (100 / COLS) + "%", top: 0, bottom: 0, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" } },
                 isSelected ? React.createElement("svg", { viewBox: "0 0 36 40", width: "28", height: "32" }, React.createElement("defs", null, React.createElement("linearGradient", { id: "bsg", x1: "0", y1: "0", x2: "0", y2: "1" }, React.createElement("stop", { offset: "0%", stopColor: "#ffd0ff" }), React.createElement("stop", { offset: "100%", stopColor: "#cc70cc" }))), React.createElement("path", { d: "M18 0L4 32L12 27L18 40L24 27L32 32Z", fill: "url(#bsg)" })) : React.createElement("div", { style: { width: 8, height: 8, borderRadius: "50%", background: "rgba(255,168,255,0.15)", border: "1px solid rgba(255,168,255,0.1)" } }));
             })),
           React.createElement("div", { ref: tourPlasmaRef, style: { display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginTop: 6, marginBottom: 2 } },
-            React.createElement("div", { onClick: function() { var n = Math.max(1, builderPlasma - 1); setBuilderPlasma(n); setBuilderDirty(true); }, style: { width: 28, height: 28, borderRadius: 4, background: PNL, border: PNLB, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#b0c8d8", fontSize: 16, fontWeight: 700 } }, "-"),
+            React.createElement("div", { onClick: function() { var n = Math.max(1, builderPlasma - 1); setBuilderPlasma(n); setBuilderDirty(true); lbHistoryPush({ grid: builderGrid, shipStart: builderShipStart, name: builderLevelName, plasma: n }, "plasma"); }, style: { width: 28, height: 28, borderRadius: 4, background: PNL, border: PNLB, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#b0c8d8", fontSize: 16, fontWeight: 700 } }, "-"),
             React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
               React.createElement(PlasmaContainer, { current: builderPlasma, max: 20 }),
               React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 } }, "Plasma")),
-            React.createElement("div", { onClick: function() { var n = Math.min(20, builderPlasma + 1); setBuilderPlasma(n); setBuilderDirty(true); }, style: { width: 28, height: 28, borderRadius: 4, background: PNL, border: PNLB, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#b0c8d8", fontSize: 16, fontWeight: 700 } }, "+"))),
+            React.createElement("div", { onClick: function() { var n = Math.min(20, builderPlasma + 1); setBuilderPlasma(n); setBuilderDirty(true); lbHistoryPush({ grid: builderGrid, shipStart: builderShipStart, name: builderLevelName, plasma: n }, "plasma"); }, style: { width: 28, height: 28, borderRadius: 4, background: PNL, border: PNLB, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#b0c8d8", fontSize: 16, fontWeight: 700 } }, "+"))),
         crateSubPanelOpen && React.createElement("div", { style: { position: "relative", zIndex: 3, background: "linear-gradient(180deg, #1a1a2e, #151528)", borderTop: "2px solid rgba(212,168,67,0.3)", padding: "8px 8px 6px", boxShadow: "0 -2px 8px rgba(0,0,0,0.3)" } },
           React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 } },
             React.createElement("div", { style: { color: "rgba(212,168,67,0.7)", fontSize: 9, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase" } }, "Crate Reward"),
@@ -3722,6 +3916,16 @@ export default function CosmicWorkshop() {
       vfxCurrentView === "editor" && React.createElement(React.Fragment, null,
         React.createElement(WorkshopTopBar, { onBack: vfxHandleBack, backLabel: "VFX Studio", title: "VFX Studio", color: "#ffb43c",
           rightContent: React.createElement("div", { style: { display: "flex", gap: 4, alignItems: "center" } },
+            React.createElement("div", { onClick: vfxUndo, title: "Undo",
+              style: Object.assign({}, BTN_TOPBAR, { padding: "6px 8px", opacity: vfxCanUndo ? 1 : 0.35, cursor: vfxCanUndo ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center" }) },
+              React.createElement("svg", { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round" },
+                React.createElement("path", { d: "M9 14L4 9l5-5" }),
+                React.createElement("path", { d: "M4 9h11a5 5 0 0 1 5 5v0a5 5 0 0 1-5 5h-3" }))),
+            React.createElement("div", { onClick: vfxRedo, title: "Redo",
+              style: Object.assign({}, BTN_TOPBAR, { padding: "6px 8px", opacity: vfxCanRedo ? 1 : 0.35, cursor: vfxCanRedo ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center" }) },
+              React.createElement("svg", { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round" },
+                React.createElement("path", { d: "M15 14l5-5-5-5" }),
+                React.createElement("path", { d: "M20 9H9a5 5 0 0 0-5 5v0a5 5 0 0 0 5 5h3" }))),
             React.createElement("div", { onClick: vfxSaveCurrentDesign, style: BTN_SAVE }, "Save"),
             React.createElement("div", { onClick: function() {
               if (!vfxEditId || vfxDirty) { setVfxSaveStatus("Save the effect first"); setTimeout(function() { setVfxSaveStatus(""); }, 2500); return; }
@@ -3823,6 +4027,16 @@ export default function CosmicWorkshop() {
           },
           backLabel: "My UFOs", title: ufoEditId ? "Edit UFO" : "New UFO", color: "#64dcb4",
           rightContent: React.createElement("div", { style: { display: "flex", gap: 6 } },
+            React.createElement("div", { onClick: ufoUndo, title: "Undo",
+              style: Object.assign({}, BTN_TOPBAR, { padding: "6px 8px", opacity: ufoCanUndo ? 1 : 0.35, cursor: ufoCanUndo ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center" }) },
+              React.createElement("svg", { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round" },
+                React.createElement("path", { d: "M9 14L4 9l5-5" }),
+                React.createElement("path", { d: "M4 9h11a5 5 0 0 1 5 5v0a5 5 0 0 1-5 5h-3" }))),
+            React.createElement("div", { onClick: ufoRedo, title: "Redo",
+              style: Object.assign({}, BTN_TOPBAR, { padding: "6px 8px", opacity: ufoCanRedo ? 1 : 0.35, cursor: ufoCanRedo ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center" }) },
+              React.createElement("svg", { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round" },
+                React.createElement("path", { d: "M15 14l5-5-5-5" }),
+                React.createElement("path", { d: "M20 9H9a5 5 0 0 0-5 5v0a5 5 0 0 0 5 5h3" }))),
             ufoEditId && React.createElement("div", { onClick: function() { ufoEditId === ufoActiveId ? ufoSetActive(null) : ufoSetActive(ufoEditId); }, style: Object.assign({}, BTN_TOPBAR, { color: ufoEditId === ufoActiveId ? "#80dd90" : "rgba(200,210,220,0.7)", border: ufoEditId === ufoActiveId ? "2px solid rgba(80,200,100,0.5)" : PNLB }) }, ufoEditId === ufoActiveId ? "★ Active" : "Set Active"),
             React.createElement("div", { onClick: ufoSaveCurrent, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #1a3a30, #0f2a22)", boxShadow: "0 0 8px rgba(100,220,180,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, ufoSaveStatus || "Save"))
         }),
@@ -3940,6 +4154,16 @@ export default function CosmicWorkshop() {
           },
           backLabel: "My Ships", title: shipEditId ? "Edit Ship" : "New Ship", color: "#ff8aaa",
           rightContent: React.createElement("div", { style: { display: "flex", gap: 6 } },
+            React.createElement("div", { onClick: shipUndo, title: "Undo",
+              style: Object.assign({}, BTN_TOPBAR, { padding: "6px 8px", opacity: shipCanUndo ? 1 : 0.35, cursor: shipCanUndo ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center" }) },
+              React.createElement("svg", { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round" },
+                React.createElement("path", { d: "M9 14L4 9l5-5" }),
+                React.createElement("path", { d: "M4 9h11a5 5 0 0 1 5 5v0a5 5 0 0 1-5 5h-3" }))),
+            React.createElement("div", { onClick: shipRedo, title: "Redo",
+              style: Object.assign({}, BTN_TOPBAR, { padding: "6px 8px", opacity: shipCanRedo ? 1 : 0.35, cursor: shipCanRedo ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center" }) },
+              React.createElement("svg", { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round" },
+                React.createElement("path", { d: "M15 14l5-5-5-5" }),
+                React.createElement("path", { d: "M20 9H9a5 5 0 0 0-5 5v0a5 5 0 0 0 5 5h3" }))),
             React.createElement("div", { onClick: function() {
               if (!shipEditId || shipDirtyRef.current) { setShipSaveStatus("Save the ship first"); setTimeout(function() { setShipSaveStatus(""); }, 2500); return; }
               shipEditId === shipActiveId ? shipSetActive(null) : shipSetActive(shipEditId);
