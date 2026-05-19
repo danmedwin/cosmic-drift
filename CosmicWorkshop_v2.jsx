@@ -3004,7 +3004,7 @@ export default function CosmicWorkshop() {
         React.createElement("div", { style: { display: "flex", flexDirection: "row", gap: 8, alignItems: "stretch" } },
 
         // MODULES PANEL
-        React.createElement(WsPanel, { style: { padding: "10px", flex: 1, display: "flex", flexDirection: "column" } },
+        React.createElement(WsPanel, { style: { padding: "10px", flex: 3, display: "flex", flexDirection: "column" } },
           React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, paddingLeft: 2, paddingRight: 2 } },
             React.createElement(WsMono, { size: 8, ls: 2.5, color: "rgba(180,140,255,0.65)" }, "MODULES"),
             React.createElement(WsMono, { size: 7, ls: 1, color: "rgba(180,140,255,0.3)" }, "05 / 05")
