@@ -4476,6 +4476,12 @@ export default function CosmicWorkshop() {
             React.createElement("div", { onClick: shipSaveCurrent, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #3a1030, #280820)", boxShadow: "0 0 8px rgba(255,138,170,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, shipSaveStatus || "Save"))
         }),
         React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "0 16px 32px" } },
+          // Name panel sits above the sticky preview so it scrolls away
+          // once the user gets into editing — same shape as other modules.
+          React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "10px 14px", marginBottom: 10 } },
+            React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, marginBottom: 4, letterSpacing: 0.5, textTransform: "uppercase" } }, "Name"),
+            React.createElement("input", { value: shipEdit.name || "", onChange: function(e) { shipUpdateEdit("name", e.target.value); },
+              placeholder: "My Ship", style: { width: "100%", padding: "6px 10px", borderRadius: 6, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#b0c8d8", fontSize: 16, fontFamily: "'Quicksand',sans-serif", outline: "none", boxSizing: "border-box" } })),
           // Sticky preview: pinned to the top of the scroll container so the
           // ship stays visible while editing controls farther down.
           React.createElement("div", { ref: shipPreviewStickyRef, style: { position: "sticky", top: 0, zIndex: 5, display: "flex", flexDirection: "column", alignItems: "center", padding: "12px 0 10px", margin: "0 -16px", background: "rgba(14,18,28,0.92)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)", borderBottom: "1px solid rgba(255,138,170,0.12)" } },
@@ -4534,27 +4540,25 @@ export default function CosmicWorkshop() {
                 selCount > 0 && React.createElement("div", { onClick: shipDeleteSelected, title: selCount > 1 ? ("Delete " + selCount + " parts") : "Delete",
                   style: { width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 5, cursor: "pointer", background: "rgba(220,60,80,0.10)", border: "1px solid rgba(220,60,80,0.38)" } },
                   shipTrashSvg(12, "#ff8088")));
+            })(),
+            // Tab bar lives in the same sticky band so it's always reachable.
+            // The thin top divider visually separates "selection tools" above
+            // from "editor sections" below.
+            (function() {
+              var tabs = [
+                { id: "templates", label: "Templates" },
+                { id: "add",       label: "Add" },
+                { id: "color",     label: "Color" },
+                { id: "position",  label: "Position" },
+                { id: "list",      label: "List" }
+              ];
+              return React.createElement("div", { style: { display: "flex", gap: 3, padding: "8px 14px 4px", marginTop: 8, borderTop: "1px solid rgba(255,255,255,0.09)", width: "100%", boxSizing: "border-box" } },
+                tabs.map(function(t) {
+                  var on = shipTab === t.id;
+                  return React.createElement("div", { key: t.id, onClick: function() { setShipTab(t.id); },
+                    style: { flex: 1, padding: "8px 4px", textAlign: "center", borderRadius: 8, cursor: "pointer", fontSize: 10, fontWeight: 700, letterSpacing: 0.5, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase", background: on ? "rgba(255,138,170,0.2)" : "rgba(255,255,255,0.04)", border: on ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.08)", color: on ? "#ff8aaa" : "rgba(180,200,220,0.55)" } }, t.label);
+                }));
             })()),
-          React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "12px 16px", marginBottom: 10 } },
-            React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 11, marginBottom: 6, letterSpacing: 0.5 } }, "NAME"),
-            React.createElement("input", { value: shipEdit.name || "", onChange: function(e) { shipUpdateEdit("name", e.target.value); },
-              placeholder: "My Ship", style: { width: "100%", padding: "6px 10px", borderRadius: 6, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#b0c8d8", fontSize: 16, fontFamily: "'Quicksand',sans-serif", outline: "none", boxSizing: "border-box" } })),
-          (function() {
-            // 5-tab sub-navigation: templates / add / color / position / list.
-            var tabs = [
-              { id: "templates", label: "Templates" },
-              { id: "add",       label: "Add" },
-              { id: "color",     label: "Color" },
-              { id: "position",  label: "Position" },
-              { id: "list",      label: "List" }
-            ];
-            return React.createElement("div", { style: { display: "flex", gap: 3, marginBottom: 12 } },
-              tabs.map(function(t) {
-                var on = shipTab === t.id;
-                return React.createElement("div", { key: t.id, onClick: function() { setShipTab(t.id); },
-                  style: { flex: 1, padding: "8px 4px", textAlign: "center", borderRadius: 8, cursor: "pointer", fontSize: 10, fontWeight: 700, letterSpacing: 0.5, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase", background: on ? "rgba(255,138,170,0.2)" : "rgba(255,255,255,0.04)", border: on ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.08)", color: on ? "#ff8aaa" : "rgba(180,200,220,0.55)" } }, t.label);
-              }));
-          })(),
           // ── TEMPLATES: preset hull thumbnails ──
           shipTab === "templates" && React.createElement(React.Fragment, null,
             React.createElement("div", { style: { color: "rgba(180,200,220,0.4)", fontSize: 10, marginBottom: 8, letterSpacing: 0.5, textTransform: "uppercase" } }, "Tap to load — replaces current parts"),
