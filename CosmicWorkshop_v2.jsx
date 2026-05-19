@@ -1,14 +1,14 @@
 import { useState, useRef, useCallback, useEffect, memo } from "react";
 
 /* ============================================================
-   COSMIC WORKSHOP v15.3
+   COSMIC WORKSHOP v15.4
    Creative suite for Cosmic Drift: Level Builder + Block Designer
    + VFX Studio + UFO Customizer + Hangar (ship designer).
    Shares storage with the game via window.storage.
    Created by Dan Medwin and Claude (Opus 4.6), 2026
    ============================================================ */
 
-var WORKSHOP_VERSION = "v15.3";
+var WORKSHOP_VERSION = "v15.4";
 
 // ═══════════════════════════════════════════════════════════════
 // SHARED CONSTANTS (duplicated from game for independence)
@@ -83,8 +83,8 @@ function TreasureCrateIcon(props) { var s = props.size; return React.createEleme
 function DiamondPlateBlock(props) { var ps = Math.max(8, props.size * 0.22), h = ps / 2; return React.createElement("div", { style: { width: props.size, height: props.size, borderRadius: 6, overflow: "hidden", border: "2px solid #555", position: "relative", boxSizing: "border-box" } }, React.createElement("svg", { width: props.size, height: props.size, style: { position: "absolute", top: -2, left: -2 } }, React.createElement("defs", null, React.createElement("pattern", { id: "dpat", x: "0", y: "0", width: ps, height: ps, patternUnits: "userSpaceOnUse" }, React.createElement("rect", { width: ps, height: ps, fill: "#707580" }), React.createElement("path", { d: "M" + h + " 1L" + (ps - 1) + " " + h + "L" + h + " " + (ps - 1) + "L1 " + h + "Z", fill: "#888a90", stroke: "#606368", strokeWidth: "0.5" }))), React.createElement("rect", { width: props.size, height: props.size, fill: "url(#dpat)" }))); }
 
 var UFO_DEFAULT_DESIGN = { hullColor: "#b86020", domeColor: "#44ffee", lightColor: "#4488ff", lightSpeed: 8, particleCount: 3, particleSize: 1.0, glowOpacity: 0.0, showAlien: false };
-var PLASMA_DEFAULT_DESIGN = { shape: "circle", color: "#50c8ff", color2: "#041030", colorOpacity: 1.0, glowColor: "#80ddff", glowSize: 8, trailEnabled: false, trailDensity: 4, trailDissolve: 400, splitEnabled: false, splitDistance: 20, flashEnabled: true, flashColor: "#ffffff", flashSize: 24, sourceOffsetX: 50, speed: 1.0 };
-var PLASMA_SHAPE_LABELS = { circle: "Circle", blast: "Blast", torpedo: "Torpedo" };
+var PLASMA_DEFAULT_DESIGN = { shape: "circle", color: "#50c8ff", colorMode: "radial", colorOpacity: 1.0, glowColor: "#80ddff", glowSize: 8, trailEnabled: false, trailDensity: 4, trailDissolve: 400, splitEnabled: false, splitDistance: 20, flashEnabled: true, flashColor: "#ffffff", flashSize: 24, flashOpacity: 0.9, sourceOffsetX: 50, speed: 1.0 };
+var PLASMA_SHAPE_LABELS = { circle: "Ball", blast: "Blast", torpedo: "Torpedo" };
 function ufoAdjustColor(hex, factor) {
   var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
   r = Math.min(255, Math.round(r * factor)); g = Math.min(255, Math.round(g * factor)); b = Math.min(255, Math.round(b * factor));
@@ -1279,22 +1279,40 @@ function renderVfxSetPreview(activeMap, savedDesigns) {
 
 function renderPlasmaShape(design, size) {
   var color = design.color || "#50c8ff";
-  var color2 = design.color2 || "#041030";
+  var colorMode = design.colorMode || "radial";
   var glowColor = design.glowColor || "#80ddff";
   var glowSize = (design.glowSize != null ? design.glowSize : 8) * 0.6;
   var opacity = design.colorOpacity != null ? design.colorOpacity : 1.0;
   var shape = design.shape || "circle";
   var glow2 = "0 0 " + glowSize + "px " + glowColor + ", 0 0 " + (glowSize * 2) + "px " + glowColor + "44";
+  var bg;
+  if (colorMode === "standard") {
+    bg = color;
+  } else if (colorMode === "linear") {
+    if (shape === "blast") {
+      bg = "linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.85) 12%, " + color + " 42%, rgba(0,0,0,0.65) 100%)";
+    } else {
+      bg = "linear-gradient(145deg, rgba(255,255,255,0.75) 0%, " + color + " 55%, rgba(0,0,0,0.65) 100%)";
+    }
+  } else {
+    if (shape === "circle") {
+      bg = "radial-gradient(circle at 38% 33%, #fff 0%, " + color + " 45%, rgba(0,0,0,0.7) 100%)";
+    } else if (shape === "blast") {
+      bg = "radial-gradient(ellipse at 50% 20%, #fff 0%, " + color + " 38%, rgba(0,0,0,0.7) 85%)";
+    } else {
+      bg = "radial-gradient(ellipse at 42% 28%, #fff 0%, " + color + " 45%, rgba(0,0,0,0.7) 100%)";
+    }
+  }
   if (shape === "circle") {
-    return React.createElement("div", { style: { width: size, height: size, borderRadius: "50%", background: "radial-gradient(circle at 38% 33%, #fff 0%, " + color + " 45%, " + color2 + " 100%)", boxShadow: glow2, opacity: opacity } });
+    return React.createElement("div", { style: { width: size, height: size, borderRadius: "50%", background: bg, boxShadow: glow2, opacity: opacity } });
   }
   if (shape === "blast") {
     var bw = Math.round(size * 0.18);
-    return React.createElement("div", { style: { width: bw, height: size, borderRadius: 0, background: "linear-gradient(180deg, rgba(255,255,255,0) 0%, #fff 12%, " + color + " 40%, " + color2 + " 100%)", boxShadow: glow2, opacity: opacity } });
+    return React.createElement("div", { style: { width: bw, height: size, borderRadius: 0, background: bg, boxShadow: glow2, opacity: opacity } });
   }
   // torpedo
   var tw = Math.round(size * 0.65);
-  return React.createElement("div", { style: { width: tw, height: size, borderRadius: (tw / 2) + "px " + (tw / 2) + "px " + Math.round(tw * 0.15) + "px " + Math.round(tw * 0.15) + "px", background: "radial-gradient(ellipse at 42% 28%, #fff 0%, " + color + " 45%, " + color2 + " 100%)", boxShadow: glow2, opacity: opacity } });
+  return React.createElement("div", { style: { width: tw, height: size, borderRadius: (tw / 2) + "px " + (tw / 2) + "px " + Math.round(tw * 0.15) + "px " + Math.round(tw * 0.15) + "px", background: bg, boxShadow: glow2, opacity: opacity } });
 }
 
 // ── Workshop cockpit design tokens + helpers ──
@@ -3650,7 +3668,7 @@ export default function CosmicWorkshop() {
 
   // RENDER
   // ═══════════════════════════════════════
-  var plasmaAnimDur = (1.0 / (plasmaEditDesign.speed || 1.0)).toFixed(2) + "s ease-in forwards";
+  var plasmaAnimDur = "plasmaZip " + (1.0 / (plasmaEditDesign.speed || 1.0)).toFixed(2) + "s ease-in forwards";
   var plasmaShotBottom = plasmaShipSize + 16;
   var plasmaEndY = String(-(240 - plasmaShipSize)) + "px";
   var plasmaFlashBottom = plasmaShipSize + 8;
@@ -5008,7 +5026,7 @@ export default function CosmicWorkshop() {
                   renderPlasmaShape(design, 28)),
                 React.createElement("div", { style: { flex: 1, minWidth: 0 } },
                   React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700, marginBottom: 3 } }, design.name || "Untitled"),
-                  React.createElement("div", { style: { color: "rgba(80,200,255,0.5)", fontSize: 11 } }, PLASMA_SHAPE_LABELS[design.shape] || "Circle")),
+                  React.createElement("div", { style: { color: "rgba(80,200,255,0.5)", fontSize: 11 } }, PLASMA_SHAPE_LABELS[design.shape] || "Ball")),
                 React.createElement("div", { onClick: function() { plasmaSetActive(design.id); }, style: isActive ? BTN_ISACTIVE : BTN_SETACTIVE }, isActive ? "★ Active" : "Set Active")),
               React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" } },
                 React.createElement("div", { onClick: function() { plasmaOpenEditor(design); }, style: BTN_EDIT }, WsIconPencil(), "EDIT"),
@@ -5039,8 +5057,8 @@ export default function CosmicWorkshop() {
             React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 11, marginBottom: 6, letterSpacing: 0.5 } }, "NAME"),
             React.createElement("input", { value: plasmaEditDesign.name || "", onChange: function(e) { plasmaUpdateEdit("name", e.target.value); },
               placeholder: "My Plasma", style: { width: "100%", padding: "6px 10px", borderRadius: 6, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#b0c8d8", fontSize: 16, fontFamily: "'Quicksand',sans-serif", outline: "none", boxSizing: "border-box" } })),
-          // Live preview
-          React.createElement("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", padding: "16px 0 20px" } },
+          // Live preview — hide when on Firing Range tab
+          plasmaEditTab === "design" && React.createElement("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", padding: "16px 0 20px" } },
             renderPlasmaShape(plasmaEditDesign, 72)),
           // Tab bar
           React.createElement("div", { style: { display: "flex", gap: 4, marginBottom: 12, background: "rgba(0,0,0,0.2)", borderRadius: 10, padding: 4 } },
@@ -5068,9 +5086,15 @@ export default function CosmicWorkshop() {
               React.createElement(BDSlider, { label: "Opacity", value: plasmaEditDesign.colorOpacity != null ? plasmaEditDesign.colorOpacity : 1.0,
                 min: 0.1, max: 1.0, step: 0.05, displayValue: Math.round((plasmaEditDesign.colorOpacity != null ? plasmaEditDesign.colorOpacity : 1.0) * 100) + "%",
                 onChange: function(v) { plasmaUpdateEdit("colorOpacity", v); } }),
-              React.createElement(BDColorPicker, { label: "Edge Color", value: plasmaEditDesign.color2 || "#041030",
-                presets: ["#041030", "#000000", "#0a1020", "#050810", "#1a0030", "#200010", "#001020", "#080808"],
-                onChange: function(v) { plasmaUpdateEdit("color2", v); } })),
+              React.createElement("div", { style: { marginBottom: 8 } },
+                React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 11, marginBottom: 6, letterSpacing: 0.5 } }, "STYLE"),
+                React.createElement("div", { style: { display: "flex", gap: 4, background: "rgba(0,0,0,0.2)", borderRadius: 8, padding: 3 } },
+                  ["standard", "linear", "radial"].map(function(mode) {
+                    var modeLabel = mode === "standard" ? "Standard" : mode === "linear" ? "Linear" : "Radial";
+                    var isActive = (plasmaEditDesign.colorMode || "radial") === mode;
+                    return React.createElement("div", { key: mode, onClick: function() { plasmaUpdateEdit("colorMode", mode); },
+                      style: { flex: 1, textAlign: "center", padding: "6px 0", borderRadius: 6, background: isActive ? "linear-gradient(180deg,#0e2840,#081828)" : "transparent", color: isActive ? "#50c8ff" : "rgba(180,200,220,0.4)", fontSize: 10, fontWeight: 700, letterSpacing: 0.5, cursor: "pointer", border: isActive ? "1px solid rgba(80,200,255,0.25)" : "1px solid transparent" } }, modeLabel);
+                  })))),
             // Glow
             React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
               React.createElement(BDColorPicker, { label: "Glow Color", value: plasmaEditDesign.glowColor || "#80ddff",
@@ -5079,17 +5103,6 @@ export default function CosmicWorkshop() {
               React.createElement(BDSlider, { label: "Glow Size", value: plasmaEditDesign.glowSize != null ? plasmaEditDesign.glowSize : 8,
                 min: 0, max: 24, step: 1, displayValue: String(Math.round(plasmaEditDesign.glowSize != null ? plasmaEditDesign.glowSize : 8)) + "px",
                 onChange: function(v) { plasmaUpdateEdit("glowSize", v); } })),
-            // Trails
-            React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
-              React.createElement(BDToggle, { label: "Trails", value: !!plasmaEditDesign.trailEnabled,
-                onChange: function(v) { plasmaUpdateEdit("trailEnabled", v); } }),
-              !!plasmaEditDesign.trailEnabled && React.createElement("div", null,
-                React.createElement(BDSlider, { label: "Trail Density", value: plasmaEditDesign.trailDensity || 4,
-                  min: 1, max: 10, step: 1, displayValue: String(Math.round(plasmaEditDesign.trailDensity || 4)),
-                  onChange: function(v) { plasmaUpdateEdit("trailDensity", Math.round(v)); } }),
-                React.createElement(BDSlider, { label: "Dissolve Time", value: plasmaEditDesign.trailDissolve || 400,
-                  min: 100, max: 1000, step: 50, displayValue: (plasmaEditDesign.trailDissolve || 400) + "ms",
-                  onChange: function(v) { plasmaUpdateEdit("trailDissolve", v); } }))),
             null),
 
           // ── FIRING RANGE TAB ──
@@ -5102,20 +5115,20 @@ export default function CosmicWorkshop() {
                   var ly = [15, 8, 22, 5, 18, 12, 30, 25, 7, 35][si];
                   return React.createElement("div", { key: si, style: { position: "absolute", left: lx + "%", top: ly + "%", width: si % 3 === 0 ? 2 : 1, height: si % 3 === 0 ? 2 : 1, borderRadius: "50%", background: "#fff" } });
                 })),
-              // Center plasma shot — wrapper positions, inner animates
-              React.createElement("div", { style: { position: "absolute", bottom: plasmaShotBottom, left: "50%", transform: "translateX(-50%)" } },
+              // Center shot — hidden when split is active
+              !plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaShotBottom, left: "50%", transform: "translateX(-50%)" } },
                 React.createElement("div", { style: { animation: plasmaAnimDur, "--endX": "0px", "--endY": plasmaEndY } },
                   renderPlasmaShape(plasmaEditDesign, 20))),
-              // Split shots
+              // Split shots — smaller, no center
               !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaShotBottom, left: "50%", transform: "translateX(calc(-50% - " + plasmaSplitDist + "px))" } },
                 React.createElement("div", { style: { animation: plasmaAnimDur, animationDelay: "0.05s", "--endX": "0px", "--endY": plasmaEndY } },
-                  renderPlasmaShape(plasmaEditDesign, 20))),
+                  renderPlasmaShape(plasmaEditDesign, 15))),
               !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaShotBottom, left: "50%", transform: "translateX(calc(-50% + " + plasmaSplitDist + "px))" } },
                 React.createElement("div", { style: { animation: plasmaAnimDur, animationDelay: "0.05s", "--endX": "0px", "--endY": plasmaEndY } },
-                  renderPlasmaShape(plasmaEditDesign, 20))),
+                  renderPlasmaShape(plasmaEditDesign, 15))),
               // Muzzle flash — wrapper positions, inner animates
               !!plasmaEditDesign.flashEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaFlashBottom, left: "50%", transform: "translateX(-50%)" } },
-                React.createElement("div", { style: { width: plasmaEditDesign.flashSize || 24, height: plasmaEditDesign.flashSize || 24, borderRadius: "50%", background: plasmaEditDesign.flashColor || "#ffffff", marginLeft: -((plasmaEditDesign.flashSize || 24) / 2), opacity: 0.9, animation: "plasmaFlash 0.25s ease-out forwards" } })),
+                React.createElement("div", { style: { width: plasmaEditDesign.flashSize || 24, height: plasmaEditDesign.flashSize || 24, borderRadius: "50%", background: plasmaEditDesign.flashColor || "#ffffff", marginLeft: -((plasmaEditDesign.flashSize || 24) / 2), opacity: (plasmaEditDesign.flashOpacity != null ? plasmaEditDesign.flashOpacity : 0.9), animation: "plasmaFlash 0.25s ease-out forwards" } })),
               // Ship — tap to fire
               React.createElement("div", { onClick: function() { setPlasmaRangeKey(function(k) { return k + 1; }); }, style: { position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)", cursor: "pointer" } },
                 React.createElement(ShipDesignSvg, { size: plasmaShipSize, design: shipGetActiveDesign(), uid: "plasma-range" })),
@@ -5131,14 +5144,10 @@ export default function CosmicWorkshop() {
                   onChange: function(v) { plasmaUpdateEdit("flashColor", v); } }),
                 React.createElement(BDSlider, { label: "Flash Size", value: plasmaEditDesign.flashSize || 24,
                   min: 8, max: 60, step: 2, displayValue: String(Math.round(plasmaEditDesign.flashSize || 24)) + "px",
-                  onChange: function(v) { plasmaUpdateEdit("flashSize", Math.round(v)); } }))),
-            // Split Shot
-            React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
-              React.createElement(BDToggle, { label: "Split Shot", value: !!plasmaEditDesign.splitEnabled,
-                onChange: function(v) { plasmaUpdateEdit("splitEnabled", v); } }),
-              !!plasmaEditDesign.splitEnabled && React.createElement(BDSlider, { label: "Split Distance", value: plasmaEditDesign.splitDistance || 20,
-                min: 4, max: 60, step: 2, displayValue: String(Math.round(plasmaEditDesign.splitDistance || 20)) + "px",
-                onChange: function(v) { plasmaUpdateEdit("splitDistance", Math.round(v)); } })),
+                  onChange: function(v) { plasmaUpdateEdit("flashSize", Math.round(v)); } }),
+                React.createElement(BDSlider, { label: "Flash Opacity", value: plasmaEditDesign.flashOpacity != null ? plasmaEditDesign.flashOpacity : 0.9,
+                  min: 0.05, max: 1.0, step: 0.05, displayValue: Math.round((plasmaEditDesign.flashOpacity != null ? plasmaEditDesign.flashOpacity : 0.9) * 100) + "%",
+                  onChange: function(v) { plasmaUpdateEdit("flashOpacity", v); } }))),
             // Source, Speed + Ship Size
             React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
               React.createElement(BDSlider, { label: "Source X Offset", value: plasmaEditDesign.sourceOffsetX != null ? plasmaEditDesign.sourceOffsetX : 50,
@@ -5149,7 +5158,25 @@ export default function CosmicWorkshop() {
                 onChange: function(v) { plasmaUpdateEdit("speed", v); } }),
               React.createElement(BDSlider, { label: "Ship Size", value: plasmaShipSize,
                 min: 34, max: 204, step: 2, displayValue: String(plasmaShipSize) + "px",
-                onChange: function(v) { setPlasmaShipSize(Math.round(v)); } }))),
+                onChange: function(v) { setPlasmaShipSize(Math.round(v)); } })),
+            // Split Shot
+            React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
+              React.createElement(BDToggle, { label: "Split Shot", value: !!plasmaEditDesign.splitEnabled,
+                onChange: function(v) { plasmaUpdateEdit("splitEnabled", v); } }),
+              !!plasmaEditDesign.splitEnabled && React.createElement(BDSlider, { label: "Split Distance", value: plasmaEditDesign.splitDistance || 20,
+                min: 4, max: 60, step: 2, displayValue: String(Math.round(plasmaEditDesign.splitDistance || 20)) + "px",
+                onChange: function(v) { plasmaUpdateEdit("splitDistance", Math.round(v)); } })),
+            // Trails
+            React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
+              React.createElement(BDToggle, { label: "Trails", value: !!plasmaEditDesign.trailEnabled,
+                onChange: function(v) { plasmaUpdateEdit("trailEnabled", v); } }),
+              !!plasmaEditDesign.trailEnabled && React.createElement("div", null,
+                React.createElement(BDSlider, { label: "Trail Density", value: plasmaEditDesign.trailDensity || 4,
+                  min: 1, max: 10, step: 1, displayValue: String(Math.round(plasmaEditDesign.trailDensity || 4)),
+                  onChange: function(v) { plasmaUpdateEdit("trailDensity", Math.round(v)); } }),
+                React.createElement(BDSlider, { label: "Dissolve Time", value: plasmaEditDesign.trailDissolve || 400,
+                  min: 100, max: 1000, step: 50, displayValue: (plasmaEditDesign.trailDissolve || 400) + "ms",
+                  onChange: function(v) { plasmaUpdateEdit("trailDissolve", v); } })))),
 
           // Reset button
           React.createElement("div", { style: { display: "flex", justifyContent: "center", marginTop: 20 } },
