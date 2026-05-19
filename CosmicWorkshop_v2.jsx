@@ -1,14 +1,14 @@
 import { useState, useRef, useCallback, useEffect, memo } from "react";
 
 /* ============================================================
-   COSMIC WORKSHOP v10.0
+   COSMIC WORKSHOP v15.3
    Creative suite for Cosmic Drift: Level Builder + Block Designer
    + VFX Studio + UFO Customizer + Hangar (ship designer).
    Shares storage with the game via window.storage.
    Created by Dan Medwin and Claude (Opus 4.6), 2026
    ============================================================ */
 
-var WORKSHOP_VERSION = "v10.0";
+var WORKSHOP_VERSION = "v15.3";
 
 // ═══════════════════════════════════════════════════════════════
 // SHARED CONSTANTS (duplicated from game for independence)
@@ -59,7 +59,7 @@ var SCRNB = "2px solid #3a3a45";
 var SCRNS = "inset 0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.05)";
 
 // ── Animation CSS (subset needed for Workshop) ──
-var ANIM_CSS = "@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');\n@keyframes starDrift{0%{transform:translateY(-50%)}100%{transform:translateY(0)}}\n@keyframes introFadeIn{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}\n@keyframes pulse{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}\n@keyframes ufoWarpOut{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}\n@keyframes ufoWarpIn{0%{transform:scale(0.05);opacity:0}60%{transform:scale(1.08);opacity:0.9}100%{transform:scale(1);opacity:1}}\n@keyframes ufoLightSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}\n@keyframes splashFloat{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}\n@keyframes splashGlow{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}@keyframes cdSplashEnterFromGame{0%{transform:scale(0.95);filter:brightness(0.5)}100%{transform:scale(1);filter:brightness(1)}}@keyframes cdSplashExitShrink{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(0.93);filter:brightness(0.55)}100%{transform:scale(0.93);filter:brightness(0.55)}}\n* { box-sizing: border-box; }\ninput[type=range] { -webkit-appearance: none; appearance: none; background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; outline: none; }\ninput[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }\ninput[type=range]::-moz-range-thumb { width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }@keyframes vfxOozeDrip{0%{transform:scaleY(0);opacity:0}100%{transform:scaleY(1);opacity:0.85}}@keyframes vfxOozeWave{0%{transform:translateY(0)}100%{transform:translateY(50%)}}@keyframes vfxBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxRing{0%{transform:scale(0.1);opacity:1}100%{transform:scale(2.2);opacity:0}}@keyframes vfxFlash{0%{transform:scale(0.2);opacity:1}100%{transform:scale(1.8);opacity:0}}@keyframes vfxPop{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(1.2);filter:brightness(1.8)}100%{transform:scale(0);opacity:0}}@keyframes vfxBubble{0%{transform:translateY(0) scale(0.5);opacity:0}15%{opacity:0.55}85%{opacity:0.55}100%{transform:translateY(88px) scale(1);opacity:0}}@keyframes vfxSpark{0%{transform:translate(0,0) scale(1);opacity:1}35%{transform:translate(calc(var(--sx)*0.45),calc(var(--sy)*0.25 - 7px));opacity:0.9}100%{transform:translate(var(--sx),var(--sy)) scale(0.3);opacity:0}}@keyframes vfxBurnBlock{0%{opacity:1;filter:brightness(1)}10%{opacity:1;filter:brightness(2.3)}55%{opacity:0;filter:brightness(1)}100%{opacity:0;filter:brightness(1)}}@keyframes vfxShatter{0%{transform:translate(0,0) scale(1);opacity:0}15%{opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxDroneShard{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0.2);opacity:0}}";
+var ANIM_CSS = "@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');\n@keyframes starDrift{0%{transform:translateY(-50%)}100%{transform:translateY(0)}}\n@keyframes introFadeIn{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}\n@keyframes pulse{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}\n@keyframes ufoWarpOut{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}\n@keyframes ufoWarpIn{0%{transform:scale(0.05);opacity:0}60%{transform:scale(1.08);opacity:0.9}100%{transform:scale(1);opacity:1}}\n@keyframes ufoLightSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}\n@keyframes splashFloat{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}\n@keyframes splashGlow{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}@keyframes cdSplashEnterFromGame{0%{transform:scale(0.95);filter:brightness(0.5)}100%{transform:scale(1);filter:brightness(1)}}@keyframes cdSplashExitShrink{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(0.93);filter:brightness(0.55)}100%{transform:scale(0.93);filter:brightness(0.55)}}\n* { box-sizing: border-box; }\ninput[type=range] { -webkit-appearance: none; appearance: none; background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; outline: none; }\ninput[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }\ninput[type=range]::-moz-range-thumb { width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }@keyframes vfxOozeDrip{0%{transform:scaleY(0);opacity:0}100%{transform:scaleY(1);opacity:0.85}}@keyframes vfxOozeWave{0%{transform:translateY(0)}100%{transform:translateY(50%)}}@keyframes vfxBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxRing{0%{transform:scale(0.1);opacity:1}100%{transform:scale(2.2);opacity:0}}@keyframes vfxFlash{0%{transform:scale(0.2);opacity:1}100%{transform:scale(1.8);opacity:0}}@keyframes vfxPop{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(1.2);filter:brightness(1.8)}100%{transform:scale(0);opacity:0}}@keyframes vfxBubble{0%{transform:translateY(0) scale(0.5);opacity:0}15%{opacity:0.55}85%{opacity:0.55}100%{transform:translateY(88px) scale(1);opacity:0}}@keyframes vfxSpark{0%{transform:translate(0,0) scale(1);opacity:1}35%{transform:translate(calc(var(--sx)*0.45),calc(var(--sy)*0.25 - 7px));opacity:0.9}100%{transform:translate(var(--sx),var(--sy)) scale(0.3);opacity:0}}@keyframes vfxBurnBlock{0%{opacity:1;filter:brightness(1)}10%{opacity:1;filter:brightness(2.3)}55%{opacity:0;filter:brightness(1)}100%{opacity:0;filter:brightness(1)}}@keyframes vfxShatter{0%{transform:translate(0,0) scale(1);opacity:0}15%{opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxDroneShard{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0.2);opacity:0}}@keyframes plasmaZip{0%{transform:translate(0,0) scale(1);opacity:1}80%{opacity:1}100%{transform:translate(var(--endX),var(--endY)) scale(0.5);opacity:0}}@keyframes plasmaFlash{0%{transform:scale(0.5);opacity:1}50%{transform:scale(1);opacity:0.8}100%{transform:scale(1.5);opacity:0}}";
 
 // ═══════════════════════════════════════════════════════════════
 // SHARED VISUAL COMPONENTS
@@ -83,6 +83,8 @@ function TreasureCrateIcon(props) { var s = props.size; return React.createEleme
 function DiamondPlateBlock(props) { var ps = Math.max(8, props.size * 0.22), h = ps / 2; return React.createElement("div", { style: { width: props.size, height: props.size, borderRadius: 6, overflow: "hidden", border: "2px solid #555", position: "relative", boxSizing: "border-box" } }, React.createElement("svg", { width: props.size, height: props.size, style: { position: "absolute", top: -2, left: -2 } }, React.createElement("defs", null, React.createElement("pattern", { id: "dpat", x: "0", y: "0", width: ps, height: ps, patternUnits: "userSpaceOnUse" }, React.createElement("rect", { width: ps, height: ps, fill: "#707580" }), React.createElement("path", { d: "M" + h + " 1L" + (ps - 1) + " " + h + "L" + h + " " + (ps - 1) + "L1 " + h + "Z", fill: "#888a90", stroke: "#606368", strokeWidth: "0.5" }))), React.createElement("rect", { width: props.size, height: props.size, fill: "url(#dpat)" }))); }
 
 var UFO_DEFAULT_DESIGN = { hullColor: "#b86020", domeColor: "#44ffee", lightColor: "#4488ff", lightSpeed: 8, particleCount: 3, particleSize: 1.0, glowOpacity: 0.0, showAlien: false };
+var PLASMA_DEFAULT_DESIGN = { shape: "circle", color: "#50c8ff", color2: "#041030", colorOpacity: 1.0, glowColor: "#80ddff", glowSize: 8, trailEnabled: false, trailDensity: 4, trailDissolve: 400, splitEnabled: false, splitDistance: 20, flashEnabled: true, flashColor: "#ffffff", flashSize: 24, sourceOffsetX: 50, speed: 1.0 };
+var PLASMA_SHAPE_LABELS = { circle: "Circle", blast: "Blast", torpedo: "Torpedo" };
 function ufoAdjustColor(hex, factor) {
   var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
   r = Math.min(255, Math.round(r * factor)); g = Math.min(255, Math.round(g * factor)); b = Math.min(255, Math.round(b * factor));
@@ -688,8 +690,10 @@ var VFX_ACTIVE_KEY = "cosmic-drift-vfx-active";
 var UFO_STORAGE_KEY  = "cosmic-drift-ufo-design";
 var UFO_DESIGNS_KEY  = "cosmic-drift-ufo-designs";
 var UFO_ACTIVE_KEY   = "cosmic-drift-ufo-active";
-var SHIP_DESIGNS_KEY = "cosmic-drift-ship-designs";
-var SHIP_ACTIVE_KEY  = "cosmic-drift-ship-active";
+var SHIP_DESIGNS_KEY   = "cosmic-drift-ship-designs";
+var SHIP_ACTIVE_KEY    = "cosmic-drift-ship-active";
+var PLASMA_DESIGNS_KEY = "cosmic-drift-plasma-designs";
+var PLASMA_ACTIVE_KEY  = "cosmic-drift-plasma-active";
 var SHIP_DEFAULT_DESIGN = { hull: "arrow", parts: [] };
 function shipLoadDesigns() {
   return window.storage.get(SHIP_DESIGNS_KEY).then(function(result) {
@@ -727,6 +731,24 @@ function ufoLoadActiveId() {
 }
 function ufoSaveActiveId(id) {
   return window.storage.set(UFO_ACTIVE_KEY, id || "").catch(function() {});
+}
+function plasmaLoadDesigns() {
+  return window.storage.get(PLASMA_DESIGNS_KEY).then(function(result) {
+    if (!result || !result.value) return [];
+    var parsed = JSON.parse(result.value);
+    return Array.isArray(parsed) ? parsed : [];
+  }).catch(function() { return []; });
+}
+function plasmaSaveDesigns(designs) {
+  return window.storage.set(PLASMA_DESIGNS_KEY, JSON.stringify(designs)).catch(function() {});
+}
+function plasmaLoadActiveId() {
+  return window.storage.get(PLASMA_ACTIVE_KEY).then(function(result) {
+    return result && result.value ? result.value : null;
+  }).catch(function() { return null; });
+}
+function plasmaSaveActiveIdToStorage(id) {
+  return window.storage.set(PLASMA_ACTIVE_KEY, id || "").catch(function() {});
 }
 
 // Effect type registry: drives the type-picker buttons, sorting, the editor.
@@ -1255,6 +1277,26 @@ function renderVfxSetPreview(activeMap, savedDesigns) {
   return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(2, 28px)", gap: 3, width: 59, margin: "0 auto" } }, items);
 }
 
+function renderPlasmaShape(design, size) {
+  var color = design.color || "#50c8ff";
+  var color2 = design.color2 || "#041030";
+  var glowColor = design.glowColor || "#80ddff";
+  var glowSize = (design.glowSize != null ? design.glowSize : 8) * 0.6;
+  var opacity = design.colorOpacity != null ? design.colorOpacity : 1.0;
+  var shape = design.shape || "circle";
+  var glow2 = "0 0 " + glowSize + "px " + glowColor + ", 0 0 " + (glowSize * 2) + "px " + glowColor + "44";
+  if (shape === "circle") {
+    return React.createElement("div", { style: { width: size, height: size, borderRadius: "50%", background: "radial-gradient(circle at 38% 33%, #fff 0%, " + color + " 45%, " + color2 + " 100%)", boxShadow: glow2, opacity: opacity } });
+  }
+  if (shape === "blast") {
+    var bw = Math.round(size * 0.18);
+    return React.createElement("div", { style: { width: bw, height: size, borderRadius: 0, background: "linear-gradient(180deg, rgba(255,255,255,0) 0%, #fff 12%, " + color + " 40%, " + color2 + " 100%)", boxShadow: glow2, opacity: opacity } });
+  }
+  // torpedo
+  var tw = Math.round(size * 0.65);
+  return React.createElement("div", { style: { width: tw, height: size, borderRadius: (tw / 2) + "px " + (tw / 2) + "px " + Math.round(tw * 0.15) + "px " + Math.round(tw * 0.15) + "px", background: "radial-gradient(ellipse at 42% 28%, #fff 0%, " + color + " 45%, " + color2 + " 100%)", boxShadow: glow2, opacity: opacity } });
+}
+
 // ── Workshop cockpit design tokens + helpers ──
 var WS = {
   brushed: "linear-gradient(180deg, #3a4250 0%, #2c333f 35%, #1f2530 70%, #1a1f2a 100%), repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 3px)",
@@ -1404,6 +1446,19 @@ export default function CosmicWorkshop() {
   var _shipPartRenamingIdx = useState(null), shipPartRenamingIdx = _shipPartRenamingIdx[0], setShipPartRenamingIdx = _shipPartRenamingIdx[1];
   var _shipPartRenameVal = useState(""), shipPartRenameVal = _shipPartRenameVal[0], setShipPartRenameVal = _shipPartRenameVal[1];
   var _shipResetConfirm = useState(false), shipResetConfirm = _shipResetConfirm[0], setShipResetConfirm = _shipResetConfirm[1];
+  // ══ PLASMA LAB STATE ══
+  var _plasmaSaved = useState([]), plasmaSaved = _plasmaSaved[0], setPlasmaSaved = _plasmaSaved[1];
+  var _plasmaActiveId = useState(null), plasmaActiveId = _plasmaActiveId[0], setPlasmaActiveId = _plasmaActiveId[1];
+  var _plasmaView = useState("list"), plasmaView = _plasmaView[0], setPlasmaView = _plasmaView[1];
+  var _plasmaEditDesign = useState(function() { return Object.assign({}, PLASMA_DEFAULT_DESIGN, { name: "" }); }), plasmaEditDesign = _plasmaEditDesign[0], setPlasmaEditDesign = _plasmaEditDesign[1];
+  var _plasmaEditId = useState(null), plasmaEditId = _plasmaEditId[0], setPlasmaEditId = _plasmaEditId[1];
+  var plasmaEditDirtyRef = useRef(false);
+  var _plasmaSaveStatus = useState(""), plasmaSaveStatus = _plasmaSaveStatus[0], setPlasmaSaveStatus = _plasmaSaveStatus[1];
+  var _plasmaDeletingId = useState(null), plasmaDeletingId = _plasmaDeletingId[0], setPlasmaDeletingId = _plasmaDeletingId[1];
+  var _plasmaBackWarn = useState(false), plasmaShowBackWarn = _plasmaBackWarn[0], setPlasmaShowBackWarn = _plasmaBackWarn[1];
+  var _plasmaEditTab = useState("design"), plasmaEditTab = _plasmaEditTab[0], setPlasmaEditTab = _plasmaEditTab[1];
+  var _plasmaRangeKey = useState(0), plasmaRangeKey = _plasmaRangeKey[0], setPlasmaRangeKey = _plasmaRangeKey[1];
+  var _plasmaShipSize = useState(72), plasmaShipSize = _plasmaShipSize[0], setPlasmaShipSize = _plasmaShipSize[1];
   var shipDirtyRef = useRef(false);
   var _shipSelectedPart = useState(-1), shipSelectedPart = _shipSelectedPart[0], setShipSelectedPart = _shipSelectedPart[1];
   // Multi-select: extra indices beyond the primary. Effective selection is
@@ -1526,6 +1581,19 @@ export default function CosmicWorkshop() {
         shipSaveActiveId(seed.id);
       }
     });
+    plasmaLoadDesigns().then(function(designs) {
+      if (designs && designs.length > 0) {
+        setPlasmaSaved(designs);
+        plasmaLoadActiveId().then(function(id) { setPlasmaActiveId(id); });
+      } else {
+        var seed = Object.assign({}, PLASMA_DEFAULT_DESIGN, { id: "plasma_default", name: "Default", savedAt: new Date().toISOString() });
+        setPlasmaSaved([seed]);
+        setPlasmaActiveId(seed.id);
+        plasmaSaveDesigns([seed]);
+        plasmaSaveActiveIdToStorage(seed.id);
+      }
+    });
+    try { window.storage.get("cosmic_drift_ship_size").then(function(r) { if (r && r.value) { var v = Number(r.value); if (v >= 34 && v <= 204) setPlasmaShipSize(v); } }).catch(function() {}); } catch(e) {}
   }, []);
 
   // Load saved-game snapshot (written by the game) so the CONTINUE button can
@@ -1557,6 +1625,7 @@ export default function CosmicWorkshop() {
         else if (openSection === "vfx") { setScreen("vfx"); setVfxCurrentView("list"); setVfxSavedTab("active"); }
         else if (openSection === "ufo") { setScreen("ufo"); setUfoView("list"); }
         else if (openSection === "hangar") { setScreen("hangar"); setShipView("list"); }
+        else if (openSection === "plasma") { setScreen("plasma"); setPlasmaView("list"); }
       }
     } catch(e) {}
   }, []);
@@ -2748,6 +2817,75 @@ export default function CosmicWorkshop() {
     setUfoShowImport(false); setUfoImportText(""); setUfoImportError("");
   }
 
+  // ═══════════════════════════════════════
+  // PLASMA LAB FUNCTIONS
+  // ═══════════════════════════════════════
+  function plasmaGetActiveDesign() {
+    if (plasmaActiveId) {
+      for (var i = 0; i < plasmaSaved.length; i++) { if (plasmaSaved[i].id === plasmaActiveId) return plasmaSaved[i]; }
+    }
+    return Object.assign({}, PLASMA_DEFAULT_DESIGN);
+  }
+  function plasmaOpenNew() {
+    plasmaEditDirtyRef.current = false;
+    setPlasmaEditId(null);
+    var initial = Object.assign({}, PLASMA_DEFAULT_DESIGN, { name: "" });
+    setPlasmaEditDesign(initial);
+    setPlasmaEditTab("design");
+    setPlasmaView("editor");
+  }
+  function plasmaOpenEditor(design) {
+    plasmaEditDirtyRef.current = false;
+    setPlasmaEditId(design.id);
+    setPlasmaEditDesign(Object.assign({}, design));
+    setPlasmaEditTab("design");
+    setPlasmaView("editor");
+  }
+  function plasmaUpdateEdit(key, val) {
+    plasmaEditDirtyRef.current = true;
+    setPlasmaEditDesign(function(prev) {
+      var next = {}; Object.keys(prev).forEach(function(k) { next[k] = prev[k]; });
+      next[key] = val;
+      return next;
+    });
+  }
+  function plasmaSaveCurrent() {
+    var now = new Date().toISOString();
+    var name = (plasmaEditDesign.name || "").trim() || "My Plasma";
+    var isNew = !plasmaEditId;
+    var id = isNew ? ("plasma_" + Date.now()) : plasmaEditId;
+    var saved = Object.assign({}, plasmaEditDesign, { id: id, name: name, savedAt: now });
+    setPlasmaSaved(function(prev) {
+      var list = isNew ? prev.concat([saved]) : prev.map(function(d) { return d.id === id ? saved : d; });
+      plasmaSaveDesigns(list);
+      return list;
+    });
+    if (isNew || !plasmaActiveId) {
+      setPlasmaActiveId(id);
+      plasmaSaveActiveIdToStorage(id);
+    }
+    setPlasmaEditId(id);
+    plasmaEditDirtyRef.current = false;
+    setPlasmaSaveStatus("Saved");
+    setTimeout(function() { setPlasmaSaveStatus(""); }, 1500);
+  }
+  function plasmaSetActive(id) {
+    setPlasmaActiveId(id);
+    plasmaSaveActiveIdToStorage(id);
+  }
+  function plasmaDeleteDesign(id) {
+    setPlasmaSaved(function(prev) {
+      var list = prev.filter(function(d) { return d.id !== id; });
+      plasmaSaveDesigns(list);
+      return list;
+    });
+    if (plasmaActiveId === id) {
+      setPlasmaActiveId(null);
+      plasmaSaveActiveIdToStorage(null);
+    }
+    setPlasmaDeletingId(null);
+  }
+
   function shipGetActiveDesign() {
     if (shipActiveId) {
       for (var i = 0; i < shipSaved.length; i++) { if (shipSaved[i].id === shipActiveId) return shipMigrateDesign(shipSaved[i]); }
@@ -3512,6 +3650,11 @@ export default function CosmicWorkshop() {
 
   // RENDER
   // ═══════════════════════════════════════
+  var plasmaAnimDur = (1.0 / (plasmaEditDesign.speed || 1.0)).toFixed(2) + "s ease-in forwards";
+  var plasmaShotBottom = plasmaShipSize + 16;
+  var plasmaEndY = String(-(240 - plasmaShipSize)) + "px";
+  var plasmaFlashBottom = plasmaShipSize + 8;
+  var plasmaSplitDist = plasmaEditDesign.splitDistance || 20;
 
   return React.createElement("div", { style: { position: "fixed", inset: 0, background: "#0b0c1a", fontFamily: "'Quicksand',sans-serif", overflow: "hidden" } },
     React.createElement("style", null, ANIM_CSS),
@@ -3561,7 +3704,7 @@ export default function CosmicWorkshop() {
           React.createElement("div", { style: { display: "grid", gridTemplateColumns: "3fr 1fr", gap: 6, marginBottom: 8 } },
             React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", paddingLeft: 2, paddingRight: 2 } },
               React.createElement(WsMono, { size: 8, ls: 2.5, color: "rgba(180,140,255,0.65)" }, "MODULES"),
-              React.createElement(WsMono, { size: 7, ls: 1, color: "rgba(180,140,255,0.3)" }, "05 / 05")
+              React.createElement(WsMono, { size: 7, ls: 1, color: "rgba(180,140,255,0.3)" }, "06 / 06")
             ),
             React.createElement("div", { style: { display: "flex", alignItems: "center", paddingLeft: 2, paddingRight: 2 } },
               React.createElement(WsMono, { size: 8, ls: 2.5, color: "rgba(180,140,255,0.65)" }, "ACTIVE")
@@ -3569,7 +3712,7 @@ export default function CosmicWorkshop() {
           ),
           // Body 2-column grid; column-flow places first 5 cards in col 1 (modules),
           // next 5 in col 2 (active), so each pair shares a row.
-          React.createElement("div", { style: { display: "grid", gridTemplateColumns: "3fr 1fr", gridTemplateRows: "repeat(5, auto)", gridAutoFlow: "column", gap: 6, flex: 1 } },
+          React.createElement("div", { style: { display: "grid", gridTemplateColumns: "3fr 1fr", gridTemplateRows: "repeat(6, auto)", gridAutoFlow: "column", gap: 6, flex: 1 } },
             React.createElement("div", { onClick: function() { loadSavedLevels(); setScreen("builder"); setLbScreen("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(80,200,255,0.12)", borderLeft: "3px solid #80ddff", borderRadius: 8, padding: "10px 10px 10px 10px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 6 } },
               React.createElement("div", { style: { display: "flex", alignItems: "flex-start", justifyContent: "space-between" } },
                 React.createElement("svg", { width: "20", height: "20", viewBox: "0 0 24 24" },
@@ -3628,6 +3771,23 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { color: "#ffe0ea", fontSize: 22, fontWeight: 700, letterSpacing: 0.6, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Hangar"),
               React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 10 } }, "Design your ship")
             ),
+            React.createElement("div", { onClick: function() { setScreen("plasma"); setPlasmaView("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(80,200,255,0.12)", borderLeft: "3px solid #50c8ff", borderRadius: 8, padding: "10px 10px 10px 10px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 6 } },
+              React.createElement("div", { style: { display: "flex", alignItems: "flex-start", justifyContent: "space-between" } },
+                React.createElement("svg", { width: "20", height: "20", viewBox: "0 0 24 24" },
+                  React.createElement("defs", null,
+                    React.createElement("radialGradient", { id: "plSplash", cx: "38%", cy: "33%" },
+                      React.createElement("stop", { offset: "0%", stopColor: "#fff", stopOpacity: "0.9" }),
+                      React.createElement("stop", { offset: "35%", stopColor: "#80ddff", stopOpacity: "0.85" }),
+                      React.createElement("stop", { offset: "100%", stopColor: "#2060ff", stopOpacity: "0.6" }))),
+                  React.createElement("circle", { cx: "12", cy: "13", r: "7", fill: "url(#plSplash)" }),
+                  React.createElement("circle", { cx: "12", cy: "13", r: "3", fill: "rgba(255,255,255,0.75)" }),
+                  React.createElement("line", { x1: "12", y1: "6", x2: "12", y2: "2", stroke: "#50c8ff", strokeWidth: "1.8", strokeLinecap: "round" }),
+                  React.createElement("line", { x1: "12", y1: "2", x2: "9.5", y2: "4.5", stroke: "#50c8ff", strokeWidth: "1.4", strokeLinecap: "round" }),
+                  React.createElement("line", { x1: "12", y1: "2", x2: "14.5", y2: "4.5", stroke: "#50c8ff", strokeWidth: "1.4", strokeLinecap: "round" })),
+                React.createElement(WsMono, { size: 7, ls: 0.5, color: "rgba(80,200,255,0.45)" }, plasmaSaved.length + " SAVED")),
+              React.createElement("div", { style: { color: "#d0f0ff", fontSize: 22, fontWeight: 700, letterSpacing: 0.6, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Plasma Lab"),
+              React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 10 } }, "Design plasma effects")
+            ),
             // ── Active column cards begin (placed in col 2 by gridAutoFlow) ──
             React.createElement("div", { onClick: function() { setScreen("builder"); if (savedLevels.length > 0) { var latest = savedLevels.slice().sort(function(a, b) { return new Date(b.savedAt || 0) - new Date(a.savedAt || 0); })[0]; openBuilder(latest); } else { loadSavedLevels(); setLbScreen("list"); } }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "2px solid #80ddff", borderRadius: 7, padding: "8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6 } },
               React.createElement("div", { style: { display: "flex", justifyContent: "center" } },
@@ -3651,6 +3811,11 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { display: "flex", justifyContent: "center" } },
                 React.createElement(ShipDesignSvg, { size: 72, design: shipGetActiveDesign(), uid: "loadout-ship" })),
               React.createElement("div", { style: { color: "#ffb8cc", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%", textAlign: "center" } }, (function() { return shipSaved.length > 0 && shipActiveId ? (shipGetActiveDesign().name || "Custom") : "Default"; }()))
+            ),
+            React.createElement("div", { onClick: function() { setScreen("plasma"); setPlasmaView("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "2px solid #50c8ff", borderRadius: 7, padding: "8px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6 } },
+              React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", height: 72 } },
+                renderPlasmaShape(plasmaGetActiveDesign(), 36)),
+              React.createElement("div", { style: { color: "#80d8ff", fontFamily: "'Exo 2', sans-serif", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%", textAlign: "center" } }, plasmaSaved.length > 0 && plasmaActiveId ? (plasmaGetActiveDesign().name || "Active") : "Default")
             )
           )
         ),
@@ -3794,6 +3959,12 @@ export default function CosmicWorkshop() {
           React.createElement(ShipDesignSvg, { size: 16, design: shipGetActiveDesign(), uid: "menu-ship" }),
           React.createElement("span", { style: { flex: 1 } }, "Hangar"),
           React.createElement("span", { style: { width: 6, height: 6, borderRadius: 6, background: "#ff8aaa", boxShadow: "0 0 6px #ff8aaa", flexShrink: 0 } })
+        ),
+        React.createElement("div", { onClick: function() { setShowWsMenu(false); setScreen("plasma"); setPlasmaView("list"); }, style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 } },
+          React.createElement("div", { style: { width: 16, height: 16, display: "flex", alignItems: "center", justifyContent: "center" } },
+            renderPlasmaShape(plasmaGetActiveDesign(), 14)),
+          React.createElement("span", { style: { flex: 1 } }, "Plasma Lab"),
+          React.createElement("span", { style: { width: 6, height: 6, borderRadius: 6, background: "#50c8ff", boxShadow: "0 0 6px #50c8ff", flexShrink: 0 } })
         ),
         React.createElement("div", { style: { height: 1, background: "rgba(80,100,140,0.2)", margin: "2px 12px" } }),
         React.createElement("div", { onClick: function() { setShowWsMenu(false); setShowWsGuide(true); }, style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 } },
@@ -4812,6 +4983,184 @@ export default function CosmicWorkshop() {
                 style: { padding: "10px 12px", textAlign: "center", borderRadius: 6, cursor: "pointer", background: "rgba(255,80,60,0.18)", border: "1px solid rgba(255,100,80,0.5)", color: "rgba(255,140,120,0.9)", fontSize: 12, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", fontFamily: "'Exo 2', sans-serif" } }, "Clear All"),
               React.createElement("div", { onClick: function() { setShipResetConfirm(false); },
                 style: { padding: "10px 12px", textAlign: "center", borderRadius: 6, cursor: "pointer", background: WS.brushed, backgroundBlendMode: "overlay", border: WS.pb, color: "rgba(180,200,220,0.7)", fontSize: 12, fontWeight: 700, letterSpacing: 0.5, textTransform: "uppercase", fontFamily: "'Exo 2', sans-serif", boxShadow: WS.ps } }, "Cancel")))))
+    ),
+
+    // ═══ PLASMA LAB ═══
+    screen === "plasma" && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", background: WS.brushed, backgroundBlendMode: "overlay" } },
+      WsRivet({ bottom: 5, left: 5 }), WsRivet({ bottom: 5, right: 5 }),
+
+      // ── LIST VIEW ──
+      plasmaView === "list" && React.createElement(React.Fragment, null,
+        React.createElement(WorkshopTopBar, {
+          onBack: function() { setScreen("splash"); setPlasmaView("list"); }, backLabel: "Workshop", title: "Plasma Lab", color: "#50c8ff",
+          rightContent: React.createElement("div", { style: { display: "flex", gap: 4 } },
+            React.createElement("div", { onClick: plasmaOpenNew, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #0a2040, #061828)", boxShadow: "0 0 8px rgba(80,200,255,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, "+ New"))
+        }),
+        React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "6px 10px 20px" } },
+          plasmaSaved.length === 0 && React.createElement("div", { style: { textAlign: "center", padding: 40 } },
+            React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 14, marginBottom: 8 } }, "No saved plasma designs"),
+            React.createElement("div", { style: { color: "rgba(180,200,220,0.2)", fontSize: 12 } }, "Tap + New to design your first plasma.")),
+          plasmaSaved.map(function(design) {
+            var isActive = design.id === plasmaActiveId;
+            return React.createElement("div", { key: design.id, style: CARD_STYLE },
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, marginBottom: 10 } },
+                React.createElement("div", { style: { width: 56, height: 56, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.25)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.06)", flexShrink: 0 } },
+                  renderPlasmaShape(design, 28)),
+                React.createElement("div", { style: { flex: 1, minWidth: 0 } },
+                  React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700, marginBottom: 3 } }, design.name || "Untitled"),
+                  React.createElement("div", { style: { color: "rgba(80,200,255,0.5)", fontSize: 11 } }, PLASMA_SHAPE_LABELS[design.shape] || "Circle")),
+                React.createElement("div", { onClick: function() { plasmaSetActive(design.id); }, style: isActive ? BTN_ISACTIVE : BTN_SETACTIVE }, isActive ? "★ Active" : "Set Active")),
+              React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" } },
+                React.createElement("div", { onClick: function() { plasmaOpenEditor(design); }, style: BTN_EDIT }, WsIconPencil(), "EDIT"),
+                React.createElement("div", { style: { flex: 1 } }),
+                React.createElement("div", { onClick: function() { setPlasmaDeletingId(design.id); }, style: BTN_DELETE_ICON }, WsIconTrash())));
+          })),
+        plasmaDeletingId && renderDeleteOverlay("Delete Plasma Design?",
+          function() { setPlasmaDeletingId(null); },
+          function() { plasmaDeleteDesign(plasmaDeletingId); })),
+
+      // ── EDITOR VIEW ──
+      plasmaView === "editor" && React.createElement(React.Fragment, null,
+        React.createElement(WorkshopTopBar, {
+          onBack: function() {
+            if (plasmaEditDirtyRef.current) { setPlasmaShowBackWarn(true); } else { setPlasmaView("list"); }
+          },
+          backLabel: "My Plasma", title: plasmaEditId ? "Edit Plasma" : "New Plasma", color: "#50c8ff",
+          rightContent: React.createElement("div", { style: { display: "flex", gap: 6 } },
+            plasmaEditId && React.createElement("div", {
+              onClick: function() { plasmaEditId === plasmaActiveId ? plasmaSetActive(null) : plasmaSetActive(plasmaEditId); },
+              style: Object.assign({}, BTN_TOPBAR, { color: plasmaEditId === plasmaActiveId ? "#80dd90" : "rgba(200,210,220,0.7)", border: plasmaEditId === plasmaActiveId ? "2px solid rgba(80,200,100,0.5)" : PNLB })
+            }, plasmaEditId === plasmaActiveId ? "★ Active" : "Set Active"),
+            React.createElement("div", { onClick: plasmaSaveCurrent, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #0a2040, #061828)", boxShadow: "0 0 8px rgba(80,200,255,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, plasmaSaveStatus || "Save"))
+        }),
+        React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "0 16px 32px" } },
+          // Name (above preview, matching other module editors)
+          React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "12px 16px", margin: "12px 0 10px" } },
+            React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 11, marginBottom: 6, letterSpacing: 0.5 } }, "NAME"),
+            React.createElement("input", { value: plasmaEditDesign.name || "", onChange: function(e) { plasmaUpdateEdit("name", e.target.value); },
+              placeholder: "My Plasma", style: { width: "100%", padding: "6px 10px", borderRadius: 6, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#b0c8d8", fontSize: 16, fontFamily: "'Quicksand',sans-serif", outline: "none", boxSizing: "border-box" } })),
+          // Live preview
+          React.createElement("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", padding: "16px 0 20px" } },
+            renderPlasmaShape(plasmaEditDesign, 72)),
+          // Tab bar
+          React.createElement("div", { style: { display: "flex", gap: 4, marginBottom: 12, background: "rgba(0,0,0,0.2)", borderRadius: 10, padding: 4 } },
+            React.createElement("div", { onClick: function() { setPlasmaEditTab("design"); }, style: { flex: 1, textAlign: "center", padding: "8px 0", borderRadius: 7, background: plasmaEditTab === "design" ? "linear-gradient(180deg,#0e2840,#081828)" : "transparent", color: plasmaEditTab === "design" ? "#50c8ff" : "rgba(180,200,220,0.4)", fontSize: 11, fontWeight: 700, letterSpacing: 0.8, cursor: "pointer", border: plasmaEditTab === "design" ? "1px solid rgba(80,200,255,0.25)" : "1px solid transparent" } }, "Design"),
+            React.createElement("div", { onClick: function() { setPlasmaEditTab("range"); setPlasmaRangeKey(function(k) { return k + 1; }); }, style: { flex: 1, textAlign: "center", padding: "8px 0", borderRadius: 7, background: plasmaEditTab === "range" ? "linear-gradient(180deg,#0e2840,#081828)" : "transparent", color: plasmaEditTab === "range" ? "#50c8ff" : "rgba(180,200,220,0.4)", fontSize: 11, fontWeight: 700, letterSpacing: 0.8, cursor: "pointer", border: plasmaEditTab === "range" ? "1px solid rgba(80,200,255,0.25)" : "1px solid transparent" } }, "Firing Range")),
+
+          // ── DESIGN TAB ──
+          plasmaEditTab === "design" && React.createElement("div", null,
+            // Shape picker
+            React.createElement("div", { style: { marginBottom: 10 } },
+              React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 11, marginBottom: 8, letterSpacing: 0.5 } }, "SHAPE"),
+              React.createElement("div", { style: { display: "flex", gap: 8 } },
+                ["circle", "blast", "torpedo"].map(function(shape) {
+                  var isSelected = (plasmaEditDesign.shape || "circle") === shape;
+                  return React.createElement("div", { key: shape, onClick: function() { plasmaUpdateEdit("shape", shape); },
+                    style: { flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: "14px 8px", borderRadius: 10, background: isSelected ? "rgba(80,200,255,0.1)" : "rgba(0,0,0,0.2)", border: isSelected ? "2px solid rgba(80,200,255,0.5)" : "2px solid rgba(255,255,255,0.08)", cursor: "pointer", minHeight: 80, justifyContent: "center" } },
+                    renderPlasmaShape(Object.assign({}, plasmaEditDesign, { shape: shape }), 22),
+                    React.createElement("div", { style: { fontSize: 10, color: isSelected ? "#50c8ff" : "rgba(180,200,220,0.5)", fontWeight: 700, letterSpacing: 0.5 } }, PLASMA_SHAPE_LABELS[shape]));
+                }))),
+            // Color
+            React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
+              React.createElement(BDColorPicker, { label: "Color", value: plasmaEditDesign.color || "#50c8ff",
+                presets: ["#50c8ff", "#80ddff", "#4488ff", "#cc66ff", "#ff4488", "#44ffaa", "#ffcc44", "#ffffff"],
+                onChange: function(v) { plasmaUpdateEdit("color", v); } }),
+              React.createElement(BDSlider, { label: "Opacity", value: plasmaEditDesign.colorOpacity != null ? plasmaEditDesign.colorOpacity : 1.0,
+                min: 0.1, max: 1.0, step: 0.05, displayValue: Math.round((plasmaEditDesign.colorOpacity != null ? plasmaEditDesign.colorOpacity : 1.0) * 100) + "%",
+                onChange: function(v) { plasmaUpdateEdit("colorOpacity", v); } }),
+              React.createElement(BDColorPicker, { label: "Edge Color", value: plasmaEditDesign.color2 || "#041030",
+                presets: ["#041030", "#000000", "#0a1020", "#050810", "#1a0030", "#200010", "#001020", "#080808"],
+                onChange: function(v) { plasmaUpdateEdit("color2", v); } })),
+            // Glow
+            React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
+              React.createElement(BDColorPicker, { label: "Glow Color", value: plasmaEditDesign.glowColor || "#80ddff",
+                presets: ["#80ddff", "#50c8ff", "#ffffff", "#cc66ff", "#ff4488", "#44ffaa", "#ffcc44", "#4488ff"],
+                onChange: function(v) { plasmaUpdateEdit("glowColor", v); } }),
+              React.createElement(BDSlider, { label: "Glow Size", value: plasmaEditDesign.glowSize != null ? plasmaEditDesign.glowSize : 8,
+                min: 0, max: 24, step: 1, displayValue: String(Math.round(plasmaEditDesign.glowSize != null ? plasmaEditDesign.glowSize : 8)) + "px",
+                onChange: function(v) { plasmaUpdateEdit("glowSize", v); } })),
+            // Trails
+            React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
+              React.createElement(BDToggle, { label: "Trails", value: !!plasmaEditDesign.trailEnabled,
+                onChange: function(v) { plasmaUpdateEdit("trailEnabled", v); } }),
+              !!plasmaEditDesign.trailEnabled && React.createElement("div", null,
+                React.createElement(BDSlider, { label: "Trail Density", value: plasmaEditDesign.trailDensity || 4,
+                  min: 1, max: 10, step: 1, displayValue: String(Math.round(plasmaEditDesign.trailDensity || 4)),
+                  onChange: function(v) { plasmaUpdateEdit("trailDensity", Math.round(v)); } }),
+                React.createElement(BDSlider, { label: "Dissolve Time", value: plasmaEditDesign.trailDissolve || 400,
+                  min: 100, max: 1000, step: 50, displayValue: (plasmaEditDesign.trailDissolve || 400) + "ms",
+                  onChange: function(v) { plasmaUpdateEdit("trailDissolve", v); } }))),
+            null),
+
+          // ── FIRING RANGE TAB ──
+          plasmaEditTab === "range" && React.createElement("div", null,
+            // Animated preview arena
+            React.createElement("div", { key: plasmaRangeKey, style: { position: "relative", height: 260, background: "linear-gradient(180deg, #050810 0%, #0a0e1a 100%)", borderRadius: 12, overflow: "hidden", marginBottom: 14, border: "1px solid rgba(80,200,255,0.1)" } },
+              // Stars
+              React.createElement("div", { style: { position: "absolute", inset: 0, opacity: 0.4 } },
+                [10, 25, 40, 60, 75, 90, 15, 50, 80, 35].map(function(lx, si) {
+                  var ly = [15, 8, 22, 5, 18, 12, 30, 25, 7, 35][si];
+                  return React.createElement("div", { key: si, style: { position: "absolute", left: lx + "%", top: ly + "%", width: si % 3 === 0 ? 2 : 1, height: si % 3 === 0 ? 2 : 1, borderRadius: "50%", background: "#fff" } });
+                })),
+              // Center plasma shot — wrapper positions, inner animates
+              React.createElement("div", { style: { position: "absolute", bottom: plasmaShotBottom, left: "50%", transform: "translateX(-50%)" } },
+                React.createElement("div", { style: { animation: plasmaAnimDur, "--endX": "0px", "--endY": plasmaEndY } },
+                  renderPlasmaShape(plasmaEditDesign, 20))),
+              // Split shots
+              !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaShotBottom, left: "50%", transform: "translateX(calc(-50% - " + plasmaSplitDist + "px))" } },
+                React.createElement("div", { style: { animation: plasmaAnimDur, animationDelay: "0.05s", "--endX": "0px", "--endY": plasmaEndY } },
+                  renderPlasmaShape(plasmaEditDesign, 20))),
+              !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaShotBottom, left: "50%", transform: "translateX(calc(-50% + " + plasmaSplitDist + "px))" } },
+                React.createElement("div", { style: { animation: plasmaAnimDur, animationDelay: "0.05s", "--endX": "0px", "--endY": plasmaEndY } },
+                  renderPlasmaShape(plasmaEditDesign, 20))),
+              // Muzzle flash — wrapper positions, inner animates
+              !!plasmaEditDesign.flashEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaFlashBottom, left: "50%", transform: "translateX(-50%)" } },
+                React.createElement("div", { style: { width: plasmaEditDesign.flashSize || 24, height: plasmaEditDesign.flashSize || 24, borderRadius: "50%", background: plasmaEditDesign.flashColor || "#ffffff", marginLeft: -((plasmaEditDesign.flashSize || 24) / 2), opacity: 0.9, animation: "plasmaFlash 0.25s ease-out forwards" } })),
+              // Ship — tap to fire
+              React.createElement("div", { onClick: function() { setPlasmaRangeKey(function(k) { return k + 1; }); }, style: { position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)", cursor: "pointer" } },
+                React.createElement(ShipDesignSvg, { size: plasmaShipSize, design: shipGetActiveDesign(), uid: "plasma-range" })),
+              // Tap hint
+              React.createElement("div", { style: { position: "absolute", bottom: 8, right: 10, fontSize: 9, color: "rgba(80,200,255,0.3)", letterSpacing: 1, fontFamily: "'Quicksand', sans-serif", fontWeight: 700, pointerEvents: "none" } }, "TAP SHIP TO FIRE")),
+            // Flash controls
+            React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
+              React.createElement(BDToggle, { label: "Muzzle Flash", value: !!plasmaEditDesign.flashEnabled,
+                onChange: function(v) { plasmaUpdateEdit("flashEnabled", v); } }),
+              !!plasmaEditDesign.flashEnabled && React.createElement("div", null,
+                React.createElement(BDColorPicker, { label: "Flash Color", value: plasmaEditDesign.flashColor || "#ffffff",
+                  presets: ["#ffffff", "#80ddff", "#50c8ff", "#ffcc44", "#ff8844", "#cc66ff", "#44ffaa", "#ff4488"],
+                  onChange: function(v) { plasmaUpdateEdit("flashColor", v); } }),
+                React.createElement(BDSlider, { label: "Flash Size", value: plasmaEditDesign.flashSize || 24,
+                  min: 8, max: 60, step: 2, displayValue: String(Math.round(plasmaEditDesign.flashSize || 24)) + "px",
+                  onChange: function(v) { plasmaUpdateEdit("flashSize", Math.round(v)); } }))),
+            // Split Shot
+            React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
+              React.createElement(BDToggle, { label: "Split Shot", value: !!plasmaEditDesign.splitEnabled,
+                onChange: function(v) { plasmaUpdateEdit("splitEnabled", v); } }),
+              !!plasmaEditDesign.splitEnabled && React.createElement(BDSlider, { label: "Split Distance", value: plasmaEditDesign.splitDistance || 20,
+                min: 4, max: 60, step: 2, displayValue: String(Math.round(plasmaEditDesign.splitDistance || 20)) + "px",
+                onChange: function(v) { plasmaUpdateEdit("splitDistance", Math.round(v)); } })),
+            // Source, Speed + Ship Size
+            React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
+              React.createElement(BDSlider, { label: "Source X Offset", value: plasmaEditDesign.sourceOffsetX != null ? plasmaEditDesign.sourceOffsetX : 50,
+                min: 0, max: 100, step: 1, displayValue: Math.round(plasmaEditDesign.sourceOffsetX != null ? plasmaEditDesign.sourceOffsetX : 50) + "%",
+                onChange: function(v) { plasmaUpdateEdit("sourceOffsetX", Math.round(v)); } }),
+              React.createElement(BDSlider, { label: "Speed", value: plasmaEditDesign.speed || 1.0,
+                min: 0.3, max: 2.5, step: 0.1, displayValue: (plasmaEditDesign.speed || 1.0).toFixed(1) + "x",
+                onChange: function(v) { plasmaUpdateEdit("speed", v); } }),
+              React.createElement(BDSlider, { label: "Ship Size", value: plasmaShipSize,
+                min: 34, max: 204, step: 2, displayValue: String(plasmaShipSize) + "px",
+                onChange: function(v) { setPlasmaShipSize(Math.round(v)); } }))),
+
+          // Reset button
+          React.createElement("div", { style: { display: "flex", justifyContent: "center", marginTop: 20 } },
+            React.createElement("div", {
+              onClick: function() { plasmaEditDirtyRef.current = true; setPlasmaEditDesign(Object.assign({}, PLASMA_DEFAULT_DESIGN, { name: plasmaEditDesign.name || "" })); },
+              style: { padding: "8px 20px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.1)", color: "rgba(180,200,220,0.5)", fontSize: 11, fontFamily: "'Exo 2', sans-serif", cursor: "pointer", letterSpacing: 0.5 }
+            }, "Reset to Defaults"))),
+        plasmaShowBackWarn && renderBackWarnOverlay(
+          function() { setPlasmaShowBackWarn(false); },
+          function() { plasmaSaveCurrent(); setPlasmaShowBackWarn(false); setPlasmaView("list"); plasmaEditDirtyRef.current = false; },
+          function() { setPlasmaShowBackWarn(false); setPlasmaView("list"); plasmaEditDirtyRef.current = false; }))
     )
   );
 }
