@@ -1410,6 +1410,9 @@ export default function CosmicWorkshop() {
   // shipSelectedPart (if >= 0) ∪ shipSelectedExtras. Canvas taps clear extras
   // (single-select gesture); the checkbox in the LIST tab toggles extras.
   var _shipSelectedExtras = useState([]), shipSelectedExtras = _shipSelectedExtras[0], setShipSelectedExtras = _shipSelectedExtras[1];
+  // Multi-select toggle: when ON, canvas taps add/remove the tapped part
+  // (and any group members) instead of replacing the selection.
+  var _shipMultiSelectOn = useState(false), shipMultiSelectOn = _shipMultiSelectOn[0], setShipMultiSelectOn = _shipMultiSelectOn[1];
   var shipDragRef = useRef(null);
   // Tracks an active row-drag in the parts list (Z-order reordering by drag).
   var shipDragHandleRef = useRef(null);
@@ -3012,6 +3015,159 @@ export default function CosmicWorkshop() {
   // True iff 2+ parts are selected and they disagree on `key`. Used to badge
   // property controls with "MIXED" so the user knows changing the value will
   // overwrite distinct values across the selection.
+  // List all part indices that share `gid` (used for group expansion on tap).
+  function shipGroupMembers(gid) {
+    var out = []; if (!gid) return out;
+    var parts = (shipEdit && shipEdit.parts) || [];
+    for (var i = 0; i < parts.length; i++) {
+      if (parts[i] && parts[i].groupId === gid) out.push(i);
+    }
+    return out;
+  }
+  // Single entry point for canvas / list-row taps. addMode comes from the
+  // multi-select toggle; when true, the tap adds/removes the tapped part
+  // (and any group members) instead of replacing the selection.
+  function shipApplyTap(idx, addMode) {
+    var parts = (shipEdit && shipEdit.parts) || [];
+    var p = parts[idx]; if (!p) return;
+    var members = p.groupId ? shipGroupMembers(p.groupId) : [idx];
+    if (!addMode) {
+      setShipSelectedPart(members[0]);
+      setShipSelectedExtras(members.slice(1));
+      return;
+    }
+    var current = shipGetSelected();
+    var allIn = members.every(function(m) { return current.indexOf(m) >= 0; });
+    if (allIn) {
+      // Toggle the group out of the selection
+      var remaining = current.filter(function(c) { return members.indexOf(c) < 0; });
+      if (remaining.length === 0) { setShipSelectedPart(-1); setShipSelectedExtras([]); return; }
+      setShipSelectedPart(remaining[0]);
+      setShipSelectedExtras(remaining.slice(1));
+    } else {
+      var union = current.slice();
+      members.forEach(function(m) { if (union.indexOf(m) < 0) union.push(m); });
+      if (shipSelectedPart < 0) {
+        setShipSelectedPart(union[0]);
+        setShipSelectedExtras(union.slice(1));
+      } else {
+        setShipSelectedExtras(union.filter(function(u) { return u !== shipSelectedPart; }));
+      }
+    }
+  }
+  function shipSelectAll() {
+    var parts = (shipEdit && shipEdit.parts) || [];
+    if (parts.length === 0) return;
+    var all = []; for (var i = 0; i < parts.length; i++) all.push(i);
+    setShipSelectedPart(all[0]);
+    setShipSelectedExtras(all.slice(1));
+  }
+  function shipClearSelection() {
+    setShipSelectedPart(-1);
+    setShipSelectedExtras([]);
+  }
+  // Delete every selected part as one history step. Splice descending so
+  // earlier indices don't shift mid-loop. Selection is cleared after.
+  function shipDeleteSelected() {
+    var sels = shipGetSelected();
+    if (sels.length === 0) return;
+    if (sels.length === 1) { shipDeletePart(sels[0]); return; }
+    shipDirtyRef.current = true;
+    shipApplyEdit(function(prev) {
+      var list = (prev.parts || []).slice();
+      var sorted = sels.slice().sort(function(a, b) { return b - a; });
+      for (var i = 0; i < sorted.length; i++) list.splice(sorted[i], 1);
+      return Object.assign({}, prev, { parts: list });
+    }, "__delMulti_" + Date.now());
+    setShipSelectedPart(-1);
+    setShipSelectedExtras([]);
+  }
+  // Duplicate every selected part as one history step. Each copy is nudged
+  // (1.5, 1.5) and gets " copy" appended to its name. The new copies become
+  // the next selection.
+  function shipDuplicateSelected() {
+    var sels = shipGetSelected();
+    if (sels.length === 0) return;
+    if (sels.length === 1) { shipDuplicatePart(sels[0]); return; }
+    shipDirtyRef.current = true;
+    var firstNew = -1, restNew = [];
+    shipApplyEdit(function(prev) {
+      var list = (prev.parts || []).slice();
+      var sorted = sels.slice().sort(function(a, b) { return a - b; });
+      for (var i = 0; i < sorted.length; i++) {
+        var src = list[sorted[i]]; if (!src) continue;
+        var copy = JSON.parse(JSON.stringify(src));
+        copy.x = Math.max(0, Math.min(40, (src.x || 20) + 1.5));
+        copy.y = Math.max(0, Math.min(40, (src.y || 20) + 1.5));
+        if (src.name) copy.name = src.name + " copy";
+        list.push(copy);
+        var newIx = list.length - 1;
+        if (firstNew < 0) firstNew = newIx; else restNew.push(newIx);
+      }
+      return Object.assign({}, prev, { parts: list });
+    }, "__dupMulti_" + Date.now());
+    if (firstNew >= 0) {
+      setShipSelectedPart(firstNew);
+      setShipSelectedExtras(restNew);
+    }
+  }
+  // Tag every selected part with a fresh groupId so subsequent canvas/row
+  // taps select the whole group together.
+  function shipGroupSelected() {
+    var sels = shipGetSelected();
+    if (sels.length < 2) return;
+    var gid = "g" + Date.now();
+    shipDirtyRef.current = true;
+    shipApplyEdit(function(prev) {
+      var list = (prev.parts || []).slice();
+      for (var i = 0; i < sels.length; i++) {
+        var p = list[sels[i]]; if (!p) continue;
+        list[sels[i]] = Object.assign({}, p, { groupId: gid });
+      }
+      return Object.assign({}, prev, { parts: list });
+    }, "__group_" + Date.now());
+  }
+  // Strip groupId from every selected part.
+  function shipUngroupSelected() {
+    var sels = shipGetSelected();
+    if (sels.length === 0) return;
+    var anyGrouped = false;
+    var parts = (shipEdit && shipEdit.parts) || [];
+    for (var i = 0; i < sels.length; i++) {
+      if (parts[sels[i]] && parts[sels[i]].groupId) { anyGrouped = true; break; }
+    }
+    if (!anyGrouped) return;
+    shipDirtyRef.current = true;
+    shipApplyEdit(function(prev) {
+      var list = (prev.parts || []).slice();
+      for (var i = 0; i < sels.length; i++) {
+        var p = list[sels[i]]; if (!p || !p.groupId) continue;
+        var copy = Object.assign({}, p);
+        delete copy.groupId;
+        list[sels[i]] = copy;
+      }
+      return Object.assign({}, prev, { parts: list });
+    }, "__ungroup_" + Date.now());
+  }
+  // True if at least one selected part has a groupId (used to toggle the
+  // visibility of the Ungroup button).
+  // Deterministic tint for a groupId so members of the same group share a
+  // colored chip in the list. Returns null when there's no group.
+  function shipGroupTint(gid) {
+    if (!gid) return null;
+    var h = 0;
+    for (var i = 0; i < gid.length; i++) h = (h * 31 + gid.charCodeAt(i)) >>> 0;
+    return "hsl(" + (h % 360) + ", 70%, 62%)";
+  }
+  function shipSelectionHasGroup() {
+    var sels = shipGetSelected();
+    var parts = (shipEdit && shipEdit.parts) || [];
+    for (var i = 0; i < sels.length; i++) {
+      if (parts[sels[i]] && parts[sels[i]].groupId) return true;
+    }
+    return false;
+  }
+
   function shipMixed(key) {
     // Guard: same label text ("Opacity", "Rotation", "Width", ...) is reused
     // in Block Designer / VFX / UFO, but those modules have nothing to do
@@ -3105,16 +3261,24 @@ export default function CosmicWorkshop() {
   // Header shown at the top of the Color / Position sub-tabs when a part is
   // selected: part type label, name input, duplicate, delete.
   function renderShipSelectedHeader(sel) {
+    var selCount = shipGetSelected().length;
+    var heading = selCount > 1 ? (selCount + " parts selected") : ("Selected: " + (sel.name || SHIP_PART_LABELS[sel.type]));
     return React.createElement(React.Fragment, null,
-      React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 } },
-        React.createElement("div", { style: { color: "#ff8aaa", fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", fontFamily: "'Exo 2', sans-serif" } }, "Selected: " + (sel.name || SHIP_PART_LABELS[sel.type])),
+      React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, gap: 6, flexWrap: "wrap" } },
+        React.createElement("div", { style: { color: "#ff8aaa", fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", fontFamily: "'Exo 2', sans-serif" } }, heading),
         React.createElement("div", { style: { display: "flex", gap: 6 } },
-          React.createElement("div", { onClick: function() { shipDuplicatePart(shipSelectedPart); },
-            title: "Duplicate part",
+          // Group / Ungroup chips. Group appears when 2+ selected; Ungroup
+          // appears whenever any selected part has a groupId.
+          selCount >= 2 && React.createElement("div", { onClick: shipGroupSelected, title: "Group selected parts",
+            style: { padding: "4px 8px", borderRadius: 6, cursor: "pointer", background: "rgba(200,184,255,0.12)", border: "1px solid rgba(200,184,255,0.4)", color: "#c8b8ff", fontSize: 10, fontWeight: 700, letterSpacing: 0.4, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Group"),
+          shipSelectionHasGroup() && React.createElement("div", { onClick: shipUngroupSelected, title: "Ungroup",
+            style: { padding: "4px 8px", borderRadius: 6, cursor: "pointer", background: "rgba(180,180,180,0.08)", border: "1px solid rgba(180,180,180,0.3)", color: "rgba(200,210,220,0.7)", fontSize: 10, fontWeight: 700, letterSpacing: 0.4, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Ungroup"),
+          React.createElement("div", { onClick: shipDuplicateSelected,
+            title: selCount > 1 ? ("Duplicate " + selCount + " parts") : "Duplicate part",
             style: { width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, cursor: "pointer", background: "rgba(128,221,255,0.12)", border: "1px solid rgba(128,221,255,0.4)" } },
             shipCopySvg(14, "#80ddff")),
-          React.createElement("div", { onClick: function() { shipDeletePart(shipSelectedPart); },
-            title: "Delete part",
+          React.createElement("div", { onClick: shipDeleteSelected,
+            title: selCount > 1 ? ("Delete " + selCount + " parts") : "Delete part",
             style: { width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, cursor: "pointer", background: "rgba(220,60,80,0.15)", border: "1px solid rgba(220,60,80,0.4)" } },
             shipTrashSvg(14, "#ff8088")))),
       );
@@ -3137,17 +3301,22 @@ export default function CosmicWorkshop() {
       var p = parts[i];
       var hw = ((p.w || 8) / 2) + 1.5, hh = ((p.h || 8) / 2) + 1.5;
       if (px >= p.x - hw && px <= p.x + hw && py >= p.y - hh && py <= p.y + hh) {
-        setShipSelectedPart(i);
-        setShipSelectedExtras([]);
-        shipDragRef.current = { idx: i, offX: px - p.x, offY: py - p.y };
-        if (e.currentTarget.setPointerCapture && e.pointerId != null) {
-          try { e.currentTarget.setPointerCapture(e.pointerId); } catch(err) {}
+        shipApplyTap(i, shipMultiSelectOn);
+        // Only enable drag-to-move when the tap acts on a single part
+        // (multi-select + groups are about composition, not dragging).
+        if (!shipMultiSelectOn && !(p.groupId)) {
+          shipDragRef.current = { idx: i, offX: px - p.x, offY: py - p.y };
+          if (e.currentTarget.setPointerCapture && e.pointerId != null) {
+            try { e.currentTarget.setPointerCapture(e.pointerId); } catch(err) {}
+          }
         }
         return;
       }
     }
-    setShipSelectedPart(-1);
-    setShipSelectedExtras([]);
+    if (!shipMultiSelectOn) {
+      setShipSelectedPart(-1);
+      setShipSelectedExtras([]);
+    }
   }
   function shipPreviewPointerMove(e) {
     if (!shipDragRef.current) return;
@@ -4354,7 +4523,16 @@ export default function CosmicWorkshop() {
             React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 11, marginBottom: 6, letterSpacing: 0.5 } }, "NAME"),
             React.createElement("input", { value: shipEdit.name || "", onChange: function(e) { shipUpdateEdit("name", e.target.value); },
               placeholder: "My Ship", style: { width: "100%", padding: "6px 10px", borderRadius: 6, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#b0c8d8", fontSize: 16, fontFamily: "'Quicksand',sans-serif", outline: "none", boxSizing: "border-box" } }),
-            React.createElement("div", { style: { marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between" } },
+            // Multi-Select toggle + Select All / Clear chips on the left, on
+            // the row beneath the name input. (Ship Glow stays on its own row.)
+            React.createElement("div", { style: { marginTop: 10, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" } },
+              React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, letterSpacing: 0.5, textTransform: "uppercase" } }, "Multi-Select"),
+              React.createElement(BDToggle, { value: shipMultiSelectOn, onChange: function(v) { setShipMultiSelectOn(v); } }),
+              shipMultiSelectOn && React.createElement("div", { onClick: shipSelectAll, title: "Select all parts",
+                style: { padding: "4px 10px", borderRadius: 6, cursor: "pointer", background: "rgba(255,138,170,0.12)", border: "1px solid rgba(255,138,170,0.4)", color: "#ff8aaa", fontSize: 10, fontWeight: 700, letterSpacing: 0.4, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Select All"),
+              shipMultiSelectOn && React.createElement("div", { onClick: shipClearSelection, title: "Clear selection",
+                style: { padding: "4px 10px", borderRadius: 6, cursor: "pointer", background: "rgba(180,180,180,0.08)", border: "1px solid rgba(180,180,180,0.3)", color: "rgba(200,210,220,0.7)", fontSize: 10, fontWeight: 700, letterSpacing: 0.4, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Clear")),
+            React.createElement("div", { style: { marginTop: 12, display: "flex", alignItems: "center", gap: 8 } },
               React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, letterSpacing: 0.5, textTransform: "uppercase" } }, "Ship Glow"),
               React.createElement(BDToggle, { value: shipEdit.glowEnabled || false, onChange: function(v) { shipUpdateEdit("glowEnabled", v); } })),
             shipEdit.glowEnabled && React.createElement(React.Fragment, null,
@@ -4425,7 +4603,7 @@ export default function CosmicWorkshop() {
               React.createElement(BDSlider, { label: shipMixedLbl("opacity", "Opacity"), value: sel.opacity, min: 0, max: 1, step: 0.05, displayValue: Math.round((sel.opacity || 0) * 100) + "%",
                 onChange: function(v) { shipUpdateSelected("opacity", v); } }),
               // Fill mode selector + gradient controls (color2, angle for linear).
-              React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, marginTop: 12, marginBottom: 6, letterSpacing: 0.5, textTransform: "uppercase" } }, "Fill Mode"),
+              React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, marginTop: 12, marginBottom: 6, letterSpacing: 0.5, textTransform: "uppercase" } }, shipMixedLbl("fillMode", "Fill Mode")),
               React.createElement("div", { style: { display: "flex", gap: 4, marginBottom: 10 } },
                 fillModes.map(function(m) {
                   var on = fillMode === m.id;
@@ -4449,7 +4627,7 @@ export default function CosmicWorkshop() {
                 onChange: function(v) { shipUpdateSelected("bo", v); } }),
               // ── Glow: per-part halo via CSS drop-shadow filter ──
               React.createElement("div", { style: { marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between" } },
-                React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, letterSpacing: 0.5, textTransform: "uppercase" } }, "Glow"),
+                React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, letterSpacing: 0.5, textTransform: "uppercase" } }, shipMixedLbl("glowEnabled", "Glow")),
                 React.createElement(BDToggle, { value: sel.glowEnabled || false, onChange: function(v) { shipUpdateSelected("glowEnabled", v); } })),
               sel.glowEnabled && React.createElement(React.Fragment, null,
                 React.createElement(BDColorPicker, { label: shipMixedLbl("glowColor", "Glow Color"), value: sel.glowColor || "#80ddff",
@@ -4536,7 +4714,7 @@ export default function CosmicWorkshop() {
                     var isSel = shipIsSelected(idx);
                     var displayName = p.name || SHIP_PART_LABELS[p.type];
                     var isRenaming = shipPartRenamingIdx === idx;
-                    return React.createElement("div", Object.assign({ key: idx, onClick: function() { setShipSelectedPart(idx); setShipSelectedExtras([]); },
+                    return React.createElement("div", Object.assign({ key: idx, onClick: function() { shipApplyTap(idx, false); },
                       style: { display: "flex", alignItems: "center", gap: 6, padding: "6px 6px", borderRadius: 6, cursor: "pointer", background: isSel ? "rgba(255,138,170,0.12)" : "rgba(255,255,255,0.02)", border: isPrimary ? "1px solid rgba(255,138,170,0.6)" : (isSel ? "1px solid rgba(255,138,170,0.3)" : "1px solid rgba(255,255,255,0.05)") } }, { "data-shippart-row": "1", "data-shippart-actual-idx": String(idx) }),
                       // Multi-select checkbox. Tap toggles in/out of the selection
                       // without disturbing the row tap (which replaces selection).
@@ -4562,6 +4740,8 @@ export default function CosmicWorkshop() {
                           React.createElement("circle", { cx: 2.5, cy: 13, r: 1.3 }),
                           React.createElement("circle", { cx: 7.5, cy: 13, r: 1.3 }))),
                       React.createElement("div", { style: { width: 14, height: 14, borderRadius: 3, background: p.color || "#80ddff", border: "1px solid rgba(255,255,255,0.2)", flex: "0 0 auto" } }),
+                      p.groupId && React.createElement("div", { title: "Group member",
+                        style: { width: 14, height: 14, borderRadius: "50%", background: shipGroupTint(p.groupId), border: "1.5px solid rgba(0,0,0,0.35)", flex: "0 0 auto", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 800, color: "rgba(0,0,0,0.7)" } }, "G"),
                       isRenaming
                         ? React.createElement("input", { autoFocus: true, value: shipPartRenameVal,
                             onChange: function(e) { setShipPartRenameVal(e.target.value); },
