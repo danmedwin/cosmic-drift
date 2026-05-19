@@ -9194,6 +9194,49 @@ function CosmicWorkshop() {
       });
     }, "multiEdit_" + key);
   }
+  // Align the current selection to one of six edges/centers of the group's
+  // bounding box. Single history step regardless of how many parts move.
+  function shipAlignSelected(mode) {
+    var sels = shipGetSelected();
+    if (sels.length < 2) return;
+    shipDirtyRef.current = true;
+    shipApplyEdit(function (prev) {
+      var list = (prev.parts || []).slice();
+      var minL = Infinity,
+        maxR = -Infinity,
+        minT = Infinity,
+        maxB = -Infinity;
+      for (var i = 0; i < sels.length; i++) {
+        var p = list[sels[i]];
+        if (!p) continue;
+        var l = p.x - p.w / 2,
+          r = p.x + p.w / 2,
+          t = p.y - p.h / 2,
+          b = p.y + p.h / 2;
+        if (l < minL) minL = l;
+        if (r > maxR) maxR = r;
+        if (t < minT) minT = t;
+        if (b > maxB) maxB = b;
+      }
+      var cx = (minL + maxR) / 2;
+      var cy = (minT + maxB) / 2;
+      for (var j = 0; j < sels.length; j++) {
+        var ix = sels[j];
+        var pp = list[ix];
+        if (!pp) continue;
+        var nx = pp.x,
+          ny = pp.y;
+        if (mode === "left") nx = minL + pp.w / 2;else if (mode === "right") nx = maxR - pp.w / 2;else if (mode === "hcenter") nx = cx;else if (mode === "top") ny = minT + pp.h / 2;else if (mode === "bottom") ny = maxB - pp.h / 2;else if (mode === "vcenter") ny = cy;
+        if (nx !== pp.x || ny !== pp.y) list[ix] = Object.assign({}, pp, {
+          x: nx,
+          y: ny
+        });
+      }
+      return Object.assign({}, prev, {
+        parts: list
+      });
+    }, "align_" + mode + "_" + Date.now());
+  }
   // Size-aware fan-out: respects shipWhLocked per-part.
   function shipUpdatePartSizeSelected(key, val) {
     var sels = shipGetSelected();
@@ -15371,6 +15414,230 @@ function CosmicWorkshop() {
     var partsList = Array.isArray(shipEdit.parts) ? shipEdit.parts : [];
     var sel = shipSelectedPart >= 0 && shipSelectedPart < partsList.length ? partsList[shipSelectedPart] : null;
     if (!sel) return renderShipSelectMessage();
+    var selCount = shipGetSelected().length;
+    var multi = selCount >= 2;
+    // Alignment buttons are SVG glyphs: a thick bar showing the
+    // reference edge/axis plus two rectangles snapped against it.
+    var alignBtns = [{
+      mode: "left",
+      label: "Left",
+      svg: React.createElement("svg", {
+        width: 22,
+        height: 22,
+        viewBox: "0 0 24 24"
+      }, React.createElement("rect", {
+        x: 1,
+        y: 2,
+        width: 2,
+        height: 20,
+        fill: "#ff8aaa"
+      }), React.createElement("rect", {
+        x: 5,
+        y: 5,
+        width: 12,
+        height: 4,
+        rx: 1,
+        fill: "rgba(255,138,170,0.55)"
+      }), React.createElement("rect", {
+        x: 5,
+        y: 15,
+        width: 8,
+        height: 4,
+        rx: 1,
+        fill: "rgba(255,138,170,0.55)"
+      }))
+    }, {
+      mode: "hcenter",
+      label: "H-Cen",
+      svg: React.createElement("svg", {
+        width: 22,
+        height: 22,
+        viewBox: "0 0 24 24"
+      }, React.createElement("rect", {
+        x: 11,
+        y: 2,
+        width: 2,
+        height: 20,
+        fill: "#ff8aaa"
+      }), React.createElement("rect", {
+        x: 6,
+        y: 5,
+        width: 12,
+        height: 4,
+        rx: 1,
+        fill: "rgba(255,138,170,0.55)"
+      }), React.createElement("rect", {
+        x: 8,
+        y: 15,
+        width: 8,
+        height: 4,
+        rx: 1,
+        fill: "rgba(255,138,170,0.55)"
+      }))
+    }, {
+      mode: "right",
+      label: "Right",
+      svg: React.createElement("svg", {
+        width: 22,
+        height: 22,
+        viewBox: "0 0 24 24"
+      }, React.createElement("rect", {
+        x: 21,
+        y: 2,
+        width: 2,
+        height: 20,
+        fill: "#ff8aaa"
+      }), React.createElement("rect", {
+        x: 7,
+        y: 5,
+        width: 12,
+        height: 4,
+        rx: 1,
+        fill: "rgba(255,138,170,0.55)"
+      }), React.createElement("rect", {
+        x: 11,
+        y: 15,
+        width: 8,
+        height: 4,
+        rx: 1,
+        fill: "rgba(255,138,170,0.55)"
+      }))
+    }, {
+      mode: "top",
+      label: "Top",
+      svg: React.createElement("svg", {
+        width: 22,
+        height: 22,
+        viewBox: "0 0 24 24"
+      }, React.createElement("rect", {
+        x: 2,
+        y: 1,
+        width: 20,
+        height: 2,
+        fill: "#ff8aaa"
+      }), React.createElement("rect", {
+        x: 5,
+        y: 5,
+        width: 4,
+        height: 12,
+        rx: 1,
+        fill: "rgba(255,138,170,0.55)"
+      }), React.createElement("rect", {
+        x: 15,
+        y: 5,
+        width: 4,
+        height: 8,
+        rx: 1,
+        fill: "rgba(255,138,170,0.55)"
+      }))
+    }, {
+      mode: "vcenter",
+      label: "V-Cen",
+      svg: React.createElement("svg", {
+        width: 22,
+        height: 22,
+        viewBox: "0 0 24 24"
+      }, React.createElement("rect", {
+        x: 2,
+        y: 11,
+        width: 20,
+        height: 2,
+        fill: "#ff8aaa"
+      }), React.createElement("rect", {
+        x: 5,
+        y: 6,
+        width: 4,
+        height: 12,
+        rx: 1,
+        fill: "rgba(255,138,170,0.55)"
+      }), React.createElement("rect", {
+        x: 15,
+        y: 8,
+        width: 4,
+        height: 8,
+        rx: 1,
+        fill: "rgba(255,138,170,0.55)"
+      }))
+    }, {
+      mode: "bottom",
+      label: "Bot",
+      svg: React.createElement("svg", {
+        width: 22,
+        height: 22,
+        viewBox: "0 0 24 24"
+      }, React.createElement("rect", {
+        x: 2,
+        y: 21,
+        width: 20,
+        height: 2,
+        fill: "#ff8aaa"
+      }), React.createElement("rect", {
+        x: 5,
+        y: 7,
+        width: 4,
+        height: 12,
+        rx: 1,
+        fill: "rgba(255,138,170,0.55)"
+      }), React.createElement("rect", {
+        x: 15,
+        y: 11,
+        width: 4,
+        height: 8,
+        rx: 1,
+        fill: "rgba(255,138,170,0.55)"
+      }))
+    }];
+    var alignPanel = multi && React.createElement("div", {
+      style: {
+        background: "rgba(255,255,255,0.03)",
+        border: "1px solid rgba(255,138,170,0.25)",
+        borderRadius: 12,
+        padding: "10px 14px",
+        marginBottom: 8
+      }
+    }, React.createElement("div", {
+      style: {
+        color: "rgba(180,200,220,0.5)",
+        fontSize: 10,
+        letterSpacing: 0.5,
+        textTransform: "uppercase",
+        marginBottom: 8
+      }
+    }, "Align " + selCount + " parts"), React.createElement("div", {
+      style: {
+        display: "grid",
+        gridTemplateColumns: "repeat(3, 1fr)",
+        gap: 6
+      }
+    }, alignBtns.map(function (b) {
+      return React.createElement("div", {
+        key: b.mode,
+        onClick: function () {
+          shipAlignSelected(b.mode);
+        },
+        title: "Align " + b.label,
+        style: {
+          padding: "6px 4px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 3,
+          borderRadius: 6,
+          cursor: "pointer",
+          background: "rgba(255,138,170,0.08)",
+          border: "1px solid rgba(255,138,170,0.35)"
+        }
+      }, b.svg, React.createElement("div", {
+        style: {
+          color: "#ff8aaa",
+          fontSize: 9,
+          fontWeight: 700,
+          letterSpacing: 0.3,
+          fontFamily: "'Exo 2', sans-serif",
+          textTransform: "uppercase"
+        }
+      }, b.label));
+    })));
     return React.createElement("div", {
       style: {
         background: "rgba(255,255,255,0.03)",
@@ -15378,7 +15645,11 @@ function CosmicWorkshop() {
         borderRadius: 12,
         padding: "12px 16px 8px"
       }
-    }, renderShipSelectedHeader(sel), React.createElement(BDSlider, {
+    }, renderShipSelectedHeader(sel), alignPanel,
+    // Hide per-part Position X/Y while multi-selected — slamming all
+    // selected parts to a single x or y would collapse them on top
+    // of each other. Use the Align buttons above instead.
+    !multi && React.createElement(BDSlider, {
       label: "Position X",
       value: sel.x,
       min: 0,
@@ -15388,7 +15659,7 @@ function CosmicWorkshop() {
       onChange: function (v) {
         shipUpdateSelected("x", v);
       }
-    }), React.createElement(BDSlider, {
+    }), !multi && React.createElement(BDSlider, {
       label: "Position Y",
       value: sel.y,
       min: 0,
