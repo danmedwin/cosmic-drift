@@ -4724,7 +4724,7 @@ export default function CosmicWorkshop() {
               partsList.length > 1 && React.createElement(BDSlider, { label: "Z (layer)", value: shipSelectedPart, min: 0, max: partsList.length - 1, step: 1, displayValue: shipSelectedPart + " / " + (partsList.length - 1),
                 onChange: function(v) { shipReorderPart(shipSelectedPart, Math.round(v)); } }));
           })(),
-          // ── LIST: parts list + Reset to Preset ──
+          // ── LIST: parts list ──
           shipTab === "list" && (function() {
             var partsList = Array.isArray(shipEdit.parts) ? shipEdit.parts : [];
             return React.createElement(React.Fragment, null,
@@ -4793,12 +4793,7 @@ export default function CosmicWorkshop() {
                         title: "Delete part",
                         style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", background: "rgba(220,60,80,0.12)", border: "1px solid rgba(220,60,80,0.3)", flex: "0 0 auto" } },
                         shipTrashSvg(12, "#ff8088")));
-                  })),
-                React.createElement("div", { style: { display: "flex", justifyContent: "center", marginTop: 14 } },
-                  React.createElement("div", {
-                    onClick: function() { shipDirtyRef.current = true; var h = shipEdit.hull || "arrow"; setShipEdit(Object.assign({}, shipEdit, { hull: h, parts: shipHullPresetParts(h) })); setShipSelectedPart(-1); },
-                    style: { padding: "8px 20px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.1)", color: "rgba(180,200,220,0.5)", fontSize: 11, fontFamily: "'Exo 2', sans-serif", cursor: "pointer", letterSpacing: 0.5 }
-                  }, "Reset to Template"))));
+                  })));
           })()),
         shipShowBackWarn && renderBackWarnOverlay(
           function() { setShipShowBackWarn(false); },
