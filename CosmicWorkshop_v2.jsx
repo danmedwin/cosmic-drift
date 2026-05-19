@@ -3009,6 +3009,28 @@ export default function CosmicWorkshop() {
       return Object.assign({}, prev, { parts: list });
     }, "multiEdit_" + key);
   }
+  // True iff 2+ parts are selected and they disagree on `key`. Used to badge
+  // property controls with "MIXED" so the user knows changing the value will
+  // overwrite distinct values across the selection.
+  function shipMixed(key) {
+    // Guard: same label text ("Opacity", "Rotation", "Width", ...) is reused
+    // in Block Designer / VFX / UFO, but those modules have nothing to do
+    // with ship part selection. Only return true on the hangar screen.
+    if (screen !== "hangar") return false;
+    var sels = shipGetSelected();
+    if (sels.length < 2) return false;
+    var parts = (shipEdit && shipEdit.parts) || [];
+    var v0; var have = false;
+    for (var i = 0; i < sels.length; i++) {
+      var p = parts[sels[i]]; if (!p) continue;
+      if (!have) { v0 = p[key]; have = true; }
+      else if (p[key] !== v0) return true;
+    }
+    return false;
+  }
+  function shipMixedLbl(key, label) {
+    return shipMixed(key) ? (label + " · MIXED") : label;
+  }
   // Align the current selection to one of six edges/centers of the group's
   // bounding box. Single history step regardless of how many parts move.
   function shipAlignSelected(mode) {
@@ -3919,18 +3941,18 @@ export default function CosmicWorkshop() {
             bdActivePanel && React.createElement("div", { style: { borderRadius: 10, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(68,136,255,0.15)", padding: "16px", marginTop: 2 } },
               bdActivePanel === "shape" && React.createElement(React.Fragment, null,
                 React.createElement(BDOptionGrid, { options: SHAPES, value: bdDesign.shape, onChange: function(v) { bdUpdateDesign("shape", v); }, columns: 4 }),
-                React.createElement(BDSlider, { label: "Rotation", value: bdDesign.shapeRotation, onChange: function(v) { bdUpdateDesign("shapeRotation", v); }, min: 0, max: 360, step: 5, displayValue: bdDesign.shapeRotation + "\u00b0" }),
-                CORNER_SHAPES[bdDesign.shape] && React.createElement(BDSlider, { label: "Corner Radius", value: bdDesign.cornerRadius, onChange: function(v) { bdUpdateDesign("cornerRadius", v); }, min: 0, max: 46, step: 1 })),
+                React.createElement(BDSlider, { label: shipMixedLbl("rot", "Rotation"), value: bdDesign.shapeRotation, onChange: function(v) { bdUpdateDesign("shapeRotation", v); }, min: 0, max: 360, step: 5, displayValue: bdDesign.shapeRotation + "\u00b0" }),
+                CORNER_SHAPES[bdDesign.shape] && React.createElement(BDSlider, { label: shipMixedLbl("cr", "Corner Radius"), value: bdDesign.cornerRadius, onChange: function(v) { bdUpdateDesign("cornerRadius", v); }, min: 0, max: 46, step: 1 })),
               bdActivePanel === "color" && React.createElement(React.Fragment, null,
                 React.createElement(BDColorPicker, { value: bdDesign.color, onChange: function(v) { bdUpdateDesign("color", v); }, presets: BD_COLOR_PRESETS }),
                 React.createElement(BDSlider, { label: "Fill Opacity", value: bdDesign.fillOpacity != null ? bdDesign.fillOpacity : 1, onChange: function(v) { bdUpdateDesign("fillOpacity", v); }, min: 0, max: 1, step: 0.05, displayValue: Math.round((bdDesign.fillOpacity != null ? bdDesign.fillOpacity : 1) * 100) + "%" })),
               bdActivePanel === "border" && React.createElement(React.Fragment, null,
                 React.createElement(BDColorPicker, { value: bdDisplayDesign.borderColor, onChange: function(v) { bdUpdateDesign("borderColor", v); }, label: "Color", presets: BD_COLOR_PRESETS }),
                 React.createElement(BDSlider, { label: "Thickness", value: bdDisplayDesign.borderWidth, onChange: function(v) { bdUpdateDesign("borderWidth", v); }, min: 0, max: 8, step: 0.5 }),
-                React.createElement(BDSlider, { label: "Border Opacity", value: bdDisplayDesign.borderOpacity != null ? bdDisplayDesign.borderOpacity : 1, onChange: function(v) { bdUpdateDesign("borderOpacity", v); }, min: 0, max: 1, step: 0.05, displayValue: Math.round((bdDisplayDesign.borderOpacity != null ? bdDisplayDesign.borderOpacity : 1) * 100) + "%" }),
+                React.createElement(BDSlider, { label: shipMixedLbl("bo", "Border Opacity"), value: bdDisplayDesign.borderOpacity != null ? bdDisplayDesign.borderOpacity : 1, onChange: function(v) { bdUpdateDesign("borderOpacity", v); }, min: 0, max: 1, step: 0.05, displayValue: Math.round((bdDisplayDesign.borderOpacity != null ? bdDisplayDesign.borderOpacity : 1) * 100) + "%" }),
                 React.createElement(BDToggle, { label: "Glow", value: bdDisplayDesign.glowEnabled, onChange: function(v) { bdUpdateDesign("glowEnabled", v); } }),
                 bdDisplayDesign.glowEnabled && React.createElement(React.Fragment, null,
-                  React.createElement(BDColorPicker, { value: bdDisplayDesign.glowColor, onChange: function(v) { bdUpdateDesign("glowColor", v); }, label: "Glow Color" }),
+                  React.createElement(BDColorPicker, { value: bdDisplayDesign.glowColor, onChange: function(v) { bdUpdateDesign("glowColor", v); }, label: shipMixedLbl("glowColor", "Glow Color") }),
                   React.createElement(BDSlider, { label: "Intensity", value: bdDisplayDesign.glowIntensity, onChange: function(v) { bdUpdateDesign("glowIntensity", v); }, min: 2, max: 20, step: 1 }))),
               bdActivePanel === "pattern" && React.createElement(React.Fragment, null,
                 React.createElement(BDOptionGrid, { options: PATTERNS, value: bdDesign.pattern, onChange: function(v) {
@@ -3944,14 +3966,14 @@ export default function CosmicWorkshop() {
                   var caps = PATTERN_CAPS[bdDesign.pattern] || {};
                   return React.createElement(React.Fragment, null,
                     React.createElement(BDColorPicker, { value: bdDesign.patternColor, onChange: function(v) { bdUpdateDesign("patternColor", v); }, label: "Color" }),
-                    React.createElement(BDSlider, { label: "Opacity", value: bdDesign.patternOpacity, onChange: function(v) { bdUpdateDesign("patternOpacity", v); }, min: 0.1, max: 1, step: 0.05, displayValue: Math.round(bdDesign.patternOpacity * 100) + "%" }),
+                    React.createElement(BDSlider, { label: shipMixedLbl("opacity", "Opacity"), value: bdDesign.patternOpacity, onChange: function(v) { bdUpdateDesign("patternOpacity", v); }, min: 0.1, max: 1, step: 0.05, displayValue: Math.round(bdDesign.patternOpacity * 100) + "%" }),
                     bdDesign.pattern !== "rings" && (function() {
                       var isCraters = bdDesign.pattern === "craters";
                       var sMin = isCraters ? 3 : 0.3, sMax = isCraters ? 10 : 3, sStep = isCraters ? 0.5 : 0.1;
                       var sVal = bdDesign.patternScale == null ? (isCraters ? 10 : 1) : Math.max(sMin, Math.min(sMax, bdDesign.patternScale));
                       return React.createElement(BDSlider, { label: "Scale", value: sVal, onChange: function(v) { bdUpdateDesign("patternScale", v); }, min: sMin, max: sMax, step: sStep, displayValue: sVal.toFixed(1) + "x" });
                     })(),
-                    bdDesign.pattern !== "rings" && React.createElement(BDSlider, { label: "Rotation", value: bdDesign.patternRotation, onChange: function(v) { bdUpdateDesign("patternRotation", v); }, min: 0, max: 360, step: 5, displayValue: bdDesign.patternRotation + "\u00b0" }),
+                    bdDesign.pattern !== "rings" && React.createElement(BDSlider, { label: shipMixedLbl("rot", "Rotation"), value: bdDesign.patternRotation, onChange: function(v) { bdUpdateDesign("patternRotation", v); }, min: 0, max: 360, step: 5, displayValue: bdDesign.patternRotation + "\u00b0" }),
                     caps.lineWidth && React.createElement(BDSlider, { label: "Line Width", value: bdDesign.patternLineWidth, onChange: function(v) { bdUpdateDesign("patternLineWidth", v); }, min: 0.5, max: 4, step: 0.25 }),
                     caps.spacing && React.createElement(BDSlider, { label: "Spacing", value: bdDesign.patternSpacing == null ? 10 : bdDesign.patternSpacing, onChange: function(v) { bdUpdateDesign("patternSpacing", v); }, min: 4, max: 30, step: 1, displayValue: String(Math.round(bdDesign.patternSpacing == null ? 10 : bdDesign.patternSpacing)) }),
                     caps.ringSpacing && React.createElement(BDSlider, { label: "Ring Spacing", value: bdDesign.patternRingSpacing == null ? 6 : bdDesign.patternRingSpacing, onChange: function(v) { bdUpdateDesign("patternRingSpacing", v); }, min: 2, max: 30, step: 1, displayValue: String(Math.round(bdDesign.patternRingSpacing == null ? 6 : bdDesign.patternRingSpacing)) }),
@@ -3961,11 +3983,11 @@ export default function CosmicWorkshop() {
                 React.createElement(BDOptionGrid, { options: BD_ICONS.map(function(ic) { return { id: ic.id, label: ic.label }; }), value: bdDisplayDesign.icon, onChange: function(v) { bdUpdateDesign("icon", v); }, columns: 4 }),
                 bdDisplayDesign.icon !== "none" && React.createElement(React.Fragment, null,
                   React.createElement(BDColorPicker, { value: bdDisplayDesign.iconColor, onChange: function(v) { bdUpdateDesign("iconColor", v); }, label: "Color" }),
-                  React.createElement(BDSlider, { label: "Opacity", value: bdDisplayDesign.iconOpacity, onChange: function(v) { bdUpdateDesign("iconOpacity", v); }, min: 0.1, max: 1, step: 0.05, displayValue: Math.round(bdDisplayDesign.iconOpacity * 100) + "%" }),
-                  React.createElement(BDSlider, { label: "Rotation", value: bdDisplayDesign.iconRotation || 0, onChange: function(v) { bdUpdateDesign("iconRotation", v); }, min: 0, max: 360, step: 5, displayValue: (bdDisplayDesign.iconRotation || 0) + "°" }),
+                  React.createElement(BDSlider, { label: shipMixedLbl("opacity", "Opacity"), value: bdDisplayDesign.iconOpacity, onChange: function(v) { bdUpdateDesign("iconOpacity", v); }, min: 0.1, max: 1, step: 0.05, displayValue: Math.round(bdDisplayDesign.iconOpacity * 100) + "%" }),
+                  React.createElement(BDSlider, { label: shipMixedLbl("rot", "Rotation"), value: bdDisplayDesign.iconRotation || 0, onChange: function(v) { bdUpdateDesign("iconRotation", v); }, min: 0, max: 360, step: 5, displayValue: (bdDisplayDesign.iconRotation || 0) + "°" }),
                   React.createElement(BDToggle, { label: "Icon Glow", value: bdDisplayDesign.iconGlow, onChange: function(v) { bdUpdateDesign("iconGlow", v); } }),
                   bdDisplayDesign.iconGlow && React.createElement(React.Fragment, null,
-                    React.createElement(BDColorPicker, { value: bdDisplayDesign.iconGlowColor, onChange: function(v) { bdUpdateDesign("iconGlowColor", v); }, label: "Glow Color" }),
+                    React.createElement(BDColorPicker, { value: bdDisplayDesign.iconGlowColor, onChange: function(v) { bdUpdateDesign("iconGlowColor", v); }, label: shipMixedLbl("glowColor", "Glow Color") }),
                     React.createElement(BDSlider, { label: "Glow Spread", value: bdDisplayDesign.iconGlowIntensity, onChange: function(v) { bdUpdateDesign("iconGlowIntensity", v); }, min: 1, max: 12, step: 0.5 }))))))),
         bdShowBackWarn && renderBackWarnOverlay(
           function() { setBdShowBackWarn(false); },
@@ -4082,7 +4104,7 @@ export default function CosmicWorkshop() {
             vfxEditDesign.effectType === "acid_ooze" && React.createElement(React.Fragment, null,
               React.createElement(BDColorPicker, { label: "Body Color", value: vfxEditDesign.color1, onChange: function(v) { vfxUpdateDesign("color1", v); } }),
               React.createElement(BDColorPicker, { label: "Highlight Color", value: vfxEditDesign.color2, onChange: function(v) { vfxUpdateDesign("color2", v); } }),
-              React.createElement(BDSlider, { label: "Width", value: vfxEditDesign.width, onChange: function(v) { vfxUpdateDesign("width", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.width || 1).toFixed(1) + "x" }),
+              React.createElement(BDSlider, { label: shipMixedLbl("w", "Width"), value: vfxEditDesign.width, onChange: function(v) { vfxUpdateDesign("width", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.width || 1).toFixed(1) + "x" }),
               React.createElement(BDSlider, { label: "Waves", value: vfxEditDesign.waveSize, onChange: function(v) { vfxUpdateDesign("waveSize", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.waveSize || 1).toFixed(1) + "x" }),
               React.createElement(BDSlider, { label: "Frequency", value: vfxEditDesign.freq, onChange: function(v) { vfxUpdateDesign("freq", v); }, min: 2, max: 12, step: 1, displayValue: String(Math.round(vfxEditDesign.freq == null ? 5 : vfxEditDesign.freq)) }),
               React.createElement(BDSlider, { label: "Speed of Flow", value: vfxEditDesign.speed, onChange: function(v) { vfxUpdateDesign("speed", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.speed || 1).toFixed(1) + "x" }),
@@ -4201,7 +4223,7 @@ export default function CosmicWorkshop() {
             React.createElement(BDSlider, { label: "Particle Size", value: ufoEditDesign.particleSize || 1.0,
               min: 0.3, max: 2.5, step: 0.1, displayValue: (ufoEditDesign.particleSize || 1.0).toFixed(1) + "x",
               onChange: function(v) { ufoUpdateEdit("particleSize", v); } }),
-            React.createElement(BDSlider, { label: "Glow Intensity", value: ufoEditDesign.glowOpacity || 0,
+            React.createElement(BDSlider, { label: shipMixedLbl("glowIntensity", "Glow Intensity"), value: ufoEditDesign.glowOpacity || 0,
               min: 0, max: 1, step: 0.05, displayValue: (Math.round((ufoEditDesign.glowOpacity || 0) * 100) || 0) + "%",
               onChange: function(v) { ufoUpdateEdit("glowOpacity", v); } }),
             React.createElement(BDToggle, { label: "Alien Inside", value: !!ufoEditDesign.showAlien,
@@ -4336,10 +4358,10 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, letterSpacing: 0.5, textTransform: "uppercase" } }, "Ship Glow"),
               React.createElement(BDToggle, { value: shipEdit.glowEnabled || false, onChange: function(v) { shipUpdateEdit("glowEnabled", v); } })),
             shipEdit.glowEnabled && React.createElement(React.Fragment, null,
-              React.createElement(BDColorPicker, { label: "Glow Color", value: shipEdit.glowColor || "#ff88aa",
+              React.createElement(BDColorPicker, { label: shipMixedLbl("glowColor", "Glow Color"), value: shipEdit.glowColor || "#ff88aa",
                 presets: ["#ff88aa", "#80ddff", "#ffd060", "#80ff80", "#cc70ff", "#ffffff", "#ff6040", "#40c8ff"],
                 onChange: function(v) { shipUpdateEdit("glowColor", v); } }),
-              React.createElement(BDSlider, { label: "Glow Intensity", value: shipEdit.glowIntensity || 10, min: 2, max: 30, step: 1,
+              React.createElement(BDSlider, { label: shipMixedLbl("glowIntensity", "Glow Intensity"), value: shipEdit.glowIntensity || 10, min: 2, max: 30, step: 1,
                 displayValue: (shipEdit.glowIntensity || 10) + "px",
                 onChange: function(v) { shipUpdateEdit("glowIntensity", v); } }))),
           (function() {
@@ -4397,10 +4419,10 @@ export default function CosmicWorkshop() {
             ];
             return React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,138,170,0.25)", borderRadius: 12, padding: "12px 16px 8px" } },
               renderShipSelectedHeader(sel),
-              React.createElement(BDColorPicker, { label: fillMode === "solid" ? "Color" : "Color 1", value: sel.color,
+              React.createElement(BDColorPicker, { label: shipMixedLbl("color", fillMode === "solid" ? "Color" : "Color 1"), value: sel.color,
                 presets: ["#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70cc", "#a0a8b8", "#ffffff", "#222a3a"],
                 onChange: function(v) { shipUpdateSelected("color", v); } }),
-              React.createElement(BDSlider, { label: "Opacity", value: sel.opacity, min: 0, max: 1, step: 0.05, displayValue: Math.round((sel.opacity || 0) * 100) + "%",
+              React.createElement(BDSlider, { label: shipMixedLbl("opacity", "Opacity"), value: sel.opacity, min: 0, max: 1, step: 0.05, displayValue: Math.round((sel.opacity || 0) * 100) + "%",
                 onChange: function(v) { shipUpdateSelected("opacity", v); } }),
               // Fill mode selector + gradient controls (color2, angle for linear).
               React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, marginTop: 12, marginBottom: 6, letterSpacing: 0.5, textTransform: "uppercase" } }, "Fill Mode"),
@@ -4410,30 +4432,30 @@ export default function CosmicWorkshop() {
                   return React.createElement("div", { key: m.id, onClick: function() { shipUpdateSelected("fillMode", m.id); },
                     style: { flex: 1, padding: "7px 6px", textAlign: "center", borderRadius: 6, cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: 0.5, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase", background: on ? "rgba(255,138,170,0.2)" : "rgba(255,255,255,0.04)", border: on ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.1)", color: on ? "#ff8aaa" : "rgba(180,200,220,0.6)" } }, m.label);
                 })),
-              fillMode !== "solid" && React.createElement(BDColorPicker, { label: "Color 2", value: sel.color2 || sel.color,
+              fillMode !== "solid" && React.createElement(BDColorPicker, { label: shipMixedLbl("color2", "Color 2"), value: sel.color2 || sel.color,
                 presets: ["#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70cc", "#a0a8b8", "#ffffff", "#222a3a"],
                 onChange: function(v) { shipUpdateSelected("color2", v); } }),
-              fillMode === "linear" && React.createElement(BDSlider, { label: "Gradient Angle", value: sel.gradAngle || 0, min: 0, max: 360, step: 15, displayValue: (sel.gradAngle || 0) + "°",
+              fillMode === "linear" && React.createElement(BDSlider, { label: shipMixedLbl("gradAngle", "Gradient Angle"), value: sel.gradAngle || 0, min: 0, max: 360, step: 15, displayValue: (sel.gradAngle || 0) + "°",
                 onChange: function(v) { shipUpdateSelected("gradAngle", v); } }),
-              fillMode === "radial" && React.createElement(BDSlider, { label: "Center Size", value: sel.gradStop || 0, min: 0, max: 0.95, step: 0.05, displayValue: Math.round((sel.gradStop || 0) * 100) + "%",
+              fillMode === "radial" && React.createElement(BDSlider, { label: shipMixedLbl("gradStop", "Center Size"), value: sel.gradStop || 0, min: 0, max: 0.95, step: 0.05, displayValue: Math.round((sel.gradStop || 0) * 100) + "%",
                 onChange: function(v) { shipUpdateSelected("gradStop", v); } }),
               React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, marginTop: 12, marginBottom: 4, letterSpacing: 0.5, textTransform: "uppercase" } }, "Border"),
-              React.createElement(BDColorPicker, { label: "Border Color", value: sel.bc || "#000000",
+              React.createElement(BDColorPicker, { label: shipMixedLbl("bc", "Border Color"), value: sel.bc || "#000000",
                 presets: ["#000000", "#222a3a", "#ffffff", "#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70cc"],
                 onChange: function(v) { shipUpdateSelected("bc", v); } }),
-              React.createElement(BDSlider, { label: "Border Width", value: sel.bw || 0, min: 0, max: 4, step: 0.1, displayValue: (sel.bw || 0).toFixed(1),
+              React.createElement(BDSlider, { label: shipMixedLbl("bw", "Border Width"), value: sel.bw || 0, min: 0, max: 4, step: 0.1, displayValue: (sel.bw || 0).toFixed(1),
                 onChange: function(v) { shipUpdateSelected("bw", v); } }),
-              React.createElement(BDSlider, { label: "Border Opacity", value: typeof sel.bo === "number" ? sel.bo : 1, min: 0, max: 1, step: 0.05, displayValue: Math.round((typeof sel.bo === "number" ? sel.bo : 1) * 100) + "%",
+              React.createElement(BDSlider, { label: shipMixedLbl("bo", "Border Opacity"), value: typeof sel.bo === "number" ? sel.bo : 1, min: 0, max: 1, step: 0.05, displayValue: Math.round((typeof sel.bo === "number" ? sel.bo : 1) * 100) + "%",
                 onChange: function(v) { shipUpdateSelected("bo", v); } }),
               // ── Glow: per-part halo via CSS drop-shadow filter ──
               React.createElement("div", { style: { marginTop: 12, display: "flex", alignItems: "center", justifyContent: "space-between" } },
                 React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, letterSpacing: 0.5, textTransform: "uppercase" } }, "Glow"),
                 React.createElement(BDToggle, { value: sel.glowEnabled || false, onChange: function(v) { shipUpdateSelected("glowEnabled", v); } })),
               sel.glowEnabled && React.createElement(React.Fragment, null,
-                React.createElement(BDColorPicker, { label: "Glow Color", value: sel.glowColor || "#80ddff",
+                React.createElement(BDColorPicker, { label: shipMixedLbl("glowColor", "Glow Color"), value: sel.glowColor || "#80ddff",
                   presets: ["#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70ff", "#ffffff", "#ff6040", "#40c8ff"],
                   onChange: function(v) { shipUpdateSelected("glowColor", v); } }),
-                React.createElement(BDSlider, { label: "Glow Intensity", value: sel.glowIntensity || 4, min: 1, max: 20, step: 0.5, displayValue: (sel.glowIntensity || 4) + "px",
+                React.createElement(BDSlider, { label: shipMixedLbl("glowIntensity", "Glow Intensity"), value: sel.glowIntensity || 4, min: 1, max: 20, step: 0.5, displayValue: (sel.glowIntensity || 4) + "px",
                   onChange: function(v) { shipUpdateSelected("glowIntensity", v); } })));
           })(),
           // ── POSITION: geometry for the selected part ──
@@ -4475,9 +4497,9 @@ export default function CosmicWorkshop() {
                 onChange: function(v) { shipUpdateSelected("y", v); } }),
               React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 36px", gap: 8, alignItems: "stretch" } },
                 React.createElement("div", null,
-                  React.createElement(BDSlider, { label: "Width", value: sel.w, min: 1, max: 30, step: 0.5, displayValue: sel.w.toFixed(1),
+                  React.createElement(BDSlider, { label: shipMixedLbl("w", "Width"), value: sel.w, min: 1, max: 30, step: 0.5, displayValue: sel.w.toFixed(1),
                     onChange: function(v) { shipUpdatePartSizeSelected("w", v); } }),
-                  React.createElement(BDSlider, { label: "Height", value: sel.h, min: 0.5, max: 30, step: 0.5, displayValue: sel.h.toFixed(1),
+                  React.createElement(BDSlider, { label: shipMixedLbl("h", "Height"), value: sel.h, min: 0.5, max: 30, step: 0.5, displayValue: sel.h.toFixed(1),
                     onChange: function(v) { shipUpdatePartSizeSelected("h", v); } })),
                 React.createElement("div", {
                   onClick: function() { setShipWhLocked(!shipWhLocked); },
@@ -4486,13 +4508,13 @@ export default function CosmicWorkshop() {
                     background: shipWhLocked ? "rgba(255,138,170,0.15)" : "rgba(255,255,255,0.04)",
                     border: shipWhLocked ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.1)" } },
                   shipLockSvg(18, shipWhLocked))),
-              sel.type === "rect" && React.createElement(BDSlider, { label: "Corner Radius", value: sel.cr || 0, min: 0, max: Math.min(sel.w, sel.h) / 2, step: 0.25, displayValue: (sel.cr || 0).toFixed(2),
+              sel.type === "rect" && React.createElement(BDSlider, { label: shipMixedLbl("cr", "Corner Radius"), value: sel.cr || 0, min: 0, max: Math.min(sel.w, sel.h) / 2, step: 0.25, displayValue: (sel.cr || 0).toFixed(2),
                 onChange: function(v) { shipUpdateSelected("cr", v); } }),
-              sel.type === "trapezoid" && React.createElement(BDSlider, { label: "Top Width", value: typeof sel.tw === "number" ? sel.tw : sel.w / 2, min: 0, max: sel.w * 1.5, step: 0.25, displayValue: (typeof sel.tw === "number" ? sel.tw : sel.w / 2).toFixed(2),
+              sel.type === "trapezoid" && React.createElement(BDSlider, { label: shipMixedLbl("tw", "Top Width"), value: typeof sel.tw === "number" ? sel.tw : sel.w / 2, min: 0, max: sel.w * 1.5, step: 0.25, displayValue: (typeof sel.tw === "number" ? sel.tw : sel.w / 2).toFixed(2),
                 onChange: function(v) { shipUpdateSelected("tw", v); } }),
-              sel.type === "trapezoid" && React.createElement(BDSlider, { label: "Top Offset", value: sel.tofs || 0, min: -sel.w / 2, max: sel.w / 2, step: 0.25, displayValue: (sel.tofs || 0).toFixed(2),
+              sel.type === "trapezoid" && React.createElement(BDSlider, { label: shipMixedLbl("tofs", "Top Offset"), value: sel.tofs || 0, min: -sel.w / 2, max: sel.w / 2, step: 0.25, displayValue: (sel.tofs || 0).toFixed(2),
                 onChange: function(v) { shipUpdateSelected("tofs", v); } }),
-              React.createElement(BDSlider, { label: "Rotation", value: sel.rot || 0, min: 0, max: 360, step: 5, displayValue: (sel.rot || 0) + "°",
+              React.createElement(BDSlider, { label: shipMixedLbl("rot", "Rotation"), value: sel.rot || 0, min: 0, max: 360, step: 5, displayValue: (sel.rot || 0) + "°",
                 onChange: function(v) { shipUpdateSelected("rot", v); } }),
               partsList.length > 1 && React.createElement(BDSlider, { label: "Z (layer)", value: shipSelectedPart, min: 0, max: partsList.length - 1, step: 1, displayValue: shipSelectedPart + " / " + (partsList.length - 1),
                 onChange: function(v) { shipReorderPart(shipSelectedPart, Math.round(v)); } }));
