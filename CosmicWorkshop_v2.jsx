@@ -651,7 +651,7 @@ var BD_COLOR_PRESETS = [
 
 function bdDefaultDesign() {
   return {
-    name: "", shape: "square", shapeRotation: 0, cornerRadius: 0,
+    name: "", shape: "square", shapeRotation: 0, cornerRadius: 6,
     color: "#4488ff", borderColor: "#88bbff", borderWidth: 2, fillOpacity: 1, borderOpacity: 1,
     glowEnabled: false, glowColor: "#88bbff", glowIntensity: 6,
     pattern: "none", patternColor: "#ffffff", patternOpacity: 0.3,

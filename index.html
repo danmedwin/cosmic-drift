@@ -13002,66 +13002,17 @@ function CosmicDriftGame() {
     y: "26"
   }, "SECT " + GAME_VERSION.toUpperCase()), /*#__PURE__*/React.createElement("text", {
     x: "22",
-    y: "304"
-  }, "RNG 8x6"), /*#__PURE__*/React.createElement("text", {
+    y: "293"
+  }, "HIGH SCORE"), /*#__PURE__*/React.createElement("text", {
+    x: "22",
+    y: "307"
+  }, bestScore > 0 ? bestScore.toLocaleString() : "—"), /*#__PURE__*/React.createElement("text", {
     x: "246",
-    y: "304"
-  }, "↑", " HOSTILE"))))), /*#__PURE__*/React.createElement(GsPanel, {
-    style: {
-      flexShrink: 0,
-      padding: "5px 10px 6px",
-      position: "relative",
-      zIndex: 1
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 6,
-      marginBottom: 3,
-      paddingLeft: 5
-    }
-  }, /*#__PURE__*/React.createElement(GsLED, {
-    color: GS.blue,
-    size: 5
-  }), /*#__PURE__*/React.createElement(GsMono, {
-    size: 8,
-    ls: 2,
-    color: "rgba(80,221,255,0.7)"
-  }, "FLIGHT RECORD"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1
-    }
-  })), /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: GS.inset,
-      border: GS.ib,
-      borderRadius: 6,
-      boxShadow: GS.is,
-      padding: 3,
-      display: "grid",
-      gridTemplateColumns: "1fr 1fr 1fr",
-      gap: 3
-    }
-  }, /*#__PURE__*/React.createElement(GsStatReadout, {
-    s: {
-      label: "BEST",
-      value: bestScore > 0 ? bestScore.toLocaleString() : "—",
-      glow: GS.blue
-    }
-  }), /*#__PURE__*/React.createElement(GsStatReadout, {
-    s: {
-      label: "LEVEL",
-      value: bestLevel > 0 ? "L·" + bestLevel : "—",
-      glow: "#ffb43c"
-    }
-  }), /*#__PURE__*/React.createElement(GsStatReadout, {
-    s: {
-      label: "DIFF",
-      value: (DIFF_LABELS[difficulty] || difficulty).toUpperCase(),
-      glow: DIFF_COLORS[difficulty] || GS.green
-    }
-  }))), /*#__PURE__*/React.createElement("div", {
+    y: "293"
+  }, "BEST LEVEL"), /*#__PURE__*/React.createElement("text", {
+    x: "246",
+    y: "307"
+  }, bestLevel > 0 ? "L·" + bestLevel : "—"))))), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: "0 0 10px"
     }
