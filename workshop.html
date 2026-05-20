@@ -5309,7 +5309,7 @@ var SAMPLE_LEVEL = {
 // ── Active Loadout mini-preview helpers ──
 // Tiny pixel-grid preview of a saved level's block layout.
 function renderGridMiniPreview(level, accent) {
-  var cell = 6;
+  var cell = 7;
   var grid = level && level.grid;
   var border = "1px solid " + (accent || "rgba(128,221,255,0.25)");
   if (!grid || grid.length !== COLS * ROWS) {
@@ -10723,7 +10723,8 @@ function CosmicWorkshop() {
       justifyContent: "center",
       gap: 4,
       aspectRatio: "1",
-      alignSelf: "stretch"
+      alignSelf: "stretch",
+      minWidth: 0
     }
   }, React.createElement("div", {
     style: {
@@ -11063,7 +11064,8 @@ function CosmicWorkshop() {
       justifyContent: "center",
       gap: 4,
       aspectRatio: "1",
-      alignSelf: "stretch"
+      alignSelf: "stretch",
+      minWidth: 0
     }
   }, React.createElement("div", {
     style: {
@@ -11179,7 +11181,8 @@ function CosmicWorkshop() {
       justifyContent: "center",
       gap: 4,
       aspectRatio: "1",
-      alignSelf: "stretch"
+      alignSelf: "stretch",
+      minWidth: 0
     }
   }, React.createElement("div", {
     style: {
@@ -11320,7 +11323,8 @@ function CosmicWorkshop() {
   }, plasmaSaved.length + " SAVED")))), React.createElement("div", {
     onClick: function () {
       setScreen("plasma");
-      setPlasmaView("list");
+      var ad = plasmaGetActiveDesign();
+      if (ad) plasmaOpenEditor(ad);else setPlasmaView("list");
     },
     style: {
       background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)",
@@ -11334,7 +11338,8 @@ function CosmicWorkshop() {
       justifyContent: "center",
       gap: 4,
       aspectRatio: "1",
-      alignSelf: "stretch"
+      alignSelf: "stretch",
+      minWidth: 0
     }
   }, React.createElement("div", {
     style: {
