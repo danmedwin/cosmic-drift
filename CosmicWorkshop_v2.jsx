@@ -1277,7 +1277,7 @@ function renderVfxSetPreview(activeMap, savedDesigns) {
   return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(2, 28px)", gap: 3, width: 59, margin: "0 auto" } }, items);
 }
 
-function renderPlasmaShape(design, size) {
+function renderPlasmaSingle(design, size) {
   var color = design.color || "#50c8ff";
   var colorMode = design.colorMode || "radial";
   var glowColor = design.glowColor || "#80ddff";
@@ -1313,6 +1313,16 @@ function renderPlasmaShape(design, size) {
   // torpedo
   var tw = Math.round(size * 0.65);
   return React.createElement("div", { style: { width: tw, height: size, borderRadius: (tw / 2) + "px " + (tw / 2) + "px " + Math.round(tw * 0.15) + "px " + Math.round(tw * 0.15) + "px", background: bg, boxShadow: glow2, opacity: opacity } });
+}
+function renderPlasmaShape(design, size) {
+  if (design && design.splitEnabled) {
+    var ss = Math.round(size * 0.68);
+    var sg = Math.round(size * 0.14);
+    return React.createElement("div", { style: { display: "flex", alignItems: "center", gap: sg } },
+      renderPlasmaSingle(design, ss),
+      renderPlasmaSingle(design, ss));
+  }
+  return renderPlasmaSingle(design, size);
 }
 
 // ── Workshop cockpit design tokens + helpers ──

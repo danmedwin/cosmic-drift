@@ -9578,6 +9578,48 @@ function CosmicDriftGame() {
     var shipY = getShipY(),
       sx = getBlockX(fromCol),
       targetIdx = findBlockInCol(fromCol);
+    var splitOn = !!GAME_PLASMA_DESIGN.splitEnabled;
+    var splitDist = GAME_PLASMA_DESIGN.splitDistance || 20;
+    if (splitOn) {
+      var sxL = sx - splitDist;
+      var sxR = sx + splitDist;
+      if (targetIdx < 0) {
+        var topYsp = getGridTop() - 20;
+        var durSp = (shipY - topYsp) / PLASMA_SPEED;
+        _spawnCanvasProj(sxL, shipY, topYsp, durSp, function () {});
+        _spawnCanvasProj(sxR, shipY, topYsp, durSp, function () {
+          spawnFizzle(sx, topYsp + 10);
+          scheduleRechargeCheck();
+        });
+      } else {
+        shotsHitRef.current += 1;
+        var targetRowSp = Math.floor(targetIdx / COLS);
+        var targetTypeSp = gridRef2.current[targetIdx];
+        if (targetTypeSp !== 7 && targetTypeSp !== 17 && !(targetTypeSp === 10 && shieldRef.current[targetIdx] > 0)) removingRef.current.add(targetIdx);
+        var targetYSp = targetTypeSp === 7 ? getBlockY(targetRowSp) + blockSize / 2 + 2 : getBlockY(targetRowSp);
+        var dur2Sp = Math.max(100, (shipY - targetYSp) / PLASMA_SPEED);
+        var _fireTSp = Date.now();
+        _spawnCanvasProj(sxL, shipY, targetYSp, dur2Sp, function () {});
+        _spawnCanvasProj(sxR, shipY, targetYSp, dur2Sp, function (arriveT) {
+          var _hitTSp = Date.now();
+          _shotTimingLog.unshift({
+            fireT: _fireTSp,
+            arriveT: arriveT,
+            hitT: _hitTSp,
+            dur: dur2Sp
+          });
+          if (_shotTimingLog.length > 20) _shotTimingLog.pop();
+          if (targetTypeSp === 7) {
+            playSound("indestructibleHit");
+          }
+          processHit(targetIdx, 0, "below");
+        });
+      }
+      setTimeout(function () {
+        checkDeadlock();
+      }, 800);
+      return;
+    }
     if (targetIdx < 0) {
       var topY = getGridTop() - 20,
         dist = shipY - topY,
