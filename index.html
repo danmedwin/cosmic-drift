@@ -12811,8 +12811,8 @@ function CosmicDriftGame() {
     }
   })))), /*#__PURE__*/React.createElement(GsPanel, {
     style: {
-      flex: 1,
-      minHeight: 100,
+      flexShrink: 0,
+      aspectRatio: "1",
       padding: 12,
       position: "relative",
       overflow: "hidden",
@@ -13021,22 +13021,50 @@ function CosmicDriftGame() {
     y: "307"
   }, bestLevel > 0 ? "L·" + bestLevel : "—"))))), /*#__PURE__*/React.createElement("div", {
     style: {
-      flex: "0 0 10px"
+      flex: 1,
+      minHeight: 6
     }
-  }), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement(GsPanel, {
     style: {
-      display: "grid",
-      gridTemplateColumns: "1fr 1fr",
-      gap: 6,
+      padding: "10px",
+      display: "flex",
+      flexDirection: "column",
+      gap: 8,
       flexShrink: 0,
       position: "relative",
       zIndex: 1
     }
-  }, /*#__PURE__*/React.createElement(GsPanel, {
+  }, /*#__PURE__*/React.createElement(GsRivet, {
+    pos: {
+      top: 5,
+      left: 5
+    },
+    size: 5
+  }), /*#__PURE__*/React.createElement(GsRivet, {
+    pos: {
+      top: 5,
+      right: 5
+    },
+    size: 5
+  }), /*#__PURE__*/React.createElement(GsRivet, {
+    pos: {
+      bottom: 5,
+      left: 5
+    },
+    size: 5
+  }), /*#__PURE__*/React.createElement(GsRivet, {
+    pos: {
+      bottom: 5,
+      right: 5
+    },
+    size: 5
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "8px 10px 10px"
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 6
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
@@ -13101,11 +13129,7 @@ function CosmicDriftGame() {
       textTransform: "uppercase",
       borderRadius: 4
     }
-  }, "Signature"))), /*#__PURE__*/React.createElement(GsPanel, {
-    style: {
-      padding: "8px 10px 10px"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, "Signature"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
@@ -13194,45 +13218,19 @@ function CosmicDriftGame() {
     },
     style: {
       position: "relative",
-      height: 64,
-      borderRadius: 12,
+      height: 56,
+      borderRadius: 8,
       background: GS.brushedSolid,
       border: GS.pbl,
       boxShadow: GS.ps,
-      padding: 6,
-      flexShrink: 0,
-      cursor: "pointer",
-      zIndex: 1
+      padding: 5,
+      cursor: "pointer"
     }
-  }, /*#__PURE__*/React.createElement(GsRivet, {
-    pos: {
-      top: 5,
-      left: 5
-    },
-    size: 5
-  }), /*#__PURE__*/React.createElement(GsRivet, {
-    pos: {
-      top: 5,
-      right: 5
-    },
-    size: 5
-  }), /*#__PURE__*/React.createElement(GsRivet, {
-    pos: {
-      bottom: 5,
-      left: 5
-    },
-    size: 5
-  }), /*#__PURE__*/React.createElement(GsRivet, {
-    pos: {
-      bottom: 5,
-      right: 5
-    },
-    size: 5
-  }), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", {
     style: {
       position: "absolute",
-      inset: 6,
-      borderRadius: 8,
+      inset: 5,
+      borderRadius: 5,
       background: "linear-gradient(180deg, #2c8a4a 0%, #1a5a32 100%)",
       border: "1px solid #50ffae",
       boxShadow: "inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.4), 0 0 26px rgba(80,255,180,0.45), 0 0 0 1px rgba(80,255,180,0.3)",
@@ -13248,7 +13246,7 @@ function CosmicDriftGame() {
       left: 0,
       right: 0,
       height: "45%",
-      borderRadius: "8px 8px 100% 100%",
+      borderRadius: "5px 5px 100% 100%",
       background: "linear-gradient(180deg, rgba(255,255,255,0.22) 0%, transparent 100%)",
       pointerEvents: "none"
     }
@@ -13268,7 +13266,7 @@ function CosmicDriftGame() {
       color: "#eaffe8",
       textShadow: "0 0 12px rgba(128,221,255,0.7), 0 1px 0 rgba(0,0,0,0.4)"
     }
-  }, hasSaveGame ? "NEW GAME" : "PLAY"))), hasSaveGame && /*#__PURE__*/React.createElement("div", {
+  }, hasSaveGame ? "NEW GAME" : "PLAY")))), hasSaveGame && /*#__PURE__*/React.createElement("div", {
     onClick: loadSaveGame,
     style: {
       flexShrink: 0,

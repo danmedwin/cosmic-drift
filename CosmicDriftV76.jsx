@@ -3022,7 +3022,7 @@ function logUfo(msg) {
         </GsPanel>
 
         {/* Radar / tactical scope */}
-        <GsPanel style={{ flex: 1, minHeight: 100, padding: 12, position: "relative", overflow: "hidden", zIndex: 1 }}>
+        <GsPanel style={{ flexShrink: 0, aspectRatio: "1", padding: 12, position: "relative", overflow: "hidden", zIndex: 1 }}>
           <div style={{ position: "absolute", inset: 18, background: GS.inset, border: GS.ib, borderRadius: 8, boxShadow: GS.is + ", inset 0 0 80px rgba(0,0,0,0.65)", overflow: "hidden" }}>
             <svg width="100%" height="100%" viewBox="0 0 320 320" preserveAspectRatio="xMidYMid meet" style={{ position: "absolute", inset: 0 }}>
               <defs>
@@ -3045,43 +3045,43 @@ function logUfo(msg) {
           </div>
         </GsPanel>
 
-        <div style={{ flex: "0 0 10px" }} />
+        <div style={{ flex: 1, minHeight: 6 }} />
 
-        {/* Mode / Difficulty */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, flexShrink: 0, position: "relative", zIndex: 1 }}>
-          <GsPanel style={{ padding: "8px 10px 10px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6, paddingLeft: 5 }}>
-              <GsLED color={GS.blue} size={5} />
-              <GsMono size={8} ls={2} color="rgba(80,221,255,0.65)">MODE</GsMono>
-            </div>
-            <div style={{ background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: 3, display: "flex", gap: 3 }}>
-              <div onClick={function() { gameModeRef.current = "campaign"; setGameMode("campaign"); }} style={{ flex: 1, padding: "7px 0", textAlign: "center", fontFamily: "'Exo 2', sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: 1.5, cursor: "pointer", color: gameMode === "campaign" ? "#0a0c12" : "rgba(200,220,240,0.55)", background: gameMode === "campaign" ? "linear-gradient(180deg, " + GS.blue + " 0%, " + GS.blue + "cc 100%)" : "transparent", boxShadow: gameMode === "campaign" ? "inset 0 1px 0 rgba(255,255,255,0.3), 0 0 10px " + GS.blue + "66" : "none", textTransform: "uppercase", borderRadius: 4 }}>Campaign</div>
-              <div onClick={function() { gameModeRef.current = "highlights"; setGameMode("highlights"); }} style={{ flex: 1, padding: "7px 0", textAlign: "center", fontFamily: "'Exo 2', sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: 1.5, cursor: "pointer", color: gameMode === "highlights" ? "#0a0c12" : "rgba(200,220,240,0.55)", background: gameMode === "highlights" ? "linear-gradient(180deg, #c8b8ff 0%, #c8b8ffcc 100%)" : "transparent", boxShadow: gameMode === "highlights" ? "inset 0 1px 0 rgba(255,255,255,0.3), 0 0 10px #c8b8ff66" : "none", textTransform: "uppercase", borderRadius: 4 }}>Signature</div>
-            </div>
-          </GsPanel>
-          <GsPanel style={{ padding: "8px 10px 10px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6, paddingLeft: 5 }}>
-              <GsLED color="#ffb43c" size={5} />
-              <GsMono size={8} ls={2} color="rgba(255,180,60,0.7)">DIFFICULTY</GsMono>
-            </div>
-            <div style={{ background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: 3, display: "flex", gap: 3 }}>
-              {["easy","regular","hard"].map(function(d) { var dcol = DIFF_COLORS[d]; var isAct = difficulty === d; return <div key={d} onClick={function() { difficultyRef.current = d; setDifficulty(d); try { window.storage.set("cosmic_drift_difficulty", d); } catch(e) {} }} style={{ flex: 1, padding: "7px 0", textAlign: "center", fontFamily: "'Exo 2', sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: 1.5, cursor: "pointer", color: isAct ? "#0a0c12" : "rgba(200,220,240,0.55)", background: isAct ? "linear-gradient(180deg, " + dcol + " 0%, " + dcol + "cc 100%)" : "transparent", boxShadow: isAct ? "inset 0 1px 0 rgba(255,255,255,0.3), 0 0 10px " + dcol + "66" : "none", textTransform: "uppercase", borderRadius: 4 }}>{DIFF_LABELS[d]}</div>; })}
-            </div>
-          </GsPanel>
-        </div>
-
-        {/* PLAY button */}
-        <div onClick={function() { if (gameModeRef.current === "highlights") { fullRestart(); startMusic(); setScreen("game"); return; } if (npSavedChoice === "skip") { fullRestart(); setLevel(10); levelRef.current = 10; gridRef2.current = generateGrid(10); shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); seenPowerUpsRef.current = { crossshot: true, drone: true, lightning: true, anglebounce: true, hammer: true }; startMusic(); setScreen("game"); return; } if (npSavedChoice === "training") { fullRestart(); startMusic(); setScreen("game"); return; } setShowNewPlayerPopup(true); }} style={{ position: "relative", height: 64, borderRadius: 12, background: GS.brushedSolid, border: GS.pbl, boxShadow: GS.ps, padding: 6, flexShrink: 0, cursor: "pointer", zIndex: 1 }}>
+        {/* Mode / Difficulty / Play — unified panel */}
+        <GsPanel style={{ padding: "10px", display: "flex", flexDirection: "column", gap: 8, flexShrink: 0, position: "relative", zIndex: 1 }}>
           <GsRivet pos={{ top: 5, left: 5 }} size={5} />
           <GsRivet pos={{ top: 5, right: 5 }} size={5} />
           <GsRivet pos={{ bottom: 5, left: 5 }} size={5} />
           <GsRivet pos={{ bottom: 5, right: 5 }} size={5} />
-          <div style={{ position: "absolute", inset: 6, borderRadius: 8, background: "linear-gradient(180deg, #2c8a4a 0%, #1a5a32 100%)", border: "1px solid #50ffae", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.4), 0 0 26px rgba(80,255,180,0.45), 0 0 0 1px rgba(80,255,180,0.3)", display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
-            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "45%", borderRadius: "8px 8px 100% 100%", background: "linear-gradient(180deg, rgba(255,255,255,0.22) 0%, transparent 100%)", pointerEvents: "none" }} />
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="#eaffe8"><polygon points="6,4 20,12 6,20" /></svg>
-            <span style={{ fontFamily: "'Exo 2', sans-serif", fontSize: 22, fontWeight: 800, letterSpacing: 6, color: "#eaffe8", textShadow: "0 0 12px rgba(128,221,255,0.7), 0 1px 0 rgba(0,0,0,0.4)" }}>{hasSaveGame ? "NEW GAME" : "PLAY"}</span>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6, paddingLeft: 5 }}>
+                <GsLED color={GS.blue} size={5} />
+                <GsMono size={8} ls={2} color="rgba(80,221,255,0.65)">MODE</GsMono>
+              </div>
+              <div style={{ background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: 3, display: "flex", gap: 3 }}>
+                <div onClick={function() { gameModeRef.current = "campaign"; setGameMode("campaign"); }} style={{ flex: 1, padding: "7px 0", textAlign: "center", fontFamily: "'Exo 2', sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: 1.5, cursor: "pointer", color: gameMode === "campaign" ? "#0a0c12" : "rgba(200,220,240,0.55)", background: gameMode === "campaign" ? "linear-gradient(180deg, " + GS.blue + " 0%, " + GS.blue + "cc 100%)" : "transparent", boxShadow: gameMode === "campaign" ? "inset 0 1px 0 rgba(255,255,255,0.3), 0 0 10px " + GS.blue + "66" : "none", textTransform: "uppercase", borderRadius: 4 }}>Campaign</div>
+                <div onClick={function() { gameModeRef.current = "highlights"; setGameMode("highlights"); }} style={{ flex: 1, padding: "7px 0", textAlign: "center", fontFamily: "'Exo 2', sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: 1.5, cursor: "pointer", color: gameMode === "highlights" ? "#0a0c12" : "rgba(200,220,240,0.55)", background: gameMode === "highlights" ? "linear-gradient(180deg, #c8b8ff 0%, #c8b8ffcc 100%)" : "transparent", boxShadow: gameMode === "highlights" ? "inset 0 1px 0 rgba(255,255,255,0.3), 0 0 10px #c8b8ff66" : "none", textTransform: "uppercase", borderRadius: 4 }}>Signature</div>
+              </div>
+            </div>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6, paddingLeft: 5 }}>
+                <GsLED color="#ffb43c" size={5} />
+                <GsMono size={8} ls={2} color="rgba(255,180,60,0.7)">DIFFICULTY</GsMono>
+              </div>
+              <div style={{ background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: 3, display: "flex", gap: 3 }}>
+                {["easy","regular","hard"].map(function(d) { var dcol = DIFF_COLORS[d]; var isAct = difficulty === d; return <div key={d} onClick={function() { difficultyRef.current = d; setDifficulty(d); try { window.storage.set("cosmic_drift_difficulty", d); } catch(e) {} }} style={{ flex: 1, padding: "7px 0", textAlign: "center", fontFamily: "'Exo 2', sans-serif", fontSize: 10, fontWeight: 700, letterSpacing: 1.5, cursor: "pointer", color: isAct ? "#0a0c12" : "rgba(200,220,240,0.55)", background: isAct ? "linear-gradient(180deg, " + dcol + " 0%, " + dcol + "cc 100%)" : "transparent", boxShadow: isAct ? "inset 0 1px 0 rgba(255,255,255,0.3), 0 0 10px " + dcol + "66" : "none", textTransform: "uppercase", borderRadius: 4 }}>{DIFF_LABELS[d]}</div>; })}
+              </div>
+            </div>
           </div>
-        </div>
+          <div onClick={function() { if (gameModeRef.current === "highlights") { fullRestart(); startMusic(); setScreen("game"); return; } if (npSavedChoice === "skip") { fullRestart(); setLevel(10); levelRef.current = 10; gridRef2.current = generateGrid(10); shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); seenPowerUpsRef.current = { crossshot: true, drone: true, lightning: true, anglebounce: true, hammer: true }; startMusic(); setScreen("game"); return; } if (npSavedChoice === "training") { fullRestart(); startMusic(); setScreen("game"); return; } setShowNewPlayerPopup(true); }} style={{ position: "relative", height: 56, borderRadius: 8, background: GS.brushedSolid, border: GS.pbl, boxShadow: GS.ps, padding: 5, cursor: "pointer" }}>
+            <div style={{ position: "absolute", inset: 5, borderRadius: 5, background: "linear-gradient(180deg, #2c8a4a 0%, #1a5a32 100%)", border: "1px solid #50ffae", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -2px 4px rgba(0,0,0,0.4), 0 0 26px rgba(80,255,180,0.45), 0 0 0 1px rgba(80,255,180,0.3)", display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
+              <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "45%", borderRadius: "5px 5px 100% 100%", background: "linear-gradient(180deg, rgba(255,255,255,0.22) 0%, transparent 100%)", pointerEvents: "none" }} />
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="#eaffe8"><polygon points="6,4 20,12 6,20" /></svg>
+              <span style={{ fontFamily: "'Exo 2', sans-serif", fontSize: 22, fontWeight: 800, letterSpacing: 6, color: "#eaffe8", textShadow: "0 0 12px rgba(128,221,255,0.7), 0 1px 0 rgba(0,0,0,0.4)" }}>{hasSaveGame ? "NEW GAME" : "PLAY"}</span>
+            </div>
+          </div>
+        </GsPanel>
 
         {/* Continue row */}
         {hasSaveGame && <div onClick={loadSaveGame} style={{ flexShrink: 0, padding: "8px 16px", background: "linear-gradient(180deg, rgba(20,20,35,0.9), rgba(12,12,22,0.9))", border: "1px solid " + (DIFF_COLORS[(saveGameInfo && saveGameInfo.difficulty) || "regular"] || GS.green) + "44", borderRadius: 8, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, zIndex: 1 }}>
