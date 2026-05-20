@@ -5142,8 +5142,8 @@ export default function CosmicWorkshop() {
                     var ly = [15, 8, 22, 5, 18, 12, 30, 25, 7, 35][si];
                     return React.createElement("div", { key: si, style: { position: "absolute", left: lx + "%", top: ly + "%", width: si % 3 === 0 ? 2 : 1, height: si % 3 === 0 ? 2 : 1, borderRadius: "50%", background: "#fff" } });
                   })),
-                [1,2,3,4,5,6,7].map(function(i) {
-                  return React.createElement("div", { key: "col" + i, style: { position: "absolute", top: 0, bottom: 0, width: 1, left: "calc(" + i + " * (100% - 55px) / 8 + " + (10 + (i - 0.5) * 5) + "px)", background: "rgba(80,200,255,0.1)", pointerEvents: "none", zIndex: 1 } });
+                [0,1,2,3,4,5,6,7].map(function(j) {
+                  return React.createElement("div", { key: "col" + j, style: { position: "absolute", top: 0, bottom: 0, width: 1, left: "calc(" + (j + 0.5) + " * (100% - 55px) / 8 + " + (7.5 + (j + 0.5) * 5) + "px)", background: "rgba(80,200,255,0.1)", pointerEvents: "none", zIndex: 1 } });
                 }),
                 !plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", top: 0, bottom: plasmaOriginBottom, left: "calc(50% + " + plasmaSourceOffsetPx + "px)", width: 1, transform: "translateX(-50%)", background: "linear-gradient(to bottom, " + plasmaIndicatorColor + "00 0%, " + plasmaIndicatorColor + "50 100%)", pointerEvents: "none", zIndex: 3 } }),
                 !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", top: 0, bottom: plasmaOriginBottom, left: "calc(50% + " + (plasmaSourceOffsetPx - plasmaSplitDist) + "px)", width: 1, transform: "translateX(-50%)", background: "linear-gradient(to bottom, " + plasmaIndicatorColor + "00 0%, " + plasmaIndicatorColor + "50 100%)", pointerEvents: "none", zIndex: 3 } }),

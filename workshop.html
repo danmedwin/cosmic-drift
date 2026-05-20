@@ -17474,15 +17474,15 @@ function CosmicWorkshop() {
         background: "#fff"
       }
     });
-  })), [1, 2, 3, 4, 5, 6, 7].map(function (i) {
+  })), [0, 1, 2, 3, 4, 5, 6, 7].map(function (j) {
     return React.createElement("div", {
-      key: "col" + i,
+      key: "col" + j,
       style: {
         position: "absolute",
         top: 0,
         bottom: 0,
         width: 1,
-        left: "calc(" + i + " * (100% - 55px) / 8 + " + (10 + (i - 0.5) * 5) + "px)",
+        left: "calc(" + (j + 0.5) + " * (100% - 55px) / 8 + " + (7.5 + (j + 0.5) * 5) + "px)",
         background: "rgba(80,200,255,0.1)",
         pointerEvents: "none",
         zIndex: 1
