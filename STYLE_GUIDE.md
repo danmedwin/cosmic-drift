@@ -20,6 +20,7 @@ call-to-action buttons. Never mix these across sections.
 | Block Designer | `#c8b8ff` (soft purple) | title, EXPORT button color |
 | VFX Studio | `#ffb43c` (amber) | title |
 | UFO Customizer | `#64dcb4` (teal-green) | title, set-active tints |
+| Plasma Lab     | `#50c8ff` (electric cyan-blue) | title, glow accents, CTA buttons — pulled from the plasma ball color ramp |
 
 ### Global palette
 ```
@@ -112,8 +113,94 @@ EDIT · (RENAME if applicable) · (SET ACTIVE / ★ ACTIVE) · EXPORT · DELETE
 **Top-bar layout (left → right):**
 `[← Back]`  ·  `[centered title]`  ·  `[secondary btn?]  [primary CTA]`
 
-When both Set Active and Save appear together in an editor top bar:
+When an editor has undo/redo **and** Set Active **and** Save:
+`[← Back]`  ·  `[title]`  ·  `[↩ Undo]  [↪ Redo]  [Set Active / ★ Active]  [Save]`
+
+When only Set Active and Save (no undo/redo):
 `[← Back]`  ·  `[title]`  ·  `[Set Active / ★ Active]  [Save]`
+
+### Undo / Redo (standard pattern for editors)
+
+Any editor that supports freeform property editing should include undo/redo.
+Currently implemented: **Hangar (Ship Designer)**, **Plasma Lab**.
+
+**State you need (per module, e.g. `plasma`):**
+```js
+var fooHistoryRef = useRef({ stack: [], idx: -1, lastKey: null, lastTime: 0 });
+var _fooHistVersion = useState(0), setFooHistVersion = _fooHistVersion[1];
+// derived (re-computed each render):
+var fooCanUndo = fooHistoryRef.current.idx > 0;
+var fooCanRedo = fooHistoryRef.current.idx < fooHistoryRef.current.stack.length - 1;
+```
+
+**Functions (copy-paste, rename prefix):**
+```js
+function fooHistoryReset(state) {
+  fooHistoryRef.current = { stack: [JSON.parse(JSON.stringify(state))], idx: 0, lastKey: null, lastTime: 0 };
+  setFooHistVersion(function(v) { return v + 1; });
+}
+function fooHistoryPush(state, coalesceKey) {
+  var h = fooHistoryRef.current; var now = Date.now();
+  var snap = JSON.parse(JSON.stringify(state));
+  if (coalesceKey && h.lastKey === coalesceKey && now - h.lastTime < 600 && h.idx >= 0) {
+    h.stack[h.idx] = snap; h.lastTime = now;
+  } else {
+    h.stack = h.stack.slice(0, h.idx + 1); h.stack.push(snap);
+    if (h.stack.length > 50) { h.stack.shift(); }
+    h.idx = h.stack.length - 1; h.lastKey = coalesceKey || null; h.lastTime = now;
+  }
+  setFooHistVersion(function(v) { return v + 1; });
+}
+function fooUndo() {
+  var h = fooHistoryRef.current; if (h.idx <= 0) return;
+  h.idx -= 1; h.lastKey = null;
+  setFooEditDesign(JSON.parse(JSON.stringify(h.stack[h.idx])));
+  fooEditDirtyRef.current = true;
+  setFooHistVersion(function(v) { return v + 1; });
+}
+function fooRedo() {
+  var h = fooHistoryRef.current; if (h.idx >= h.stack.length - 1) return;
+  h.idx += 1; h.lastKey = null;
+  setFooEditDesign(JSON.parse(JSON.stringify(h.stack[h.idx])));
+  fooEditDirtyRef.current = true;
+  setFooHistVersion(function(v) { return v + 1; });
+}
+```
+
+**Wire it up:**
+- Call `fooHistoryReset(initial)` in both `fooOpenNew()` and `fooOpenEditor(design)`.
+- In `fooUpdateEdit(key, val)`, call `fooHistoryPush(next, key)` inside the setState
+  callback, using `key` as the coalesceKey (collapses rapid slider drags into one step).
+
+**Coalesce key:** Pass the property name being edited (e.g. `"speed"`, `"color"`).
+Dragging a slider fires many updates in <600 ms — they collapse into one undo step.
+Discrete changes (toggle a checkbox, change shape) always create a new step.
+
+**50-step cap:** `fooHistoryPush` drops the oldest entry when the stack exceeds 50.
+
+**Top-bar buttons** (icon-only, `BTN_TOPBAR`, `padding: "6px 8px"`, dimmed when unavailable):
+```js
+React.createElement("div", { onClick: fooUndo, title: "Undo",
+  style: Object.assign({}, BTN_TOPBAR, { padding: "6px 8px",
+    opacity: fooCanUndo ? 1 : 0.35,
+    cursor: fooCanUndo ? "pointer" : "default",
+    display: "flex", alignItems: "center", justifyContent: "center" }) },
+  React.createElement("svg", { width: 14, height: 14, viewBox: "0 0 24 24",
+    fill: "none", stroke: "currentColor", strokeWidth: 2.2,
+    strokeLinecap: "round", strokeLinejoin: "round" },
+    React.createElement("path", { d: "M9 14L4 9l5-5" }),
+    React.createElement("path", { d: "M4 9h11a5 5 0 0 1 5 5v0a5 5 0 0 1-5 5h-3" }))),
+React.createElement("div", { onClick: fooRedo, title: "Redo",
+  style: Object.assign({}, BTN_TOPBAR, { padding: "6px 8px",
+    opacity: fooCanRedo ? 1 : 0.35,
+    cursor: fooCanRedo ? "pointer" : "default",
+    display: "flex", alignItems: "center", justifyContent: "center" }) },
+  React.createElement("svg", { width: 14, height: 14, viewBox: "0 0 24 24",
+    fill: "none", stroke: "currentColor", strokeWidth: 2.2,
+    strokeLinecap: "round", strokeLinejoin: "round" },
+    React.createElement("path", { d: "M15 14l5-5-5-5" }),
+    React.createElement("path", { d: "M20 9H9a5 5 0 0 0-5 5v0a5 5 0 0 0 5 5h3" }))),
+```
 
 ### Set Active / ★ Active toggle (standard pattern)
 - **In list rows** — use `BTN_SETACTIVE` / `BTN_ISACTIVE` pair, always visible.
@@ -150,6 +237,8 @@ screen = "splash"
       vfxCurrentView = "list" | "editor"
   → "ufo"       (UFO Customizer)
       ufoView = "list" | "editor"
+  → "plasma"    (Plasma Lab)
+      plasmaView = "list" | "editor"
 ```
 
 Each section follows the same two-level pattern: a **list view** and an
@@ -276,6 +365,8 @@ cosmic-drift-vfx-active       → VFX active map { effectType: designId }
 cosmic-drift-ufo-designs      → UFO saved designs array
 cosmic-drift-ufo-active       → UFO active design id (string, not map)
 cosmic-drift-ufo-design       → LEGACY single-design key (migrate only)
+cosmic-drift-plasma-designs   → Plasma Lab saved designs array
+cosmic-drift-plasma-active    → Plasma Lab active design id (string, not map — one slot)
 ```
 
 **Array items always have:** `id` (string, e.g. `"ufo_" + Date.now()`),

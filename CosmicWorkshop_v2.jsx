@@ -1481,6 +1481,8 @@ export default function CosmicWorkshop() {
   var _plasmaEditDesign = useState(function() { return Object.assign({}, PLASMA_DEFAULT_DESIGN, { name: "" }); }), plasmaEditDesign = _plasmaEditDesign[0], setPlasmaEditDesign = _plasmaEditDesign[1];
   var _plasmaEditId = useState(null), plasmaEditId = _plasmaEditId[0], setPlasmaEditId = _plasmaEditId[1];
   var plasmaEditDirtyRef = useRef(false);
+  var plasmaHistoryRef = useRef({ stack: [], idx: -1, lastKey: null, lastTime: 0 });
+  var _plasmaHistVersion = useState(0), setPlasmaHistVersion = _plasmaHistVersion[1];
   var _plasmaSaveStatus = useState(""), plasmaSaveStatus = _plasmaSaveStatus[0], setPlasmaSaveStatus = _plasmaSaveStatus[1];
   var _plasmaDeletingId = useState(null), plasmaDeletingId = _plasmaDeletingId[0], setPlasmaDeletingId = _plasmaDeletingId[1];
   var _plasmaBackWarn = useState(false), plasmaShowBackWarn = _plasmaBackWarn[0], setPlasmaShowBackWarn = _plasmaBackWarn[1];
@@ -2858,18 +2860,51 @@ export default function CosmicWorkshop() {
     }
     return Object.assign({}, PLASMA_DEFAULT_DESIGN);
   }
+  function plasmaHistoryReset(state) {
+    plasmaHistoryRef.current = { stack: [JSON.parse(JSON.stringify(state))], idx: 0, lastKey: null, lastTime: 0 };
+    setPlasmaHistVersion(function(v) { return v + 1; });
+  }
+  function plasmaHistoryPush(state, coalesceKey) {
+    var h = plasmaHistoryRef.current; var now = Date.now();
+    var snap = JSON.parse(JSON.stringify(state));
+    if (coalesceKey && h.lastKey === coalesceKey && now - h.lastTime < 600 && h.idx >= 0) {
+      h.stack[h.idx] = snap; h.lastTime = now;
+    } else {
+      h.stack = h.stack.slice(0, h.idx + 1); h.stack.push(snap);
+      if (h.stack.length > 50) { h.stack.shift(); }
+      h.idx = h.stack.length - 1; h.lastKey = coalesceKey || null; h.lastTime = now;
+    }
+    setPlasmaHistVersion(function(v) { return v + 1; });
+  }
+  function plasmaUndo() {
+    var h = plasmaHistoryRef.current; if (h.idx <= 0) return;
+    h.idx -= 1; h.lastKey = null;
+    setPlasmaEditDesign(JSON.parse(JSON.stringify(h.stack[h.idx])));
+    plasmaEditDirtyRef.current = true;
+    setPlasmaHistVersion(function(v) { return v + 1; });
+  }
+  function plasmaRedo() {
+    var h = plasmaHistoryRef.current; if (h.idx >= h.stack.length - 1) return;
+    h.idx += 1; h.lastKey = null;
+    setPlasmaEditDesign(JSON.parse(JSON.stringify(h.stack[h.idx])));
+    plasmaEditDirtyRef.current = true;
+    setPlasmaHistVersion(function(v) { return v + 1; });
+  }
   function plasmaOpenNew() {
     plasmaEditDirtyRef.current = false;
     setPlasmaEditId(null);
     var initial = Object.assign({}, PLASMA_DEFAULT_DESIGN, { name: "" });
     setPlasmaEditDesign(initial);
+    plasmaHistoryReset(initial);
     setPlasmaEditTab("design");
     setPlasmaView("editor");
   }
   function plasmaOpenEditor(design) {
     plasmaEditDirtyRef.current = false;
     setPlasmaEditId(design.id);
-    setPlasmaEditDesign(Object.assign({}, design));
+    var snap = Object.assign({}, design);
+    setPlasmaEditDesign(snap);
+    plasmaHistoryReset(snap);
     setPlasmaEditTab("design");
     setPlasmaView("editor");
   }
@@ -2878,6 +2913,7 @@ export default function CosmicWorkshop() {
     setPlasmaEditDesign(function(prev) {
       var next = {}; Object.keys(prev).forEach(function(k) { next[k] = prev[k]; });
       next[key] = val;
+      plasmaHistoryPush(next, key);
       return next;
     });
   }
@@ -3688,6 +3724,8 @@ export default function CosmicWorkshop() {
 
   // RENDER
   // ═══════════════════════════════════════
+  var plasmaCanUndo = plasmaHistoryRef.current.idx > 0;
+  var plasmaCanRedo = plasmaHistoryRef.current.idx < plasmaHistoryRef.current.stack.length - 1;
   var plasmaEasing = plasmaEditDesign.shape === "blast" ? "linear" : plasmaEditDesign.shape === "torpedo" ? "cubic-bezier(0.895, 0.030, 0.685, 0.220)" : "ease-in";
   var plasmaAnimDur = "plasmaZip " + (1.5 / (plasmaEditDesign.speed || 1.0)).toFixed(2) + "s " + plasmaEasing + " infinite";
   var plasmaSplitDist = Math.round(((plasmaEditDesign.splitDistance != null ? plasmaEditDesign.splitDistance : 30) / 100) * plasmaShipSize);
@@ -5075,6 +5113,16 @@ export default function CosmicWorkshop() {
           },
           backLabel: "My Plasma", title: plasmaEditId ? "Edit Plasma" : "New Plasma", color: "#50c8ff",
           rightContent: React.createElement("div", { style: { display: "flex", gap: 6 } },
+            React.createElement("div", { onClick: plasmaUndo, title: "Undo",
+              style: Object.assign({}, BTN_TOPBAR, { padding: "6px 8px", opacity: plasmaCanUndo ? 1 : 0.35, cursor: plasmaCanUndo ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center" }) },
+              React.createElement("svg", { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round" },
+                React.createElement("path", { d: "M9 14L4 9l5-5" }),
+                React.createElement("path", { d: "M4 9h11a5 5 0 0 1 5 5v0a5 5 0 0 1-5 5h-3" }))),
+            React.createElement("div", { onClick: plasmaRedo, title: "Redo",
+              style: Object.assign({}, BTN_TOPBAR, { padding: "6px 8px", opacity: plasmaCanRedo ? 1 : 0.35, cursor: plasmaCanRedo ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center" }) },
+              React.createElement("svg", { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round" },
+                React.createElement("path", { d: "M15 14l5-5-5-5" }),
+                React.createElement("path", { d: "M20 9H9a5 5 0 0 0-5 5v0a5 5 0 0 0 5 5h3" }))),
             React.createElement("div", {
               onClick: function() {
                 if (!plasmaEditId) { setPlasmaSaveStatus("Save first"); setTimeout(function() { setPlasmaSaveStatus(""); }, 2500); return; }

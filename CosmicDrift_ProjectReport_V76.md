@@ -108,7 +108,7 @@ GS.green / GS.blue  // accent colors #50ffae / #80ddff
 
 | Component | Usage |
 |-----------|-------|
-| `GsPanel` | Brushed metal container with 4 corner rivets (6px spheres). `riveted=false` disables rivets. `inset` prop flips to dark inset style. |
+| `GsPanel` | Brushed metal container. `riveted=false` disables rivets. `inset` prop flips to dark inset style. |
 | `GsRivet` | Absolute-positioned 6px sphere. Radial gradient simulates a machined bolt head. Accepts `pos` prop (CSS position object) and optional `size`. |
 | `GsMono` | JetBrains Mono label, uppercase, configurable size/letterSpacing/color. |
 | `GsLED` | Small circular status indicator with glow. |
@@ -116,12 +116,12 @@ GS.green / GS.blue  // accent colors #50ffae / #80ddff
 
 ### Applied screens (game)
 
-- **Top nav bar**: GS brushed metal. 6 rivets: left column pair, right column pair, flanking the hamburger.
-- **HUD**: GS brushed metal. 6 rivets at the corners and mid-panel separation points. Readout panels use `GS.inset`. Side frame bars use inset box-shadow (not CSS border) so grid width calculation is unaffected.
+- **Top nav bar**: GS brushed metal. 
+- **HUD**: GS brushed metal. Readout panels use `GS.inset`. Side frame bars use inset box-shadow (not CSS border) so grid width calculation is unaffected.
 - **Level Clear card**: GsPanel with hazard stripes, inset score panels, plasma-used stat, per-level score tracking.
 - **Game Over card**: GsPanel matching Level Clear structure.
 - **All modal dialogs** (Exit confirm, Restart confirm, Convert Core, Deadlock, Intro card): GsPanel.
-- **In-game dropdown menu**: GsPanel with brushed metal and rivets.
+- **In-game dropdown menu**: GsPanel with brushed metal.
 
 ---
 
