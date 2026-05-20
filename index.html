@@ -6170,6 +6170,8 @@ function HudPanel(props) {
   var showShipSizeSlider = props.showShipSizeSlider || false;
   var onToggleShipSizeSlider = props.onToggleShipSizeSlider || function () {};
   var onShipSizeChange = props.onShipSizeChange || function () {};
+  var onOpenShipSizeSlider = props.onOpenShipSizeSlider || function () {};
+  var touchRef = useRef(null);
   var baseSlots = [];
   for (var bsi = 0; bsi < 3; bsi++) baseSlots.push(/*#__PURE__*/React.createElement("div", {
     key: "b" + bsi,
@@ -6303,7 +6305,30 @@ function HudPanel(props) {
     }
   }, score)), /*#__PURE__*/React.createElement("div", {
     onClick: function () {
+      if (touchRef.current && touchRef.current.didMove) {
+        touchRef.current = null;
+        return;
+      }
+      touchRef.current = null;
       onToggleShipSizeSlider();
+    },
+    onTouchStart: function (e) {
+      touchRef.current = {
+        startY: e.touches[0].clientY,
+        startVal: shipDisplaySize,
+        didMove: false
+      };
+    },
+    onTouchMove: function (e) {
+      if (!touchRef.current) return;
+      var dy = touchRef.current.startY - e.touches[0].clientY;
+      if (Math.abs(dy) > 4) {
+        touchRef.current.didMove = true;
+        if (!showShipSizeSlider) onOpenShipSizeSlider();
+        var nv = Math.min(204, Math.max(34, Math.round(touchRef.current.startVal + dy * 170 / 140)));
+        onShipSizeChange(nv);
+      }
+      e.preventDefault();
     },
     style: {
       flex: "0 0 32px",
@@ -15556,6 +15581,9 @@ function CosmicDriftGame() {
       try {
         window.storage.set("cosmic_drift_ship_size", String(v));
       } catch (ex) {}
+    },
+    onOpenShipSizeSlider: function () {
+      setShowShipSizeSlider(true);
     }
   }), /*#__PURE__*/React.createElement(InventoryBarMemo, {
     invDrones: invDrones,

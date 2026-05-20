@@ -6039,6 +6039,17 @@ function CosmicWorkshop() {
   var _showPlasmaShipSizeSlider = useState(false),
     showPlasmaShipSizeSlider = _showPlasmaShipSizeSlider[0],
     setShowPlasmaShipSizeSlider = _showPlasmaShipSizeSlider[1];
+  var plasmaShipSizeTouchRef = useRef(null);
+  useEffect(function () {
+    try {
+      window.storage.get("cosmic_drift_ship_size").then(function (r) {
+        if (r && r.value) {
+          var v = Number(r.value);
+          if (v >= 34 && v <= 204) setPlasmaShipSize(v);
+        }
+      }).catch(function () {});
+    } catch (e) {}
+  }, []);
   var _plasmaPreviewShipId = useState(null),
     plasmaPreviewShipId = _plasmaPreviewShipId[0],
     setPlasmaPreviewShipId = _plasmaPreviewShipId[1];
@@ -17463,7 +17474,57 @@ function CosmicWorkshop() {
         background: "#fff"
       }
     });
-  })), React.createElement("div", {
+  })), [1, 2, 3, 4, 5, 6, 7].map(function (i) {
+    return React.createElement("div", {
+      key: "col" + i,
+      style: {
+        position: "absolute",
+        top: 0,
+        bottom: 0,
+        width: 1,
+        left: "calc(" + i + " * (100% - 55px) / 8 + " + (10 + (i - 0.5) * 5) + "px)",
+        background: "rgba(80,200,255,0.1)",
+        pointerEvents: "none",
+        zIndex: 1
+      }
+    });
+  }), !plasmaEditDesign.splitEnabled && React.createElement("div", {
+    style: {
+      position: "absolute",
+      top: 0,
+      bottom: plasmaOriginBottom,
+      left: "calc(50% + " + plasmaSourceOffsetPx + "px)",
+      width: 1,
+      transform: "translateX(-50%)",
+      background: "linear-gradient(to bottom, " + plasmaIndicatorColor + "00 0%, " + plasmaIndicatorColor + "50 100%)",
+      pointerEvents: "none",
+      zIndex: 3
+    }
+  }), !!plasmaEditDesign.splitEnabled && React.createElement("div", {
+    style: {
+      position: "absolute",
+      top: 0,
+      bottom: plasmaOriginBottom,
+      left: "calc(50% + " + (plasmaSourceOffsetPx - plasmaSplitDist) + "px)",
+      width: 1,
+      transform: "translateX(-50%)",
+      background: "linear-gradient(to bottom, " + plasmaIndicatorColor + "00 0%, " + plasmaIndicatorColor + "50 100%)",
+      pointerEvents: "none",
+      zIndex: 3
+    }
+  }), !!plasmaEditDesign.splitEnabled && React.createElement("div", {
+    style: {
+      position: "absolute",
+      top: 0,
+      bottom: plasmaOriginBottom,
+      left: "calc(50% + " + (plasmaSourceOffsetPx + plasmaSplitDist) + "px)",
+      width: 1,
+      transform: "translateX(-50%)",
+      background: "linear-gradient(to bottom, " + plasmaIndicatorColor + "00 0%, " + plasmaIndicatorColor + "50 100%)",
+      pointerEvents: "none",
+      zIndex: 3
+    }
+  }), React.createElement("div", {
     onClick: function () {
       setPlasmaRangeKey(function (k) {
         return k + 1;
@@ -17641,9 +17702,35 @@ function CosmicWorkshop() {
   }))), React.createElement("div", {
     onClick: function (e) {
       e.stopPropagation();
+      if (plasmaShipSizeTouchRef.current && plasmaShipSizeTouchRef.current.didMove) {
+        plasmaShipSizeTouchRef.current = null;
+        return;
+      }
+      plasmaShipSizeTouchRef.current = null;
       setShowPlasmaShipSizeSlider(function (v) {
         return !v;
       });
+    },
+    onTouchStart: function (e) {
+      plasmaShipSizeTouchRef.current = {
+        startY: e.touches[0].clientY,
+        startVal: plasmaShipSize,
+        didMove: false
+      };
+    },
+    onTouchMove: function (e) {
+      if (!plasmaShipSizeTouchRef.current) return;
+      var dy = plasmaShipSizeTouchRef.current.startY - e.touches[0].clientY;
+      if (Math.abs(dy) > 4) {
+        plasmaShipSizeTouchRef.current.didMove = true;
+        if (!showPlasmaShipSizeSlider) setShowPlasmaShipSizeSlider(true);
+        var nv = Math.min(204, Math.max(34, Math.round(plasmaShipSizeTouchRef.current.startVal + dy * 170 / 140)));
+        setPlasmaShipSize(nv);
+        try {
+          window.storage.set("cosmic_drift_ship_size", String(nv));
+        } catch (ex) {}
+      }
+      e.preventDefault();
     },
     style: {
       position: "absolute",
@@ -17691,7 +17778,11 @@ function CosmicWorkshop() {
     step: 2,
     value: -plasmaShipSize,
     onChange: function (e) {
-      setPlasmaShipSize(-Math.round(Number(e.target.value)));
+      var v = -Math.round(Number(e.target.value));
+      setPlasmaShipSize(v);
+      try {
+        window.storage.set("cosmic_drift_ship_size", String(v));
+      } catch (ex) {}
     },
     style: {
       writingMode: "vertical-lr",
