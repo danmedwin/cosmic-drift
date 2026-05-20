@@ -10207,6 +10207,13 @@ function CosmicDriftGame() {
         window.storage.set("cosmic_drift_best_level_" + difficultyRef.current, String(nl));
       } catch (e) {}
     }
+    if (gameModeRef.current === "campaign" && !customLevelMode && scoreRef.current > bestScoreRef.current) {
+      bestScoreRef.current = scoreRef.current;
+      setBestScore(scoreRef.current);
+      try {
+        window.storage.set("cosmic_drift_best_score_" + difficultyRef.current, String(scoreRef.current));
+      } catch (e) {}
+    }
     var nb = NEW_BLOCK_AT[nl];
     if (nb && BLOCK_INTROS[nb] && nl > 9) {
       var bi = BLOCK_INTROS[nb];
