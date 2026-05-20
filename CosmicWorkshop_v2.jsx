@@ -5191,7 +5191,7 @@ export default function CosmicWorkshop() {
                   min: 0.3, max: 2.5, step: 0.1, displayValue: (plasmaEditDesign.speed || 1.0).toFixed(1) + "x",
                   onChange: function(v) { plasmaUpdateEdit("speed", v); } }),
                 React.createElement(BDSlider, { label: "Ship Size", value: plasmaShipSize,
-                  min: 34, max: 204, step: 2, displayValue: String(plasmaShipSize) + "px",
+                  min: 34, max: 204, step: 2, displayValue: Math.round(plasmaShipSize / 68 * 100) + "%",
                   onChange: function(v) { setPlasmaShipSize(Math.round(v)); } }),
                 shipSaved.length > 1 && React.createElement("div", { style: { marginTop: 8, marginBottom: 4 } },
                   React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 11, marginBottom: 6, letterSpacing: 0.5 } }, "SHIP"),

@@ -17773,7 +17773,7 @@ function CosmicWorkshop() {
     min: 34,
     max: 204,
     step: 2,
-    displayValue: String(plasmaShipSize) + "px",
+    displayValue: Math.round(plasmaShipSize / 68 * 100) + "%",
     onChange: function (v) {
       setPlasmaShipSize(Math.round(v));
     }
