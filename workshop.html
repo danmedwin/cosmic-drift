@@ -10620,19 +10620,17 @@ function CosmicWorkshop() {
       padding: "5px 10px",
       cursor: "pointer",
       display: "flex",
-      flexDirection: "column",
-      gap: 3
-    }
-  }, React.createElement("div", {
-    style: {
-      display: "flex",
+      flexDirection: "row",
       alignItems: "center",
-      gap: 8
+      gap: 10
     }
   }, React.createElement("svg", {
-    width: "18",
-    height: "18",
-    viewBox: "0 0 24 24"
+    width: "40",
+    height: "40",
+    viewBox: "0 0 24 24",
+    style: {
+      flexShrink: 0
+    }
   }, React.createElement("rect", {
     x: "3",
     y: "3",
@@ -10670,6 +10668,14 @@ function CosmicWorkshop() {
     strokeDasharray: "2 2"
   })), React.createElement("div", {
     style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 3,
+      flex: 1,
+      minWidth: 0
+    }
+  }, React.createElement("div", {
+    style: {
       color: "#ddf0ff",
       fontSize: 20,
       fontWeight: 700,
@@ -10677,7 +10683,7 @@ function CosmicWorkshop() {
       fontFamily: "'Exo 2', sans-serif",
       textTransform: "uppercase"
     }
-  }, "Level Builder")), React.createElement("div", {
+  }, "Level Builder"), React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
@@ -10692,7 +10698,7 @@ function CosmicWorkshop() {
     size: 9,
     ls: 0.5,
     color: "rgba(128,221,255,0.45)"
-  }, savedLevels.length + " SAVED"))), React.createElement("div", {
+  }, savedLevels.length + " SAVED")))), React.createElement("div", {
     onClick: function () {
       setScreen("designer");
       setBdCurrentView("list");
@@ -10706,19 +10712,17 @@ function CosmicWorkshop() {
       padding: "5px 10px",
       cursor: "pointer",
       display: "flex",
-      flexDirection: "column",
-      gap: 3
-    }
-  }, React.createElement("div", {
-    style: {
-      display: "flex",
+      flexDirection: "row",
       alignItems: "center",
-      gap: 8
+      gap: 10
     }
   }, React.createElement("svg", {
-    width: "18",
-    height: "18",
-    viewBox: "0 0 24 24"
+    width: "40",
+    height: "40",
+    viewBox: "0 0 24 24",
+    style: {
+      flexShrink: 0
+    }
   }, React.createElement("rect", {
     x: "4",
     y: "4",
@@ -10741,6 +10745,14 @@ function CosmicWorkshop() {
     opacity: "0.2"
   })), React.createElement("div", {
     style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 3,
+      flex: 1,
+      minWidth: 0
+    }
+  }, React.createElement("div", {
+    style: {
       color: "#ede8ff",
       fontSize: 20,
       fontWeight: 700,
@@ -10748,7 +10760,7 @@ function CosmicWorkshop() {
       fontFamily: "'Exo 2', sans-serif",
       textTransform: "uppercase"
     }
-  }, "Block Designer")), React.createElement("div", {
+  }, "Block Designer"), React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
@@ -10763,7 +10775,7 @@ function CosmicWorkshop() {
     size: 9,
     ls: 0.5,
     color: "rgba(200,184,255,0.45)"
-  }, bdSaved.length + " SAVED"))), React.createElement("div", {
+  }, bdSaved.length + " SAVED")))), React.createElement("div", {
     onClick: function () {
       setScreen("vfx");
       setVfxCurrentView("list");
@@ -10777,19 +10789,17 @@ function CosmicWorkshop() {
       padding: "5px 10px",
       cursor: "pointer",
       display: "flex",
-      flexDirection: "column",
-      gap: 3
-    }
-  }, React.createElement("div", {
-    style: {
-      display: "flex",
+      flexDirection: "row",
       alignItems: "center",
-      gap: 8
+      gap: 10
     }
   }, React.createElement("svg", {
-    width: "18",
-    height: "18",
-    viewBox: "0 0 24 24"
+    width: "40",
+    height: "40",
+    viewBox: "0 0 24 24",
+    style: {
+      flexShrink: 0
+    }
   }, React.createElement("circle", {
     cx: "12",
     cy: "12",
@@ -10802,6 +10812,14 @@ function CosmicWorkshop() {
     strokeLinecap: "round"
   })), React.createElement("div", {
     style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 3,
+      flex: 1,
+      minWidth: 0
+    }
+  }, React.createElement("div", {
+    style: {
       color: "#fff3dd",
       fontSize: 20,
       fontWeight: 700,
@@ -10809,7 +10827,7 @@ function CosmicWorkshop() {
       fontFamily: "'Exo 2', sans-serif",
       textTransform: "uppercase"
     }
-  }, "VFX Studio")), React.createElement("div", {
+  }, "VFX Studio"), React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
@@ -10824,7 +10842,7 @@ function CosmicWorkshop() {
     size: 9,
     ls: 0.5,
     color: "rgba(255,180,60,0.45)"
-  }, vfxSaved.length + " SAVED"))), React.createElement("div", {
+  }, vfxSaved.length + " SAVED")))), React.createElement("div", {
     onClick: function () {
       setScreen("ufo");
     },
@@ -10836,19 +10854,17 @@ function CosmicWorkshop() {
       padding: "5px 10px",
       cursor: "pointer",
       display: "flex",
-      flexDirection: "column",
-      gap: 3
-    }
-  }, React.createElement("div", {
-    style: {
-      display: "flex",
+      flexDirection: "row",
       alignItems: "center",
-      gap: 8
+      gap: 10
     }
   }, React.createElement("svg", {
-    width: "18",
-    height: "18",
-    viewBox: "0 0 24 24"
+    width: "40",
+    height: "40",
+    viewBox: "0 0 24 24",
+    style: {
+      flexShrink: 0
+    }
   }, React.createElement("ellipse", {
     cx: "12",
     cy: "9.5",
@@ -10882,6 +10898,14 @@ function CosmicWorkshop() {
     fill: "#64dcb4"
   })), React.createElement("div", {
     style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 3,
+      flex: 1,
+      minWidth: 0
+    }
+  }, React.createElement("div", {
+    style: {
       color: "#ddffee",
       fontSize: 20,
       fontWeight: 700,
@@ -10889,7 +10913,7 @@ function CosmicWorkshop() {
       fontFamily: "'Exo 2', sans-serif",
       textTransform: "uppercase"
     }
-  }, "UFO Customizer")), React.createElement("div", {
+  }, "UFO Customizer"), React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
@@ -10904,7 +10928,7 @@ function CosmicWorkshop() {
     size: 9,
     ls: 0.5,
     color: "rgba(100,220,180,0.45)"
-  }, ufoSaved.length + " SAVED"))), React.createElement("div", {
+  }, ufoSaved.length + " SAVED")))), React.createElement("div", {
     onClick: function () {
       setScreen("hangar");
       setShipView("list");
@@ -10917,19 +10941,17 @@ function CosmicWorkshop() {
       padding: "5px 10px",
       cursor: "pointer",
       display: "flex",
-      flexDirection: "column",
-      gap: 3
-    }
-  }, React.createElement("div", {
-    style: {
-      display: "flex",
+      flexDirection: "row",
       alignItems: "center",
-      gap: 8
+      gap: 10
     }
   }, React.createElement("svg", {
-    width: "18",
-    height: "18",
-    viewBox: "0 0 24 24"
+    width: "40",
+    height: "40",
+    viewBox: "0 0 24 24",
+    style: {
+      flexShrink: 0
+    }
   }, React.createElement("polygon", {
     points: "12,2 22,17 16,15 12,22 8,15 2,17",
     fill: "none",
@@ -10938,6 +10960,14 @@ function CosmicWorkshop() {
     strokeLinejoin: "round"
   })), React.createElement("div", {
     style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 3,
+      flex: 1,
+      minWidth: 0
+    }
+  }, React.createElement("div", {
+    style: {
       color: "#ffe0ea",
       fontSize: 20,
       fontWeight: 700,
@@ -10945,7 +10975,7 @@ function CosmicWorkshop() {
       fontFamily: "'Exo 2', sans-serif",
       textTransform: "uppercase"
     }
-  }, "Hangar")), React.createElement("div", {
+  }, "Hangar"), React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
@@ -10960,7 +10990,7 @@ function CosmicWorkshop() {
     size: 9,
     ls: 0.5,
     color: "rgba(255,138,170,0.45)"
-  }, shipSaved.length + " SAVED"))), React.createElement("div", {
+  }, shipSaved.length + " SAVED")))), React.createElement("div", {
     onClick: function () {
       setScreen("plasma");
       setPlasmaView("list");
@@ -10973,19 +11003,17 @@ function CosmicWorkshop() {
       padding: "5px 10px",
       cursor: "pointer",
       display: "flex",
-      flexDirection: "column",
-      gap: 3
-    }
-  }, React.createElement("div", {
-    style: {
-      display: "flex",
+      flexDirection: "row",
       alignItems: "center",
-      gap: 8
+      gap: 10
     }
   }, React.createElement("svg", {
-    width: "18",
-    height: "18",
-    viewBox: "0 0 24 24"
+    width: "40",
+    height: "40",
+    viewBox: "0 0 24 24",
+    style: {
+      flexShrink: 0
+    }
   }, React.createElement("defs", null, React.createElement("radialGradient", {
     id: "plSplash",
     cx: "38%",
@@ -11038,6 +11066,14 @@ function CosmicWorkshop() {
     strokeLinecap: "round"
   })), React.createElement("div", {
     style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 3,
+      flex: 1,
+      minWidth: 0
+    }
+  }, React.createElement("div", {
+    style: {
       color: "#d0f0ff",
       fontSize: 20,
       fontWeight: 700,
@@ -11045,7 +11081,7 @@ function CosmicWorkshop() {
       fontFamily: "'Exo 2', sans-serif",
       textTransform: "uppercase"
     }
-  }, "Plasma Lab")), React.createElement("div", {
+  }, "Plasma Lab"), React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
@@ -11060,7 +11096,7 @@ function CosmicWorkshop() {
     size: 9,
     ls: 0.5,
     color: "rgba(80,200,255,0.45)"
-  }, plasmaSaved.length + " SAVED"))),
+  }, plasmaSaved.length + " SAVED")))),
   // ── Active column cards begin (placed in col 2 by gridAutoFlow) ──
   React.createElement("div", {
     onClick: function () {
