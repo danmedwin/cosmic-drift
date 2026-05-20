@@ -1332,7 +1332,7 @@ function _startCvfxLoop() {
       var progress;
       var pdShapeEase = (GAME_PLASMA_DESIGN.shape || "circle");
       if (pdShapeEase === "torpedo") {
-        progress = rawProgress * rawProgress * rawProgress;
+        progress = rawProgress * rawProgress;
       } else {
         progress = rawProgress;
       }

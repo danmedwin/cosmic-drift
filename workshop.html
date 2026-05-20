@@ -10260,7 +10260,7 @@ function CosmicWorkshop() {
 
   // RENDER
   // ═══════════════════════════════════════
-  var plasmaEasing = plasmaEditDesign.shape === "blast" ? "linear" : plasmaEditDesign.shape === "torpedo" ? "cubic-bezier(0.75, 0.0, 1.0, 1.0)" : "ease-in";
+  var plasmaEasing = plasmaEditDesign.shape === "blast" ? "linear" : plasmaEditDesign.shape === "torpedo" ? "cubic-bezier(0.3, 0.0, 0.7, 1.0)" : "ease-in";
   var plasmaAnimDur = "plasmaZip " + (1.0 / (plasmaEditDesign.speed || 1.0)).toFixed(2) + "s " + plasmaEasing + " forwards";
   var plasmaSplitDist = Math.round((plasmaEditDesign.splitDistance != null ? plasmaEditDesign.splitDistance : 30) / 100 * plasmaShipSize);
   var plasmaSourceOffsetPx = Math.round(((plasmaEditDesign.sourceOffsetX != null ? plasmaEditDesign.sourceOffsetX : 50) - 50) / 100 * plasmaShipSize);
@@ -17602,7 +17602,7 @@ function CosmicWorkshop() {
       zIndex: 3
     }
   }, "TAP SHIP TO FIRE"), React.createElement("div", {
-    key: plasmaRangeKey,
+    key: String(plasmaRangeKey) + "_" + (plasmaEditDesign.shape || "circle") + "_" + String(Math.round((plasmaEditDesign.speed || 1) * 10)),
     style: {
       position: "absolute",
       inset: 0,

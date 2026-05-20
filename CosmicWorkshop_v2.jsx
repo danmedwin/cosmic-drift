@@ -3688,7 +3688,7 @@ export default function CosmicWorkshop() {
 
   // RENDER
   // ═══════════════════════════════════════
-  var plasmaEasing = plasmaEditDesign.shape === "blast" ? "linear" : plasmaEditDesign.shape === "torpedo" ? "cubic-bezier(0.75, 0.0, 1.0, 1.0)" : "ease-in";
+  var plasmaEasing = plasmaEditDesign.shape === "blast" ? "linear" : plasmaEditDesign.shape === "torpedo" ? "cubic-bezier(0.3, 0.0, 0.7, 1.0)" : "ease-in";
   var plasmaAnimDur = "plasmaZip " + (1.0 / (plasmaEditDesign.speed || 1.0)).toFixed(2) + "s " + plasmaEasing + " forwards";
   var plasmaSplitDist = Math.round(((plasmaEditDesign.splitDistance != null ? plasmaEditDesign.splitDistance : 30) / 100) * plasmaShipSize);
   var plasmaSourceOffsetPx = Math.round(((plasmaEditDesign.sourceOffsetX != null ? plasmaEditDesign.sourceOffsetX : 50) - 50) / 100 * plasmaShipSize);
@@ -5155,7 +5155,7 @@ export default function CosmicWorkshop() {
                 !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaFlashBottom, left: "calc(50% + " + (plasmaSourceOffsetPx - plasmaSplitDist) + "px)", transform: "translate(-50%, 50%)", width: 6, height: 6, borderRadius: "50%", background: plasmaIndicatorColor, boxShadow: plasmaIndicatorGlow, animation: "pulse 1.5s ease-in-out infinite", pointerEvents: "none", zIndex: 4 } }),
                 !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaFlashBottom, left: "calc(50% + " + (plasmaSourceOffsetPx + plasmaSplitDist) + "px)", transform: "translate(-50%, 50%)", width: 6, height: 6, borderRadius: "50%", background: plasmaIndicatorColor, boxShadow: plasmaIndicatorGlow, animation: "pulse 1.5s ease-in-out infinite", pointerEvents: "none", zIndex: 4 } }),
                 React.createElement("div", { style: { position: "absolute", bottom: 8, left: 10, fontSize: 9, color: "rgba(80,200,255,0.3)", letterSpacing: 1, fontFamily: "'Quicksand', sans-serif", fontWeight: 700, pointerEvents: "none", zIndex: 3 } }, "TAP SHIP TO FIRE"),
-                React.createElement("div", { key: plasmaRangeKey, style: { position: "absolute", inset: 0, pointerEvents: "none" } },
+                React.createElement("div", { key: String(plasmaRangeKey) + "_" + (plasmaEditDesign.shape || "circle") + "_" + String(Math.round((plasmaEditDesign.speed || 1) * 10)), style: { position: "absolute", inset: 0, pointerEvents: "none" } },
                   !plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaShotBottom, left: "calc(50% + " + plasmaSourceOffsetPx + "px)", transform: "translateX(-50%)" } },
                     React.createElement("div", { style: { animation: plasmaAnimDur, "--endX": "0px", "--endY": plasmaEndY } },
                       renderPlasmaSingle(plasmaEditDesign, 20))),
