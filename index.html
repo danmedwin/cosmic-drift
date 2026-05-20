@@ -9654,6 +9654,7 @@ function CosmicDriftGame() {
       targetIdx = findBlockInCol(fromCol);
     var splitOn = !!GAME_PLASMA_DESIGN.splitEnabled;
     if (splitOn) {
+      shotsFiredRef.current += 1;
       var SS = 0.7;
       var srcXPx = ((GAME_PLASMA_DESIGN.sourceOffsetX != null ? GAME_PLASMA_DESIGN.sourceOffsetX : 50) - 50) / 100 * shipDisplaySize;
       var splPx = (GAME_PLASMA_DESIGN.splitDistance != null ? GAME_PLASMA_DESIGN.splitDistance : 30) / 100 * shipDisplaySize;
