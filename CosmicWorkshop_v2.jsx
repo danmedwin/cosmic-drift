@@ -3688,7 +3688,8 @@ export default function CosmicWorkshop() {
 
   // RENDER
   // ═══════════════════════════════════════
-  var plasmaAnimDur = "plasmaZip " + (1.0 / (plasmaEditDesign.speed || 1.0)).toFixed(2) + "s ease-in forwards";
+  var plasmaEasing = plasmaEditDesign.shape === "blast" ? "linear" : plasmaEditDesign.shape === "torpedo" ? "cubic-bezier(0.75, 0.0, 1.0, 1.0)" : "ease-in";
+  var plasmaAnimDur = "plasmaZip " + (1.0 / (plasmaEditDesign.speed || 1.0)).toFixed(2) + "s " + plasmaEasing + " forwards";
   var plasmaSplitDist = Math.round(((plasmaEditDesign.splitDistance != null ? plasmaEditDesign.splitDistance : 30) / 100) * plasmaShipSize);
   var plasmaSourceOffsetPx = Math.round(((plasmaEditDesign.sourceOffsetX != null ? plasmaEditDesign.sourceOffsetX : 50) - 50) / 100 * plasmaShipSize);
   var plasmaSourceY = plasmaEditDesign.sourceOffsetY != null ? plasmaEditDesign.sourceOffsetY : 0;
@@ -5212,9 +5213,14 @@ export default function CosmicWorkshop() {
                   React.createElement("div", { style: { display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4 } },
                     shipSaved.map(function(ship) {
                       var isPickedShip = plasmaPreviewShipId ? (plasmaPreviewShipId === ship.id) : (ship.id === shipActiveId);
-                      return React.createElement("div", { key: ship.id, onClick: function() { setPlasmaPreviewShipId(ship.id); },
-                        style: { flexShrink: 0, width: 52, height: 52, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 8, background: isPickedShip ? "rgba(80,200,255,0.1)" : "rgba(0,0,0,0.2)", border: isPickedShip ? "2px solid rgba(80,200,255,0.5)" : "2px solid rgba(255,255,255,0.08)", cursor: "pointer" } },
-                        React.createElement(ShipDesignSvg, { size: 38, design: shipMigrateDesign(ship), uid: "plasma-pick-" + ship.id }));
+                      var isShipActive = ship.id === shipActiveId;
+                      return React.createElement("div", { key: ship.id, style: { flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 } },
+                        React.createElement("div", { onClick: function() { setPlasmaPreviewShipId(ship.id); },
+                          style: { width: 52, height: 52, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 8, background: isPickedShip ? "rgba(80,200,255,0.1)" : "rgba(0,0,0,0.2)", border: isPickedShip ? "2px solid rgba(80,200,255,0.5)" : "2px solid rgba(255,255,255,0.08)", cursor: "pointer" } },
+                          React.createElement(ShipDesignSvg, { size: 38, design: shipMigrateDesign(ship), uid: "plasma-pick-" + ship.id })),
+                        React.createElement("div", { onClick: function() { shipSetActive(ship.id); },
+                          style: Object.assign({}, BTN_BASE, { padding: "3px 6px", fontSize: 8, background: isShipActive ? "linear-gradient(180deg, #2a5a3a, #1a3a28)" : PNL, border: isShipActive ? "1px solid rgba(80,220,120,0.7)" : "1px solid rgba(120,200,140,0.4)", color: isShipActive ? "#80dd90" : "rgba(150,220,170,0.8)", whiteSpace: "nowrap" }) },
+                          isShipActive ? "★ Active" : "Set Active"));
                     })))),
               React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
                 React.createElement(BDToggle, { label: "Split Shot", value: !!plasmaEditDesign.splitEnabled,

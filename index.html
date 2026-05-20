@@ -5999,7 +5999,14 @@ function _startCvfxLoop() {
       var cp = _canvasProjectiles[pi];
       if (cp.startTime < 0) cp.startTime = now;
       var elapsed = now - cp.startTime;
-      var progress = Math.min(1, elapsed / cp.duration);
+      var rawProgress = Math.min(1, elapsed / cp.duration);
+      var progress;
+      var pdShapeEase = GAME_PLASMA_DESIGN.shape || "circle";
+      if (pdShapeEase === "torpedo") {
+        progress = rawProgress * rawProgress * rawProgress;
+      } else {
+        progress = rawProgress;
+      }
       var cy = cp.startY + (cp.endY - cp.startY) * progress;
       if (progress >= 1) {
         if (cp.onDone) {
@@ -11694,7 +11701,7 @@ function CosmicDriftGame() {
       lineHeight: 1,
       position: "relative"
     }
-  }, levelClearStats.blocks), /*#__PURE__*/React.createElement("div", {
+  }, levelClearStats.hits), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 7,
       color: "rgba(200,220,240,0.4)",
@@ -11703,7 +11710,7 @@ function CosmicDriftGame() {
       textTransform: "uppercase",
       position: "relative"
     }
-  }, "Blocks")), /*#__PURE__*/React.createElement("div", {
+  }, "Hits")), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
       position: "relative",
@@ -11730,7 +11737,7 @@ function CosmicDriftGame() {
       lineHeight: 1,
       position: "relative"
     }
-  }, levelClearStats.shots > 0 ? Math.round(levelClearStats.hits / levelClearStats.shots * 100) : 0, "%"), /*#__PURE__*/React.createElement("div", {
+  }, Math.min(100, levelClearStats.shots > 0 ? Math.round(levelClearStats.hits / levelClearStats.shots * 100) : 0), "%"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 7,
       color: "rgba(200,220,240,0.4)",
@@ -11766,7 +11773,7 @@ function CosmicDriftGame() {
       lineHeight: 1,
       position: "relative"
     }
-  }, levelClearStats.shots), /*#__PURE__*/React.createElement("div", {
+  }, Math.max(0, levelClearStats.shots - levelClearStats.hits)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 7,
       color: "rgba(200,220,240,0.4)",
@@ -11775,7 +11782,7 @@ function CosmicDriftGame() {
       textTransform: "uppercase",
       position: "relative"
     }
-  }, "Used"))), /*#__PURE__*/React.createElement("div", {
+  }, "Misses"))), /*#__PURE__*/React.createElement("div", {
     style: {
       position: "relative",
       background: GS.inset,
@@ -12218,7 +12225,7 @@ function CosmicDriftGame() {
       lineHeight: 1,
       position: "relative"
     }
-  }, blocksDestroyedRef.current), /*#__PURE__*/React.createElement("div", {
+  }, shotsHitRef.current), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 7,
       color: "rgba(200,220,240,0.4)",
@@ -12227,7 +12234,7 @@ function CosmicDriftGame() {
       textTransform: "uppercase",
       position: "relative"
     }
-  }, "Blocks")), /*#__PURE__*/React.createElement("div", {
+  }, "Hits")), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
       position: "relative",
@@ -12254,7 +12261,7 @@ function CosmicDriftGame() {
       lineHeight: 1,
       position: "relative"
     }
-  }, shotsFiredRef.current > 0 ? Math.round(shotsHitRef.current / shotsFiredRef.current * 100) : 0, "%"), /*#__PURE__*/React.createElement("div", {
+  }, Math.min(100, shotsFiredRef.current > 0 ? Math.round(shotsHitRef.current / shotsFiredRef.current * 100) : 0), "%"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 7,
       color: "rgba(200,220,240,0.4)",
@@ -12290,7 +12297,7 @@ function CosmicDriftGame() {
       lineHeight: 1,
       position: "relative"
     }
-  }, shotsFiredRef.current), /*#__PURE__*/React.createElement("div", {
+  }, Math.max(0, shotsFiredRef.current - shotsHitRef.current)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 7,
       color: "rgba(200,220,240,0.4)",
@@ -12299,7 +12306,7 @@ function CosmicDriftGame() {
       textTransform: "uppercase",
       position: "relative"
     }
-  }, "Used"))), /*#__PURE__*/React.createElement("div", {
+  }, "Misses"))), /*#__PURE__*/React.createElement("div", {
     style: {
       position: "relative",
       background: GS.inset,

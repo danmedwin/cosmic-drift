@@ -1328,7 +1328,14 @@ function _startCvfxLoop() {
       var cp = _canvasProjectiles[pi];
       if (cp.startTime < 0) cp.startTime = now;
       var elapsed = now - cp.startTime;
-      var progress = Math.min(1, elapsed / cp.duration);
+      var rawProgress = Math.min(1, elapsed / cp.duration);
+      var progress;
+      var pdShapeEase = (GAME_PLASMA_DESIGN.shape || "circle");
+      if (pdShapeEase === "torpedo") {
+        progress = rawProgress * rawProgress * rawProgress;
+      } else {
+        progress = rawProgress;
+      }
       var cy = cp.startY + (cp.endY - cp.startY) * progress;
       if (progress >= 1) {
         if (cp.onDone) { try { cp.onDone(now); } catch(e) {} }
@@ -2853,18 +2860,18 @@ function logUfo(msg) {
       {levelClearStats && <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
         <div style={{ flex: 1, position: "relative", background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: "8px 4px 6px", textAlign: "center" }}>
           <span style={{ position: "absolute", inset: 0, borderRadius: 5, background: "radial-gradient(ellipse 80% 60% at 50% 70%, " + GS.green + "1a 0%, transparent 70%)", pointerEvents: "none" }} />
-          <div style={{ fontSize: 20, fontWeight: 700, color: GS.green, lineHeight: 1, position: "relative" }}>{levelClearStats.blocks}</div>
-          <div style={{ fontSize: 7, color: "rgba(200,220,240,0.4)", letterSpacing: 2, marginTop: 3, textTransform: "uppercase", position: "relative" }}>Blocks</div>
+          <div style={{ fontSize: 20, fontWeight: 700, color: GS.green, lineHeight: 1, position: "relative" }}>{levelClearStats.hits}</div>
+          <div style={{ fontSize: 7, color: "rgba(200,220,240,0.4)", letterSpacing: 2, marginTop: 3, textTransform: "uppercase", position: "relative" }}>Hits</div>
         </div>
         <div style={{ flex: 1, position: "relative", background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: "8px 4px 6px", textAlign: "center" }}>
           <span style={{ position: "absolute", inset: 0, borderRadius: 5, background: "radial-gradient(ellipse 80% 60% at 50% 70%, " + GS.green + "1a 0%, transparent 70%)", pointerEvents: "none" }} />
-          <div style={{ fontSize: 20, fontWeight: 700, color: GS.green, lineHeight: 1, position: "relative" }}>{levelClearStats.shots > 0 ? Math.round(levelClearStats.hits / levelClearStats.shots * 100) : 0}%</div>
+          <div style={{ fontSize: 20, fontWeight: 700, color: GS.green, lineHeight: 1, position: "relative" }}>{Math.min(100, levelClearStats.shots > 0 ? Math.round(levelClearStats.hits / levelClearStats.shots * 100) : 0)}%</div>
           <div style={{ fontSize: 7, color: "rgba(200,220,240,0.4)", letterSpacing: 2, marginTop: 3, textTransform: "uppercase", position: "relative" }}>Accuracy</div>
         </div>
         <div style={{ flex: 1, position: "relative", background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: "8px 4px 6px", textAlign: "center" }}>
           <span style={{ position: "absolute", inset: 0, borderRadius: 5, background: "radial-gradient(ellipse 80% 60% at 50% 70%, " + GS.green + "1a 0%, transparent 70%)", pointerEvents: "none" }} />
-          <div style={{ fontSize: 20, fontWeight: 700, color: GS.green, lineHeight: 1, position: "relative" }}>{levelClearStats.shots}</div>
-          <div style={{ fontSize: 7, color: "rgba(200,220,240,0.4)", letterSpacing: 2, marginTop: 3, textTransform: "uppercase", position: "relative" }}>Used</div>
+          <div style={{ fontSize: 20, fontWeight: 700, color: GS.green, lineHeight: 1, position: "relative" }}>{Math.max(0, levelClearStats.shots - levelClearStats.hits)}</div>
+          <div style={{ fontSize: 7, color: "rgba(200,220,240,0.4)", letterSpacing: 2, marginTop: 3, textTransform: "uppercase", position: "relative" }}>Misses</div>
         </div>
       </div>}
       <div style={{ position: "relative", background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: "8px 12px", marginBottom: 10 }}>
@@ -2921,18 +2928,18 @@ function logUfo(msg) {
             <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
               <div style={{ flex: 1, position: "relative", background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: "8px 4px 6px", textAlign: "center" }}>
                 <span style={{ position: "absolute", inset: 0, borderRadius: 5, background: "radial-gradient(ellipse 80% 60% at 50% 70%, rgba(255,68,85,0.12) 0%, transparent 70%)", pointerEvents: "none" }} />
-                <div style={{ fontSize: 20, fontWeight: 700, color: "#ff4455", lineHeight: 1, position: "relative" }}>{blocksDestroyedRef.current}</div>
-                <div style={{ fontSize: 7, color: "rgba(200,220,240,0.4)", letterSpacing: 2, marginTop: 3, textTransform: "uppercase", position: "relative" }}>Blocks</div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: "#ff4455", lineHeight: 1, position: "relative" }}>{shotsHitRef.current}</div>
+                <div style={{ fontSize: 7, color: "rgba(200,220,240,0.4)", letterSpacing: 2, marginTop: 3, textTransform: "uppercase", position: "relative" }}>Hits</div>
               </div>
               <div style={{ flex: 1, position: "relative", background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: "8px 4px 6px", textAlign: "center" }}>
                 <span style={{ position: "absolute", inset: 0, borderRadius: 5, background: "radial-gradient(ellipse 80% 60% at 50% 70%, rgba(255,68,85,0.12) 0%, transparent 70%)", pointerEvents: "none" }} />
-                <div style={{ fontSize: 20, fontWeight: 700, color: "#ff4455", lineHeight: 1, position: "relative" }}>{shotsFiredRef.current > 0 ? Math.round(shotsHitRef.current / shotsFiredRef.current * 100) : 0}%</div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: "#ff4455", lineHeight: 1, position: "relative" }}>{Math.min(100, shotsFiredRef.current > 0 ? Math.round(shotsHitRef.current / shotsFiredRef.current * 100) : 0)}%</div>
                 <div style={{ fontSize: 7, color: "rgba(200,220,240,0.4)", letterSpacing: 2, marginTop: 3, textTransform: "uppercase", position: "relative" }}>Accuracy</div>
               </div>
               <div style={{ flex: 1, position: "relative", background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: "8px 4px 6px", textAlign: "center" }}>
                 <span style={{ position: "absolute", inset: 0, borderRadius: 5, background: "radial-gradient(ellipse 80% 60% at 50% 70%, rgba(255,68,85,0.12) 0%, transparent 70%)", pointerEvents: "none" }} />
-                <div style={{ fontSize: 20, fontWeight: 700, color: "#ff4455", lineHeight: 1, position: "relative" }}>{shotsFiredRef.current}</div>
-                <div style={{ fontSize: 7, color: "rgba(200,220,240,0.4)", letterSpacing: 2, marginTop: 3, textTransform: "uppercase", position: "relative" }}>Used</div>
+                <div style={{ fontSize: 20, fontWeight: 700, color: "#ff4455", lineHeight: 1, position: "relative" }}>{Math.max(0, shotsFiredRef.current - shotsHitRef.current)}</div>
+                <div style={{ fontSize: 7, color: "rgba(200,220,240,0.4)", letterSpacing: 2, marginTop: 3, textTransform: "uppercase", position: "relative" }}>Misses</div>
               </div>
             </div>
             <div style={{ position: "relative", background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: "8px 12px", marginBottom: 10 }}>
