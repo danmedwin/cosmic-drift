@@ -9580,8 +9580,10 @@ function CosmicDriftGame() {
       targetIdx = findBlockInCol(fromCol);
     var splitOn = !!GAME_PLASMA_DESIGN.splitEnabled;
     if (splitOn) {
-      var leftCol = Math.max(0, fromCol - 1);
-      var rightCol = Math.min(COLS - 1, fromCol + 1);
+      var splitOffsetPx = (GAME_PLASMA_DESIGN.splitDistance != null ? GAME_PLASMA_DESIGN.splitDistance : 30) / 100 * shipDisplaySize;
+      var colOffset = splitOffsetPx / (blockSize + GAP);
+      var leftCol = Math.max(0, Math.min(COLS - 1, Math.round(fromCol - colOffset)));
+      var rightCol = Math.max(0, Math.min(COLS - 1, Math.round(fromCol + colOffset)));
       if (leftCol === rightCol) {
         splitOn = false;
       }
@@ -9690,7 +9692,7 @@ function CosmicDriftGame() {
     setTimeout(function () {
       checkDeadlock();
     }, 800);
-  }, [gameState, getShipY, getBlockX, getBlockY, getGridTop, findBlockInCol, addProj, rmProj, processHit, addVfx, rmVfx, blockSize, scheduleRechargeCheck]);
+  }, [gameState, getShipY, getBlockX, getBlockY, getGridTop, findBlockInCol, addProj, rmProj, processHit, addVfx, rmVfx, blockSize, scheduleRechargeCheck, shipDisplaySize]);
 
   // ── TAP HANDLERS ──
   var handleGridAction = useCallback(function (cx) {

@@ -783,7 +783,7 @@ var PLASMA_DEFAULT_DESIGN = {
   glowColor: "#80ddff",
   glowSize: 8,
   splitEnabled: false,
-  splitDistance: 20,
+  splitDistance: 30,
   flashEnabled: true,
   flashColor: "#ffffff",
   flashSize: 24,
@@ -10247,7 +10247,7 @@ function CosmicWorkshop() {
   // RENDER
   // ═══════════════════════════════════════
   var plasmaAnimDur = "plasmaZip " + (1.0 / (plasmaEditDesign.speed || 1.0)).toFixed(2) + "s ease-in forwards";
-  var plasmaSplitDist = plasmaEditDesign.splitDistance || 20;
+  var plasmaSplitDist = Math.round((plasmaEditDesign.splitDistance != null ? plasmaEditDesign.splitDistance : 30) / 100 * plasmaShipSize);
   var plasmaSourceOffsetPx = Math.round(((plasmaEditDesign.sourceOffsetX != null ? plasmaEditDesign.sourceOffsetX : 50) - 50) / 100 * plasmaShipSize);
   var plasmaSourceY = plasmaEditDesign.sourceOffsetY != null ? plasmaEditDesign.sourceOffsetY : 0;
   // Origin: 0% = nose (top of ship), 100% = tail (bottom). Ship sits at bottom:10.
@@ -17836,11 +17836,11 @@ function CosmicWorkshop() {
     }
   }), !!plasmaEditDesign.splitEnabled && React.createElement(BDSlider, {
     label: "Split Distance",
-    value: plasmaEditDesign.splitDistance || 20,
-    min: 4,
-    max: 60,
-    step: 2,
-    displayValue: String(Math.round(plasmaEditDesign.splitDistance || 20)) + "px",
+    value: plasmaEditDesign.splitDistance != null ? plasmaEditDesign.splitDistance : 30,
+    min: 0,
+    max: 100,
+    step: 1,
+    displayValue: String(Math.round(plasmaEditDesign.splitDistance != null ? plasmaEditDesign.splitDistance : 30)) + "%",
     onChange: function (v) {
       plasmaUpdateEdit("splitDistance", Math.round(v));
     }

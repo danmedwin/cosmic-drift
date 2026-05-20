@@ -83,7 +83,7 @@ function TreasureCrateIcon(props) { var s = props.size; return React.createEleme
 function DiamondPlateBlock(props) { var ps = Math.max(8, props.size * 0.22), h = ps / 2; return React.createElement("div", { style: { width: props.size, height: props.size, borderRadius: 6, overflow: "hidden", border: "2px solid #555", position: "relative", boxSizing: "border-box" } }, React.createElement("svg", { width: props.size, height: props.size, style: { position: "absolute", top: -2, left: -2 } }, React.createElement("defs", null, React.createElement("pattern", { id: "dpat", x: "0", y: "0", width: ps, height: ps, patternUnits: "userSpaceOnUse" }, React.createElement("rect", { width: ps, height: ps, fill: "#707580" }), React.createElement("path", { d: "M" + h + " 1L" + (ps - 1) + " " + h + "L" + h + " " + (ps - 1) + "L1 " + h + "Z", fill: "#888a90", stroke: "#606368", strokeWidth: "0.5" }))), React.createElement("rect", { width: props.size, height: props.size, fill: "url(#dpat)" }))); }
 
 var UFO_DEFAULT_DESIGN = { hullColor: "#b86020", domeColor: "#44ffee", lightColor: "#4488ff", lightSpeed: 8, particleCount: 3, particleSize: 1.0, glowOpacity: 0.0, showAlien: false };
-var PLASMA_DEFAULT_DESIGN = { shape: "circle", color: "#50c8ff", colorMode: "radial", colorOpacity: 1.0, glowColor: "#80ddff", glowSize: 8, splitEnabled: false, splitDistance: 20, flashEnabled: true, flashColor: "#ffffff", flashSize: 24, flashOpacity: 0.9, sourceOffsetX: 50, sourceOffsetY: 0, speed: 1.0 };
+var PLASMA_DEFAULT_DESIGN = { shape: "circle", color: "#50c8ff", colorMode: "radial", colorOpacity: 1.0, glowColor: "#80ddff", glowSize: 8, splitEnabled: false, splitDistance: 30, flashEnabled: true, flashColor: "#ffffff", flashSize: 24, flashOpacity: 0.9, sourceOffsetX: 50, sourceOffsetY: 0, speed: 1.0 };
 var PLASMA_SHAPE_LABELS = { circle: "Ball", blast: "Blast", torpedo: "Torpedo" };
 function ufoAdjustColor(hex, factor) {
   var r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
@@ -3686,7 +3686,7 @@ export default function CosmicWorkshop() {
   // RENDER
   // ═══════════════════════════════════════
   var plasmaAnimDur = "plasmaZip " + (1.0 / (plasmaEditDesign.speed || 1.0)).toFixed(2) + "s ease-in forwards";
-  var plasmaSplitDist = plasmaEditDesign.splitDistance || 20;
+  var plasmaSplitDist = Math.round(((plasmaEditDesign.splitDistance != null ? plasmaEditDesign.splitDistance : 30) / 100) * plasmaShipSize);
   var plasmaSourceOffsetPx = Math.round(((plasmaEditDesign.sourceOffsetX != null ? plasmaEditDesign.sourceOffsetX : 50) - 50) / 100 * plasmaShipSize);
   var plasmaSourceY = plasmaEditDesign.sourceOffsetY != null ? plasmaEditDesign.sourceOffsetY : 0;
   // Origin: 0% = nose (top of ship), 100% = tail (bottom). Ship sits at bottom:10.
@@ -5205,8 +5205,8 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
                 React.createElement(BDToggle, { label: "Split Shot", value: !!plasmaEditDesign.splitEnabled,
                   onChange: function(v) { plasmaUpdateEdit("splitEnabled", v); } }),
-                !!plasmaEditDesign.splitEnabled && React.createElement(BDSlider, { label: "Split Distance", value: plasmaEditDesign.splitDistance || 20,
-                  min: 4, max: 60, step: 2, displayValue: String(Math.round(plasmaEditDesign.splitDistance || 20)) + "px",
+                !!plasmaEditDesign.splitEnabled && React.createElement(BDSlider, { label: "Split Distance", value: plasmaEditDesign.splitDistance != null ? plasmaEditDesign.splitDistance : 30,
+                  min: 0, max: 100, step: 1, displayValue: String(Math.round(plasmaEditDesign.splitDistance != null ? plasmaEditDesign.splitDistance : 30)) + "%",
                   onChange: function(v) { plasmaUpdateEdit("splitDistance", Math.round(v)); } })))),
 
           // Reset button
