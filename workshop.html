@@ -6036,6 +6036,9 @@ function CosmicWorkshop() {
   var _plasmaShipSize = useState(72),
     plasmaShipSize = _plasmaShipSize[0],
     setPlasmaShipSize = _plasmaShipSize[1];
+  var _showPlasmaShipSizeSlider = useState(false),
+    showPlasmaShipSizeSlider = _showPlasmaShipSizeSlider[0],
+    setShowPlasmaShipSizeSlider = _showPlasmaShipSizeSlider[1];
   var _plasmaPreviewShipId = useState(null),
     plasmaPreviewShipId = _plasmaPreviewShipId[0],
     setPlasmaPreviewShipId = _plasmaPreviewShipId[1];
@@ -17527,7 +17530,7 @@ function CosmicWorkshop() {
     style: {
       position: "absolute",
       bottom: 8,
-      right: 10,
+      left: 10,
       fontSize: 9,
       color: "rgba(80,200,255,0.3)",
       letterSpacing: 1,
@@ -17635,6 +17638,88 @@ function CosmicWorkshop() {
       opacity: plasmaFlashOpacity,
       animation: "plasmaFlash 0.25s ease-out forwards"
     }
+  }))), React.createElement("div", {
+    onClick: function (e) {
+      e.stopPropagation();
+      setShowPlasmaShipSizeSlider(function (v) {
+        return !v;
+      });
+    },
+    style: {
+      position: "absolute",
+      bottom: 10,
+      right: 10,
+      width: 32,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 3,
+      padding: "4px 4px",
+      borderRadius: 6,
+      background: showPlasmaShipSizeSlider ? "rgba(30,60,100,0.97)" : "rgba(8,14,28,0.9)",
+      border: showPlasmaShipSizeSlider ? "2px solid rgba(80,180,255,0.5)" : "1px solid rgba(80,180,255,0.2)",
+      borderTop: showPlasmaShipSizeSlider ? "none" : undefined,
+      cursor: "pointer",
+      zIndex: 10,
+      minHeight: 48
+    }
+  }, showPlasmaShipSizeSlider && React.createElement("div", {
+    onClick: function (e) {
+      e.stopPropagation();
+    },
+    style: {
+      position: "absolute",
+      bottom: "calc(100% - 4px)",
+      left: -2,
+      right: -2,
+      background: "rgba(30,60,100,0.97)",
+      border: "2px solid rgba(80,180,255,0.5)",
+      borderBottom: "none",
+      borderRadius: "6px 6px 0 0",
+      padding: "0 2px 4px",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      boxShadow: "-4px -8px 20px rgba(0,0,0,0.7), 4px -8px 20px rgba(0,0,0,0.7), 0 0 16px rgba(80,180,255,0.15)"
+    }
+  }, React.createElement("style", null, ".plasma-sz-sl::-webkit-slider-runnable-track{background:transparent!important;box-shadow:none!important;border:none!important}.plasma-sz-sl::-moz-range-track{background:transparent!important;border:none!important}"), React.createElement("input", {
+    className: "plasma-sz-sl",
+    type: "range",
+    min: -204,
+    max: -34,
+    step: 2,
+    value: -plasmaShipSize,
+    onChange: function (e) {
+      setPlasmaShipSize(-Math.round(Number(e.target.value)));
+    },
+    style: {
+      writingMode: "vertical-lr",
+      height: 140,
+      width: 28,
+      cursor: "ns-resize",
+      fontSize: 16,
+      accentColor: "#50c8ff"
+    }
+  })), React.createElement("div", {
+    style: {
+      fontFamily: "'JetBrains Mono', monospace",
+      fontSize: 7,
+      fontWeight: 700,
+      color: showPlasmaShipSizeSlider ? "#80ddff" : "rgba(140,180,210,0.6)",
+      letterSpacing: 0.3,
+      lineHeight: 1
+    }
+  }, Math.round(plasmaShipSize / 68 * 100) + "%"), React.createElement("svg", {
+    width: 14,
+    height: 14,
+    viewBox: "0 0 24 24"
+  }, React.createElement("path", {
+    d: "M15 3h6v6l-2.3-2.3-3.4 3.4-1.4-1.4 3.4-3.4L15 3z",
+    fill: showPlasmaShipSizeSlider ? "rgba(80,200,255,0.85)" : "rgba(140,160,180,0.5)"
+  }), React.createElement("path", {
+    d: "M9 21H3v-6l2.3 2.3 3.4-3.4 1.4 1.4-3.4 3.4L9 21z",
+    fill: showPlasmaShipSizeSlider ? "rgba(80,200,255,0.85)" : "rgba(140,160,180,0.5)"
   })))),
   // Tab bar — BELOW the arena
   React.createElement("div", {
@@ -17766,16 +17851,6 @@ function CosmicWorkshop() {
     displayValue: (plasmaEditDesign.speed || 1.0).toFixed(1) + "x",
     onChange: function (v) {
       plasmaUpdateEdit("speed", v);
-    }
-  }), React.createElement(BDSlider, {
-    label: "Ship Size",
-    value: plasmaShipSize,
-    min: 34,
-    max: 204,
-    step: 2,
-    displayValue: Math.round(plasmaShipSize / 68 * 100) + "%",
-    onChange: function (v) {
-      setPlasmaShipSize(Math.round(v));
     }
   }), shipSaved.length > 1 && React.createElement("div", {
     style: {
