@@ -5309,7 +5309,7 @@ var SAMPLE_LEVEL = {
 // ── Active Loadout mini-preview helpers ──
 // Tiny pixel-grid preview of a saved level's block layout.
 function renderGridMiniPreview(level, accent) {
-  var cell = 10;
+  var cell = 9;
   var grid = level && level.grid;
   var border = "1px solid " + (accent || "rgba(128,221,255,0.25)");
   if (!grid || grid.length !== COLS * ROWS) {
@@ -5360,21 +5360,21 @@ function renderBlocksSetPreview(activeMap, savedDesigns) {
     if (design) items.push(React.createElement("div", {
       key: types[i],
       style: {
-        width: 20,
-        height: 20,
+        width: 18,
+        height: 18,
         overflow: "hidden"
       }
     }, React.createElement(BDBlockPreview, {
       design: design,
-      size: 20
+      size: 18
     })));
   }
   return React.createElement("div", {
     style: {
       display: "grid",
-      gridTemplateColumns: "repeat(3, 20px)",
+      gridTemplateColumns: "repeat(3, 18px)",
       gap: 2,
-      width: 64,
+      width: 58,
       margin: "0 auto"
     }
   }, items);
@@ -5492,17 +5492,17 @@ function renderVfxSetPreview(activeMap, savedDesigns) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        width: 28,
-        height: 28
+        width: 25,
+        height: 25
       }
     }, renderVfxMini(t, d));
   });
   return React.createElement("div", {
     style: {
       display: "grid",
-      gridTemplateColumns: "repeat(2, 28px)",
+      gridTemplateColumns: "repeat(2, 25px)",
       gap: 3,
-      width: 59,
+      width: 53,
       margin: "0 auto"
     }
   }, items);
@@ -10576,19 +10576,14 @@ function CosmicWorkshop() {
     style: {
       display: "flex",
       alignItems: "center",
-      justifyContent: "space-between",
       paddingLeft: 2,
       paddingRight: 2
     }
   }, React.createElement(WsMono, {
-    size: 8,
+    size: 11,
     ls: 2.5,
-    color: "rgba(180,140,255,0.65)"
-  }, "MODULES"), React.createElement(WsMono, {
-    size: 7,
-    ls: 1,
-    color: "rgba(180,140,255,0.3)"
-  }, "06 / 06")), React.createElement("div", {
+    color: "rgba(220,200,255,0.88)"
+  }, "MODULES")), React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
@@ -10596,9 +10591,9 @@ function CosmicWorkshop() {
       paddingRight: 2
     }
   }, React.createElement(WsMono, {
-    size: 8,
+    size: 11,
     ls: 2.5,
-    color: "rgba(180,140,255,0.65)"
+    color: "rgba(220,200,255,0.88)"
   }, "ACTIVE"))),
   // Body 2-column grid; column-flow places first 5 cards in col 1 (modules),
   // next 5 in col 2 (active), so each pair shares a row.
@@ -11181,7 +11176,7 @@ function CosmicWorkshop() {
       justifyContent: "center"
     }
   }, React.createElement(UFOBlockSvg, {
-    size: 54,
+    size: 49,
     design: ufoGetActiveDesign(),
     uid: "loadout-ufo"
   })), React.createElement("div", {
@@ -11226,7 +11221,7 @@ function CosmicWorkshop() {
       justifyContent: "center"
     }
   }, React.createElement(ShipDesignSvg, {
-    size: 54,
+    size: 49,
     design: shipGetActiveDesign(),
     uid: "loadout-ship"
   })), React.createElement("div", {
@@ -11265,9 +11260,9 @@ function CosmicWorkshop() {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      height: 54
+      height: 49
     }
-  }, renderPlasmaShape(plasmaGetActiveDesign(), 28)), React.createElement("div", {
+  }, renderPlasmaShape(plasmaGetActiveDesign(), 25)), React.createElement("div", {
     style: {
       color: "#80d8ff",
       fontFamily: "'Exo 2', sans-serif",

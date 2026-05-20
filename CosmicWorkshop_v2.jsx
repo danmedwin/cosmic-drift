@@ -1204,7 +1204,7 @@ var SAMPLE_LEVEL = {
 // ── Active Loadout mini-preview helpers ──
 // Tiny pixel-grid preview of a saved level's block layout.
 function renderGridMiniPreview(level, accent) {
-  var cell = 10;
+  var cell = 9;
   var grid = level && level.grid;
   var border = "1px solid " + (accent || "rgba(128,221,255,0.25)");
   if (!grid || grid.length !== COLS * ROWS) {
@@ -1225,9 +1225,9 @@ function renderBlocksSetPreview(activeMap, savedDesigns) {
   var types = [1, 2, 3, 5, 6, 7, 8, 9, 10];
   for (var i = 0; i < types.length; i++) {
     var design = bdResolveActiveDesign(types[i], activeMap, savedDesigns);
-    if (design) items.push(React.createElement("div", { key: types[i], style: { width: 20, height: 20, overflow: "hidden" } }, React.createElement(BDBlockPreview, { design: design, size: 20 })));
+    if (design) items.push(React.createElement("div", { key: types[i], style: { width: 18, height: 18, overflow: "hidden" } }, React.createElement(BDBlockPreview, { design: design, size: 18 })));
   }
-  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(3, 20px)", gap: 2, width: 64, margin: "0 auto" } }, items);
+  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(3, 18px)", gap: 2, width: 58, margin: "0 auto" } }, items);
 }
 // Compact stylized icon per VFX effect type — captures the visual signature
 // of each effect (acid drip / flame / spark burst / explosion ring) using the
@@ -1272,9 +1272,9 @@ function renderVfxSetPreview(activeMap, savedDesigns) {
   var types = ["acid_ooze", "burn", "block_destroy", "drone_explode"];
   var items = types.map(function(t) {
     var d = vfxResolveActive(t, activeMap, savedDesigns);
-    return React.createElement("div", { key: t, style: { display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28 } }, renderVfxMini(t, d));
+    return React.createElement("div", { key: t, style: { display: "flex", alignItems: "center", justifyContent: "center", width: 25, height: 25 } }, renderVfxMini(t, d));
   });
-  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(2, 28px)", gap: 3, width: 59, margin: "0 auto" } }, items);
+  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(2, 25px)", gap: 3, width: 53, margin: "0 auto" } }, items);
 }
 
 function renderPlasmaSingle(design, size) {
@@ -3788,12 +3788,11 @@ export default function CosmicWorkshop() {
         React.createElement(WsPanel, { style: { padding: "10px", display: "flex", flexDirection: "column" } },
           // Header row aligned to body columns (MODULES over col 1, ACTIVE over col 2)
           React.createElement("div", { style: { display: "grid", gridTemplateColumns: "3fr 1fr", gap: 6, marginBottom: 8 } },
-            React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", paddingLeft: 2, paddingRight: 2 } },
-              React.createElement(WsMono, { size: 8, ls: 2.5, color: "rgba(180,140,255,0.65)" }, "MODULES"),
-              React.createElement(WsMono, { size: 7, ls: 1, color: "rgba(180,140,255,0.3)" }, "06 / 06")
+            React.createElement("div", { style: { display: "flex", alignItems: "center", paddingLeft: 2, paddingRight: 2 } },
+              React.createElement(WsMono, { size: 11, ls: 2.5, color: "rgba(220,200,255,0.88)" }, "MODULES")
             ),
             React.createElement("div", { style: { display: "flex", alignItems: "center", paddingLeft: 2, paddingRight: 2 } },
-              React.createElement(WsMono, { size: 8, ls: 2.5, color: "rgba(180,140,255,0.65)" }, "ACTIVE")
+              React.createElement(WsMono, { size: 11, ls: 2.5, color: "rgba(220,200,255,0.88)" }, "ACTIVE")
             )
           ),
           // Body 2-column grid; column-flow places first 5 cards in col 1 (modules),
@@ -3903,17 +3902,17 @@ export default function CosmicWorkshop() {
             ),
             React.createElement("div", { onClick: function() { setScreen("ufo"); var ad = ufoGetActiveDesign(); if (ad) ufoOpenEditor(ad); else setUfoView("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "2px solid #64dcb4", borderRadius: 7, padding: "5px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4 } },
               React.createElement("div", { style: { display: "flex", justifyContent: "center" } },
-                React.createElement(UFOBlockSvg, { size: 54, design: ufoGetActiveDesign(), uid: "loadout-ufo" })),
+                React.createElement(UFOBlockSvg, { size: 49, design: ufoGetActiveDesign(), uid: "loadout-ufo" })),
               React.createElement("div", { style: { color: "#80e8c4", fontFamily: "'Exo 2', sans-serif", fontSize: 10, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%", textAlign: "center" } }, ufoSaved.length > 0 ? (ufoGetActiveDesign().name || "Active") : "Default")
             ),
             React.createElement("div", { onClick: function() { setScreen("hangar"); var sd = null; for (var i = 0; i < shipSaved.length; i++) { if (shipSaved[i].id === shipActiveId) { sd = shipSaved[i]; break; } } if (sd) shipOpenEditor(sd); else setShipView("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "2px solid #ff8aaa", borderRadius: 7, padding: "5px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4 } },
               React.createElement("div", { style: { display: "flex", justifyContent: "center" } },
-                React.createElement(ShipDesignSvg, { size: 54, design: shipGetActiveDesign(), uid: "loadout-ship" })),
+                React.createElement(ShipDesignSvg, { size: 49, design: shipGetActiveDesign(), uid: "loadout-ship" })),
               React.createElement("div", { style: { color: "#ffb8cc", fontFamily: "'Exo 2', sans-serif", fontSize: 10, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%", textAlign: "center" } }, (function() { return shipSaved.length > 0 && shipActiveId ? (shipGetActiveDesign().name || "Custom") : "Default"; }()))
             ),
             React.createElement("div", { onClick: function() { setScreen("plasma"); setPlasmaView("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "2px solid #50c8ff", borderRadius: 7, padding: "5px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4 } },
-              React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", height: 54 } },
-                renderPlasmaShape(plasmaGetActiveDesign(), 28)),
+              React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", height: 49 } },
+                renderPlasmaShape(plasmaGetActiveDesign(), 25)),
               React.createElement("div", { style: { color: "#80d8ff", fontFamily: "'Exo 2', sans-serif", fontSize: 10, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%", textAlign: "center" } }, plasmaSaved.length > 0 && plasmaActiveId ? (plasmaGetActiveDesign().name || "Active") : "Default")
             )
           )
