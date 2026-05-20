@@ -212,16 +212,31 @@ React.createElement("div", { onClick: fooRedo, title: "Redo",
 - **Never** show "SET ACTIVE" on list rows using `BTN_TOPBAR` (smaller, wrong padding).
 
 ### Splash tile cards (Workshop home)
-```js
-{
-  background: "linear-gradient(135deg, rgba(R,G,B,0.08), rgba(R,G,B,0.02))",
-  border: "1px solid rgba(R,G,B,0.2)",
-  borderRadius: 12, padding: "20px 20px", cursor: "pointer"
-}
+
+Module cards (left column) use a two-row layout:
 ```
-Icon box inside: `48×48`, `borderRadius: 10`, `rgba(R,G,B,0.1)` bg, `rgba(R,G,B,0.2)` border.
-Title: section accent color, `fontSize: 16`, `fontWeight: 700`, `letterSpacing: 1`.
-Subtitle: `rgba(180,200,220,0.35)`, `fontSize: 11`, `marginTop: 3`.
+Row 1: [SVG icon 18×18]  [Module Name — fontSize 13, Exo 2, bold, uppercase]
+Row 2: [description text — fontSize 10]  [X SAVED — WsMono size 7]
+```
+
+```js
+// Outer card
+{
+  background: "linear-gradient(160deg, rgba(8,18,32,0.95), rgba(5,12,24,0.98))",
+  border: "1px solid rgba(R,G,B,0.12)", borderLeft: "3px solid <accent>",
+  borderRadius: 8, padding: "8px 10px", cursor: "pointer",
+  display: "flex", flexDirection: "column", gap: 4
+}
+// Row 1: icon + title
+{ display: "flex", alignItems: "center", gap: 8 }
+// Row 2: description + saves
+{ display: "flex", alignItems: "center", justifyContent: "space-between" }
+```
+Title: section accent color, `fontSize: 13`, `fontWeight: 700`, `letterSpacing: 0.4`, `textTransform: "uppercase"`.
+Description: `rgba(170,195,215,0.45)`, `fontSize: 10`.
+Saves: `WsMono size: 7, ls: 0.5` in section accent at 0.45 opacity.
+
+Active panel cards (right column): `padding: "6px"`, smaller previews (`size: 54` for UFO/Ship, `height: 54` container for Plasma at shape `size: 28`), label `fontSize: 10`.
 
 ---
 
