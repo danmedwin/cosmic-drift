@@ -6013,11 +6013,12 @@ function _startCvfxLoop() {
       var pdShape = pd.shape || "circle";
       var pdColor = pd.color || "#50c8ff";
       var pdGlow = pd.glowColor || "#80ddff";
-      var pdGlowR = (pd.glowSize != null ? pd.glowSize : 8) * 1.5;
+      var pdScale = cp.scale != null ? cp.scale : 1;
+      var pdGlowR = (pd.glowSize != null ? pd.glowSize : 8) * 1.5 * pdScale;
       var pdOpacity = pd.colorOpacity != null ? pd.colorOpacity : 1.0;
       if (pdShape === "blast") {
-        var bw = 3;
-        var bh = 22;
+        var bw = Math.max(1, Math.round(3 * pdScale));
+        var bh = Math.max(6, Math.round(22 * pdScale));
         ctx.shadowBlur = pdGlowR * 2;
         ctx.shadowColor = pdGlow;
         ctx.globalAlpha = pdOpacity * 0.35;
@@ -6031,8 +6032,8 @@ function _startCvfxLoop() {
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(cp.x - 1, cy - bh * 0.5, 2, Math.round(bh * 0.35));
       } else if (pdShape === "torpedo") {
-        var tw = 7;
-        var th = 16;
+        var tw = Math.max(2, Math.round(7 * pdScale));
+        var th = Math.max(4, Math.round(16 * pdScale));
         ctx.shadowBlur = pdGlowR * 1.5;
         ctx.shadowColor = pdGlow;
         ctx.globalAlpha = pdOpacity * 0.3;
@@ -6049,7 +6050,7 @@ function _startCvfxLoop() {
         ctx.globalAlpha = 0.9;
         ctx.fillStyle = "#ffffff";
         ctx.beginPath();
-        ctx.arc(cp.x - 1, cy - Math.round(th * 0.3), 2.5, 0, Math.PI * 2);
+        ctx.arc(cp.x - 1, cy - Math.round(th * 0.3), Math.max(1, Math.round(2.5 * pdScale)), 0, Math.PI * 2);
         ctx.fill();
       } else {
         ctx.globalAlpha = pdOpacity * 0.3;
@@ -6060,12 +6061,12 @@ function _startCvfxLoop() {
         ctx.globalAlpha = pdOpacity * 0.85;
         ctx.fillStyle = pdColor;
         ctx.beginPath();
-        ctx.arc(cp.x, cy, 7, 0, Math.PI * 2);
+        ctx.arc(cp.x, cy, Math.max(2, Math.round(7 * pdScale)), 0, Math.PI * 2);
         ctx.fill();
         ctx.globalAlpha = 1;
         ctx.fillStyle = "#ffffff";
         ctx.beginPath();
-        ctx.arc(cp.x - 1, cy - 1, 3, 0, Math.PI * 2);
+        ctx.arc(cp.x - 1, cy - 1, Math.max(1, Math.round(3 * pdScale)), 0, Math.PI * 2);
         ctx.fill();
       }
       nextProj.push(cp);
@@ -6091,14 +6092,15 @@ function _kickCvfx() {
 // ── Canvas Projectiles (bypass React entirely) ──
 var _canvasProjectiles = [];
 var _shotTimingLog = [];
-function _spawnCanvasProj(x, startY, endY, duration, onDone) {
+function _spawnCanvasProj(x, startY, endY, duration, onDone, scale) {
   _canvasProjectiles.push({
     x: x,
     startY: startY,
     endY: endY,
     duration: duration,
     startTime: -1,
-    onDone: onDone
+    onDone: onDone,
+    scale: scale || 1
   });
   _startCvfxLoop();
 }
@@ -9580,77 +9582,112 @@ function CosmicDriftGame() {
       targetIdx = findBlockInCol(fromCol);
     var splitOn = !!GAME_PLASMA_DESIGN.splitEnabled;
     if (splitOn) {
-      var splitOffsetPx = (GAME_PLASMA_DESIGN.splitDistance != null ? GAME_PLASMA_DESIGN.splitDistance : 30) / 100 * shipDisplaySize;
-      var colOffset = splitOffsetPx / (blockSize + GAP);
-      var leftCol = Math.max(0, Math.min(COLS - 1, Math.round(fromCol - colOffset)));
-      var rightCol = Math.max(0, Math.min(COLS - 1, Math.round(fromCol + colOffset)));
+      var SS = 0.7;
+      var srcXPx = ((GAME_PLASMA_DESIGN.sourceOffsetX != null ? GAME_PLASMA_DESIGN.sourceOffsetX : 50) - 50) / 100 * shipDisplaySize;
+      var splPx = (GAME_PLASMA_DESIGN.splitDistance != null ? GAME_PLASMA_DESIGN.splitDistance : 30) / 100 * shipDisplaySize;
+      var colPitch = blockSize + GAP;
+      var sxL = sx + srcXPx - splPx;
+      var sxR = sx + srcXPx + splPx;
+      var leftCol = Math.max(0, Math.min(COLS - 1, Math.round(fromCol + (srcXPx - splPx) / colPitch)));
+      var rightCol = Math.max(0, Math.min(COLS - 1, Math.round(fromCol + (srcXPx + splPx) / colPitch)));
       if (leftCol === rightCol) {
-        splitOn = false;
-      }
-    }
-    if (splitOn) {
-      var sxL = getBlockX(leftCol);
-      var sxR = getBlockX(rightCol);
-      var targetIdxL = findBlockInCol(leftCol);
-      var targetIdxR = findBlockInCol(rightCol);
-      if (targetIdxL < 0) {
-        var topYL = getGridTop() - 20;
-        var durL = (shipY - topYL) / PLASMA_SPEED;
-        _spawnCanvasProj(sxL, shipY, topYL, durL, function () {
-          spawnFizzle(sxL, topYL + 10);
-        });
+        var targetIdxSame = findBlockInCol(leftCol);
+        if (targetIdxSame < 0) {
+          var topYSame = getGridTop() - 20;
+          var durSame = (shipY - topYSame) / PLASMA_SPEED;
+          _spawnCanvasProj(sxL, shipY, topYSame, durSame, function () {
+            spawnFizzle(sxL, topYSame + 10);
+          }, SS);
+          _spawnCanvasProj(sxR, shipY, topYSame, durSame, function () {
+            spawnFizzle(sxR, topYSame + 10);
+            scheduleRechargeCheck();
+          }, SS);
+        } else {
+          shotsHitRef.current += 1;
+          var tRowSame = Math.floor(targetIdxSame / COLS);
+          var tTypeSame = gridRef2.current[targetIdxSame];
+          if (tTypeSame !== 7 && tTypeSame !== 17 && !(tTypeSame === 10 && shieldRef.current[targetIdxSame] > 0)) removingRef.current.add(targetIdxSame);
+          var tYSame = tTypeSame === 7 ? getBlockY(tRowSame) + blockSize / 2 + 2 : getBlockY(tRowSame);
+          var dur2Same = Math.max(100, (shipY - tYSame) / PLASMA_SPEED);
+          var _fireTSame = Date.now();
+          _spawnCanvasProj(sxL, shipY, tYSame, dur2Same, function () {}, SS);
+          _spawnCanvasProj(sxR, shipY, tYSame, dur2Same, function (arriveT) {
+            var _hitTSame = Date.now();
+            _shotTimingLog.unshift({
+              fireT: _fireTSame,
+              arriveT: arriveT,
+              hitT: _hitTSame,
+              dur: dur2Same
+            });
+            if (_shotTimingLog.length > 20) _shotTimingLog.pop();
+            if (tTypeSame === 7) {
+              playSound("indestructibleHit");
+            }
+            processHit(targetIdxSame, 0, "below");
+          }, SS);
+        }
       } else {
-        shotsHitRef.current += 1;
-        var targetRowL = Math.floor(targetIdxL / COLS);
-        var targetTypeL = gridRef2.current[targetIdxL];
-        if (targetTypeL !== 7 && targetTypeL !== 17 && !(targetTypeL === 10 && shieldRef.current[targetIdxL] > 0)) removingRef.current.add(targetIdxL);
-        var targetYL = targetTypeL === 7 ? getBlockY(targetRowL) + blockSize / 2 + 2 : getBlockY(targetRowL);
-        var dur2L = Math.max(100, (shipY - targetYL) / PLASMA_SPEED);
-        var _fireTL = Date.now();
-        _spawnCanvasProj(sxL, shipY, targetYL, dur2L, function (arriveT) {
-          var _hitTL = Date.now();
-          _shotTimingLog.unshift({
-            fireT: _fireTL,
-            arriveT: arriveT,
-            hitT: _hitTL,
-            dur: dur2L
-          });
-          if (_shotTimingLog.length > 20) _shotTimingLog.pop();
-          if (targetTypeL === 7) {
-            playSound("indestructibleHit");
-          }
-          processHit(targetIdxL, 0, "below");
-        });
-      }
-      if (targetIdxR < 0) {
-        var topYR = getGridTop() - 20;
-        var durR = (shipY - topYR) / PLASMA_SPEED;
-        _spawnCanvasProj(sxR, shipY, topYR, durR, function () {
-          spawnFizzle(sxR, topYR + 10);
-          scheduleRechargeCheck();
-        });
-      } else {
-        shotsHitRef.current += 1;
-        var targetRowR = Math.floor(targetIdxR / COLS);
-        var targetTypeR = gridRef2.current[targetIdxR];
-        if (targetTypeR !== 7 && targetTypeR !== 17 && !(targetTypeR === 10 && shieldRef.current[targetIdxR] > 0)) removingRef.current.add(targetIdxR);
-        var targetYR = targetTypeR === 7 ? getBlockY(targetRowR) + blockSize / 2 + 2 : getBlockY(targetRowR);
-        var dur2R = Math.max(100, (shipY - targetYR) / PLASMA_SPEED);
-        var _fireTR = Date.now();
-        _spawnCanvasProj(sxR, shipY, targetYR, dur2R, function (arriveT) {
-          var _hitTR = Date.now();
-          _shotTimingLog.unshift({
-            fireT: _fireTR,
-            arriveT: arriveT,
-            hitT: _hitTR,
-            dur: dur2R
-          });
-          if (_shotTimingLog.length > 20) _shotTimingLog.pop();
-          if (targetTypeR === 7) {
-            playSound("indestructibleHit");
-          }
-          processHit(targetIdxR, 0, "below");
-        });
+        var targetIdxL = findBlockInCol(leftCol);
+        var targetIdxR = findBlockInCol(rightCol);
+        if (targetIdxL < 0) {
+          var topYL = getGridTop() - 20;
+          var durL = (shipY - topYL) / PLASMA_SPEED;
+          _spawnCanvasProj(sxL, shipY, topYL, durL, function () {
+            spawnFizzle(sxL, topYL + 10);
+          }, SS);
+        } else {
+          shotsHitRef.current += 1;
+          var targetRowL = Math.floor(targetIdxL / COLS);
+          var targetTypeL = gridRef2.current[targetIdxL];
+          if (targetTypeL !== 7 && targetTypeL !== 17 && !(targetTypeL === 10 && shieldRef.current[targetIdxL] > 0)) removingRef.current.add(targetIdxL);
+          var targetYL = targetTypeL === 7 ? getBlockY(targetRowL) + blockSize / 2 + 2 : getBlockY(targetRowL);
+          var dur2L = Math.max(100, (shipY - targetYL) / PLASMA_SPEED);
+          var _fireTL = Date.now();
+          _spawnCanvasProj(sxL, shipY, targetYL, dur2L, function (arriveT) {
+            var _hitTL = Date.now();
+            _shotTimingLog.unshift({
+              fireT: _fireTL,
+              arriveT: arriveT,
+              hitT: _hitTL,
+              dur: dur2L
+            });
+            if (_shotTimingLog.length > 20) _shotTimingLog.pop();
+            if (targetTypeL === 7) {
+              playSound("indestructibleHit");
+            }
+            processHit(targetIdxL, 0, "below");
+          }, SS);
+        }
+        if (targetIdxR < 0) {
+          var topYR = getGridTop() - 20;
+          var durR = (shipY - topYR) / PLASMA_SPEED;
+          _spawnCanvasProj(sxR, shipY, topYR, durR, function () {
+            spawnFizzle(sxR, topYR + 10);
+            scheduleRechargeCheck();
+          }, SS);
+        } else {
+          shotsHitRef.current += 1;
+          var targetRowR = Math.floor(targetIdxR / COLS);
+          var targetTypeR = gridRef2.current[targetIdxR];
+          if (targetTypeR !== 7 && targetTypeR !== 17 && !(targetTypeR === 10 && shieldRef.current[targetIdxR] > 0)) removingRef.current.add(targetIdxR);
+          var targetYR = targetTypeR === 7 ? getBlockY(targetRowR) + blockSize / 2 + 2 : getBlockY(targetRowR);
+          var dur2R = Math.max(100, (shipY - targetYR) / PLASMA_SPEED);
+          var _fireTR = Date.now();
+          _spawnCanvasProj(sxR, shipY, targetYR, dur2R, function (arriveT) {
+            var _hitTR = Date.now();
+            _shotTimingLog.unshift({
+              fireT: _fireTR,
+              arriveT: arriveT,
+              hitT: _hitTR,
+              dur: dur2R
+            });
+            if (_shotTimingLog.length > 20) _shotTimingLog.pop();
+            if (targetTypeR === 7) {
+              playSound("indestructibleHit");
+            }
+            processHit(targetIdxR, 0, "below");
+          }, SS);
+        }
       }
       setTimeout(function () {
         checkDeadlock();
