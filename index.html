@@ -12729,10 +12729,10 @@ function CosmicDriftGame() {
       marginTop: 2
     }
   }, /*#__PURE__*/React.createElement(GsLED, {
-    color: DIFF_COLORS[difficulty] || GS.green,
+    color: gameMode === "campaign" ? GS.blue : "#c8b8ff",
     size: 6
   }), /*#__PURE__*/React.createElement(GsLED, {
-    color: gameMode === "campaign" ? GS.blue : "#c8b8ff",
+    color: DIFF_COLORS[difficulty] || GS.green,
     size: 6
   }), /*#__PURE__*/React.createElement(GsLED, {
     color: npSavedChoice !== "skip" ? GS.green : "#cc4444",

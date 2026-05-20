@@ -3004,8 +3004,8 @@ function logUfo(msg) {
               <span style={{ width: 22, height: 1, background: "rgba(80,221,255,0.25)" }} />
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 2 }}>
-              <GsLED color={DIFF_COLORS[difficulty] || GS.green} size={6} />
               <GsLED color={gameMode === "campaign" ? GS.blue : "#c8b8ff"} size={6} />
+              <GsLED color={DIFF_COLORS[difficulty] || GS.green} size={6} />
               <GsLED color={npSavedChoice !== "skip" ? GS.green : "#cc4444"} size={6} />
             </div>
           </div>
