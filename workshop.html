@@ -10228,6 +10228,7 @@ function CosmicWorkshop() {
   var plasmaEndY = String(-(240 - plasmaShipSize)) + "px";
   var plasmaFlashBottom = plasmaShipSize + 8;
   var plasmaSplitDist = plasmaEditDesign.splitDistance || 20;
+  var plasmaSourceOffsetPx = Math.round(((plasmaEditDesign.sourceOffsetX != null ? plasmaEditDesign.sourceOffsetX : 50) - 50) / 100 * plasmaShipSize);
   return React.createElement("div", {
     style: {
       position: "fixed",
@@ -17427,7 +17428,7 @@ function CosmicWorkshop() {
     style: {
       position: "absolute",
       bottom: plasmaShotBottom,
-      left: "50%",
+      left: "calc(50% + " + plasmaSourceOffsetPx + "px)",
       transform: "translateX(-50%)"
     }
   }, React.createElement("div", {
@@ -17437,13 +17438,13 @@ function CosmicWorkshop() {
       "--endY": plasmaEndY
     }
   }, renderPlasmaShape(plasmaEditDesign, 20))),
-  // Split shots — smaller, no center
+  // Split shots — smaller, no center, both anchored to source X
   !!plasmaEditDesign.splitEnabled && React.createElement("div", {
     style: {
       position: "absolute",
       bottom: plasmaShotBottom,
-      left: "50%",
-      transform: "translateX(calc(-50% - " + plasmaSplitDist + "px))"
+      left: "calc(50% + " + (plasmaSourceOffsetPx - plasmaSplitDist) + "px)",
+      transform: "translateX(-50%)"
     }
   }, React.createElement("div", {
     style: {
@@ -17456,8 +17457,8 @@ function CosmicWorkshop() {
     style: {
       position: "absolute",
       bottom: plasmaShotBottom,
-      left: "50%",
-      transform: "translateX(calc(-50% + " + plasmaSplitDist + "px))"
+      left: "calc(50% + " + (plasmaSourceOffsetPx + plasmaSplitDist) + "px)",
+      transform: "translateX(-50%)"
     }
   }, React.createElement("div", {
     style: {
@@ -17467,12 +17468,12 @@ function CosmicWorkshop() {
       "--endY": plasmaEndY
     }
   }, renderPlasmaShape(plasmaEditDesign, 15))),
-  // Muzzle flash — wrapper positions, inner animates
+  // Muzzle flash — anchored to source X
   !!plasmaEditDesign.flashEnabled && React.createElement("div", {
     style: {
       position: "absolute",
       bottom: plasmaFlashBottom,
-      left: "50%",
+      left: "calc(50% + " + plasmaSourceOffsetPx + "px)",
       transform: "translateX(-50%)"
     }
   }, React.createElement("div", {

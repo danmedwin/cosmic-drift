@@ -3673,6 +3673,7 @@ export default function CosmicWorkshop() {
   var plasmaEndY = String(-(240 - plasmaShipSize)) + "px";
   var plasmaFlashBottom = plasmaShipSize + 8;
   var plasmaSplitDist = plasmaEditDesign.splitDistance || 20;
+  var plasmaSourceOffsetPx = Math.round(((plasmaEditDesign.sourceOffsetX != null ? plasmaEditDesign.sourceOffsetX : 50) - 50) / 100 * plasmaShipSize);
 
   return React.createElement("div", { style: { position: "fixed", inset: 0, background: "#0b0c1a", fontFamily: "'Quicksand',sans-serif", overflow: "hidden" } },
     React.createElement("style", null, ANIM_CSS),
@@ -5116,18 +5117,18 @@ export default function CosmicWorkshop() {
                   return React.createElement("div", { key: si, style: { position: "absolute", left: lx + "%", top: ly + "%", width: si % 3 === 0 ? 2 : 1, height: si % 3 === 0 ? 2 : 1, borderRadius: "50%", background: "#fff" } });
                 })),
               // Center shot — hidden when split is active
-              !plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaShotBottom, left: "50%", transform: "translateX(-50%)" } },
+              !plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaShotBottom, left: "calc(50% + " + plasmaSourceOffsetPx + "px)", transform: "translateX(-50%)" } },
                 React.createElement("div", { style: { animation: plasmaAnimDur, "--endX": "0px", "--endY": plasmaEndY } },
                   renderPlasmaShape(plasmaEditDesign, 20))),
-              // Split shots — smaller, no center
-              !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaShotBottom, left: "50%", transform: "translateX(calc(-50% - " + plasmaSplitDist + "px))" } },
+              // Split shots — smaller, no center, both anchored to source X
+              !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaShotBottom, left: "calc(50% + " + (plasmaSourceOffsetPx - plasmaSplitDist) + "px)", transform: "translateX(-50%)" } },
                 React.createElement("div", { style: { animation: plasmaAnimDur, animationDelay: "0.05s", "--endX": "0px", "--endY": plasmaEndY } },
                   renderPlasmaShape(plasmaEditDesign, 15))),
-              !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaShotBottom, left: "50%", transform: "translateX(calc(-50% + " + plasmaSplitDist + "px))" } },
+              !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaShotBottom, left: "calc(50% + " + (plasmaSourceOffsetPx + plasmaSplitDist) + "px)", transform: "translateX(-50%)" } },
                 React.createElement("div", { style: { animation: plasmaAnimDur, animationDelay: "0.05s", "--endX": "0px", "--endY": plasmaEndY } },
                   renderPlasmaShape(plasmaEditDesign, 15))),
-              // Muzzle flash — wrapper positions, inner animates
-              !!plasmaEditDesign.flashEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaFlashBottom, left: "50%", transform: "translateX(-50%)" } },
+              // Muzzle flash — anchored to source X
+              !!plasmaEditDesign.flashEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaFlashBottom, left: "calc(50% + " + plasmaSourceOffsetPx + "px)", transform: "translateX(-50%)" } },
                 React.createElement("div", { style: { width: plasmaEditDesign.flashSize || 24, height: plasmaEditDesign.flashSize || 24, borderRadius: "50%", background: plasmaEditDesign.flashColor || "#ffffff", marginLeft: -((plasmaEditDesign.flashSize || 24) / 2), opacity: (plasmaEditDesign.flashOpacity != null ? plasmaEditDesign.flashOpacity : 0.9), animation: "plasmaFlash 0.25s ease-out forwards" } })),
               // Ship — tap to fire
               React.createElement("div", { onClick: function() { setPlasmaRangeKey(function(k) { return k + 1; }); }, style: { position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)", cursor: "pointer" } },
