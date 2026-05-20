@@ -2846,6 +2846,16 @@ var SHIP_DEFAULT_DESIGN = {
   hull: "arrow",
   parts: []
 };
+var PLASMA_DESIGNS_KEY_G = "cosmic-drift-plasma-designs";
+var PLASMA_ACTIVE_KEY_G = "cosmic-drift-plasma-active";
+var GAME_PLASMA_DESIGN = {
+  shape: "circle",
+  color: "#50c8ff",
+  colorMode: "radial",
+  glowColor: "#80ddff",
+  glowSize: 8,
+  colorOpacity: 1.0
+};
 // Normalized 6-point swept-arrow polygon (matches Workshop's ARROW_POINTS).
 var ARROW_POINTS = [[0, -0.5], [0.5, 0.269], [0.207, 0.170], [0, 0.5], [-0.207, 0.170], [-0.5, 0.269]];
 // Parts-array hull presets (kept in sync with Workshop's HULL_PRESETS).
@@ -5999,21 +6009,65 @@ function _startCvfxLoop() {
         }
         continue;
       }
-      ctx.globalAlpha = 0.3;
-      ctx.fillStyle = "#50c8ff";
-      ctx.beginPath();
-      ctx.arc(cp.x, cy, 12, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = 0.85;
-      ctx.fillStyle = "#80ddff";
-      ctx.beginPath();
-      ctx.arc(cp.x, cy, 7, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = "#ffffff";
-      ctx.beginPath();
-      ctx.arc(cp.x - 1, cy - 1, 3, 0, Math.PI * 2);
-      ctx.fill();
+      var pd = GAME_PLASMA_DESIGN;
+      var pdShape = pd.shape || "circle";
+      var pdColor = pd.color || "#50c8ff";
+      var pdGlow = pd.glowColor || "#80ddff";
+      var pdGlowR = (pd.glowSize != null ? pd.glowSize : 8) * 1.5;
+      var pdOpacity = pd.colorOpacity != null ? pd.colorOpacity : 1.0;
+      if (pdShape === "blast") {
+        var bw = 3;
+        var bh = 22;
+        ctx.shadowBlur = pdGlowR * 2;
+        ctx.shadowColor = pdGlow;
+        ctx.globalAlpha = pdOpacity * 0.35;
+        ctx.fillStyle = pdGlow;
+        ctx.fillRect(cp.x - bw * 2, cy - bh * 0.5, bw * 4, bh);
+        ctx.globalAlpha = pdOpacity;
+        ctx.fillStyle = pdColor;
+        ctx.fillRect(cp.x - bw, cy - bh * 0.5, bw * 2, bh);
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 0.9;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(cp.x - 1, cy - bh * 0.5, 2, Math.round(bh * 0.35));
+      } else if (pdShape === "torpedo") {
+        var tw = 7;
+        var th = 16;
+        ctx.shadowBlur = pdGlowR * 1.5;
+        ctx.shadowColor = pdGlow;
+        ctx.globalAlpha = pdOpacity * 0.3;
+        ctx.fillStyle = pdGlow;
+        ctx.beginPath();
+        ctx.ellipse(cp.x, cy, tw * 1.5, th * 1.25, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = pdOpacity;
+        ctx.fillStyle = pdColor;
+        ctx.beginPath();
+        ctx.ellipse(cp.x, cy, tw, th, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 0.9;
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(cp.x - 1, cy - Math.round(th * 0.3), 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.globalAlpha = pdOpacity * 0.3;
+        ctx.fillStyle = pdGlow;
+        ctx.beginPath();
+        ctx.arc(cp.x, cy, pdGlowR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = pdOpacity * 0.85;
+        ctx.fillStyle = pdColor;
+        ctx.beginPath();
+        ctx.arc(cp.x, cy, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(cp.x - 1, cy - 1, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
       nextProj.push(cp);
     }
     _canvasProjectiles = nextProj;
@@ -7652,6 +7706,30 @@ function CosmicDriftGame() {
                 }
               }
               if (found) GAME_SHIP_DESIGN = shipMigrateDesign(found);
+            }).catch(function () {});
+          }
+        }
+      }).catch(function () {});
+    } catch (e) {}
+  }, []);
+  // Load active plasma design from Workshop storage.
+  useEffect(function () {
+    try {
+      window.storage.get(PLASMA_DESIGNS_KEY_G).then(function (r) {
+        if (r && r.value) {
+          var designs = JSON.parse(r.value);
+          if (Array.isArray(designs) && designs.length > 0) {
+            window.storage.get(PLASMA_ACTIVE_KEY_G).then(function (ra) {
+              var activeId = ra && ra.value ? ra.value : null;
+              var found = null;
+              for (var i = 0; i < designs.length; i++) {
+                if (designs[i].id === activeId) {
+                  found = designs[i];
+                  break;
+                }
+              }
+              if (!found) found = designs[0];
+              GAME_PLASMA_DESIGN = Object.assign({}, GAME_PLASMA_DESIGN, found);
             }).catch(function () {});
           }
         }
