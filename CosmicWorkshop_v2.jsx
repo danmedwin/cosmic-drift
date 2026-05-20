@@ -3762,7 +3762,7 @@ export default function CosmicWorkshop() {
           React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 33, fontWeight: 700, letterSpacing: 7, color: "#ede8ff", textTransform: "uppercase", textShadow: "0 0 22px rgba(160,100,255,0.55), 0 0 44px rgba(120,60,220,0.25)", lineHeight: 1.1 } }, "WORKSHOP"),
           React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", gap: 8 } },
             React.createElement("div", { style: { height: 1, width: 22, background: "rgba(160,100,255,0.25)" } }),
-            React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,170,255,0.32)" }, "SERVICE PANEL  ·  OPEN"),
+            React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,170,255,0.32)" }, "SERVICE PANEL  ·  v2.1"),
             React.createElement("div", { style: { height: 1, width: 22, background: "rgba(160,100,255,0.25)" } })
           ),
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginTop: 2 } },
