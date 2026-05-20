@@ -1487,6 +1487,7 @@ export default function CosmicWorkshop() {
   var _plasmaEditTab = useState("design"), plasmaEditTab = _plasmaEditTab[0], setPlasmaEditTab = _plasmaEditTab[1];
   var _plasmaRangeKey = useState(0), plasmaRangeKey = _plasmaRangeKey[0], setPlasmaRangeKey = _plasmaRangeKey[1];
   var _plasmaShipSize = useState(72), plasmaShipSize = _plasmaShipSize[0], setPlasmaShipSize = _plasmaShipSize[1];
+  var _plasmaPreviewShipId = useState(null), plasmaPreviewShipId = _plasmaPreviewShipId[0], setPlasmaPreviewShipId = _plasmaPreviewShipId[1];
   var shipDirtyRef = useRef(false);
   var _shipSelectedPart = useState(-1), shipSelectedPart = _shipSelectedPart[0], setShipSelectedPart = _shipSelectedPart[1];
   // Multi-select: extra indices beyond the primary. Effective selection is
@@ -2900,6 +2901,12 @@ export default function CosmicWorkshop() {
   function plasmaSetActive(id) {
     setPlasmaActiveId(id);
     plasmaSaveActiveIdToStorage(id);
+  }
+  function plasmaGetPreviewShipDesign() {
+    if (plasmaPreviewShipId) {
+      for (var psi = 0; psi < shipSaved.length; psi++) { if (shipSaved[psi].id === plasmaPreviewShipId) return shipMigrateDesign(shipSaved[psi]); }
+    }
+    return shipGetActiveDesign();
   }
   function plasmaDeleteDesign(id) {
     setPlasmaSaved(function(prev) {
@@ -5064,8 +5071,11 @@ export default function CosmicWorkshop() {
           },
           backLabel: "My Plasma", title: plasmaEditId ? "Edit Plasma" : "New Plasma", color: "#50c8ff",
           rightContent: React.createElement("div", { style: { display: "flex", gap: 6 } },
-            plasmaEditId && React.createElement("div", {
-              onClick: function() { plasmaEditId === plasmaActiveId ? plasmaSetActive(null) : plasmaSetActive(plasmaEditId); },
+            React.createElement("div", {
+              onClick: function() {
+                if (!plasmaEditId) { setPlasmaSaveStatus("Save first"); setTimeout(function() { setPlasmaSaveStatus(""); }, 2500); return; }
+                plasmaEditId === plasmaActiveId ? plasmaSetActive(null) : plasmaSetActive(plasmaEditId);
+              },
               style: Object.assign({}, BTN_TOPBAR, { color: plasmaEditId === plasmaActiveId ? "#80dd90" : "rgba(200,210,220,0.7)", border: plasmaEditId === plasmaActiveId ? "2px solid rgba(80,200,100,0.5)" : PNLB })
             }, plasmaEditId === plasmaActiveId ? "★ Active" : "Set Active"),
             React.createElement("div", { onClick: plasmaSaveCurrent, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #0a2040, #061828)", boxShadow: "0 0 8px rgba(80,200,255,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, plasmaSaveStatus || "Save"))
@@ -5076,128 +5086,128 @@ export default function CosmicWorkshop() {
             React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 11, marginBottom: 6, letterSpacing: 0.5 } }, "NAME"),
             React.createElement("input", { value: plasmaEditDesign.name || "", onChange: function(e) { plasmaUpdateEdit("name", e.target.value); },
               placeholder: "My Plasma", style: { width: "100%", padding: "6px 10px", borderRadius: 6, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#b0c8d8", fontSize: 16, fontFamily: "'Quicksand',sans-serif", outline: "none", boxSizing: "border-box" } })),
-          // Live preview — hide when on Firing Range tab
-          plasmaEditTab === "design" && React.createElement("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", padding: "16px 0 20px" } },
-            renderPlasmaShape(plasmaEditDesign, 72)),
-          // Tab bar
-          React.createElement("div", { style: { display: "flex", gap: 4, marginBottom: 12, background: "rgba(0,0,0,0.2)", borderRadius: 10, padding: 4 } },
-            React.createElement("div", { onClick: function() { setPlasmaEditTab("design"); }, style: { flex: 1, textAlign: "center", padding: "8px 0", borderRadius: 7, background: plasmaEditTab === "design" ? "linear-gradient(180deg,#0e2840,#081828)" : "transparent", color: plasmaEditTab === "design" ? "#50c8ff" : "rgba(180,200,220,0.4)", fontSize: 11, fontWeight: 700, letterSpacing: 0.8, cursor: "pointer", border: plasmaEditTab === "design" ? "1px solid rgba(80,200,255,0.25)" : "1px solid transparent" } }, "Design"),
-            React.createElement("div", { onClick: function() { setPlasmaEditTab("range"); setPlasmaRangeKey(function(k) { return k + 1; }); }, style: { flex: 1, textAlign: "center", padding: "8px 0", borderRadius: 7, background: plasmaEditTab === "range" ? "linear-gradient(180deg,#0e2840,#081828)" : "transparent", color: plasmaEditTab === "range" ? "#50c8ff" : "rgba(180,200,220,0.4)", fontSize: 11, fontWeight: 700, letterSpacing: 0.8, cursor: "pointer", border: plasmaEditTab === "range" ? "1px solid rgba(80,200,255,0.25)" : "1px solid transparent" } }, "Firing Range")),
-
           // ── DESIGN TAB ──
-          plasmaEditTab === "design" && React.createElement("div", null,
-            // Shape picker
-            React.createElement("div", { style: { marginBottom: 10 } },
-              React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 11, marginBottom: 8, letterSpacing: 0.5 } }, "SHAPE"),
-              React.createElement("div", { style: { display: "flex", gap: 8 } },
-                ["circle", "blast", "torpedo"].map(function(shape) {
-                  var isSelected = (plasmaEditDesign.shape || "circle") === shape;
-                  return React.createElement("div", { key: shape, onClick: function() { plasmaUpdateEdit("shape", shape); },
-                    style: { flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: "14px 8px", borderRadius: 10, background: isSelected ? "rgba(80,200,255,0.1)" : "rgba(0,0,0,0.2)", border: isSelected ? "2px solid rgba(80,200,255,0.5)" : "2px solid rgba(255,255,255,0.08)", cursor: "pointer", minHeight: 80, justifyContent: "center" } },
-                    renderPlasmaShape(Object.assign({}, plasmaEditDesign, { shape: shape }), 22),
-                    React.createElement("div", { style: { fontSize: 10, color: isSelected ? "#50c8ff" : "rgba(180,200,220,0.5)", fontWeight: 700, letterSpacing: 0.5 } }, PLASMA_SHAPE_LABELS[shape]));
-                }))),
-            // Color
-            React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
-              React.createElement(BDColorPicker, { label: "Color", value: plasmaEditDesign.color || "#50c8ff",
-                presets: ["#50c8ff", "#80ddff", "#4488ff", "#cc66ff", "#ff4488", "#44ffaa", "#ffcc44", "#ffffff"],
-                onChange: function(v) { plasmaUpdateEdit("color", v); } }),
-              React.createElement(BDSlider, { label: "Opacity", value: plasmaEditDesign.colorOpacity != null ? plasmaEditDesign.colorOpacity : 1.0,
-                min: 0.1, max: 1.0, step: 0.05, displayValue: Math.round((plasmaEditDesign.colorOpacity != null ? plasmaEditDesign.colorOpacity : 1.0) * 100) + "%",
-                onChange: function(v) { plasmaUpdateEdit("colorOpacity", v); } }),
-              React.createElement("div", { style: { marginBottom: 8 } },
-                React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 11, marginBottom: 6, letterSpacing: 0.5 } }, "STYLE"),
-                React.createElement("div", { style: { display: "flex", gap: 4, background: "rgba(0,0,0,0.2)", borderRadius: 8, padding: 3 } },
-                  ["standard", "linear", "radial"].map(function(mode) {
-                    var modeLabel = mode === "standard" ? "Standard" : mode === "linear" ? "Linear" : "Radial";
-                    var isActive = (plasmaEditDesign.colorMode || "radial") === mode;
-                    return React.createElement("div", { key: mode, onClick: function() { plasmaUpdateEdit("colorMode", mode); },
-                      style: { flex: 1, textAlign: "center", padding: "6px 0", borderRadius: 6, background: isActive ? "linear-gradient(180deg,#0e2840,#081828)" : "transparent", color: isActive ? "#50c8ff" : "rgba(180,200,220,0.4)", fontSize: 10, fontWeight: 700, letterSpacing: 0.5, cursor: "pointer", border: isActive ? "1px solid rgba(80,200,255,0.25)" : "1px solid transparent" } }, modeLabel);
-                  })))),
-            // Glow
-            React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
-              React.createElement(BDColorPicker, { label: "Glow Color", value: plasmaEditDesign.glowColor || "#80ddff",
-                presets: ["#80ddff", "#50c8ff", "#ffffff", "#cc66ff", "#ff4488", "#44ffaa", "#ffcc44", "#4488ff"],
-                onChange: function(v) { plasmaUpdateEdit("glowColor", v); } }),
-              React.createElement(BDSlider, { label: "Glow Size", value: plasmaEditDesign.glowSize != null ? plasmaEditDesign.glowSize : 8,
-                min: 0, max: 24, step: 1, displayValue: String(Math.round(plasmaEditDesign.glowSize != null ? plasmaEditDesign.glowSize : 8)) + "px",
-                onChange: function(v) { plasmaUpdateEdit("glowSize", v); } })),
-            null),
+          plasmaEditTab === "design" && React.createElement(React.Fragment, null,
+            React.createElement("div", { style: { display: "flex", flexDirection: "column", alignItems: "center", padding: "16px 0 20px" } },
+              renderPlasmaShape(plasmaEditDesign, 72)),
+            React.createElement("div", { style: { display: "flex", gap: 4, marginBottom: 12, background: "rgba(0,0,0,0.2)", borderRadius: 10, padding: 4 } },
+              React.createElement("div", { onClick: function() { setPlasmaEditTab("design"); }, style: { flex: 1, textAlign: "center", padding: "8px 0", borderRadius: 7, background: "linear-gradient(180deg,#0e2840,#081828)", color: "#50c8ff", fontSize: 11, fontWeight: 700, letterSpacing: 0.8, cursor: "pointer", border: "1px solid rgba(80,200,255,0.25)" } }, "Design"),
+              React.createElement("div", { onClick: function() { setPlasmaEditTab("range"); setPlasmaRangeKey(function(k) { return k + 1; }); }, style: { flex: 1, textAlign: "center", padding: "8px 0", borderRadius: 7, background: "transparent", color: "rgba(180,200,220,0.4)", fontSize: 11, fontWeight: 700, letterSpacing: 0.8, cursor: "pointer", border: "1px solid transparent" } }, "Firing Range")),
+            React.createElement("div", null,
+              React.createElement("div", { style: { marginBottom: 10 } },
+                React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 11, marginBottom: 8, letterSpacing: 0.5 } }, "SHAPE"),
+                React.createElement("div", { style: { display: "flex", gap: 8 } },
+                  ["circle", "blast", "torpedo"].map(function(shape) {
+                    var isSelected = (plasmaEditDesign.shape || "circle") === shape;
+                    return React.createElement("div", { key: shape, onClick: function() { plasmaUpdateEdit("shape", shape); },
+                      style: { flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 10, padding: "14px 8px", borderRadius: 10, background: isSelected ? "rgba(80,200,255,0.1)" : "rgba(0,0,0,0.2)", border: isSelected ? "2px solid rgba(80,200,255,0.5)" : "2px solid rgba(255,255,255,0.08)", cursor: "pointer", minHeight: 80, justifyContent: "center" } },
+                      renderPlasmaShape(Object.assign({}, plasmaEditDesign, { shape: shape }), 22),
+                      React.createElement("div", { style: { fontSize: 10, color: isSelected ? "#50c8ff" : "rgba(180,200,220,0.5)", fontWeight: 700, letterSpacing: 0.5 } }, PLASMA_SHAPE_LABELS[shape]));
+                  }))),
+              React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
+                React.createElement(BDColorPicker, { label: "Color", value: plasmaEditDesign.color || "#50c8ff",
+                  presets: ["#50c8ff", "#80ddff", "#4488ff", "#cc66ff", "#ff4488", "#44ffaa", "#ffcc44", "#ffffff"],
+                  onChange: function(v) { plasmaUpdateEdit("color", v); } }),
+                React.createElement(BDSlider, { label: "Opacity", value: plasmaEditDesign.colorOpacity != null ? plasmaEditDesign.colorOpacity : 1.0,
+                  min: 0.1, max: 1.0, step: 0.05, displayValue: Math.round((plasmaEditDesign.colorOpacity != null ? plasmaEditDesign.colorOpacity : 1.0) * 100) + "%",
+                  onChange: function(v) { plasmaUpdateEdit("colorOpacity", v); } }),
+                React.createElement("div", { style: { marginBottom: 8 } },
+                  React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 11, marginBottom: 6, letterSpacing: 0.5 } }, "STYLE"),
+                  React.createElement("div", { style: { display: "flex", gap: 4, background: "rgba(0,0,0,0.2)", borderRadius: 8, padding: 3 } },
+                    ["standard", "linear", "radial"].map(function(mode) {
+                      var modeLabel = mode === "standard" ? "Standard" : mode === "linear" ? "Linear" : "Radial";
+                      var isModeActive = (plasmaEditDesign.colorMode || "radial") === mode;
+                      return React.createElement("div", { key: mode, onClick: function() { plasmaUpdateEdit("colorMode", mode); },
+                        style: { flex: 1, textAlign: "center", padding: "6px 0", borderRadius: 6, background: isModeActive ? "linear-gradient(180deg,#0e2840,#081828)" : "transparent", color: isModeActive ? "#50c8ff" : "rgba(180,200,220,0.4)", fontSize: 10, fontWeight: 700, letterSpacing: 0.5, cursor: "pointer", border: isModeActive ? "1px solid rgba(80,200,255,0.25)" : "1px solid transparent" } }, modeLabel);
+                    })))),
+              React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
+                React.createElement(BDColorPicker, { label: "Glow Color", value: plasmaEditDesign.glowColor || "#80ddff",
+                  presets: ["#80ddff", "#50c8ff", "#ffffff", "#cc66ff", "#ff4488", "#44ffaa", "#ffcc44", "#4488ff"],
+                  onChange: function(v) { plasmaUpdateEdit("glowColor", v); } }),
+                React.createElement(BDSlider, { label: "Glow Size", value: plasmaEditDesign.glowSize != null ? plasmaEditDesign.glowSize : 8,
+                  min: 0, max: 24, step: 1, displayValue: String(Math.round(plasmaEditDesign.glowSize != null ? plasmaEditDesign.glowSize : 8)) + "px",
+                  onChange: function(v) { plasmaUpdateEdit("glowSize", v); } })))),
 
           // ── FIRING RANGE TAB ──
-          plasmaEditTab === "range" && React.createElement("div", null,
-            // Arena — outer div holds persistent elements; inner keyed div holds animations
-            React.createElement("div", { style: { position: "relative", height: 260, background: "linear-gradient(180deg, #050810 0%, #0a0e1a 100%)", borderRadius: 12, overflow: "hidden", marginBottom: 14, border: "1px solid rgba(80,200,255,0.1)" } },
-              // Stars (persistent)
-              React.createElement("div", { style: { position: "absolute", inset: 0, opacity: 0.4, pointerEvents: "none" } },
-                [10, 25, 40, 60, 75, 90, 15, 50, 80, 35].map(function(lx, si) {
-                  var ly = [15, 8, 22, 5, 18, 12, 30, 25, 7, 35][si];
-                  return React.createElement("div", { key: si, style: { position: "absolute", left: lx + "%", top: ly + "%", width: si % 3 === 0 ? 2 : 1, height: si % 3 === 0 ? 2 : 1, borderRadius: "50%", background: "#fff" } });
-                })),
-              // Ship (persistent) — tap to fire
-              React.createElement("div", { onClick: function() { setPlasmaRangeKey(function(k) { return k + 1; }); }, style: { position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)", cursor: "pointer", zIndex: 2 } },
-                React.createElement(ShipDesignSvg, { size: plasmaShipSize, design: shipGetActiveDesign(), uid: "plasma-range" })),
-              // Origin indicator(s) — always visible, update live as you drag sliders
-              !plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaFlashBottom, left: "calc(50% + " + plasmaSourceOffsetPx + "px)", transform: "translate(-50%, 50%)", width: 7, height: 7, borderRadius: "50%", background: plasmaIndicatorColor, boxShadow: plasmaIndicatorGlow, animation: "pulse 1.5s ease-in-out infinite", pointerEvents: "none", zIndex: 4 } }),
-              !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaFlashBottom, left: "calc(50% + " + (plasmaSourceOffsetPx - plasmaSplitDist) + "px)", transform: "translate(-50%, 50%)", width: 6, height: 6, borderRadius: "50%", background: plasmaIndicatorColor, boxShadow: plasmaIndicatorGlow, animation: "pulse 1.5s ease-in-out infinite", pointerEvents: "none", zIndex: 4 } }),
-              !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaFlashBottom, left: "calc(50% + " + (plasmaSourceOffsetPx + plasmaSplitDist) + "px)", transform: "translate(-50%, 50%)", width: 6, height: 6, borderRadius: "50%", background: plasmaIndicatorColor, boxShadow: plasmaIndicatorGlow, animation: "pulse 1.5s ease-in-out infinite", pointerEvents: "none", zIndex: 4 } }),
-              // Tap hint
-              React.createElement("div", { style: { position: "absolute", bottom: 8, right: 10, fontSize: 9, color: "rgba(80,200,255,0.3)", letterSpacing: 1, fontFamily: "'Quicksand', sans-serif", fontWeight: 700, pointerEvents: "none", zIndex: 3 } }, "TAP SHIP TO FIRE"),
-              // Animated layer — remounts on every fire tap
-              React.createElement("div", { key: plasmaRangeKey, style: { position: "absolute", inset: 0, pointerEvents: "none" } },
-                // Center shot (hidden when split active)
-                !plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaShotBottom, left: "calc(50% + " + plasmaSourceOffsetPx + "px)", transform: "translateX(-50%)" } },
-                  React.createElement("div", { style: { animation: plasmaAnimDur, "--endX": "0px", "--endY": plasmaEndY } },
-                    renderPlasmaShape(plasmaEditDesign, 20))),
-                // Split shots — smaller, both anchored to source
-                !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaShotBottom, left: "calc(50% + " + (plasmaSourceOffsetPx - plasmaSplitDist) + "px)", transform: "translateX(-50%)" } },
-                  React.createElement("div", { style: { animation: plasmaAnimDur, animationDelay: "0.05s", "--endX": "0px", "--endY": plasmaEndY } },
-                    renderPlasmaShape(plasmaEditDesign, 15))),
-                !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaShotBottom, left: "calc(50% + " + (plasmaSourceOffsetPx + plasmaSplitDist) + "px)", transform: "translateX(-50%)" } },
-                  React.createElement("div", { style: { animation: plasmaAnimDur, animationDelay: "0.05s", "--endX": "0px", "--endY": plasmaEndY } },
-                    renderPlasmaShape(plasmaEditDesign, 15))),
-                // Muzzle flash — single when not split, paired when split
-                !!plasmaEditDesign.flashEnabled && !plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaFlashBottom, left: "calc(50% + " + plasmaSourceOffsetPx + "px)", transform: "translate(-50%, 0)" } },
-                  React.createElement("div", { style: { width: plasmaFlashSize, height: plasmaFlashSize, borderRadius: "50%", background: plasmaEditDesign.flashColor || "#ffffff", marginLeft: -(plasmaFlashSize / 2), opacity: plasmaFlashOpacity, animation: "plasmaFlash 0.25s ease-out forwards" } })),
-                !!plasmaEditDesign.flashEnabled && !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaFlashBottom, left: "calc(50% + " + (plasmaSourceOffsetPx - plasmaSplitDist) + "px)", transform: "translate(-50%, 0)" } },
-                  React.createElement("div", { style: { width: plasmaSplitFlashSize, height: plasmaSplitFlashSize, borderRadius: "50%", background: plasmaEditDesign.flashColor || "#ffffff", marginLeft: -(plasmaSplitFlashSize / 2), opacity: plasmaFlashOpacity, animation: "plasmaFlash 0.25s ease-out forwards" } })),
-                !!plasmaEditDesign.flashEnabled && !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaFlashBottom, left: "calc(50% + " + (plasmaSourceOffsetPx + plasmaSplitDist) + "px)", transform: "translate(-50%, 0)" } },
-                  React.createElement("div", { style: { width: plasmaSplitFlashSize, height: plasmaSplitFlashSize, borderRadius: "50%", background: plasmaEditDesign.flashColor || "#ffffff", marginLeft: -(plasmaSplitFlashSize / 2), opacity: plasmaFlashOpacity, animation: "plasmaFlash 0.25s ease-out forwards" } })))),
-            // Flash controls
-            React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
-              React.createElement(BDToggle, { label: "Muzzle Flash", value: !!plasmaEditDesign.flashEnabled,
-                onChange: function(v) { plasmaUpdateEdit("flashEnabled", v); } }),
-              !!plasmaEditDesign.flashEnabled && React.createElement("div", null,
-                React.createElement(BDColorPicker, { label: "Flash Color", value: plasmaEditDesign.flashColor || "#ffffff",
-                  presets: ["#ffffff", "#80ddff", "#50c8ff", "#ffcc44", "#ff8844", "#cc66ff", "#44ffaa", "#ff4488"],
-                  onChange: function(v) { plasmaUpdateEdit("flashColor", v); } }),
-                React.createElement(BDSlider, { label: "Flash Size", value: plasmaFlashSize,
-                  min: 8, max: 60, step: 2, displayValue: String(Math.round(plasmaFlashSize)) + "px",
-                  onChange: function(v) { plasmaUpdateEdit("flashSize", Math.round(v)); } }),
-                React.createElement(BDSlider, { label: "Flash Opacity", value: plasmaFlashOpacity,
-                  min: 0.05, max: 1.0, step: 0.05, displayValue: Math.round(plasmaFlashOpacity * 100) + "%",
-                  onChange: function(v) { plasmaUpdateEdit("flashOpacity", v); } }))),
-            // Source position, speed, ship size
-            React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
-              React.createElement(BDSlider, { label: "Source X", value: plasmaEditDesign.sourceOffsetX != null ? plasmaEditDesign.sourceOffsetX : 50,
-                min: 0, max: 100, step: 1, displayValue: Math.round(plasmaEditDesign.sourceOffsetX != null ? plasmaEditDesign.sourceOffsetX : 50) + "%",
-                onChange: function(v) { plasmaUpdateEdit("sourceOffsetX", Math.round(v)); } }),
-              React.createElement(BDSlider, { label: "Source Y", value: plasmaEditDesign.sourceOffsetY != null ? plasmaEditDesign.sourceOffsetY : 0,
-                min: 0, max: 100, step: 1, displayValue: Math.round(plasmaEditDesign.sourceOffsetY != null ? plasmaEditDesign.sourceOffsetY : 0) + "%",
-                onChange: function(v) { plasmaUpdateEdit("sourceOffsetY", Math.round(v)); } }),
-              React.createElement(BDSlider, { label: "Speed", value: plasmaEditDesign.speed || 1.0,
-                min: 0.3, max: 2.5, step: 0.1, displayValue: (plasmaEditDesign.speed || 1.0).toFixed(1) + "x",
-                onChange: function(v) { plasmaUpdateEdit("speed", v); } }),
-              React.createElement(BDSlider, { label: "Ship Size", value: plasmaShipSize,
-                min: 34, max: 204, step: 2, displayValue: String(plasmaShipSize) + "px",
-                onChange: function(v) { setPlasmaShipSize(Math.round(v)); } })),
-            // Split Shot
-            React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
-              React.createElement(BDToggle, { label: "Split Shot", value: !!plasmaEditDesign.splitEnabled,
-                onChange: function(v) { plasmaUpdateEdit("splitEnabled", v); } }),
-              !!plasmaEditDesign.splitEnabled && React.createElement(BDSlider, { label: "Split Distance", value: plasmaEditDesign.splitDistance || 20,
-                min: 4, max: 60, step: 2, displayValue: String(Math.round(plasmaEditDesign.splitDistance || 20)) + "px",
-                onChange: function(v) { plasmaUpdateEdit("splitDistance", Math.round(v)); } }))),
+          plasmaEditTab === "range" && React.createElement(React.Fragment, null,
+            // Sticky block: arena + tab bar pinned to top while controls scroll
+            React.createElement("div", { style: { position: "sticky", top: 0, zIndex: 5, margin: "0 -16px", background: "rgba(8,12,22,0.97)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)", paddingBottom: 8 } },
+              // Arena
+              React.createElement("div", { style: { position: "relative", height: 260, background: "linear-gradient(180deg, #050810 0%, #0a0e1a 100%)", overflow: "hidden", border: "none", borderBottom: "1px solid rgba(80,200,255,0.08)" } },
+                React.createElement("div", { style: { position: "absolute", inset: 0, opacity: 0.4, pointerEvents: "none" } },
+                  [10, 25, 40, 60, 75, 90, 15, 50, 80, 35].map(function(lx, si) {
+                    var ly = [15, 8, 22, 5, 18, 12, 30, 25, 7, 35][si];
+                    return React.createElement("div", { key: si, style: { position: "absolute", left: lx + "%", top: ly + "%", width: si % 3 === 0 ? 2 : 1, height: si % 3 === 0 ? 2 : 1, borderRadius: "50%", background: "#fff" } });
+                  })),
+                React.createElement("div", { onClick: function() { setPlasmaRangeKey(function(k) { return k + 1; }); }, style: { position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)", cursor: "pointer", zIndex: 2 } },
+                  React.createElement(ShipDesignSvg, { size: plasmaShipSize, design: plasmaGetPreviewShipDesign(), uid: "plasma-range" })),
+                !plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaFlashBottom, left: "calc(50% + " + plasmaSourceOffsetPx + "px)", transform: "translate(-50%, 50%)", width: 7, height: 7, borderRadius: "50%", background: plasmaIndicatorColor, boxShadow: plasmaIndicatorGlow, animation: "pulse 1.5s ease-in-out infinite", pointerEvents: "none", zIndex: 4 } }),
+                !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaFlashBottom, left: "calc(50% + " + (plasmaSourceOffsetPx - plasmaSplitDist) + "px)", transform: "translate(-50%, 50%)", width: 6, height: 6, borderRadius: "50%", background: plasmaIndicatorColor, boxShadow: plasmaIndicatorGlow, animation: "pulse 1.5s ease-in-out infinite", pointerEvents: "none", zIndex: 4 } }),
+                !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaFlashBottom, left: "calc(50% + " + (plasmaSourceOffsetPx + plasmaSplitDist) + "px)", transform: "translate(-50%, 50%)", width: 6, height: 6, borderRadius: "50%", background: plasmaIndicatorColor, boxShadow: plasmaIndicatorGlow, animation: "pulse 1.5s ease-in-out infinite", pointerEvents: "none", zIndex: 4 } }),
+                React.createElement("div", { style: { position: "absolute", bottom: 8, right: 10, fontSize: 9, color: "rgba(80,200,255,0.3)", letterSpacing: 1, fontFamily: "'Quicksand', sans-serif", fontWeight: 700, pointerEvents: "none", zIndex: 3 } }, "TAP SHIP TO FIRE"),
+                React.createElement("div", { key: plasmaRangeKey, style: { position: "absolute", inset: 0, pointerEvents: "none" } },
+                  !plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaShotBottom, left: "calc(50% + " + plasmaSourceOffsetPx + "px)", transform: "translateX(-50%)" } },
+                    React.createElement("div", { style: { animation: plasmaAnimDur, "--endX": "0px", "--endY": plasmaEndY } },
+                      renderPlasmaSingle(plasmaEditDesign, 20))),
+                  !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaShotBottom, left: "calc(50% + " + (plasmaSourceOffsetPx - plasmaSplitDist) + "px)", transform: "translateX(-50%)" } },
+                    React.createElement("div", { style: { animation: plasmaAnimDur, animationDelay: "0.05s", "--endX": "0px", "--endY": plasmaEndY } },
+                      renderPlasmaSingle(plasmaEditDesign, 15))),
+                  !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaShotBottom, left: "calc(50% + " + (plasmaSourceOffsetPx + plasmaSplitDist) + "px)", transform: "translateX(-50%)" } },
+                    React.createElement("div", { style: { animation: plasmaAnimDur, animationDelay: "0.05s", "--endX": "0px", "--endY": plasmaEndY } },
+                      renderPlasmaSingle(plasmaEditDesign, 15))),
+                  !!plasmaEditDesign.flashEnabled && !plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaFlashBottom, left: "calc(50% + " + plasmaSourceOffsetPx + "px)", transform: "translate(-50%, 0)" } },
+                    React.createElement("div", { style: { width: plasmaFlashSize, height: plasmaFlashSize, borderRadius: "50%", background: plasmaEditDesign.flashColor || "#ffffff", marginLeft: -(plasmaFlashSize / 2), opacity: plasmaFlashOpacity, animation: "plasmaFlash 0.25s ease-out forwards" } })),
+                  !!plasmaEditDesign.flashEnabled && !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaFlashBottom, left: "calc(50% + " + (plasmaSourceOffsetPx - plasmaSplitDist) + "px)", transform: "translate(-50%, 0)" } },
+                    React.createElement("div", { style: { width: plasmaSplitFlashSize, height: plasmaSplitFlashSize, borderRadius: "50%", background: plasmaEditDesign.flashColor || "#ffffff", marginLeft: -(plasmaSplitFlashSize / 2), opacity: plasmaFlashOpacity, animation: "plasmaFlash 0.25s ease-out forwards" } })),
+                  !!plasmaEditDesign.flashEnabled && !!plasmaEditDesign.splitEnabled && React.createElement("div", { style: { position: "absolute", bottom: plasmaFlashBottom, left: "calc(50% + " + (plasmaSourceOffsetPx + plasmaSplitDist) + "px)", transform: "translate(-50%, 0)" } },
+                    React.createElement("div", { style: { width: plasmaSplitFlashSize, height: plasmaSplitFlashSize, borderRadius: "50%", background: plasmaEditDesign.flashColor || "#ffffff", marginLeft: -(plasmaSplitFlashSize / 2), opacity: plasmaFlashOpacity, animation: "plasmaFlash 0.25s ease-out forwards" } })))),
+              // Tab bar — BELOW the arena
+              React.createElement("div", { style: { display: "flex", gap: 4, margin: "8px 16px 0", background: "rgba(0,0,0,0.2)", borderRadius: 10, padding: 4 } },
+                React.createElement("div", { onClick: function() { setPlasmaEditTab("design"); }, style: { flex: 1, textAlign: "center", padding: "8px 0", borderRadius: 7, background: "transparent", color: "rgba(180,200,220,0.4)", fontSize: 11, fontWeight: 700, letterSpacing: 0.8, cursor: "pointer", border: "1px solid transparent" } }, "Design"),
+                React.createElement("div", { onClick: function() { setPlasmaRangeKey(function(k) { return k + 1; }); }, style: { flex: 1, textAlign: "center", padding: "8px 0", borderRadius: 7, background: "linear-gradient(180deg,#0e2840,#081828)", color: "#50c8ff", fontSize: 11, fontWeight: 700, letterSpacing: 0.8, cursor: "pointer", border: "1px solid rgba(80,200,255,0.25)" } }, "Firing Range"))),
+            // Scrollable controls
+            React.createElement("div", { style: { paddingTop: 14 } },
+              React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
+                React.createElement(BDToggle, { label: "Muzzle Flash", value: !!plasmaEditDesign.flashEnabled,
+                  onChange: function(v) { plasmaUpdateEdit("flashEnabled", v); } }),
+                !!plasmaEditDesign.flashEnabled && React.createElement("div", null,
+                  React.createElement(BDColorPicker, { label: "Flash Color", value: plasmaEditDesign.flashColor || "#ffffff",
+                    presets: ["#ffffff", "#80ddff", "#50c8ff", "#ffcc44", "#ff8844", "#cc66ff", "#44ffaa", "#ff4488"],
+                    onChange: function(v) { plasmaUpdateEdit("flashColor", v); } }),
+                  React.createElement(BDSlider, { label: "Flash Size", value: plasmaFlashSize,
+                    min: 8, max: 60, step: 2, displayValue: String(Math.round(plasmaFlashSize)) + "px",
+                    onChange: function(v) { plasmaUpdateEdit("flashSize", Math.round(v)); } }),
+                  React.createElement(BDSlider, { label: "Flash Opacity", value: plasmaFlashOpacity,
+                    min: 0.05, max: 1.0, step: 0.05, displayValue: Math.round(plasmaFlashOpacity * 100) + "%",
+                    onChange: function(v) { plasmaUpdateEdit("flashOpacity", v); } }))),
+              React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
+                React.createElement(BDSlider, { label: "Source X", value: plasmaEditDesign.sourceOffsetX != null ? plasmaEditDesign.sourceOffsetX : 50,
+                  min: 0, max: 100, step: 1, displayValue: Math.round(plasmaEditDesign.sourceOffsetX != null ? plasmaEditDesign.sourceOffsetX : 50) + "%",
+                  onChange: function(v) { plasmaUpdateEdit("sourceOffsetX", Math.round(v)); } }),
+                React.createElement(BDSlider, { label: "Source Y", value: plasmaEditDesign.sourceOffsetY != null ? plasmaEditDesign.sourceOffsetY : 0,
+                  min: 0, max: 100, step: 1, displayValue: Math.round(plasmaEditDesign.sourceOffsetY != null ? plasmaEditDesign.sourceOffsetY : 0) + "%",
+                  onChange: function(v) { plasmaUpdateEdit("sourceOffsetY", Math.round(v)); } }),
+                React.createElement(BDSlider, { label: "Speed", value: plasmaEditDesign.speed || 1.0,
+                  min: 0.3, max: 2.5, step: 0.1, displayValue: (plasmaEditDesign.speed || 1.0).toFixed(1) + "x",
+                  onChange: function(v) { plasmaUpdateEdit("speed", v); } }),
+                React.createElement(BDSlider, { label: "Ship Size", value: plasmaShipSize,
+                  min: 34, max: 204, step: 2, displayValue: String(plasmaShipSize) + "px",
+                  onChange: function(v) { setPlasmaShipSize(Math.round(v)); } }),
+                shipSaved.length > 1 && React.createElement("div", { style: { marginTop: 8, marginBottom: 4 } },
+                  React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 11, marginBottom: 6, letterSpacing: 0.5 } }, "SHIP"),
+                  React.createElement("div", { style: { display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4 } },
+                    shipSaved.map(function(ship) {
+                      var isPickedShip = plasmaPreviewShipId ? (plasmaPreviewShipId === ship.id) : (ship.id === shipActiveId);
+                      return React.createElement("div", { key: ship.id, onClick: function() { setPlasmaPreviewShipId(ship.id); },
+                        style: { flexShrink: 0, width: 52, height: 52, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 8, background: isPickedShip ? "rgba(80,200,255,0.1)" : "rgba(0,0,0,0.2)", border: isPickedShip ? "2px solid rgba(80,200,255,0.5)" : "2px solid rgba(255,255,255,0.08)", cursor: "pointer" } },
+                        React.createElement(ShipDesignSvg, { size: 38, design: shipMigrateDesign(ship), uid: "plasma-pick-" + ship.id }));
+                    })))),
+              React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "16px 16px 8px", marginBottom: 10 } },
+                React.createElement(BDToggle, { label: "Split Shot", value: !!plasmaEditDesign.splitEnabled,
+                  onChange: function(v) { plasmaUpdateEdit("splitEnabled", v); } }),
+                !!plasmaEditDesign.splitEnabled && React.createElement(BDSlider, { label: "Split Distance", value: plasmaEditDesign.splitDistance || 20,
+                  min: 4, max: 60, step: 2, displayValue: String(Math.round(plasmaEditDesign.splitDistance || 20)) + "px",
+                  onChange: function(v) { plasmaUpdateEdit("splitDistance", Math.round(v)); } })))),
 
           // Reset button
           React.createElement("div", { style: { display: "flex", justifyContent: "center", marginTop: 20 } },
