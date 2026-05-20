@@ -9588,8 +9588,14 @@ function CosmicDriftGame() {
       var colPitch = blockSize + GAP;
       var sxL = sx + srcXPx - splPx;
       var sxR = sx + srcXPx + splPx;
-      var leftCol = Math.max(0, Math.min(COLS - 1, Math.round(fromCol + (srcXPx - splPx) / colPitch)));
-      var rightCol = Math.max(0, Math.min(COLS - 1, Math.round(fromCol + (srcXPx + splPx) / colPitch)));
+      var leftCol, rightCol;
+      if (shipDisplaySize <= 68) {
+        leftCol = fromCol;
+        rightCol = fromCol;
+      } else {
+        leftCol = Math.max(0, Math.min(COLS - 1, Math.round(fromCol + (srcXPx - splPx) / colPitch)));
+        rightCol = Math.max(0, Math.min(COLS - 1, Math.round(fromCol + (srcXPx + splPx) / colPitch)));
+      }
       if (leftCol === rightCol) {
         var targetIdxSame = findBlockInCol(leftCol);
         if (targetIdxSame < 0) {
@@ -15445,67 +15451,63 @@ function CosmicDriftGame() {
     style: {
       position: "fixed",
       inset: 0,
-      zIndex: 200,
-      display: "flex",
-      alignItems: "flex-end"
+      zIndex: 200
     }
   }, /*#__PURE__*/React.createElement("div", {
     onClick: function (e) {
       e.stopPropagation();
     },
     style: {
-      width: "100%",
-      maxWidth: 420,
-      margin: "0 auto",
-      background: GS.brushed,
-      borderTop: "2px solid rgba(80,140,200,0.25)",
-      borderRadius: "14px 14px 0 0",
-      padding: "18px 20px 32px",
-      boxSizing: "border-box",
-      boxShadow: "0 -4px 24px rgba(0,0,0,0.6)"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
+      position: "absolute",
+      right: 8,
+      bottom: 150,
+      background: "rgba(10,16,30,0.97)",
+      border: "2px solid rgba(80,180,255,0.45)",
+      borderRadius: 12,
+      padding: "10px 8px 8px",
       display: "flex",
+      flexDirection: "column",
       alignItems: "center",
-      justifyContent: "space-between",
-      marginBottom: 14
+      gap: 8,
+      boxShadow: "0 -4px 24px rgba(0,0,0,0.7), 0 0 12px rgba(80,180,255,0.12)"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 9,
-      fontWeight: 700,
-      color: "rgba(140,180,210,0.5)",
-      letterSpacing: 2.5,
-      textTransform: "uppercase"
-    }
-  }, "Ship Size"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 26,
+      fontSize: 13,
       fontWeight: 700,
       color: "#80ddff",
       fontFamily: "'JetBrains Mono', monospace",
-      letterSpacing: 1,
-      textShadow: "0 0 10px rgba(80,200,255,0.4)"
+      letterSpacing: 0.5
     }
-  }, Math.round(shipDisplaySize / 68 * 100) + "%")), /*#__PURE__*/React.createElement("input", {
+  }, Math.round(shipDisplaySize / 68 * 100) + "%"), /*#__PURE__*/React.createElement("input", {
     type: "range",
-    min: 34,
-    max: 204,
+    min: -204,
+    max: -34,
     step: 1,
-    value: shipDisplaySize,
+    value: -shipDisplaySize,
     onChange: function (e) {
-      var v = Number(e.target.value);
+      var v = -Number(e.target.value);
       setShipDisplaySize(v);
       try {
         window.storage.set("cosmic_drift_ship_size", String(v));
       } catch (ex) {}
     },
     style: {
-      width: "100%",
-      fontSize: 16
+      writingMode: "vertical-lr",
+      height: 140,
+      width: 28,
+      cursor: "ns-resize",
+      fontSize: 16,
+      accentColor: "#50c8ff"
     }
-  }))), /*#__PURE__*/React.createElement("div", {
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 8,
+      color: "rgba(80,180,255,0.4)",
+      letterSpacing: 1,
+      fontWeight: 700
+    }
+  }, "SIZE"))), /*#__PURE__*/React.createElement("div", {
     ref: hudRef,
     style: {
       position: "relative",
