@@ -5686,6 +5686,13 @@ function CosmicWorkshop() {
     splashEntering = _spEn[0],
     setSplashEntering = _spEn[1];
   var splashTouchRef = useRef(null);
+  var _splashRowH = useState(0),
+    splashRowH = _splashRowH[0],
+    setSplashRowH = _splashRowH[1];
+  var splashRowRef = useRef(null);
+  useEffect(function () {
+    if (splashRowRef.current) setSplashRowH(splashRowRef.current.offsetHeight);
+  }, []);
 
   // ══ BLOCK DESIGNER STATE ══
   var _bdDesign = useState(function () {
@@ -10606,6 +10613,7 @@ function CosmicWorkshop() {
       flex: 1
     }
   }, React.createElement("div", {
+    ref: splashRowRef,
     style: {
       display: "flex",
       flexDirection: "row",
@@ -10728,8 +10736,10 @@ function CosmicWorkshop() {
       alignItems: "center",
       justifyContent: "center",
       gap: 4,
-      aspectRatio: "1",
-      alignSelf: "stretch"
+      aspectRatio: splashRowH ? undefined : "1",
+      alignSelf: splashRowH ? "auto" : "stretch",
+      width: splashRowH || undefined,
+      height: splashRowH || undefined
     }
   }, React.createElement("div", {
     style: {
@@ -10852,8 +10862,10 @@ function CosmicWorkshop() {
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
-      aspectRatio: "1",
-      alignSelf: "stretch"
+      aspectRatio: splashRowH ? undefined : "1",
+      alignSelf: splashRowH ? "auto" : "stretch",
+      width: splashRowH || undefined,
+      height: splashRowH || undefined
     }
   }, React.createElement("div", {
     style: {
@@ -10950,8 +10962,10 @@ function CosmicWorkshop() {
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
-      aspectRatio: "1",
-      alignSelf: "stretch"
+      aspectRatio: splashRowH ? undefined : "1",
+      alignSelf: splashRowH ? "auto" : "stretch",
+      width: splashRowH || undefined,
+      height: splashRowH || undefined
     }
   }, React.createElement("div", {
     style: {
@@ -11068,8 +11082,10 @@ function CosmicWorkshop() {
       alignItems: "center",
       justifyContent: "center",
       gap: 4,
-      aspectRatio: "1",
-      alignSelf: "stretch"
+      aspectRatio: splashRowH ? undefined : "1",
+      alignSelf: splashRowH ? "auto" : "stretch",
+      width: splashRowH || undefined,
+      height: splashRowH || undefined
     }
   }, React.createElement("div", {
     style: {
@@ -11184,8 +11200,10 @@ function CosmicWorkshop() {
       alignItems: "center",
       justifyContent: "center",
       gap: 4,
-      aspectRatio: "1",
-      alignSelf: "stretch"
+      aspectRatio: splashRowH ? undefined : "1",
+      alignSelf: splashRowH ? "auto" : "stretch",
+      width: splashRowH || undefined,
+      height: splashRowH || undefined
     }
   }, React.createElement("div", {
     style: {
@@ -11340,8 +11358,10 @@ function CosmicWorkshop() {
       alignItems: "center",
       justifyContent: "center",
       gap: 4,
-      aspectRatio: "1",
-      alignSelf: "stretch"
+      aspectRatio: splashRowH ? undefined : "1",
+      alignSelf: splashRowH ? "auto" : "stretch",
+      width: splashRowH || undefined,
+      height: splashRowH || undefined
     }
   }, React.createElement("div", {
     style: {
