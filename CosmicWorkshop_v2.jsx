@@ -1204,7 +1204,7 @@ var SAMPLE_LEVEL = {
 // ── Active Loadout mini-preview helpers ──
 // Tiny pixel-grid preview of a saved level's block layout.
 function renderGridMiniPreview(level, accent) {
-  var cell = 8;
+  var cell = 6;
   var grid = level && level.grid;
   var border = "1px solid " + (accent || "rgba(128,221,255,0.25)");
   if (!grid || grid.length !== COLS * ROWS) {
@@ -1225,9 +1225,9 @@ function renderBlocksSetPreview(activeMap, savedDesigns) {
   var types = [1, 2, 3, 5, 6, 7, 8, 9, 10];
   for (var i = 0; i < types.length; i++) {
     var design = bdResolveActiveDesign(types[i], activeMap, savedDesigns);
-    if (design) items.push(React.createElement("div", { key: types[i], style: { width: 15, height: 15, overflow: "hidden" } }, React.createElement(BDBlockPreview, { design: design, size: 15 })));
+    if (design) items.push(React.createElement("div", { key: types[i], style: { width: 16, height: 16, overflow: "hidden" } }, React.createElement(BDBlockPreview, { design: design, size: 16 })));
   }
-  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(3, 15px)", gap: 2, width: 49, margin: "0 auto" } }, items);
+  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(3, 16px)", gap: 2, width: 52, margin: "0 auto" } }, items);
 }
 // Compact stylized icon per VFX effect type — captures the visual signature
 // of each effect (acid drip / flame / spark burst / explosion ring) using the
@@ -1272,9 +1272,9 @@ function renderVfxSetPreview(activeMap, savedDesigns) {
   var types = ["acid_ooze", "burn", "block_destroy", "drone_explode"];
   var items = types.map(function(t) {
     var d = vfxResolveActive(t, activeMap, savedDesigns);
-    return React.createElement("div", { key: t, style: { display: "flex", alignItems: "center", justifyContent: "center", width: 21, height: 21 } }, renderVfxMini(t, d));
+    return React.createElement("div", { key: t, style: { display: "flex", alignItems: "center", justifyContent: "center", width: 25, height: 25 } }, renderVfxMini(t, d));
   });
-  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(2, 21px)", gap: 3, width: 45, margin: "0 auto" } }, items);
+  return React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(2, 25px)", gap: 3, width: 53, margin: "0 auto" } }, items);
 }
 
 function renderPlasmaSingle(design, size) {
