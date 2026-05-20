@@ -5360,21 +5360,21 @@ function renderBlocksSetPreview(activeMap, savedDesigns) {
     if (design) items.push(React.createElement("div", {
       key: types[i],
       style: {
-        width: 16,
-        height: 16,
+        width: 18,
+        height: 18,
         overflow: "hidden"
       }
     }, React.createElement(BDBlockPreview, {
       design: design,
-      size: 16
+      size: 18
     })));
   }
   return React.createElement("div", {
     style: {
       display: "grid",
-      gridTemplateColumns: "repeat(3, 16px)",
+      gridTemplateColumns: "repeat(3, 18px)",
       gap: 2,
-      width: 52,
+      width: 58,
       margin: "0 auto"
     }
   }, items);
@@ -5492,17 +5492,17 @@ function renderVfxSetPreview(activeMap, savedDesigns) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        width: 25,
-        height: 25
+        width: 28,
+        height: 28
       }
     }, renderVfxMini(t, d));
   });
   return React.createElement("div", {
     style: {
       display: "grid",
-      gridTemplateColumns: "repeat(2, 25px)",
+      gridTemplateColumns: "repeat(2, 28px)",
       gap: 3,
-      width: 53,
+      width: 59,
       margin: "0 auto"
     }
   }, items);
@@ -10723,7 +10723,8 @@ function CosmicWorkshop() {
       justifyContent: "center",
       gap: 4,
       aspectRatio: "1",
-      alignSelf: "stretch"
+      alignSelf: "stretch",
+      overflow: "hidden"
     }
   }, React.createElement("div", {
     style: {
@@ -10741,7 +10742,7 @@ function CosmicWorkshop() {
       whiteSpace: "nowrap",
       overflow: "hidden",
       textOverflow: "ellipsis",
-      maxWidth: "100%",
+      width: "100%",
       textAlign: "center"
     }
   }, savedLevels.length > 0 ? savedLevels.slice().sort(function (a, b) {
@@ -11063,7 +11064,8 @@ function CosmicWorkshop() {
       justifyContent: "center",
       gap: 4,
       aspectRatio: "1",
-      alignSelf: "stretch"
+      alignSelf: "stretch",
+      overflow: "hidden"
     }
   }, React.createElement("div", {
     style: {
@@ -11083,7 +11085,7 @@ function CosmicWorkshop() {
       whiteSpace: "nowrap",
       overflow: "hidden",
       textOverflow: "ellipsis",
-      maxWidth: "100%",
+      width: "100%",
       textAlign: "center"
     }
   }, ufoSaved.length > 0 ? ufoGetActiveDesign().name || "Active" : "Default"))), React.createElement("div", {
@@ -11179,7 +11181,8 @@ function CosmicWorkshop() {
       justifyContent: "center",
       gap: 4,
       aspectRatio: "1",
-      alignSelf: "stretch"
+      alignSelf: "stretch",
+      overflow: "hidden"
     }
   }, React.createElement("div", {
     style: {
@@ -11199,7 +11202,7 @@ function CosmicWorkshop() {
       whiteSpace: "nowrap",
       overflow: "hidden",
       textOverflow: "ellipsis",
-      maxWidth: "100%",
+      width: "100%",
       textAlign: "center"
     }
   }, function () {
@@ -11334,7 +11337,8 @@ function CosmicWorkshop() {
       justifyContent: "center",
       gap: 4,
       aspectRatio: "1",
-      alignSelf: "stretch"
+      alignSelf: "stretch",
+      overflow: "hidden"
     }
   }, React.createElement("div", {
     style: {
@@ -11352,7 +11356,7 @@ function CosmicWorkshop() {
       whiteSpace: "nowrap",
       overflow: "hidden",
       textOverflow: "ellipsis",
-      maxWidth: "100%",
+      width: "100%",
       textAlign: "center"
     }
   }, plasmaSaved.length > 0 && plasmaActiveId ? plasmaGetActiveDesign().name || "Active" : "Default"))))),
