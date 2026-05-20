@@ -1427,6 +1427,7 @@ function HudPanel(props) {
   var shipDisplaySize = props.shipDisplaySize || 64;
   var showShipSizeSlider = props.showShipSizeSlider || false;
   var onToggleShipSizeSlider = props.onToggleShipSizeSlider || function () {};
+  var onShipSizeChange = props.onShipSizeChange || function () {};
   var baseSlots = []; for (var bsi = 0; bsi < 3; bsi++) baseSlots.push(<div key={"b" + bsi} style={{ opacity: bsi < baseCores ? 1 : 0.15 }}><CoreIcon size={18} mode="lit" /></div>);
   var extraDisplay = [];
   for (var ei2 = 0; ei2 < extraCores; ei2++) extraDisplay.push(<CoreIcon key={"e" + ei2} size={14} mode="lit" />);
@@ -1444,7 +1445,11 @@ function HudPanel(props) {
       <div style={{ fontFamily: "'JetBrains Mono', monospace", color: GS.blue + "bb", fontSize: 7, textTransform: "uppercase", letterSpacing: 1.5, fontWeight: 400, marginBottom: 3 }}>Score</div>
       <div style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: 18, color: GS.blue, letterSpacing: 1.5, textShadow: "0 0 10px " + GS.blue + ", 0 0 4px " + GS.blue + "cc", animation: scoreFlash ? "scoreFlash 0.2s ease-out" : "none", lineHeight: 1 }}>{score}</div>
     </div>
-    <div onClick={function () { onToggleShipSizeSlider(); }} style={{ flex: "0 0 32px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, padding: "4px 4px", borderRadius: 6, background: showShipSizeSlider ? "rgba(30,60,100,0.7)" : GS.inset, border: showShipSizeSlider ? "2px solid rgba(80,180,255,0.5)" : GS.ib, cursor: "pointer", boxShadow: showShipSizeSlider ? "0 0 8px rgba(80,180,255,0.25), " + GS.is : GS.is, minHeight: 60 }}>
+    <div onClick={function () { onToggleShipSizeSlider(); }} style={{ flex: "0 0 32px", position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, padding: "4px 4px", borderRadius: 6, background: showShipSizeSlider ? "rgba(30,60,100,0.97)" : GS.inset, border: showShipSizeSlider ? "2px solid rgba(80,180,255,0.5)" : GS.ib, borderTop: showShipSizeSlider ? "none" : undefined, cursor: "pointer", boxShadow: showShipSizeSlider ? "0 0 8px rgba(80,180,255,0.25), " + GS.is : GS.is, minHeight: 60 }}>
+      {showShipSizeSlider && <div onClick={function (e) { e.stopPropagation(); }} style={{ position: "absolute", bottom: "100%", left: -4, right: -4, background: "rgba(30,60,100,0.97)", border: "2px solid rgba(80,180,255,0.5)", borderBottom: "none", borderRadius: "12px 12px 0 0", padding: "8px 4px 6px", display: "flex", flexDirection: "column", alignItems: "center", gap: 6, boxShadow: "-4px -8px 20px rgba(0,0,0,0.7), 4px -8px 20px rgba(0,0,0,0.7), 0 0 16px rgba(80,180,255,0.15)" }}>
+        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, fontWeight: 700, color: "#80ddff", width: "100%", textAlign: "center", letterSpacing: 0.5 }}>{Math.round(shipDisplaySize / 68 * 100) + "%"}</div>
+        <input type="range" min={-204} max={-34} step={1} value={-shipDisplaySize} onChange={function (e) { onShipSizeChange(-Number(e.target.value)); }} style={{ writingMode: "vertical-lr", height: 140, width: 28, cursor: "ns-resize", fontSize: 16, accentColor: "#50c8ff" }} />
+      </div>}
       <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 7, fontWeight: 700, color: showShipSizeSlider ? "#80ddff" : "rgba(140,180,210,0.6)", letterSpacing: 0.3, lineHeight: 1 }}>{Math.round(shipDisplaySize / 68 * 100) + "%"}</div>
       <svg width="14" height="14" viewBox="0 0 24 24">
         <path d="M15 3h6v6l-2.3-2.3-3.4 3.4-1.4-1.4 3.4-3.4L15 3z" fill={showShipSizeSlider ? "rgba(80,200,255,0.85)" : "rgba(140,160,180,0.5)"} />
@@ -3435,14 +3440,8 @@ function logUfo(msg) {
           </div>
         </div>
 
-        {/* ═══ SHIP SIZE SLIDER OVERLAY ═══ */}
-        {showShipSizeSlider && <div onClick={function () { setShowShipSizeSlider(false); }} style={{ position: "fixed", inset: 0, zIndex: 200 }}>
-          <div onClick={function (e) { e.stopPropagation(); }} style={{ position: "absolute", right: 8, bottom: 150, background: "rgba(10,16,30,0.97)", border: "2px solid rgba(80,180,255,0.45)", borderRadius: 12, padding: "10px 8px 8px", display: "flex", flexDirection: "column", alignItems: "center", gap: 8, boxShadow: "0 -4px 24px rgba(0,0,0,0.7), 0 0 12px rgba(80,180,255,0.12)" }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: "#80ddff", fontFamily: "'JetBrains Mono', monospace", letterSpacing: 0.5 }}>{Math.round(shipDisplaySize / 68 * 100) + "%"}</div>
-            <input type="range" min={-204} max={-34} step={1} value={-shipDisplaySize} onChange={function (e) { var v = -Number(e.target.value); setShipDisplaySize(v); try { window.storage.set("cosmic_drift_ship_size", String(v)); } catch (ex) {} }} style={{ writingMode: "vertical-lr", height: 140, width: 28, cursor: "ns-resize", fontSize: 16, accentColor: "#50c8ff" }} />
-            <div style={{ fontSize: 8, color: "rgba(80,180,255,0.4)", letterSpacing: 1, fontWeight: 700 }}>SIZE</div>
-          </div>
-        </div>}
+        {/* ═══ SHIP SIZE SLIDER OVERLAY (backdrop only - popup lives inside HudPanel button) ═══ */}
+        {showShipSizeSlider && <div onClick={function () { setShowShipSizeSlider(false); }} style={{ position: "fixed", inset: 0, zIndex: 1 }} />}
 
         {/* ═══ COCKPIT DASHBOARD - METALLIC PANEL ═══ */}
         <div ref={hudRef} style={{ position: "relative", zIndex: 2, flexShrink: 0, background: GS.brushed, backgroundBlendMode: "overlay", borderTop: "3px solid #404a58", padding: "6px 6px 8px", boxShadow: "0 -4px 12px rgba(0,0,0,0.55), inset 0 1px 0 rgba(200,230,240,0.08)" }}>
@@ -3453,7 +3452,7 @@ function logUfo(msg) {
           <GsRivet pos={{ top: 1, right: 2 }} />
           <GsRivet pos={{ bottom: 59, left: 2 }} />
 
-          <HudPanelMemo baseCores={baseCores} extraCores={extraCores} plasma={plasma} maxPlasma={customGridRef.current ? customPlasmaRef.current : getLevelPlasma(level)} score={score} scoreFlash={scoreFlash} gameState={gameState} setGameState={setGameState} shipDisplaySize={shipDisplaySize} showShipSizeSlider={showShipSizeSlider} onToggleShipSizeSlider={function () { setShowShipSizeSlider(function (prev) { return !prev; }); }} />
+          <HudPanelMemo baseCores={baseCores} extraCores={extraCores} plasma={plasma} maxPlasma={customGridRef.current ? customPlasmaRef.current : getLevelPlasma(level)} score={score} scoreFlash={scoreFlash} gameState={gameState} setGameState={setGameState} shipDisplaySize={shipDisplaySize} showShipSizeSlider={showShipSizeSlider} onToggleShipSizeSlider={function () { setShowShipSizeSlider(function (prev) { return !prev; }); }} onShipSizeChange={function (v) { setShipDisplaySize(v); try { window.storage.set("cosmic_drift_ship_size", String(v)); } catch (ex) {} }} />
 
           {/* Power-ups tray */}
           <InventoryBarMemo invDrones={invDrones} invLightnings={invLightnings} invCrossShots={invCrossShots} invAngleBounces={invAngleBounces} invHammers={invHammers} armedItem={armedItem} onArmItem={setArmedItem} level={level} tutPhase={tutPhase} convertOffer={convertOffer} convertFlash={convertFlash} onConvert={setConvertOffer} isStuck={isStuck} hasPowerUps={hasPowerUps} coreCount={baseCores + extraCores} gameState={gameState} />

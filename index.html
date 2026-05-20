@@ -6169,6 +6169,7 @@ function HudPanel(props) {
   var shipDisplaySize = props.shipDisplaySize || 64;
   var showShipSizeSlider = props.showShipSizeSlider || false;
   var onToggleShipSizeSlider = props.onToggleShipSizeSlider || function () {};
+  var onShipSizeChange = props.onShipSizeChange || function () {};
   var baseSlots = [];
   for (var bsi = 0; bsi < 3; bsi++) baseSlots.push(/*#__PURE__*/React.createElement("div", {
     key: "b" + bsi,
@@ -6306,6 +6307,7 @@ function HudPanel(props) {
     },
     style: {
       flex: "0 0 32px",
+      position: "relative",
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
@@ -6313,13 +6315,61 @@ function HudPanel(props) {
       gap: 3,
       padding: "4px 4px",
       borderRadius: 6,
-      background: showShipSizeSlider ? "rgba(30,60,100,0.7)" : GS.inset,
+      background: showShipSizeSlider ? "rgba(30,60,100,0.97)" : GS.inset,
       border: showShipSizeSlider ? "2px solid rgba(80,180,255,0.5)" : GS.ib,
+      borderTop: showShipSizeSlider ? "none" : undefined,
       cursor: "pointer",
       boxShadow: showShipSizeSlider ? "0 0 8px rgba(80,180,255,0.25), " + GS.is : GS.is,
       minHeight: 60
     }
+  }, showShipSizeSlider && /*#__PURE__*/React.createElement("div", {
+    onClick: function (e) {
+      e.stopPropagation();
+    },
+    style: {
+      position: "absolute",
+      bottom: "100%",
+      left: -4,
+      right: -4,
+      background: "rgba(30,60,100,0.97)",
+      border: "2px solid rgba(80,180,255,0.5)",
+      borderBottom: "none",
+      borderRadius: "12px 12px 0 0",
+      padding: "8px 4px 6px",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: 6,
+      boxShadow: "-4px -8px 20px rgba(0,0,0,0.7), 4px -8px 20px rgba(0,0,0,0.7), 0 0 16px rgba(80,180,255,0.15)"
+    }
   }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'JetBrains Mono', monospace",
+      fontSize: 11,
+      fontWeight: 700,
+      color: "#80ddff",
+      width: "100%",
+      textAlign: "center",
+      letterSpacing: 0.5
+    }
+  }, Math.round(shipDisplaySize / 68 * 100) + "%"), /*#__PURE__*/React.createElement("input", {
+    type: "range",
+    min: -204,
+    max: -34,
+    step: 1,
+    value: -shipDisplaySize,
+    onChange: function (e) {
+      onShipSizeChange(-Number(e.target.value));
+    },
+    style: {
+      writingMode: "vertical-lr",
+      height: 140,
+      width: 28,
+      cursor: "ns-resize",
+      fontSize: 16,
+      accentColor: "#50c8ff"
+    }
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: "'JetBrains Mono', monospace",
       fontSize: 7,
@@ -15451,63 +15501,9 @@ function CosmicDriftGame() {
     style: {
       position: "fixed",
       inset: 0,
-      zIndex: 200
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    onClick: function (e) {
-      e.stopPropagation();
-    },
-    style: {
-      position: "absolute",
-      right: 8,
-      bottom: 150,
-      background: "rgba(10,16,30,0.97)",
-      border: "2px solid rgba(80,180,255,0.45)",
-      borderRadius: 12,
-      padding: "10px 8px 8px",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: 8,
-      boxShadow: "0 -4px 24px rgba(0,0,0,0.7), 0 0 12px rgba(80,180,255,0.12)"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 13,
-      fontWeight: 700,
-      color: "#80ddff",
-      fontFamily: "'JetBrains Mono', monospace",
-      letterSpacing: 0.5
-    }
-  }, Math.round(shipDisplaySize / 68 * 100) + "%"), /*#__PURE__*/React.createElement("input", {
-    type: "range",
-    min: -204,
-    max: -34,
-    step: 1,
-    value: -shipDisplaySize,
-    onChange: function (e) {
-      var v = -Number(e.target.value);
-      setShipDisplaySize(v);
-      try {
-        window.storage.set("cosmic_drift_ship_size", String(v));
-      } catch (ex) {}
-    },
-    style: {
-      writingMode: "vertical-lr",
-      height: 140,
-      width: 28,
-      cursor: "ns-resize",
-      fontSize: 16,
-      accentColor: "#50c8ff"
+      zIndex: 1
     }
   }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 8,
-      color: "rgba(80,180,255,0.4)",
-      letterSpacing: 1,
-      fontWeight: 700
-    }
-  }, "SIZE"))), /*#__PURE__*/React.createElement("div", {
     ref: hudRef,
     style: {
       position: "relative",
@@ -15564,6 +15560,12 @@ function CosmicDriftGame() {
       setShowShipSizeSlider(function (prev) {
         return !prev;
       });
+    },
+    onShipSizeChange: function (v) {
+      setShipDisplaySize(v);
+      try {
+        window.storage.set("cosmic_drift_ship_size", String(v));
+      } catch (ex) {}
     }
   }), /*#__PURE__*/React.createElement(InventoryBarMemo, {
     invDrones: invDrones,
