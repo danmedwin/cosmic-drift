@@ -5309,14 +5309,15 @@ var SAMPLE_LEVEL = {
 // ── Active Loadout mini-preview helpers ──
 // Tiny pixel-grid preview of a saved level's block layout.
 function renderGridMiniPreview(level, accent) {
-  var cell = 7;
+  var w = 54,
+    h = 40;
   var grid = level && level.grid;
   var border = "1px solid " + (accent || "rgba(128,221,255,0.25)");
   if (!grid || grid.length !== COLS * ROWS) {
     return React.createElement("div", {
       style: {
-        width: COLS * cell,
-        height: ROWS * cell,
+        width: w,
+        height: h,
         background: "rgba(80,200,255,0.04)",
         borderRadius: 2,
         border: border,
@@ -5331,8 +5332,6 @@ function renderGridMiniPreview(level, accent) {
     cells.push(React.createElement("div", {
       key: i,
       style: {
-        width: cell,
-        height: cell,
         background: bc ? bc.bg : "transparent"
       }
     }));
@@ -5340,15 +5339,22 @@ function renderGridMiniPreview(level, accent) {
   return React.createElement("div", {
     style: {
       display: "grid",
-      gridTemplateColumns: "repeat(" + COLS + ", " + cell + "px)",
+      gridTemplateColumns: "repeat(" + COLS + ", 1fr)",
+      gridTemplateRows: "repeat(" + ROWS + ", 1fr)",
       gap: 0,
-      width: COLS * cell,
+      width: w,
+      height: h,
       margin: "0 auto",
       borderRadius: 2,
       overflow: "hidden",
       border: border
     }
   }, cells);
+}
+function truncLabel(s) {
+  if (!s) return "";
+  if (s.length <= 8) return s;
+  return s.slice(0, 8).trim() + "...";
 }
 // 3x3 grid of tiny BDBlockPreview thumbnails - one per playable block type
 // (Extra Core is omitted so the 9 remaining types fit a clean 3x3).
@@ -10745,9 +10751,9 @@ function CosmicWorkshop() {
       width: "100%",
       textAlign: "center"
     }
-  }, savedLevels.length > 0 ? savedLevels.slice().sort(function (a, b) {
+  }, truncLabel(savedLevels.length > 0 ? savedLevels.slice().sort(function (a, b) {
     return new Date(b.savedAt || 0) - new Date(a.savedAt || 0);
-  })[0].name || "Untitled" : "Default"))), React.createElement("div", {
+  })[0].name || "Untitled" : "Default")))), React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "row",
@@ -11088,7 +11094,7 @@ function CosmicWorkshop() {
       width: "100%",
       textAlign: "center"
     }
-  }, ufoSaved.length > 0 ? ufoGetActiveDesign().name || "Active" : "Default"))), React.createElement("div", {
+  }, truncLabel(ufoSaved.length > 0 ? ufoGetActiveDesign().name || "Active" : "Default")))), React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "row",
@@ -11205,9 +11211,9 @@ function CosmicWorkshop() {
       width: "100%",
       textAlign: "center"
     }
-  }, function () {
+  }, truncLabel(function () {
     return shipSaved.length > 0 && shipActiveId ? shipGetActiveDesign().name || "Custom" : "Default";
-  }()))), React.createElement("div", {
+  }())))), React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "row",
@@ -11360,7 +11366,7 @@ function CosmicWorkshop() {
       width: "100%",
       textAlign: "center"
     }
-  }, plasmaSaved.length > 0 && plasmaActiveId ? plasmaGetActiveDesign().name || "Active" : "Default"))))),
+  }, truncLabel(plasmaSaved.length > 0 && plasmaActiveId ? plasmaGetActiveDesign().name || "Active" : "Default")))))),
   // FLEX SPACER — pushes the credit + Resume + Bridge to bottom
   React.createElement("div", {
     style: {
