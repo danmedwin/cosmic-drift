@@ -3798,7 +3798,7 @@ export default function CosmicWorkshop() {
           // Body 2-column grid; column-flow places first 5 cards in col 1 (modules),
           // next 5 in col 2 (active), so each pair shares a row.
           React.createElement("div", { style: { display: "grid", gridTemplateColumns: "3fr 1fr", gridTemplateRows: "repeat(6, auto)", gridAutoFlow: "column", gap: 6, flex: 1 } },
-            React.createElement("div", { onClick: function() { loadSavedLevels(); setScreen("builder"); setLbScreen("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(80,200,255,0.12)", borderLeft: "3px solid #80ddff", borderRadius: 8, padding: "5px 10px", cursor: "pointer", display: "flex", flexDirection: "row", alignItems: "center", gap: 10 } },
+            React.createElement("div", { onClick: function() { loadSavedLevels(); setScreen("builder"); setLbScreen("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(80,200,255,0.12)", borderLeft: "3px solid #80ddff", borderRadius: 8, padding: "10px", cursor: "pointer", display: "flex", flexDirection: "row", alignItems: "center", gap: 10 } },
               React.createElement("svg", { width: "40", height: "40", viewBox: "0 0 24 24", style: { flexShrink: 0 } },
                 React.createElement("rect", { x: "3", y: "3", width: "7", height: "7", rx: "1", fill: "none", stroke: "#80ddff", strokeWidth: "1.5" }),
                 React.createElement("rect", { x: "14", y: "3", width: "7", height: "7", rx: "1", fill: "#80ddff", opacity: "0.45" }),
@@ -3813,7 +3813,7 @@ export default function CosmicWorkshop() {
                 )
               )
             ),
-            React.createElement("div", { onClick: function() { setScreen("designer"); setBdCurrentView("list"); setBdSavedTab("active"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(200,184,255,0.12)", borderLeft: "3px solid #c8b8ff", borderRadius: 8, padding: "5px 10px", cursor: "pointer", display: "flex", flexDirection: "row", alignItems: "center", gap: 10 } },
+            React.createElement("div", { onClick: function() { setScreen("designer"); setBdCurrentView("list"); setBdSavedTab("active"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(200,184,255,0.12)", borderLeft: "3px solid #c8b8ff", borderRadius: 8, padding: "10px", cursor: "pointer", display: "flex", flexDirection: "row", alignItems: "center", gap: 10 } },
               React.createElement("svg", { width: "40", height: "40", viewBox: "0 0 24 24", style: { flexShrink: 0 } },
                 React.createElement("rect", { x: "4", y: "4", width: "16", height: "16", rx: "3", fill: "none", stroke: "#c8b8ff", strokeWidth: "1.5" }),
                 React.createElement("circle", { cx: "12", cy: "12", r: "4", fill: "#c8b8ff", opacity: "0.4" }),
@@ -3827,7 +3827,7 @@ export default function CosmicWorkshop() {
                 )
               )
             ),
-            React.createElement("div", { onClick: function() { setScreen("vfx"); setVfxCurrentView("list"); setVfxSavedTab("active"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(255,180,60,0.12)", borderLeft: "3px solid #ffb43c", borderRadius: 8, padding: "5px 10px", cursor: "pointer", display: "flex", flexDirection: "row", alignItems: "center", gap: 10 } },
+            React.createElement("div", { onClick: function() { setScreen("vfx"); setVfxCurrentView("list"); setVfxSavedTab("active"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(255,180,60,0.12)", borderLeft: "3px solid #ffb43c", borderRadius: 8, padding: "10px", cursor: "pointer", display: "flex", flexDirection: "row", alignItems: "center", gap: 10 } },
               React.createElement("svg", { width: "40", height: "40", viewBox: "0 0 24 24", style: { flexShrink: 0 } },
                 React.createElement("circle", { cx: "12", cy: "12", r: "3", fill: "#ffb43c" }),
                 React.createElement("path", { d: "M12 2v3M12 19v3M2 12h3M19 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M16.3 7.7l-2.1 2.1M7.7 16.3l-2.1 2.1", stroke: "#ffb43c", strokeWidth: "1.8", strokeLinecap: "round" })
@@ -3840,7 +3840,7 @@ export default function CosmicWorkshop() {
                 )
               )
             ),
-            React.createElement("div", { onClick: function() { setScreen("ufo"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(100,220,180,0.12)", borderLeft: "3px solid #64dcb4", borderRadius: 8, padding: "5px 10px", cursor: "pointer", display: "flex", flexDirection: "row", alignItems: "center", gap: 10 } },
+            React.createElement("div", { onClick: function() { setScreen("ufo"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(100,220,180,0.12)", borderLeft: "3px solid #64dcb4", borderRadius: 8, padding: "10px", cursor: "pointer", display: "flex", flexDirection: "row", alignItems: "center", gap: 10 } },
               React.createElement("svg", { width: "40", height: "40", viewBox: "0 0 24 24", style: { flexShrink: 0 } },
                 React.createElement("ellipse", { cx: "12", cy: "9.5", rx: "3.5", ry: "2.5", fill: "none", stroke: "#64dcb4", strokeWidth: "1.5" }),
                 React.createElement("ellipse", { cx: "12", cy: "13", rx: "10", ry: "2.5", fill: "none", stroke: "#64dcb4", strokeWidth: "1.5" }),
@@ -3856,7 +3856,7 @@ export default function CosmicWorkshop() {
                 )
               )
             ),
-            React.createElement("div", { onClick: function() { setScreen("hangar"); setShipView("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(255,138,170,0.12)", borderLeft: "3px solid #ff8aaa", borderRadius: 8, padding: "5px 10px", cursor: "pointer", display: "flex", flexDirection: "row", alignItems: "center", gap: 10 } },
+            React.createElement("div", { onClick: function() { setScreen("hangar"); setShipView("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(255,138,170,0.12)", borderLeft: "3px solid #ff8aaa", borderRadius: 8, padding: "10px", cursor: "pointer", display: "flex", flexDirection: "row", alignItems: "center", gap: 10 } },
               React.createElement("svg", { width: "40", height: "40", viewBox: "0 0 24 24", style: { flexShrink: 0 } },
                 React.createElement("polygon", { points: "12,2 22,17 16,15 12,22 8,15 2,17", fill: "none", stroke: "#ff8aaa", strokeWidth: "1.5", strokeLinejoin: "round" })
               ),
@@ -3868,7 +3868,7 @@ export default function CosmicWorkshop() {
                 )
               )
             ),
-            React.createElement("div", { onClick: function() { setScreen("plasma"); setPlasmaView("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(80,200,255,0.12)", borderLeft: "3px solid #50c8ff", borderRadius: 8, padding: "5px 10px", cursor: "pointer", display: "flex", flexDirection: "row", alignItems: "center", gap: 10 } },
+            React.createElement("div", { onClick: function() { setScreen("plasma"); setPlasmaView("list"); }, style: { background: "linear-gradient(160deg, rgba(8,18,32,0.95) 0%, rgba(5,12,24,0.98) 100%)", border: "1px solid rgba(80,200,255,0.12)", borderLeft: "3px solid #50c8ff", borderRadius: 8, padding: "10px", cursor: "pointer", display: "flex", flexDirection: "row", alignItems: "center", gap: 10 } },
               React.createElement("svg", { width: "40", height: "40", viewBox: "0 0 24 24", style: { flexShrink: 0 } },
                 React.createElement("defs", null,
                   React.createElement("radialGradient", { id: "plSplash", cx: "38%", cy: "33%" },
