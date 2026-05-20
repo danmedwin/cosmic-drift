@@ -3688,8 +3688,8 @@ export default function CosmicWorkshop() {
 
   // RENDER
   // ═══════════════════════════════════════
-  var plasmaEasing = plasmaEditDesign.shape === "blast" ? "linear" : plasmaEditDesign.shape === "torpedo" ? "cubic-bezier(0.3, 0.0, 0.7, 1.0)" : "ease-in";
-  var plasmaAnimDur = "plasmaZip " + (1.0 / (plasmaEditDesign.speed || 1.0)).toFixed(2) + "s " + plasmaEasing + " forwards";
+  var plasmaEasing = plasmaEditDesign.shape === "blast" ? "linear" : plasmaEditDesign.shape === "torpedo" ? "cubic-bezier(0.895, 0.030, 0.685, 0.220)" : "ease-in";
+  var plasmaAnimDur = "plasmaZip " + (1.5 / (plasmaEditDesign.speed || 1.0)).toFixed(2) + "s " + plasmaEasing + " infinite";
   var plasmaSplitDist = Math.round(((plasmaEditDesign.splitDistance != null ? plasmaEditDesign.splitDistance : 30) / 100) * plasmaShipSize);
   var plasmaSourceOffsetPx = Math.round(((plasmaEditDesign.sourceOffsetX != null ? plasmaEditDesign.sourceOffsetX : 50) - 50) / 100 * plasmaShipSize);
   var plasmaSourceY = plasmaEditDesign.sourceOffsetY != null ? plasmaEditDesign.sourceOffsetY : 0;

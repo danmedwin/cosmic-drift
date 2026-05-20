@@ -6003,7 +6003,7 @@ function _startCvfxLoop() {
       var progress;
       var pdShapeEase = GAME_PLASMA_DESIGN.shape || "circle";
       if (pdShapeEase === "torpedo") {
-        progress = rawProgress * rawProgress;
+        progress = rawProgress * rawProgress * rawProgress * rawProgress;
       } else {
         progress = rawProgress;
       }
@@ -9681,9 +9681,9 @@ function CosmicDriftGame() {
             scheduleRechargeCheck();
           }, SS);
         } else {
-          shotsHitRef.current += 1;
           var tRowSame = Math.floor(targetIdxSame / COLS);
           var tTypeSame = gridRef2.current[targetIdxSame];
+          if (tTypeSame !== 7) shotsHitRef.current += 1;
           if (tTypeSame !== 7 && tTypeSame !== 17 && !(tTypeSame === 10 && shieldRef.current[targetIdxSame] > 0)) removingRef.current.add(targetIdxSame);
           var tYSame = tTypeSame === 7 ? getBlockY(tRowSame) + blockSize / 2 + 2 : getBlockY(tRowSame);
           var dur2Same = Math.max(100, (shipY - tYSame) / PLASMA_SPEED);
@@ -9714,9 +9714,9 @@ function CosmicDriftGame() {
             spawnFizzle(sxL, topYL + 10);
           }, SS);
         } else {
-          shotsHitRef.current += 1;
           var targetRowL = Math.floor(targetIdxL / COLS);
           var targetTypeL = gridRef2.current[targetIdxL];
+          if (targetTypeL !== 7) shotsHitRef.current += 1;
           if (targetTypeL !== 7 && targetTypeL !== 17 && !(targetTypeL === 10 && shieldRef.current[targetIdxL] > 0)) removingRef.current.add(targetIdxL);
           var targetYL = targetTypeL === 7 ? getBlockY(targetRowL) + blockSize / 2 + 2 : getBlockY(targetRowL);
           var dur2L = Math.max(100, (shipY - targetYL) / PLASMA_SPEED);
@@ -9744,9 +9744,9 @@ function CosmicDriftGame() {
             scheduleRechargeCheck();
           }, SS);
         } else {
-          shotsHitRef.current += 1;
           var targetRowR = Math.floor(targetIdxR / COLS);
           var targetTypeR = gridRef2.current[targetIdxR];
+          if (targetTypeR !== 7) shotsHitRef.current += 1;
           if (targetTypeR !== 7 && targetTypeR !== 17 && !(targetTypeR === 10 && shieldRef.current[targetIdxR] > 0)) removingRef.current.add(targetIdxR);
           var targetYR = targetTypeR === 7 ? getBlockY(targetRowR) + blockSize / 2 + 2 : getBlockY(targetRowR);
           var dur2R = Math.max(100, (shipY - targetYR) / PLASMA_SPEED);
@@ -9781,9 +9781,9 @@ function CosmicDriftGame() {
         scheduleRechargeCheck();
       });
     } else {
-      shotsHitRef.current += 1;
       var targetRow = Math.floor(targetIdx / COLS),
         targetType = gridRef2.current[targetIdx];
+      if (targetType !== 7) shotsHitRef.current += 1;
       if (targetType !== 7 && targetType !== 17 && !(targetType === 10 && shieldRef.current[targetIdx] > 0)) removingRef.current.add(targetIdx);
       var targetY = targetType === 7 ? getBlockY(targetRow) + blockSize / 2 + 2 : getBlockY(targetRow);
       var dist2 = shipY - targetY,
