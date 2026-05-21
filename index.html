@@ -5580,7 +5580,7 @@ function LegendOverlay(props) {
       fontWeight: 700,
       marginBottom: 4
     }
-  }, "Campaign"), /*#__PURE__*/React.createElement("div", {
+  }, "Infinite"), /*#__PURE__*/React.createElement("div", {
     style: {
       color: "rgba(180,200,220,0.7)",
       fontSize: 13,
@@ -5600,13 +5600,33 @@ function LegendOverlay(props) {
       fontWeight: 700,
       marginBottom: 4
     }
-  }, "Signature"), /*#__PURE__*/React.createElement("div", {
+  }, "Solve"), /*#__PURE__*/React.createElement("div", {
     style: {
       color: "rgba(180,200,220,0.7)",
       fontSize: 13,
       lineHeight: 1.5
     }
-  }, "A curated set of hand-crafted challenge levels, each with a fixed layout and starting setup. Work through them all to master the game."))), /*#__PURE__*/React.createElement("div", {
+  }, "A curated set of hand-crafted challenge levels, each with a fixed layout and starting setup. Work through them all to master the game.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "rgba(10,10,20,0.6)",
+      border: "1px solid rgba(60,60,70,0.5)",
+      borderRadius: 6,
+      padding: "8px 10px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "#ffd060",
+      fontSize: 13,
+      fontWeight: 700,
+      marginBottom: 4
+    }
+  }, "Set"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "rgba(180,200,220,0.7)",
+      fontSize: 13,
+      lineHeight: 1.5
+    }
+  }, "Play through a custom sequence of Workshop levels. Load a set with levels in the Workshop, then select Set mode here to play them in order."))), /*#__PURE__*/React.createElement("div", {
     style: {
       borderTop: "1px solid rgba(80,80,90,0.4)",
       marginTop: 14,
@@ -7278,10 +7298,10 @@ function CosmicDriftGame() {
   var _npChoice = useState(null),
     npSavedChoice = _npChoice[0],
     setNpSavedChoice = _npChoice[1];
-  var _gameMode = useState("campaign"),
+  var _gameMode = useState("infinite"),
     gameMode = _gameMode[0],
     setGameMode = _gameMode[1];
-  var gameModeRef = useRef("campaign");
+  var gameModeRef = useRef("infinite");
   var _iosDismissed = useState(false),
     iosPromptDismissed = _iosDismissed[0],
     setIosPromptDismissed = _iosDismissed[1];
@@ -7330,6 +7350,15 @@ function CosmicDriftGame() {
     saveGameInfo = _saveInfo[0],
     setSaveGameInfo = _saveInfo[1];
   var saveDataRef = useRef(null);
+  var _activeSetInfo = useState(null),
+    activeSetInfo = _activeSetInfo[0],
+    setActiveSetInfo = _activeSetInfo[1];
+  var _showSetMsg = useState(false),
+    showSetModeMsg = _showSetMsg[0],
+    setShowSetModeMsg = _showSetMsg[1];
+  var savesMapRef = useRef({});
+  var setModeLevelsRef = useRef([]);
+  var setModeIdxRef = useRef(0);
   // ── AUDIO ──
   var _sfxM = useState(false),
     sfxMute = _sfxM[0],
@@ -7622,8 +7651,9 @@ function CosmicDriftGame() {
       }).catch(function () {});
     } catch (e) {}
   }, []);
-  // Migrate old high scores to "regular" difficulty (one-time)
+  // Migrate old high scores (two phases, run once)
   useEffect(function () {
+    // Phase 1: cosmic_drift_best_score → cosmic_drift_best_score_regular
     try {
       window.storage.get("cosmic_drift_best_score").then(function (r) {
         if (r && r.value) {
@@ -7643,10 +7673,31 @@ function CosmicDriftGame() {
         }
       }).catch(function () {});
     } catch (e) {}
+    // Phase 2: cosmic_drift_best_score_<diff> → cosmic_drift_best_score_infinite_<diff>
+    var diffs2 = ["easy", "regular", "hard"];
+    for (var mi = 0; mi < diffs2.length; mi++) {
+      (function (d) {
+        try {
+          window.storage.get("cosmic_drift_best_score_" + d).then(function (r) {
+            if (!r || !r.value) return;
+            window.storage.get("cosmic_drift_best_score_infinite_" + d).then(function (r2) {
+              if (!r2 || !r2.value) window.storage.set("cosmic_drift_best_score_infinite_" + d, r.value);
+            }).catch(function () {});
+          }).catch(function () {});
+          window.storage.get("cosmic_drift_best_level_" + d).then(function (r) {
+            if (!r || !r.value) return;
+            window.storage.get("cosmic_drift_best_level_infinite_" + d).then(function (r2) {
+              if (!r2 || !r2.value) window.storage.set("cosmic_drift_best_level_infinite_" + d, r.value);
+            }).catch(function () {});
+          }).catch(function () {});
+        } catch (e) {}
+      })(diffs2[mi]);
+    }
   }, []);
-  function loadBestForDifficulty(diff) {
+  function loadBestForModeDiff(mode, diff) {
+    var k = mode + "_" + diff;
     try {
-      window.storage.get("cosmic_drift_best_score_" + diff).then(function (r) {
+      window.storage.get("cosmic_drift_best_score_" + k).then(function (r) {
         var v = r && r.value ? Number(r.value) : 0;
         bestScoreRef.current = v;
         setBestScore(v);
@@ -7659,7 +7710,7 @@ function CosmicDriftGame() {
       setBestScore(0);
     }
     try {
-      window.storage.get("cosmic_drift_best_level_" + diff).then(function (r) {
+      window.storage.get("cosmic_drift_best_level_" + k).then(function (r) {
         var v = r && r.value ? Number(r.value) : 0;
         bestLevelRef.current = v;
         setBestLevel(v);
@@ -7673,32 +7724,130 @@ function CosmicDriftGame() {
     }
   }
   useEffect(function () {
-    loadBestForDifficulty(difficulty);
-  }, [difficulty]);
+    loadBestForModeDiff(gameMode, difficulty);
+  }, [difficulty, gameMode]);
+  function loadSaveSlot(mode, diff, doAutoload) {
+    var slotKey = "cosmic_drift_save_" + mode + "_" + diff;
+    var mapKey = mode + "_" + diff;
+    if (savesMapRef.current.hasOwnProperty(mapKey)) {
+      var cached = savesMapRef.current[mapKey];
+      if (gameModeRef.current === mode && difficultyRef.current === diff) {
+        saveDataRef.current = cached;
+        if (cached) {
+          setHasSaveGame(true);
+          setSaveGameInfo({
+            level: cached.level,
+            score: cached.score,
+            savedAt: cached.savedAt,
+            gameMode: cached.gameMode,
+            difficulty: cached.difficulty || "regular"
+          });
+          if (doAutoload) {
+            try {
+              if (sessionStorage.getItem("cd_autoload_save")) {
+                sessionStorage.removeItem("cd_autoload_save");
+                loadSaveGame();
+              }
+            } catch (e2) {}
+          }
+        } else {
+          setHasSaveGame(false);
+          setSaveGameInfo(null);
+        }
+      }
+      return;
+    }
+    try {
+      window.storage.get(slotKey).then(function (r) {
+        var sd = r && r.value ? JSON.parse(r.value) : null;
+        savesMapRef.current[mapKey] = sd;
+        if (gameModeRef.current === mode && difficultyRef.current === diff) {
+          saveDataRef.current = sd;
+          if (sd) {
+            setHasSaveGame(true);
+            setSaveGameInfo({
+              level: sd.level,
+              score: sd.score,
+              savedAt: sd.savedAt,
+              gameMode: sd.gameMode,
+              difficulty: sd.difficulty || "regular"
+            });
+            if (doAutoload) {
+              try {
+                if (sessionStorage.getItem("cd_autoload_save")) {
+                  sessionStorage.removeItem("cd_autoload_save");
+                  loadSaveGame();
+                }
+              } catch (e2) {}
+            }
+          } else {
+            setHasSaveGame(false);
+            setSaveGameInfo(null);
+          }
+        }
+      }).catch(function () {
+        savesMapRef.current[mapKey] = null;
+      });
+    } catch (e) {}
+  }
   useEffect(function () {
+    // Migrate old single-save key to per-mode-diff slot
     try {
       window.storage.get("cosmic_drift_save").then(function (r) {
         if (r && r.value) {
-          var sd = JSON.parse(r.value);
-          saveDataRef.current = sd;
-          setHasSaveGame(true);
-          setSaveGameInfo({
-            level: sd.level,
-            score: sd.score,
-            savedAt: sd.savedAt,
-            gameMode: sd.gameMode,
-            difficulty: sd.difficulty || "regular"
-          });
-          try {
-            if (sessionStorage.getItem("cd_autoload_save")) {
-              sessionStorage.removeItem("cd_autoload_save");
-              loadSaveGame();
+          var oldSd = JSON.parse(r.value);
+          var oldDiff = oldSd.difficulty || "regular";
+          var migKey = "cosmic_drift_save_infinite_" + oldDiff;
+          window.storage.get(migKey).then(function (r2) {
+            if (!r2 || !r2.value) {
+              oldSd.gameMode = "infinite";
+              window.storage.set(migKey, JSON.stringify(oldSd));
+              savesMapRef.current["infinite_" + oldDiff] = oldSd;
+              if (gameModeRef.current === "infinite" && difficultyRef.current === oldDiff) {
+                saveDataRef.current = oldSd;
+                setHasSaveGame(true);
+                setSaveGameInfo({
+                  level: oldSd.level,
+                  score: oldSd.score,
+                  savedAt: oldSd.savedAt,
+                  gameMode: "infinite",
+                  difficulty: oldDiff
+                });
+              }
             }
-          } catch (e2) {}
+            try {
+              window.storage.delete("cosmic_drift_save");
+            } catch (e2) {}
+          }).catch(function () {});
         }
       }).catch(function () {});
     } catch (e) {}
+    // Load save for current mode+diff
+    loadSaveSlot(gameModeRef.current, difficultyRef.current, true);
+    // Load active set info for Set mode button
+    try {
+      window.storage.get("cosmic-drift-sets-active").then(function (r1) {
+        if (!r1 || !r1.value) return;
+        var activeId = r1.value;
+        window.storage.get("cosmic-drift-sets").then(function (r2) {
+          if (!r2 || !r2.value) return;
+          var sets = JSON.parse(r2.value);
+          for (var i = 0; i < sets.length; i++) {
+            if (sets[i].id === activeId) {
+              setActiveSetInfo({
+                name: sets[i].name,
+                levelIds: sets[i].levelIds || []
+              });
+              return;
+            }
+          }
+        }).catch(function () {});
+      }).catch(function () {});
+    } catch (e) {}
   }, []);
+  useEffect(function () {
+    loadSaveSlot(gameMode, difficulty, false);
+  }, [gameMode, difficulty]);
   useEffect(function () {
     try {
       window.storage.get("cosmic_drift_sfx_mute").then(function (r) {
@@ -8365,20 +8514,21 @@ function CosmicDriftGame() {
   useEffect(function () {
     if (gameState !== "lost" || customLevelMode) return;
     playSound("gameOver");
+    var modeDiffKey = gameModeRef.current + "_" + difficultyRef.current;
     if (score > bestScoreRef.current) {
       bestScoreRef.current = score;
       setBestScore(score);
       setNewHighScore(true);
       playSound("highScore");
       try {
-        window.storage.set("cosmic_drift_best_score_" + difficultyRef.current, String(score));
+        window.storage.set("cosmic_drift_best_score_" + modeDiffKey, String(score));
       } catch (e) {}
     }
     if (levelRef.current > bestLevelRef.current) {
       bestLevelRef.current = levelRef.current;
       setBestLevel(levelRef.current);
       try {
-        window.storage.set("cosmic_drift_best_level_" + difficultyRef.current, String(levelRef.current));
+        window.storage.set("cosmic_drift_best_level_" + modeDiffKey, String(levelRef.current));
       } catch (e) {}
     }
   }, [gameState]);
@@ -10159,7 +10309,39 @@ function CosmicDriftGame() {
   var nextLevel = useCallback(function () {
     clearCanvasVfx();
     var nl;
-    if (gameModeRef.current === "highlights") {
+    if (gameModeRef.current === "set") {
+      var nextIdx = setModeIdxRef.current + 1;
+      if (nextIdx >= setModeLevelsRef.current.length) {
+        stopMusic();
+        setScreen("splash");
+        return;
+      }
+      setModeIdxRef.current = nextIdx;
+      var setLv = setModeLevelsRef.current[nextIdx];
+      gridRef2.current = setLv.grid.slice();
+      customGridRef.current = setLv.grid.slice();
+      customShipRef.current = setLv.shipStart != null ? setLv.shipStart : 3;
+      var setPlasmaAmt = setLv.startPlasma || START_PLASMA;
+      customPlasmaRef.current = setPlasmaAmt;
+      shieldRef.current = initShields(gridRef2.current);
+      setGrid(gridRef2.current.slice());
+      plasmaRef.current = setPlasmaAmt;
+      setPlasma(setPlasmaAmt);
+      var setSc = customShipRef.current;
+      setShipCol(setSc);
+      shipColRef.current = setSc;
+      var setNl = nextIdx + 1;
+      setLevel(setNl);
+      levelRef.current = setNl;
+      clearBoardState();
+      baseCoresRef.current = 3;
+      extraCoresRef.current = 0;
+      setBaseCores(3);
+      setExtraCores(0);
+      clearInventory();
+      setCustomLevelName(setLv.name || "Level " + setNl);
+      return;
+    } else if (gameModeRef.current === "solve") {
       if (levelRef.current < 9) {
         nl = levelRef.current + 1;
       } else {
@@ -10190,10 +10372,11 @@ function CosmicDriftGame() {
     setLevel(nl);
     levelRef.current = nl;
     clearBoardState();
-    if (gameModeRef.current === "campaign" && !customLevelMode && difficultyRef.current !== "hard") {
+    var mdKey = gameModeRef.current + "_" + difficultyRef.current;
+    if (gameModeRef.current === "infinite" && !customLevelMode && difficultyRef.current !== "hard") {
       gainCore();
     }
-    if (gameModeRef.current === "campaign" && nl > bestLevelRef.current) {
+    if (gameModeRef.current === "infinite" && nl > bestLevelRef.current) {
       if (!highestLevelNotifiedRef.current && nl > 9) {
         highestLevelNotifiedRef.current = true;
         setNewHighLevel(true);
@@ -10204,14 +10387,14 @@ function CosmicDriftGame() {
       bestLevelRef.current = nl;
       setBestLevel(nl);
       try {
-        window.storage.set("cosmic_drift_best_level_" + difficultyRef.current, String(nl));
+        window.storage.set("cosmic_drift_best_level_" + mdKey, String(nl));
       } catch (e) {}
     }
-    if (gameModeRef.current === "campaign" && !customLevelMode && scoreRef.current > bestScoreRef.current) {
+    if (gameModeRef.current === "infinite" && !customLevelMode && scoreRef.current > bestScoreRef.current) {
       bestScoreRef.current = scoreRef.current;
       setBestScore(scoreRef.current);
       try {
-        window.storage.set("cosmic_drift_best_score_" + difficultyRef.current, String(scoreRef.current));
+        window.storage.set("cosmic_drift_best_score_" + mdKey, String(scoreRef.current));
       } catch (e) {}
     }
     var nb = NEW_BLOCK_AT[nl];
@@ -10259,7 +10442,48 @@ function CosmicDriftGame() {
   }, []);
   var fullRestart = useCallback(function () {
     clearCanvasVfx();
-    var startLv = gameModeRef.current === "highlights" ? getFirstSigLevel() : 1;
+    if (gameModeRef.current === "set") {
+      setModeIdxRef.current = 0;
+      if (setModeLevelsRef.current.length > 0) {
+        var sl0 = setModeLevelsRef.current[0];
+        baseCoresRef.current = 3;
+        extraCoresRef.current = 0;
+        setBaseCores(3);
+        setExtraCores(0);
+        scoreRef.current = 0;
+        setScore(0);
+        gridRef2.current = sl0.grid.slice();
+        customGridRef.current = sl0.grid.slice();
+        customShipRef.current = sl0.shipStart != null ? sl0.shipStart : 3;
+        var sl0Plasma = sl0.startPlasma || START_PLASMA;
+        customPlasmaRef.current = sl0Plasma;
+        shieldRef.current = initShields(gridRef2.current);
+        setGrid(gridRef2.current.slice());
+        plasmaRef.current = sl0Plasma;
+        setPlasma(sl0Plasma);
+        var sl0Sc = customShipRef.current;
+        setShipCol(sl0Sc);
+        shipColRef.current = sl0Sc;
+        setLevel(1);
+        levelRef.current = 1;
+        clearInventory();
+        clearBoardState();
+        seenPowerUpsRef.current = {
+          crossshot: true,
+          drone: true,
+          lightning: true,
+          anglebounce: true,
+          hammer: true
+        };
+        setCustomLevelMode(false);
+        customLevelDataRef.current = null;
+        setCustomLevelName(sl0.name || "Level 1");
+        highestLevelNotifiedRef.current = false;
+        setNewHighScore(false);
+      }
+      return;
+    }
+    var startLv = gameModeRef.current === "solve" ? getFirstSigLevel() : 1;
     baseCoresRef.current = 3;
     extraCoresRef.current = 0;
     setBaseCores(3);
@@ -10279,7 +10503,7 @@ function CosmicDriftGame() {
     setShipCol(sc);
     shipColRef.current = sc;
     clearBoardState();
-    seenPowerUpsRef.current = gameModeRef.current === "highlights" ? {
+    seenPowerUpsRef.current = gameModeRef.current === "solve" ? {
       crossshot: true,
       drone: true,
       lightning: true,
@@ -10332,6 +10556,90 @@ function CosmicDriftGame() {
     setScreen("game");
     startMusic();
   }
+  function startSetMode() {
+    if (!activeSetInfo || !activeSetInfo.levelIds || !activeSetInfo.levelIds.length) return;
+    var levelIds = activeSetInfo.levelIds;
+    try {
+      window.storage.get("cosmic_drift_levels").then(function (r) {
+        var allLevels = r && r.value ? JSON.parse(r.value) : [];
+        var setLevels = [];
+        for (var i = 0; i < levelIds.length; i++) {
+          for (var j = 0; j < allLevels.length; j++) {
+            if (allLevels[j].id === levelIds[i]) {
+              setLevels.push(allLevels[j]);
+              break;
+            }
+          }
+        }
+        if (!setLevels.length) return;
+        setModeLevelsRef.current = setLevels;
+        setModeIdxRef.current = 0;
+        var lv0 = setLevels[0];
+        gameModeRef.current = "set";
+        setGameMode("set");
+        baseCoresRef.current = 3;
+        extraCoresRef.current = 0;
+        setBaseCores(3);
+        setExtraCores(0);
+        scoreRef.current = 0;
+        setScore(0);
+        gridRef2.current = lv0.grid.slice();
+        customGridRef.current = lv0.grid.slice();
+        customShipRef.current = lv0.shipStart != null ? lv0.shipStart : 3;
+        var lv0Plasma = lv0.startPlasma || START_PLASMA;
+        customPlasmaRef.current = lv0Plasma;
+        shieldRef.current = initShields(gridRef2.current);
+        setGrid(gridRef2.current.slice());
+        plasmaRef.current = lv0Plasma;
+        setPlasma(lv0Plasma);
+        var lv0Sc = customShipRef.current;
+        setShipCol(lv0Sc);
+        shipColRef.current = lv0Sc;
+        setLevel(1);
+        levelRef.current = 1;
+        clearInventory();
+        clearBoardState();
+        seenPowerUpsRef.current = {
+          crossshot: true,
+          drone: true,
+          lightning: true,
+          anglebounce: true,
+          hammer: true
+        };
+        setCustomLevelMode(false);
+        customLevelDataRef.current = null;
+        setCustomLevelName(lv0.name || "Level 1");
+        highestLevelNotifiedRef.current = false;
+        setNewHighScore(false);
+        startMusic();
+        setScreen("game");
+      }).catch(function () {});
+    } catch (e) {}
+  }
+  function replaySetLevel() {
+    if (!setModeLevelsRef.current.length) return;
+    var rlv = setModeLevelsRef.current[setModeIdxRef.current];
+    if (!rlv) return;
+    baseCoresRef.current = 3;
+    extraCoresRef.current = 0;
+    setBaseCores(3);
+    setExtraCores(0);
+    scoreRef.current = 0;
+    setScore(0);
+    gridRef2.current = rlv.grid.slice();
+    customGridRef.current = rlv.grid.slice();
+    shieldRef.current = initShields(gridRef2.current);
+    setGrid(gridRef2.current.slice());
+    var rlvPlasma = rlv.startPlasma || START_PLASMA;
+    customPlasmaRef.current = rlvPlasma;
+    plasmaRef.current = rlvPlasma;
+    setPlasma(rlvPlasma);
+    var rlvSc = rlv.shipStart != null ? rlv.shipStart : 3;
+    setShipCol(rlvSc);
+    shipColRef.current = rlvSc;
+    clearInventory();
+    clearBoardState();
+  }
 
   // ── SAVE / CONTINUE GAME ──
   function saveGame() {
@@ -10356,7 +10664,10 @@ function CosmicDriftGame() {
       seenPowerUps: Object.assign({}, seenPowerUpsRef.current),
       savedAt: new Date().toLocaleString()
     };
+    var saveKey = "cosmic_drift_save_" + gameModeRef.current + "_" + difficultyRef.current;
+    var slotKey2 = gameModeRef.current + "_" + difficultyRef.current;
     saveDataRef.current = sd;
+    savesMapRef.current[slotKey2] = sd;
     setHasSaveGame(true);
     setSaveGameInfo({
       level: sd.level,
@@ -10366,7 +10677,7 @@ function CosmicDriftGame() {
       difficulty: sd.difficulty || "regular"
     });
     try {
-      window.storage.set("cosmic_drift_save", JSON.stringify(sd));
+      window.storage.set(saveKey, JSON.stringify(sd));
     } catch (e) {}
     setGameMenuOpen(false);
     setGameState("playing");
@@ -10380,8 +10691,8 @@ function CosmicDriftGame() {
     customGridRef.current = null;
     customLevelDataRef.current = null;
     customPlasmaRef.current = START_PLASMA;
-    gameModeRef.current = sd.gameMode || "campaign";
-    setGameMode(sd.gameMode || "campaign");
+    gameModeRef.current = sd.gameMode || "infinite";
+    setGameMode(sd.gameMode || "infinite");
     var sdDiff = sd.difficulty || "regular";
     difficultyRef.current = sdDiff;
     setDifficulty(sdDiff);
@@ -11351,7 +11662,8 @@ function CosmicDriftGame() {
   if (isStuck && hasPowerUps) tutorialText = "Use a power-up to reach the blocked blocks.";else if (isStuck && !hasPowerUps && baseCores + extraCores > 0) tutorialText = "Stuck? Tap an empty power-up to convert a reactor core.";
   var showTutorialHint = level === 3 && tutPhase === 2 && gameState === "playing" || level === 6 && tutPhase === 1 && gameState === "playing";
   var showShipRowHint = level === 1 && tutPhase === 2 && gameState === "playing";
-  var showTrainingBtns = level <= 9 && gameModeRef.current === "campaign" && !customLevelMode && (gameState === "playing" || gameState === "needsRecharge");
+  var showTrainingBtns = level <= 9 && gameModeRef.current === "infinite" && !customLevelMode && (gameState === "playing" || gameState === "needsRecharge");
+  var setHasLevels = activeSetInfo && activeSetInfo.levelIds && activeSetInfo.levelIds.length > 0;
   // Insta-shoot hint: find remaining block in level 1 phase 4
   var instaTarget = null;
   if (level === 1 && tutPhase === 4 && gameState === "playing") {
@@ -11860,7 +12172,7 @@ function CosmicDriftGame() {
       boxSizing: "border-box",
       textTransform: "uppercase"
     }
-  }, gameModeRef.current === "highlights" && !getNextSigLevel(level) ? "Back to Menu" : "Next Level"), bonusDone && customLevelMode && /*#__PURE__*/React.createElement("div", {
+  }, gameModeRef.current === "solve" && !getNextSigLevel(level) || gameModeRef.current === "set" && setModeIdxRef.current + 1 >= setModeLevelsRef.current.length ? "Back to Menu" : "Next Level"), bonusDone && customLevelMode && /*#__PURE__*/React.createElement("div", {
     onClick: backToMyLevels,
     style: {
       position: "relative",
@@ -11880,7 +12192,7 @@ function CosmicDriftGame() {
       boxSizing: "border-box",
       textTransform: "uppercase"
     }
-  }, "My Levels"), bonusDone && gameModeRef.current === "highlights" && getNextSigLevel(level) && /*#__PURE__*/React.createElement("div", {
+  }, "My Levels"), bonusDone && gameModeRef.current === "solve" && getNextSigLevel(level) && /*#__PURE__*/React.createElement("div", {
     style: {
       color: "rgba(200,220,240,0.35)",
       fontSize: 9,
@@ -11889,7 +12201,16 @@ function CosmicDriftGame() {
       marginBottom: 8,
       letterSpacing: 1
     }
-  }, "Next: ", FIXED_LEVELS[getNextSigLevel(level)].name), bonusDone && /*#__PURE__*/React.createElement("div", {
+  }, "Next: ", FIXED_LEVELS[getNextSigLevel(level)].name), bonusDone && gameModeRef.current === "set" && setModeIdxRef.current + 1 < setModeLevelsRef.current.length && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "rgba(200,220,240,0.35)",
+      fontSize: 9,
+      fontWeight: 600,
+      textAlign: "center",
+      marginBottom: 8,
+      letterSpacing: 1
+    }
+  }, "Next: ", setModeLevelsRef.current[setModeIdxRef.current + 1].name), bonusDone && /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 6
@@ -12373,7 +12694,7 @@ function CosmicDriftGame() {
         shipStart: customShipRef.current,
         startPlasma: customPlasmaRef.current
       });
-    } : gameModeRef.current === "highlights" && FIXED_LEVELS[level] ? function () {
+    } : gameModeRef.current === "set" ? replaySetLevel : gameModeRef.current === "solve" && FIXED_LEVELS[level] ? function () {
       playSignatureLevel(level);
     } : fullRestart,
     style: {
@@ -12729,7 +13050,7 @@ function CosmicDriftGame() {
       marginTop: 2
     }
   }, /*#__PURE__*/React.createElement(GsLED, {
-    color: gameMode === "campaign" ? GS.blue : "#c8b8ff",
+    color: gameMode === "infinite" ? GS.blue : gameMode === "set" ? "#ffd060" : "#c8b8ff",
     size: 6
   }), /*#__PURE__*/React.createElement(GsLED, {
     color: DIFF_COLORS[difficulty] || GS.green,
@@ -13091,45 +13412,184 @@ function CosmicDriftGame() {
     }
   }, /*#__PURE__*/React.createElement("div", {
     onClick: function () {
-      gameModeRef.current = "campaign";
-      setGameMode("campaign");
+      gameModeRef.current = "infinite";
+      setGameMode("infinite");
     },
     style: {
       flex: 1,
-      padding: "7px 0",
+      padding: "5px 0",
       textAlign: "center",
       fontFamily: "'Exo 2', sans-serif",
-      fontSize: 10,
+      fontSize: 9,
       fontWeight: 700,
-      letterSpacing: 1.5,
+      letterSpacing: 1,
       cursor: "pointer",
-      color: gameMode === "campaign" ? "#0a0c12" : "rgba(200,220,240,0.55)",
-      background: gameMode === "campaign" ? "linear-gradient(180deg, " + GS.blue + " 0%, " + GS.blue + "cc 100%)" : "transparent",
-      boxShadow: gameMode === "campaign" ? "inset 0 1px 0 rgba(255,255,255,0.3), 0 0 10px " + GS.blue + "66" : "none",
+      color: gameMode === "infinite" ? "#0a0c12" : "rgba(200,220,240,0.55)",
+      background: gameMode === "infinite" ? "linear-gradient(180deg, " + GS.blue + " 0%, " + GS.blue + "cc 100%)" : "transparent",
+      boxShadow: gameMode === "infinite" ? "inset 0 1px 0 rgba(255,255,255,0.3), 0 0 10px " + GS.blue + "66" : "none",
       textTransform: "uppercase",
-      borderRadius: 4
+      borderRadius: 4,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: 2
     }
-  }, "Campaign"), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 15,
+      lineHeight: 1
+    }
+  }, "∞"), /*#__PURE__*/React.createElement("span", null, "INFINITE")), /*#__PURE__*/React.createElement("div", {
     onClick: function () {
-      gameModeRef.current = "highlights";
-      setGameMode("highlights");
+      gameModeRef.current = "solve";
+      setGameMode("solve");
     },
     style: {
       flex: 1,
-      padding: "7px 0",
+      padding: "5px 0",
       textAlign: "center",
       fontFamily: "'Exo 2', sans-serif",
-      fontSize: 10,
+      fontSize: 9,
       fontWeight: 700,
-      letterSpacing: 1.5,
+      letterSpacing: 1,
       cursor: "pointer",
-      color: gameMode === "highlights" ? "#0a0c12" : "rgba(200,220,240,0.55)",
-      background: gameMode === "highlights" ? "linear-gradient(180deg, #c8b8ff 0%, #c8b8ffcc 100%)" : "transparent",
-      boxShadow: gameMode === "highlights" ? "inset 0 1px 0 rgba(255,255,255,0.3), 0 0 10px #c8b8ff66" : "none",
+      color: gameMode === "solve" ? "#0a0c12" : "rgba(200,220,240,0.55)",
+      background: gameMode === "solve" ? "linear-gradient(180deg, #c8b8ff 0%, #c8b8ffcc 100%)" : "transparent",
+      boxShadow: gameMode === "solve" ? "inset 0 1px 0 rgba(255,255,255,0.3), 0 0 10px #c8b8ff66" : "none",
       textTransform: "uppercase",
-      borderRadius: 4
+      borderRadius: 4,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: 2
     }
-  }, "Signature"))), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "13",
+    height: "13",
+    viewBox: "0 0 24 24"
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "5",
+    fill: "none",
+    stroke: gameMode === "solve" ? "#0a0c12" : "#c8b8ff",
+    strokeWidth: "2.2"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "12",
+    y1: "2",
+    x2: "12",
+    y2: "7",
+    stroke: gameMode === "solve" ? "#0a0c12" : "#c8b8ff",
+    strokeWidth: "2.2",
+    strokeLinecap: "round"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "12",
+    y1: "17",
+    x2: "12",
+    y2: "22",
+    stroke: gameMode === "solve" ? "#0a0c12" : "#c8b8ff",
+    strokeWidth: "2.2",
+    strokeLinecap: "round"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "2",
+    y1: "12",
+    x2: "7",
+    y2: "12",
+    stroke: gameMode === "solve" ? "#0a0c12" : "#c8b8ff",
+    strokeWidth: "2.2",
+    strokeLinecap: "round"
+  }), /*#__PURE__*/React.createElement("line", {
+    x1: "17",
+    y1: "12",
+    x2: "22",
+    y2: "12",
+    stroke: gameMode === "solve" ? "#0a0c12" : "#c8b8ff",
+    strokeWidth: "2.2",
+    strokeLinecap: "round"
+  })), /*#__PURE__*/React.createElement("span", null, "SOLVE")), /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      if (!setHasLevels) {
+        setShowSetModeMsg(true);
+        setTimeout(function () {
+          setShowSetModeMsg(false);
+        }, 2200);
+        return;
+      }
+      gameModeRef.current = "set";
+      setGameMode("set");
+    },
+    style: {
+      flex: 1,
+      padding: "5px 0",
+      textAlign: "center",
+      fontFamily: "'Exo 2', sans-serif",
+      fontSize: 9,
+      fontWeight: 700,
+      letterSpacing: 1,
+      cursor: "pointer",
+      color: gameMode === "set" ? "#0a0c12" : "rgba(200,220,240,0.55)",
+      background: gameMode === "set" ? "linear-gradient(180deg, #ffd060 0%, #ffd060cc 100%)" : "transparent",
+      boxShadow: gameMode === "set" ? "inset 0 1px 0 rgba(255,255,255,0.3), 0 0 10px #ffd06066" : "none",
+      textTransform: "uppercase",
+      borderRadius: 4,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: 2,
+      opacity: setHasLevels ? 1 : 0.4
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "13",
+    height: "13",
+    viewBox: "0 0 24 24"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "3",
+    y: "5",
+    width: "18",
+    height: "4",
+    rx: "1.5",
+    fill: "none",
+    stroke: gameMode === "set" ? "#0a0c12" : "#ffd060",
+    strokeWidth: "1.5"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "3",
+    y: "10",
+    width: "18",
+    height: "4",
+    rx: "1.5",
+    fill: gameMode === "set" ? "#0a0c12" : "#ffd060",
+    opacity: gameMode === "set" ? "1" : "0.5"
+  }), /*#__PURE__*/React.createElement("rect", {
+    x: "3",
+    y: "15",
+    width: "18",
+    height: "4",
+    rx: "1.5",
+    fill: gameMode === "set" ? "#0a0c12" : "#ffd060",
+    opacity: gameMode === "set" ? "1" : "0.25"
+  })), /*#__PURE__*/React.createElement("span", null, "SET"))), gameMode === "set" && activeSetInfo && activeSetInfo.name && /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      fontSize: 9,
+      color: "rgba(255,208,96,0.7)",
+      letterSpacing: 0.5,
+      marginTop: 3,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap"
+    }
+  }, activeSetInfo.name), showSetModeMsg && /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      fontSize: 10,
+      color: "rgba(255,208,96,0.85)",
+      marginTop: 3,
+      padding: "3px 6px",
+      background: "rgba(255,208,96,0.1)",
+      borderRadius: 4,
+      border: "1px solid rgba(255,208,96,0.2)"
+    }
+  }, "Load a set with levels in the Workshop.")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
@@ -13184,7 +13644,11 @@ function CosmicDriftGame() {
     }, DIFF_LABELS[d]);
   })))), /*#__PURE__*/React.createElement("div", {
     onClick: function () {
-      if (gameModeRef.current === "highlights") {
+      if (gameModeRef.current === "set") {
+        startSetMode();
+        return;
+      }
+      if (gameModeRef.current === "solve") {
         fullRestart();
         startMusic();
         setScreen("game");
@@ -13948,7 +14412,7 @@ function CosmicDriftGame() {
       letterSpacing: 1.5,
       textTransform: "uppercase"
     }
-  }, "Signature Levels"), /*#__PURE__*/React.createElement("div", {
+  }, "Solve Levels"), /*#__PURE__*/React.createElement("div", {
     onClick: function () {
       setSigLevelsOpen(false);
     },
@@ -14058,8 +14522,8 @@ function CosmicDriftGame() {
           window.storage.set("cosmic_drift_skip_popup", "skip");
         } catch (e) {}
       }
-      gameModeRef.current = "campaign";
-      setGameMode("campaign");
+      gameModeRef.current = "infinite";
+      setGameMode("infinite");
       fullRestart();
       setLevel(10);
       levelRef.current = 10;
@@ -14762,12 +15226,12 @@ function CosmicDriftGame() {
       marginRight: 6
     }
   }, /*#__PURE__*/React.createElement(GsLED, {
-    color: customLevelMode ? "#c8b8ff" : GS.blue,
+    color: customLevelMode ? "#c8b8ff" : gameModeRef.current === "set" ? "#ffd060" : GS.blue,
     size: 5
   }), /*#__PURE__*/React.createElement("span", {
     style: {
       fontFamily: "'JetBrains Mono', monospace",
-      color: customLevelMode ? "#c8b8ff" : GS.blue,
+      color: customLevelMode ? "#c8b8ff" : gameModeRef.current === "set" ? "#ffd060" : GS.blue,
       fontSize: 10,
       fontWeight: 700,
       letterSpacing: 2,
@@ -14776,9 +15240,9 @@ function CosmicDriftGame() {
       textOverflow: "ellipsis",
       whiteSpace: "nowrap",
       flex: 1,
-      textShadow: "0 0 8px " + (customLevelMode ? "rgba(200,184,255,0.35)" : "rgba(128,221,255,0.35)")
+      textShadow: "0 0 8px " + (customLevelMode ? "rgba(200,184,255,0.35)" : gameModeRef.current === "set" ? "rgba(255,208,96,0.35)" : "rgba(128,221,255,0.35)")
     }
-  }, customLevelMode ? customLevelName : getLevelName(level) ? "Lvl " + level + " \u00B7 " + getLevelName(level) : "Level " + level), /*#__PURE__*/React.createElement(GsLED, {
+  }, customLevelMode ? customLevelName : gameModeRef.current === "set" ? level + " \u00B7 " + customLevelName : getLevelName(level) ? "Lvl " + level + " \u00B7 " + getLevelName(level) : "Level " + level), /*#__PURE__*/React.createElement(GsLED, {
     color: difficulty === "hard" ? "#ff5050" : difficulty === "easy" ? "#50ff80" : "#ffd060",
     size: 5
   })), /*#__PURE__*/React.createElement("div", {
@@ -15678,8 +16142,8 @@ function CosmicDriftGame() {
     onClick: function () {
       var lv = Number(devJumpLevel);
       if (lv < 1) return;
-      gameModeRef.current = "campaign";
-      setGameMode("campaign");
+      gameModeRef.current = "infinite";
+      setGameMode("infinite");
       fullRestart();
       setLevel(lv);
       levelRef.current = lv;
