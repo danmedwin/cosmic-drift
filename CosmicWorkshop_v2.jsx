@@ -5280,7 +5280,7 @@ export default function CosmicWorkshop() {
       bdCurrentView === "list" && React.createElement(React.Fragment, null,
         React.createElement(WorkshopTopBar, { onBack: function() { if (setsSelMode) { setSetsSelMode(null); setScreen("sets"); setSetsView("editor"); } else { setScreen("splash"); } }, backLabel: setsSelMode ? "Set" : "Workshop", title: "My Blocks", color: "#c8b8ff",
           rightContent: !setsSelMode && React.createElement("div", { style: { display: "flex", gap: 4 } },
-            React.createElement("div", { onClick: function() { setBdShowImport(true); setBdImportText(""); setBdImportError(""); }, style: BTN_TOPBAR_PURPLE }, bdSavedTab === "active" ? "Import Set" : "Import"),
+            React.createElement("div", { onClick: function() { setBdShowImport(true); setBdImportText(""); setBdImportError(""); }, style: BTN_TOPBAR_PURPLE }, "Import"),
             ((bdSavedTab === "active" && Object.keys(bdActiveMap).length > 0) || (bdSavedTab !== "active" && bdSaved.length > 0)) && React.createElement("div", { onClick: bdSavedTab === "active" ? bdExportActiveBlocks : bdExportAllDesigns, style: Object.assign({}, BTN_TOPBAR, { color: "rgba(200,184,255,0.6)", fontSize: 8 }) }, "Exp All"),
             React.createElement("div", { onClick: function() { bdOpenEditor(null); }, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #1a3a4a, #0f2a38)", boxShadow: "0 0 8px rgba(80,200,255,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, "+ New")) }),
         renderSetsSelBar("block", bdSaved.map(function(d) { return d.id; })),
