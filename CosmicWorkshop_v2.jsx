@@ -1612,6 +1612,7 @@ export default function CosmicWorkshop() {
   var setsLevelDragRef = useRef(null);
   var _setsLevelInput = useState(null), setsLevelInput = _setsLevelInput[0], setSetsLevelInput = _setsLevelInput[1];
   var _setsDeleteWarn = useState(null), setsDeleteWarn = _setsDeleteWarn[0], setSetsDeleteWarn = _setsDeleteWarn[1];
+  var _setsSelectAllConflicts = useState(null), setsSelectAllConflicts = _setsSelectAllConflicts[0], setSetsSelectAllConflicts = _setsSelectAllConflicts[1];
   var storageWorking = useRef(true);
 
   // ── Load on mount ──
@@ -2110,6 +2111,44 @@ export default function CosmicWorkshop() {
         if (_conflict) { setSetsSelConflict({ incoming: design, conflicting: _conflict, typeKey: typeKey }); return; }
       }
       setSetsSelMode(Object.assign({}, setsSelMode, { selectedIds: cur.concat([design.id]) }));
+    }
+  }
+
+  function setsHandleSelectAll(moduleType, allIds) {
+    if (!setsSelMode) return;
+    if (moduleType !== "block" && moduleType !== "vfx") {
+      setSetsSelMode(Object.assign({}, setsSelMode, { selectedIds: allIds.slice() }));
+      return;
+    }
+    var _typeKey = moduleType === "block" ? "assignedTo" : "effectType";
+    var _typeList = moduleType === "block" ? BD_BLOCK_TYPES : VFX_EFFECT_TYPES;
+    var _lib = moduleType === "block" ? bdSaved : vfxSaved;
+    var _groups = {};
+    for (var _i = 0; _i < allIds.length; _i++) {
+      var _d = null;
+      for (var _j = 0; _j < _lib.length; _j++) { if (_lib[_j].id === allIds[_i]) { _d = _lib[_j]; break; } }
+      if (!_d) continue;
+      var _t = _d[_typeKey] || "unknown";
+      if (!_groups[_t]) _groups[_t] = [];
+      _groups[_t].push(_d);
+    }
+    var _autoIds = [];
+    var _conflictGroups = [];
+    var _tkeys = Object.keys(_groups);
+    for (var _ti = 0; _ti < _tkeys.length; _ti++) {
+      var _tk = _tkeys[_ti];
+      if (_groups[_tk].length === 1) {
+        _autoIds.push(_groups[_tk][0].id);
+      } else {
+        var _typeLabel = "";
+        for (var _li = 0; _li < _typeList.length; _li++) { if (_typeList[_li].id === _tk) { _typeLabel = _typeList[_li].label; break; } }
+        _conflictGroups.push({ typeId: _tk, typeLabel: _typeLabel || _tk, designs: _groups[_tk], selectedId: _groups[_tk][0].id });
+      }
+    }
+    if (_conflictGroups.length === 0) {
+      setSetsSelMode(Object.assign({}, setsSelMode, { selectedIds: allIds.slice() }));
+    } else {
+      setSetsSelectAllConflicts({ moduleType: moduleType, autoIds: _autoIds, groups: _conflictGroups });
     }
   }
 
@@ -3072,7 +3111,7 @@ export default function CosmicWorkshop() {
     var _isMulti = moduleType === "block" || moduleType === "vfx" || moduleType === "level";
     return React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6, padding: "7px 12px", background: "rgba(255,208,96,0.07)", borderBottom: "1px solid rgba(255,208,96,0.18)", zIndex: 2, position: "relative" } },
       React.createElement("div", { style: { flex: 1, color: "rgba(255,208,96,0.85)", fontSize: 11, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 } }, "Adding to: " + _setName),
-      _isMulti && React.createElement("div", { onClick: function() { setSetsSelMode(Object.assign({}, setsSelMode, { selectedIds: allIds.slice() })); }, style: Object.assign({}, BTN_BASE, { padding: "4px 8px", background: "rgba(255,208,96,0.08)", border: "1px solid rgba(255,208,96,0.25)", color: "rgba(255,208,96,0.75)", fontSize: 9, fontWeight: 700 }) }, "All"),
+      _isMulti && React.createElement("div", { onClick: function() { setsHandleSelectAll(moduleType, allIds); }, style: Object.assign({}, BTN_BASE, { padding: "4px 8px", background: "rgba(255,208,96,0.08)", border: "1px solid rgba(255,208,96,0.25)", color: "rgba(255,208,96,0.75)", fontSize: 9, fontWeight: 700 }) }, "All"),
       React.createElement("div", { onClick: function() { setSetsSelMode(Object.assign({}, setsSelMode, { selectedIds: [] })); }, style: Object.assign({}, BTN_BASE, { padding: "4px 8px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)", color: "rgba(200,210,220,0.5)", fontSize: 9 }) }, "Clear"),
       React.createElement("div", { onClick: function() { setsHandleAddSelections(setsSelMode.moduleType, setsSelMode.selectedIds); }, style: Object.assign({}, BTN_BASE, { padding: "4px 10px", background: "rgba(255,208,96,0.14)", border: "1px solid rgba(255,208,96,0.4)", color: "#ffd060", fontSize: 9, fontWeight: 700 }) }, "Add to Set"));
   }
@@ -3110,6 +3149,56 @@ export default function CosmicWorkshop() {
         React.createElement("div", { style: { display: "flex", gap: 12, justifyContent: "center" } },
           React.createElement("div", { onClick: function() { setSetsDeleteWarn(null); }, style: { padding: "8px 20px", borderRadius: 16, border: "1px solid rgba(120,80,255,0.3)", color: "#c8b8ff", fontSize: 12, fontWeight: 600, cursor: "pointer" } }, "Cancel"),
           React.createElement("div", { onClick: function() { setsDeleteWarn.onConfirm(); }, style: { padding: "8px 20px", borderRadius: 16, background: "rgba(255,60,60,0.3)", border: "1px solid rgba(255,80,80,0.4)", color: "#ff6644", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "Delete Anyway"))));
+  }
+
+  function renderSetsSelectAllConflictsOverlay() {
+    if (!setsSelectAllConflicts) return null;
+    var _sac = setsSelectAllConflicts;
+    var _totalSelected = _sac.autoIds.length + _sac.groups.length;
+    return React.createElement("div", { style: OVERLAY_BG },
+      React.createElement("div", { style: Object.assign({}, OVERLAY_BOX, { border: "1px solid rgba(255,208,96,0.3)", maxWidth: 360, width: "92%", textAlign: "left", padding: 0, overflow: "hidden" }) },
+        React.createElement("div", { style: { padding: "14px 16px 10px", borderBottom: "1px solid rgba(255,208,96,0.15)" } },
+          React.createElement("div", { style: { color: "#ffd060", fontSize: 14, fontWeight: 700, marginBottom: 4 } }, "Type Conflicts"),
+          React.createElement("div", { style: { color: "rgba(200,210,220,0.55)", fontSize: 11, lineHeight: 1.5 } }, "Multiple designs share a type. Pick one for each:")),
+        React.createElement("div", { style: { overflowY: "auto", maxHeight: "55vh", padding: "10px 12px" } },
+          _sac.groups.map(function(grp) {
+            var _isBlock = _sac.moduleType === "block";
+            return React.createElement("div", { key: grp.typeId, style: { marginBottom: 14 } },
+              React.createElement("div", { style: { color: _isBlock ? "#c8b8ff" : "#ffb43c", fontSize: 10, fontWeight: 700, letterSpacing: 1, marginBottom: 6 } }, grp.typeLabel.toUpperCase()),
+              grp.designs.map(function(des) {
+                var _sel = grp.selectedId === des.id;
+                return React.createElement("div", {
+                  key: des.id,
+                  onClick: function() {
+                    var _newGroups = _sac.groups.map(function(g) { return g.typeId === grp.typeId ? Object.assign({}, g, { selectedId: des.id }) : g; });
+                    setSetsSelectAllConflicts(Object.assign({}, _sac, { groups: _newGroups }));
+                  },
+                  style: { display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", borderRadius: 8, marginBottom: 5, background: _sel ? "rgba(255,208,96,0.08)" : "rgba(255,255,255,0.02)", border: "1px solid " + (_sel ? "rgba(255,208,96,0.35)" : "rgba(255,255,255,0.06)"), cursor: "pointer" }
+                },
+                  React.createElement("div", { style: { width: 18, height: 18, borderRadius: "50%", border: "2px solid " + (_sel ? "#ffd060" : "rgba(255,255,255,0.2)"), background: _sel ? "#ffd060" : "transparent", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" } },
+                    _sel && React.createElement("div", { style: { width: 7, height: 7, borderRadius: "50%", background: "#1a1400" } })),
+                  _isBlock
+                    ? React.createElement("div", { style: { width: 28, height: 28, flexShrink: 0 } }, React.createElement(BDBlockPreview, { design: des, size: 28 }))
+                    : React.createElement("div", { style: { width: 28, height: 28, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" } }, renderVfxMini(des.effectType, des)),
+                  React.createElement("div", { style: { flex: 1, minWidth: 0 } },
+                    React.createElement("div", { style: { color: _sel ? "#fff8dc" : "rgba(200,210,220,0.75)", fontSize: 12, fontWeight: _sel ? 700 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, des.name || "Unnamed"),
+                    React.createElement("div", { style: { color: "rgba(160,180,200,0.4)", fontSize: 10 } }, des.savedAt ? new Date(des.savedAt).toLocaleDateString() : ""))
+                );
+              })
+            );
+          })
+        ),
+        React.createElement("div", { style: { display: "flex", gap: 8, justifyContent: "center", padding: "10px 16px 14px", borderTop: "1px solid rgba(255,255,255,0.06)" } },
+          React.createElement("div", { onClick: function() { setSetsSelectAllConflicts(null); }, style: { padding: "8px 18px", borderRadius: 16, border: "1px solid rgba(120,80,255,0.3)", color: "#c8b8ff", fontSize: 12, fontWeight: 600, cursor: "pointer" } }, "Cancel"),
+          React.createElement("div", { onClick: function() {
+            var _finalIds = _sac.autoIds.slice();
+            for (var _gi = 0; _gi < _sac.groups.length; _gi++) { _finalIds.push(_sac.groups[_gi].selectedId); }
+            setSetsSelMode(Object.assign({}, setsSelMode, { selectedIds: _finalIds }));
+            setSetsSelectAllConflicts(null);
+          }, style: { padding: "8px 18px", borderRadius: 16, background: "rgba(255,208,96,0.2)", border: "1px solid rgba(255,208,96,0.5)", color: "#ffd060", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "Select " + _totalSelected + " Design" + (_totalSelected !== 1 ? "s" : ""))
+        )
+      )
+    );
   }
 
   function sortItems(items, mode, dateKey) {
@@ -4689,6 +4778,7 @@ export default function CosmicWorkshop() {
 
     // ═══ SETS SELECTION CONFLICT OVERLAY (global) ═══
     renderSetsConflictOverlay(),
+    renderSetsSelectAllConflictsOverlay(),
 
     // ═══ WORKSHOP GUIDE OVERLAY ═══
     showWsGuide && React.createElement("div", { onClick: function() { setShowWsGuide(false); }, style: { position: "fixed", inset: 0, zIndex: 60, background: "rgba(0,0,0,0.72)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 } },
