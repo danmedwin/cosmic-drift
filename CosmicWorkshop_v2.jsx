@@ -1836,15 +1836,78 @@ export default function CosmicWorkshop() {
     setsEditDirtyRef.current = false;
     setSetsView("editor");
   }
-  function setsSaveEdit() {
-    if (!setsEditSet) return;
-    var updated = Object.assign({}, setsEditSet, { savedAt: new Date().toISOString() });
+  function setsSaveSetObj(setObj) {
+    var updated = Object.assign({}, setObj, { savedAt: new Date().toISOString() });
     var existing = false;
     var next = setsSaved.map(function(s) { if (s.id === updated.id) { existing = true; return updated; } return s; });
     if (!existing) next = next.concat([updated]);
     setSetsSaved(next); setsSaveAll(next);
     setSetsEditSet(updated); setsEditDirtyRef.current = false;
     setSetsView("list");
+  }
+  function setsSaveEdit() {
+    if (!setsEditSet) return;
+    var _allGroups = [];
+    var _groups, _tkeys, _tk, _typeLabel, _d;
+    if (setsEditSet.blockDesignIds && setsEditSet.blockDesignIds.length > 1) {
+      _groups = {};
+      for (var _bi = 0; _bi < setsEditSet.blockDesignIds.length; _bi++) {
+        _d = null;
+        for (var _bj = 0; _bj < bdSaved.length; _bj++) { if (bdSaved[_bj].id === setsEditSet.blockDesignIds[_bi]) { _d = bdSaved[_bj]; break; } }
+        if (!_d) continue;
+        var _bt = _d.assignedTo || "unknown";
+        if (!_groups[_bt]) _groups[_bt] = [];
+        _groups[_bt].push(_d);
+      }
+      _tkeys = Object.keys(_groups);
+      for (var _bti = 0; _bti < _tkeys.length; _bti++) {
+        _tk = _tkeys[_bti];
+        if (_groups[_tk].length > 1) {
+          _typeLabel = "";
+          for (var _bli = 0; _bli < BD_BLOCK_TYPES.length; _bli++) { if (BD_BLOCK_TYPES[_bli].id === _tk) { _typeLabel = BD_BLOCK_TYPES[_bli].label; break; } }
+          _allGroups.push({ typeId: _tk, typeLabel: _typeLabel || _tk, moduleType: "block", designs: _groups[_tk], selectedId: _groups[_tk][0].id });
+        }
+      }
+    }
+    if (setsEditSet.vfxDesignIds && setsEditSet.vfxDesignIds.length > 1) {
+      _groups = {};
+      for (var _vi = 0; _vi < setsEditSet.vfxDesignIds.length; _vi++) {
+        _d = null;
+        for (var _vj = 0; _vj < vfxSaved.length; _vj++) { if (vfxSaved[_vj].id === setsEditSet.vfxDesignIds[_vi]) { _d = vfxSaved[_vj]; break; } }
+        if (!_d) continue;
+        var _vt = _d.effectType || "unknown";
+        if (!_groups[_vt]) _groups[_vt] = [];
+        _groups[_vt].push(_d);
+      }
+      _tkeys = Object.keys(_groups);
+      for (var _vti = 0; _vti < _tkeys.length; _vti++) {
+        _tk = _tkeys[_vti];
+        if (_groups[_tk].length > 1) {
+          _typeLabel = "";
+          for (var _vli = 0; _vli < VFX_EFFECT_TYPES.length; _vli++) { if (VFX_EFFECT_TYPES[_vli].id === _tk) { _typeLabel = VFX_EFFECT_TYPES[_vli].label; break; } }
+          _allGroups.push({ typeId: _tk, typeLabel: _typeLabel || _tk, moduleType: "vfx", designs: _groups[_tk], selectedId: _groups[_tk][0].id });
+        }
+      }
+    }
+    if (_allGroups.length > 0) {
+      var _setCapture = setsEditSet;
+      setSetsSelectAllConflicts({ autoIds: [], groups: _allGroups, onConfirm: function(finalIds, groups) {
+        var _pruned = Object.assign({}, _setCapture);
+        for (var _gi = 0; _gi < groups.length; _gi++) {
+          var _grp = groups[_gi];
+          var _nonSel = [];
+          for (var _di = 0; _di < _grp.designs.length; _di++) { if (_grp.designs[_di].id !== _grp.selectedId) _nonSel.push(_grp.designs[_di].id); }
+          if (_grp.moduleType === "block") {
+            _pruned.blockDesignIds = (_pruned.blockDesignIds || []).filter(function(id) { return _nonSel.indexOf(id) === -1; });
+          } else if (_grp.moduleType === "vfx") {
+            _pruned.vfxDesignIds = (_pruned.vfxDesignIds || []).filter(function(id) { return _nonSel.indexOf(id) === -1; });
+          }
+        }
+        setsSaveSetObj(_pruned);
+      }});
+      return;
+    }
+    setsSaveSetObj(setsEditSet);
   }
   function setsDeleteSet(id) {
     var next = setsSaved.filter(function(s) { return s.id !== id; });
@@ -2142,13 +2205,16 @@ export default function CosmicWorkshop() {
       } else {
         var _typeLabel = "";
         for (var _li = 0; _li < _typeList.length; _li++) { if (_typeList[_li].id === _tk) { _typeLabel = _typeList[_li].label; break; } }
-        _conflictGroups.push({ typeId: _tk, typeLabel: _typeLabel || _tk, designs: _groups[_tk], selectedId: _groups[_tk][0].id });
+        _conflictGroups.push({ typeId: _tk, typeLabel: _typeLabel || _tk, moduleType: moduleType, designs: _groups[_tk], selectedId: _groups[_tk][0].id });
       }
     }
     if (_conflictGroups.length === 0) {
       setSetsSelMode(Object.assign({}, setsSelMode, { selectedIds: allIds.slice() }));
     } else {
-      setSetsSelectAllConflicts({ moduleType: moduleType, autoIds: _autoIds, groups: _conflictGroups });
+      var _selModeCapture = setsSelMode;
+      setSetsSelectAllConflicts({ autoIds: _autoIds, groups: _conflictGroups, onConfirm: function(finalIds) {
+        setSetsSelMode(Object.assign({}, _selModeCapture, { selectedIds: finalIds }));
+      }});
     }
   }
 
@@ -3154,7 +3220,6 @@ export default function CosmicWorkshop() {
   function renderSetsSelectAllConflictsOverlay() {
     if (!setsSelectAllConflicts) return null;
     var _sac = setsSelectAllConflicts;
-    var _totalSelected = _sac.autoIds.length + _sac.groups.length;
     return React.createElement("div", { style: OVERLAY_BG },
       React.createElement("div", { style: Object.assign({}, OVERLAY_BOX, { border: "1px solid rgba(255,208,96,0.3)", maxWidth: 360, width: "92%", textAlign: "left", padding: 0, overflow: "hidden" }) },
         React.createElement("div", { style: { padding: "14px 16px 10px", borderBottom: "1px solid rgba(255,208,96,0.15)" } },
@@ -3162,7 +3227,7 @@ export default function CosmicWorkshop() {
           React.createElement("div", { style: { color: "rgba(200,210,220,0.55)", fontSize: 11, lineHeight: 1.5 } }, "Multiple designs share a type. Pick one for each:")),
         React.createElement("div", { style: { overflowY: "auto", maxHeight: "55vh", padding: "10px 12px" } },
           _sac.groups.map(function(grp) {
-            var _isBlock = _sac.moduleType === "block";
+            var _isBlock = grp.moduleType === "block";
             return React.createElement("div", { key: grp.typeId, style: { marginBottom: 14 } },
               React.createElement("div", { style: { color: _isBlock ? "#c8b8ff" : "#ffb43c", fontSize: 10, fontWeight: 700, letterSpacing: 1, marginBottom: 6 } }, grp.typeLabel.toUpperCase()),
               grp.designs.map(function(des) {
@@ -3193,9 +3258,9 @@ export default function CosmicWorkshop() {
           React.createElement("div", { onClick: function() {
             var _finalIds = _sac.autoIds.slice();
             for (var _gi = 0; _gi < _sac.groups.length; _gi++) { _finalIds.push(_sac.groups[_gi].selectedId); }
-            setSetsSelMode(Object.assign({}, setsSelMode, { selectedIds: _finalIds }));
+            _sac.onConfirm(_finalIds, _sac.groups);
             setSetsSelectAllConflicts(null);
-          }, style: { padding: "8px 18px", borderRadius: 16, background: "rgba(255,208,96,0.2)", border: "1px solid rgba(255,208,96,0.5)", color: "#ffd060", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "Select " + _totalSelected + " Design" + (_totalSelected !== 1 ? "s" : ""))
+          }, style: { padding: "8px 18px", borderRadius: 16, background: "rgba(255,208,96,0.2)", border: "1px solid rgba(255,208,96,0.5)", color: "#ffd060", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "Confirm")
         )
       )
     );
