@@ -2465,7 +2465,7 @@ export default function CosmicWorkshop() {
     savingRef.current = true;
     var levelId = id || genUUID();
     var now = Date.now();
-    var nowStr = new Date().toLocaleString();
+    var nowStr = new Date().toISOString();
     var entry = { id: levelId, name: name || "Untitled Level", grid: builderGrid.slice(), shipStart: builderShipStart, startPlasma: builderPlasma, created: now, modified: now, savedAt: nowStr };
     setSavedLevels(function(prev) {
       var levels = prev.slice();
@@ -4497,7 +4497,7 @@ export default function CosmicWorkshop() {
           React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 33, fontWeight: 700, letterSpacing: 7, color: "#ede8ff", textTransform: "uppercase", textShadow: "0 0 22px rgba(160,100,255,0.55), 0 0 44px rgba(120,60,220,0.25)", lineHeight: 1.1 } }, "WORKSHOP"),
           React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", gap: 8 } },
             React.createElement("div", { style: { height: 1, width: 22, background: "rgba(160,100,255,0.25)" } }),
-            React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,170,255,0.32)" }, "SERVICE PANEL  ·  v3.3"),
+            React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,170,255,0.32)" }, "SERVICE PANEL  ·  v3.4"),
             React.createElement("div", { style: { height: 1, width: 22, background: "rgba(160,100,255,0.25)" } })
           ),
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginTop: 2 } },
@@ -5132,7 +5132,8 @@ export default function CosmicWorkshop() {
             React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 14, marginBottom: 8 } }, "No saved levels yet"),
             React.createElement("div", { style: { color: "rgba(180,200,220,0.2)", fontSize: 12 } }, "Build a new level or tap Import to paste a level code.")),
           !levelsLoading && sortItems(savedLevels, sortMode, "modified").map(function(lv) {
-            var dateStr = lv.savedAt || (lv.modified ? new Date(lv.modified).toLocaleString() : "");
+            var _lvDateObj = new Date(lv.savedAt);
+            var dateStr = (lv.savedAt && !isNaN(_lvDateObj.getTime())) ? _lvDateObj.toLocaleDateString() : (lv.modified ? new Date(lv.modified).toLocaleDateString() : "");
             var _lvSel = setsSelMode && setsSelMode.selectedIds.indexOf(lv.id) !== -1;
             return React.createElement("div", { key: lv.id, style: Object.assign({}, CARD_STYLE, setsSelMode ? { display: "flex", alignItems: "flex-start", gap: 8 } : {}) },
               setsSelMode && React.createElement("div", { onClick: function() { setsToggleSel(lv, null); }, style: { width: 20, height: 20, borderRadius: 4, border: _lvSel ? "1.5px solid #ffd060" : "1.5px solid rgba(255,208,96,0.3)", background: _lvSel ? "#ffd060" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, marginTop: 2 } },
@@ -5145,7 +5146,7 @@ export default function CosmicWorkshop() {
                 : React.createElement("div", { style: { marginBottom: 8 } },
                   React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 5 } },
                     React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, lv.name || "Untitled"),
-                    !setsSelMode && React.createElement("div", { onClick: function() { setRenamingId(lv.id); setRenamingName(lv.name || ""); }, style: { color: "#80c8e8", cursor: "pointer", display: "flex", alignItems: "center" } }, WsIconPencil(14))),
+                    !setsSelMode && React.createElement("div", { onClick: function() { setRenamingId(lv.id); setRenamingName(lv.name || ""); }, style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", color: "rgba(180,200,220,0.6)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", flexShrink: 0 } }, WsIconPencil(11))),
                   React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 10 } }, dateStr)),
                 !setsSelMode && React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" } },
                   React.createElement("div", { onClick: function() { navigateToGame(lv.id); }, style: BTN_PLAY }, "PLAY"),
@@ -5297,7 +5298,8 @@ export default function CosmicWorkshop() {
             React.createElement("div", { style: { color: "rgba(180,200,220,0.2)", fontSize: 12 } }, "Create a new design or copy a Game Block to start.")),
           bdSavedTab === "custom" && sortItems(bdSaved, bdSortMode, "modifiedAt").map(function(saved) {
             var bt = null; for (var bi = 0; bi < BD_BLOCK_TYPES.length; bi++) { if (BD_BLOCK_TYPES[bi].id === saved.assignedTo) { bt = BD_BLOCK_TYPES[bi]; break; } }
-            var dateStr = saved.modifiedAt ? new Date(saved.modifiedAt).toLocaleString() : (saved.createdAt ? new Date(saved.createdAt).toLocaleString() : "");
+            var _dateRaw = saved.modifiedAt || saved.createdAt || saved.savedAt;
+            var dateStr = _dateRaw ? new Date(_dateRaw).toLocaleDateString() : "";
             var _bdSel = setsSelMode && setsSelMode.selectedIds.indexOf(saved.id) !== -1;
             return React.createElement("div", { key: saved.id, style: Object.assign({}, CARD_STYLE, setsSelMode ? { display: "flex", alignItems: "flex-start", gap: 8 } : {}) },
               setsSelMode && React.createElement("div", { onClick: function() { setsToggleSel(saved, "assignedTo"); }, style: { width: 20, height: 20, borderRadius: 4, border: _bdSel ? "1.5px solid #ffd060" : "1.5px solid rgba(255,208,96,0.3)", background: _bdSel ? "#ffd060" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, marginTop: 2 } },
@@ -5312,7 +5314,7 @@ export default function CosmicWorkshop() {
                   React.createElement("div", { style: { flex: 1, minWidth: 0 } },
                     React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 5 } },
                       React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, saved.name || "Unnamed"),
-                      !setsSelMode && React.createElement("div", { onClick: function() { setBdRenamingId(saved.id); setBdRenamingName(saved.name || ""); }, style: { color: "#80c8e8", cursor: "pointer", display: "flex", alignItems: "center" } }, WsIconPencil(14))),
+                      !setsSelMode && React.createElement("div", { onClick: function() { setBdRenamingId(saved.id); setBdRenamingName(saved.name || ""); }, style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", color: "rgba(180,200,220,0.6)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", flexShrink: 0 } }, WsIconPencil(11))),
                   React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 10 } }, (bt ? bt.label + " \u00B7 " : "") + saved.shape + (saved.pattern !== "none" ? " \u00B7 " + saved.pattern : "") + (dateStr ? " \u00B7 " + dateStr : ""))),
                   !setsSelMode && saved.assignedTo && React.createElement("div", { onClick: function() { bdToggleActive(saved); }, style: bdActiveMap[saved.assignedTo] === saved.id ? BTN_ISACTIVE : BTN_SETACTIVE }, bdActiveMap[saved.assignedTo] === saved.id ? "★ Active" : "Set Active")),
                 !setsSelMode && React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" } },
@@ -5488,7 +5490,8 @@ export default function CosmicWorkshop() {
             React.createElement("div", { style: { color: "rgba(180,200,220,0.2)", fontSize: 12 } }, "Create a new effect or copy a Default to start.")),
           vfxSavedTab === "custom" && sortItems(vfxSaved, vfxSortMode, "modifiedAt").map(function(saved) {
             var etInfo = vfxTypeInfo(saved.effectType);
-            var dateStr = saved.modifiedAt ? new Date(saved.modifiedAt).toLocaleString() : (saved.createdAt ? new Date(saved.createdAt).toLocaleString() : "");
+            var _dateRaw = saved.modifiedAt || saved.createdAt || saved.savedAt;
+            var dateStr = _dateRaw ? new Date(_dateRaw).toLocaleDateString() : "";
             var isAct = vfxActiveMap[saved.effectType] === saved.id;
             var _vfxSel = setsSelMode && setsSelMode.selectedIds.indexOf(saved.id) !== -1;
             return React.createElement("div", { key: saved.id, style: Object.assign({}, CARD_STYLE, setsSelMode ? { display: "flex", alignItems: "flex-start", gap: 8 } : {}) },
@@ -5504,7 +5507,7 @@ export default function CosmicWorkshop() {
                   React.createElement("div", { style: { flex: 1, minWidth: 0 } },
                     React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 5 } },
                       React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, saved.name || "Unnamed"),
-                      !setsSelMode && React.createElement("div", { onClick: function() { setVfxRenamingId(saved.id); setVfxRenamingName(saved.name || ""); }, style: { color: "#80c8e8", cursor: "pointer", display: "flex", alignItems: "center" } }, WsIconPencil(14))),
+                      !setsSelMode && React.createElement("div", { onClick: function() { setVfxRenamingId(saved.id); setVfxRenamingName(saved.name || ""); }, style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", color: "rgba(180,200,220,0.6)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", flexShrink: 0 } }, WsIconPencil(11))),
                     React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 10 } }, etInfo.label + (dateStr ? " · " + dateStr : ""))),
                   !setsSelMode && React.createElement("div", { onClick: function() { vfxToggleActive(saved); }, style: isAct ? BTN_ISACTIVE : BTN_SETACTIVE }, isAct ? "★ Active" : "Set Active")),
                 !setsSelMode && React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" } },
@@ -5637,7 +5640,7 @@ export default function CosmicWorkshop() {
           ufoSaved.map(function(design) {
             var isActive = design.id === ufoActiveId;
             var _ufoSel = setsSelMode && setsSelMode.selectedIds.indexOf(design.id) !== -1;
-            var _ufoDateStr = design.savedAt ? new Date(design.savedAt).toLocaleString() : "";
+            var _ufoDateStr = design.savedAt ? new Date(design.savedAt).toLocaleDateString() : "";
             return React.createElement("div", { key: design.id, style: Object.assign({}, CARD_STYLE, _ufoSel ? { borderColor: "rgba(255,208,96,0.4)", background: "rgba(255,208,96,0.05)" } : {}) },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, marginBottom: setsSelMode ? 0 : 10 } },
                 setsSelMode && React.createElement("div", { onClick: function() {
@@ -5762,7 +5765,7 @@ export default function CosmicWorkshop() {
           shipSaved.map(function(design) {
             var isActive = design.id === shipActiveId;
             var _shipSel = setsSelMode && setsSelMode.selectedIds.indexOf(design.id) !== -1;
-            var _shipDateStr = design.savedAt ? new Date(design.savedAt).toLocaleString() : "";
+            var _shipDateStr = design.savedAt ? new Date(design.savedAt).toLocaleDateString() : "";
             return React.createElement("div", { key: design.id, style: Object.assign({}, CARD_STYLE, _shipSel ? { borderColor: "rgba(255,208,96,0.4)", background: "rgba(255,208,96,0.05)" } : {}) },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, marginBottom: setsSelMode ? 0 : 10 } },
                 setsSelMode && React.createElement("div", { onClick: function() {
@@ -6199,7 +6202,7 @@ export default function CosmicWorkshop() {
           plasmaSaved.map(function(design) {
             var isActive = design.id === plasmaActiveId;
             var _plasmaSel = setsSelMode && setsSelMode.selectedIds.indexOf(design.id) !== -1;
-            var _plasmaDateStr = design.savedAt ? new Date(design.savedAt).toLocaleString() : "";
+            var _plasmaDateStr = design.savedAt ? new Date(design.savedAt).toLocaleDateString() : "";
             return React.createElement("div", { key: design.id, style: Object.assign({}, CARD_STYLE, _plasmaSel ? { borderColor: "rgba(255,208,96,0.4)", background: "rgba(255,208,96,0.05)" } : {}) },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, marginBottom: setsSelMode ? 0 : 10 } },
                 setsSelMode && React.createElement("div", { onClick: function() {
