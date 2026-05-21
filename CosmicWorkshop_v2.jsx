@@ -1180,6 +1180,7 @@ var BTN_SAVE = Object.assign({}, BTN_TOPBAR, { background: "linear-gradient(180d
 var BTN_PLAY = Object.assign({}, BTN_BASE, { padding: "5px 12px", background: "linear-gradient(180deg, #2a5a3a, #1a3a28)", border: "1px solid rgba(80,200,100,0.45)", color: "#80dd90" });
 var BTN_SETACTIVE = Object.assign({}, BTN_BASE, { padding: "5px 10px", background: PNL, border: "1px solid rgba(120,200,140,0.4)", color: "rgba(150,220,170,0.8)" });
 var BTN_ISACTIVE = Object.assign({}, BTN_BASE, { padding: "5px 10px", background: "linear-gradient(180deg, #2a5a3a, #1a3a28)", border: "1px solid rgba(80,220,120,0.7)", color: "#80dd90" });
+var BTN_PLAYSET = Object.assign({}, BTN_BASE, { padding: "5px 12px", background: "linear-gradient(180deg, #2a2000, #1a1400)", border: "1px solid rgba(255,208,96,0.6)", color: "#ffd060", display: "flex", alignItems: "center", gap: 5 });
 
 // Navigate to the game, optionally auto-playing a custom level by id.
 function navigateToGame(levelId) {
@@ -1603,6 +1604,8 @@ export default function CosmicWorkshop() {
   var _setsImportText = useState(""), setsImportText = _setsImportText[0], setSetsImportText = _setsImportText[1];
   var _setsImportError = useState(""), setsImportError = _setsImportError[0], setSetsImportError = _setsImportError[1];
   var _setsActivatePrompt = useState(null), setsActivatePrompt = _setsActivatePrompt[0], setSetsActivatePrompt = _setsActivatePrompt[1];
+  var _setsPlayPromptSet = useState(null), setsPlayPromptSet = _setsPlayPromptSet[0], setSetsPlayPromptSet = _setsPlayPromptSet[1];
+  var setsPlayAfterActivateRef = useRef(false);
   var _showSaveCurrent = useState(false), showSaveCurrent = _showSaveCurrent[0], setShowSaveCurrent = _showSaveCurrent[1];
   var _saveCurrentSels = useState(null), saveCurrentSels = _saveCurrentSels[0], setSaveCurrentSels = _saveCurrentSels[1];
   var _setsSelMode = useState(null), setsSelMode = _setsSelMode[0], setSetsSelMode = _setsSelMode[1];
@@ -2053,6 +2056,11 @@ export default function CosmicWorkshop() {
     }
     setSetsActiveId(setObj.id); setsSaveActiveId(setObj.id);
     setSetsActivatePrompt(null);
+    if (setsPlayAfterActivateRef.current) { setsPlayAfterActivateRef.current = false; handleSplashToGame(); }
+  }
+  function setsPlaySet(setObj) {
+    if (setsActiveId === setObj.id) { handleSplashToGame(); return; }
+    setSetsPlayPromptSet(setObj);
   }
   function setsExportSet(id) {
     var _so = null;
@@ -4432,7 +4440,7 @@ export default function CosmicWorkshop() {
           React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 33, fontWeight: 700, letterSpacing: 7, color: "#ede8ff", textTransform: "uppercase", textShadow: "0 0 22px rgba(160,100,255,0.55), 0 0 44px rgba(120,60,220,0.25)", lineHeight: 1.1 } }, "WORKSHOP"),
           React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", gap: 8 } },
             React.createElement("div", { style: { height: 1, width: 22, background: "rgba(160,100,255,0.25)" } }),
-            React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,170,255,0.32)" }, "SERVICE PANEL  ·  v3.0"),
+            React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,170,255,0.32)" }, "SERVICE PANEL  ·  v3.1"),
             React.createElement("div", { style: { height: 1, width: 22, background: "rgba(160,100,255,0.25)" } })
           ),
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginTop: 2 } },
@@ -4657,32 +4665,6 @@ export default function CosmicWorkshop() {
 
       ),
 
-      // ── RESUME BUTTON (Play-button style, purple — outside scroll so it's flush with BRIDGE) ──
-      React.createElement("div", { onClick: function() { handleSplashToGameAutoload(); }, style: { position: "relative", height: 64, background: WS.brushed, backgroundBlendMode: "overlay", border: WS.pbl, borderTop: "1px solid rgba(120,80,200,0.3)", borderBottom: "none", borderRadius: 0, boxShadow: "none", padding: 6, flexShrink: 0, cursor: "pointer" } },
-        WsRivet({ top: 5, left: 5 }),
-        WsRivet({ top: 5, right: 5 }),
-        WsRivet({ bottom: 5, left: 5 }),
-        WsRivet({ bottom: 5, right: 5 }),
-        React.createElement("div", { style: { position: "absolute", inset: 6, borderRadius: 7, background: "linear-gradient(180deg, #5a2480 0%, #3a1260 100%)", border: "1px solid rgba(180,100,255,0.8)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.28), inset 0 -2px 4px rgba(0,0,0,0.4), 0 0 26px rgba(160,80,255,0.4), 0 0 0 1px rgba(160,80,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center", gap: 14 } },
-          React.createElement("div", { style: { position: "absolute", top: 0, left: 0, right: 0, height: "45%", borderRadius: "7px 7px 100% 100%", background: "linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 100%)", pointerEvents: "none" } }),
-          React.createElement("svg", { width: "18", height: "18", viewBox: "0 0 24 24", fill: "none" },
-            React.createElement("circle", { cx: "8", cy: "15", r: "4", stroke: "rgba(240,220,255,0.9)", strokeWidth: "2" }),
-            React.createElement("path", { d: "M12 15h8M17 15v-3", stroke: "rgba(240,220,255,0.9)", strokeWidth: "2", strokeLinecap: "round" })
-          ),
-          React.createElement("span", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 22, fontWeight: 800, letterSpacing: 6, color: "#f0e8ff", textShadow: "0 0 14px rgba(200,140,255,0.7), 0 1px 0 rgba(0,0,0,0.4)" } }, "CONTINUE"),
-          // Two-line caption: "Saved Game" + level / difficulty.
-          React.createElement("div", { style: { display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "center", gap: 2, lineHeight: 1 } },
-            React.createElement(WsMono, { size: 8, ls: 1.2, color: "rgba(200,160,255,0.55)" }, "SAVED GAME"),
-            React.createElement(WsMono, { size: 8, ls: 0.6, color: "rgba(200,160,255,0.4)" }, (function() {
-              if (!wsSaveInfo) return "no save";
-              var lvl = wsSaveInfo.level != null ? ("LEVEL " + wsSaveInfo.level) : "";
-              var diff = (wsSaveInfo.difficulty || "").toString().toUpperCase();
-              if (lvl && diff) return lvl + "  ·  " + diff;
-              return lvl || diff || "—";
-            }())))
-        )
-      ),
-
       // ── BOTTOM BRIDGE BAR (mirrors game-splash Workshop lever) ──
       React.createElement(WsPanel, { onClick: function() { handleSplashToGame(); }, style: { flexShrink: 0, borderRadius: "0 0 10px 10px", borderTop: "none", padding: "8px 14px", height: 60, display: "flex", alignItems: "center", gap: 10, overflow: "hidden", cursor: "pointer" } },
         // Mechanical toggle — knob on LEFT (bridge/off position)
@@ -4757,6 +4739,10 @@ export default function CosmicWorkshop() {
                 })
               ),
               !setsMergeMode && React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" } },
+                setObj.levelIds && setObj.levelIds.length > 0 && React.createElement("div", { onClick: function() { setsPlaySet(setObj); }, style: BTN_PLAYSET },
+                  React.createElement("svg", { width: 9, height: 10, viewBox: "0 0 9 10" }, React.createElement("path", { d: "M0 0 L9 5 L0 10 Z", fill: "#ffd060" })),
+                  "PLAY"
+                ),
                 React.createElement("div", { onClick: function() { setsOpenEditor(setObj); }, style: BTN_EDIT }, WsIconPencil(), "EDIT"),
                 React.createElement("div", { onClick: function(e) { e.stopPropagation(); setsEditCopy(setObj); }, style: BTN_EDIT }, "COPY"),
                 React.createElement("div", { onClick: function(e) { e.stopPropagation(); setSetsMergeMode(true); setSetsMergeIds([setObj.id]); }, style: BTN_EDIT }, "MERGE"),
@@ -4815,6 +4801,16 @@ export default function CosmicWorkshop() {
             ),
             React.createElement("div", { style: { textAlign: "center" } },
               React.createElement("div", { onClick: function() { setSetsActivatePrompt(null); }, style: { color: "rgba(200,210,220,0.5)", fontSize: 12, cursor: "pointer" } }, "Cancel"))
+          )
+        ),
+        setsPlayPromptSet && React.createElement("div", { style: OVERLAY_BG },
+          React.createElement("div", { style: Object.assign({}, OVERLAY_BOX, { border: "1px solid rgba(255,208,96,0.4)", maxWidth: 320, width: "92%", textAlign: "center" }) },
+            React.createElement("div", { style: { color: "#ffd060", fontSize: 14, fontWeight: 700, marginBottom: 8, fontFamily: "'Quicksand',sans-serif" } }, setsPlayPromptSet.name || "Unnamed Set"),
+            React.createElement("div", { style: { color: "rgba(200,210,220,0.6)", fontSize: 12, marginBottom: 20 } }, "Activate this set and play?"),
+            React.createElement("div", { style: { display: "flex", gap: 10, justifyContent: "center" } },
+              React.createElement("div", { onClick: function() { setSetsPlayPromptSet(null); }, style: { padding: "9px 18px", borderRadius: 8, border: "1px solid rgba(200,210,220,0.2)", color: "rgba(200,210,220,0.5)", fontSize: 12, fontWeight: 600, cursor: "pointer" } }, "Cancel"),
+              React.createElement("div", { onClick: function() { setsPlayAfterActivateRef.current = true; setsToggleActive(setsPlayPromptSet); setSetsPlayPromptSet(null); }, style: { padding: "9px 18px", borderRadius: 8, background: "linear-gradient(180deg, #2a2000, #1a1400)", border: "1px solid rgba(255,208,96,0.6)", color: "#ffd060", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "Activate & Play")
+            )
           )
         ),
         // Save Current modal
