@@ -1463,6 +1463,8 @@ export default function CosmicWorkshop() {
   var _ufoHistVersion = useState(0), ufoHistVersion = _ufoHistVersion[0], setUfoHistVersion = _ufoHistVersion[1];
   var _ufoSaveStatus = useState(""), ufoSaveStatus = _ufoSaveStatus[0], setUfoSaveStatus = _ufoSaveStatus[1];
   var _ufoDeletingId = useState(null), ufoDeletingId = _ufoDeletingId[0], setUfoDeletingId = _ufoDeletingId[1];
+  var _ufoRenamingId = useState(null), ufoRenamingId = _ufoRenamingId[0], setUfoRenamingId = _ufoRenamingId[1];
+  var _ufoRenameValue = useState(""), ufoRenameValue = _ufoRenameValue[0], setUfoRenameValue = _ufoRenameValue[1];
   var _ufoBackWarn = useState(false), ufoShowBackWarn = _ufoBackWarn[0], setUfoShowBackWarn = _ufoBackWarn[1];
   var _ufoShowImport = useState(false), ufoShowImport = _ufoShowImport[0], setUfoShowImport = _ufoShowImport[1];
   var _ufoImportText = useState(""), ufoImportText = _ufoImportText[0], setUfoImportText = _ufoImportText[1];
@@ -1606,6 +1608,8 @@ export default function CosmicWorkshop() {
   var _setsActivatePrompt = useState(null), setsActivatePrompt = _setsActivatePrompt[0], setSetsActivatePrompt = _setsActivatePrompt[1];
   var _setsPlayPromptSet = useState(null), setsPlayPromptSet = _setsPlayPromptSet[0], setSetsPlayPromptSet = _setsPlayPromptSet[1];
   var setsPlayAfterActivateRef = useRef(false);
+  var _setsRenamingId = useState(null), setsRenamingId = _setsRenamingId[0], setSetsRenamingId = _setsRenamingId[1];
+  var _setsRenameValue = useState(""), setsRenameValue = _setsRenameValue[0], setSetsRenameValue = _setsRenameValue[1];
   var _showSaveCurrent = useState(false), showSaveCurrent = _showSaveCurrent[0], setShowSaveCurrent = _showSaveCurrent[1];
   var _saveCurrentSels = useState(null), saveCurrentSels = _saveCurrentSels[0], setSaveCurrentSels = _saveCurrentSels[1];
   var _setsSelMode = useState(null), setsSelMode = _setsSelMode[0], setSetsSelMode = _setsSelMode[1];
@@ -2062,6 +2066,15 @@ export default function CosmicWorkshop() {
     if (setsActiveId === setObj.id) { handleSplashToGame(); return; }
     setSetsPlayPromptSet(setObj);
   }
+  function setsCommitRename() {
+    var id = setsRenamingId;
+    if (!id) return;
+    var name = (setsRenameValue || "").trim() || "Unnamed Set";
+    var next = setsSaved.map(function(s) { return s.id === id ? Object.assign({}, s, { name: name, savedAt: new Date().toISOString() }) : s; });
+    setSetsSaved(next); setsSaveAll(next);
+    setSetsRenamingId(null); setSetsRenameValue("");
+  }
+  function setsCancelRename() { setSetsRenamingId(null); setSetsRenameValue(""); }
   function setsExportSet(id) {
     var _so = null;
     for (var _ei = 0; _ei < setsSaved.length; _ei++) { if (setsSaved[_ei].id === id) { _so = setsSaved[_ei]; break; } }
@@ -3492,6 +3505,18 @@ export default function CosmicWorkshop() {
     setUfoActiveId(id);
     ufoSaveActiveId(id);
   }
+  function ufoCommitRename() {
+    var id = ufoRenamingId;
+    if (!id) return;
+    var name = (ufoRenameValue || "").trim() || "Untitled";
+    setUfoSaved(function(prev) {
+      var list = prev.map(function(d) { return d.id === id ? Object.assign({}, d, { name: name, savedAt: new Date().toISOString() }) : d; });
+      ufoSaveDesigns(list);
+      return list;
+    });
+    setUfoRenamingId(null); setUfoRenameValue("");
+  }
+  function ufoCancelRename() { setUfoRenamingId(null); setUfoRenameValue(""); }
   function ufoDeleteDesign(id) {
     setUfoSaved(function(prev) {
       var list = prev.filter(function(d) { return d.id !== id; });
@@ -4440,7 +4465,7 @@ export default function CosmicWorkshop() {
           React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 33, fontWeight: 700, letterSpacing: 7, color: "#ede8ff", textTransform: "uppercase", textShadow: "0 0 22px rgba(160,100,255,0.55), 0 0 44px rgba(120,60,220,0.25)", lineHeight: 1.1 } }, "WORKSHOP"),
           React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", gap: 8 } },
             React.createElement("div", { style: { height: 1, width: 22, background: "rgba(160,100,255,0.25)" } }),
-            React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,170,255,0.32)" }, "SERVICE PANEL  ·  v3.1"),
+            React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,170,255,0.32)" }, "SERVICE PANEL  ·  v3.2"),
             React.createElement("div", { style: { height: 1, width: 22, background: "rgba(160,100,255,0.25)" } })
           ),
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginTop: 2 } },
@@ -4722,16 +4747,25 @@ export default function CosmicWorkshop() {
             var _date = setObj.savedAt ? new Date(setObj.savedAt).toLocaleDateString() : "";
             var _mergeChecked = setsMergeIds.indexOf(setObj.id) !== -1;
             return React.createElement("div", { key: setObj.id, style: Object.assign({}, CARD_STYLE, setsMergeMode && _mergeChecked ? { borderColor: "rgba(255,208,96,0.4)", background: "rgba(255,208,96,0.05)" } : {}), onClick: setsMergeMode ? function() { setSetsMergeIds(_mergeChecked ? setsMergeIds.filter(function(id) { return id !== setObj.id; }) : setsMergeIds.concat([setObj.id])); } : null },
-              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 6 } },
+              React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 8 } },
                 setsMergeMode && React.createElement("div", { style: { width: 20, height: 20, borderRadius: 4, border: "2px solid " + (_mergeChecked ? "#ffd060" : "rgba(255,255,255,0.2)"), background: _mergeChecked ? "#ffd060" : "transparent", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" } },
                   _mergeChecked && React.createElement("svg", { width: 12, height: 12, viewBox: "0 0 12 12" }, React.createElement("path", { d: "M2 6 L5 9 L10 3", stroke: "#1a1400", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", fill: "none" }))),
                 React.createElement("div", { style: { flex: 1, minWidth: 0 } },
-                  React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
-                    React.createElement("div", { style: { color: "#fff8dc", fontSize: 14, fontWeight: 700 } }, setObj.name || "Unnamed Set"),
-                    _isActive && React.createElement("div", { style: { display: "inline-block", background: "rgba(255,208,96,0.15)", border: "1px solid rgba(255,208,96,0.4)", borderRadius: 4, padding: "1px 6px", fontSize: 10, color: "#ffd060", fontWeight: 700 } }, "ACTIVE")
-                  ),
-                  React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 10, marginTop: 2 } }, _date)
-                )
+                  setsRenamingId === setObj.id
+                    ? React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
+                        React.createElement("input", { value: setsRenameValue, autoFocus: true, onChange: function(e) { setSetsRenameValue(e.target.value); }, onKeyDown: function(e) { if (e.key === "Enter") setsCommitRename(); else if (e.key === "Escape") setsCancelRename(); }, style: { flex: 1, minWidth: 0, padding: "4px 8px", borderRadius: 6, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,208,96,0.5)", color: "#fff8dc", fontSize: 16, fontWeight: 700, fontFamily: "'Quicksand',sans-serif", outline: "none", boxSizing: "border-box" } }),
+                        React.createElement("div", { onMouseDown: function(e) { e.preventDefault(); }, onClick: setsCommitRename, style: { padding: "4px 8px", borderRadius: 4, background: "rgba(80,200,100,0.2)", border: "1px solid rgba(80,200,100,0.4)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } },
+                          React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M5 13l4 4L19 7", fill: "none", stroke: "#80dd90", strokeWidth: "2.5", strokeLinecap: "round", strokeLinejoin: "round" }))),
+                        React.createElement("div", { onMouseDown: function(e) { e.preventDefault(); }, onClick: setsCancelRename, style: { padding: "4px 8px", borderRadius: 4, background: "rgba(220,60,80,0.18)", border: "1px solid rgba(220,60,80,0.45)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } },
+                          React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M6 6L18 18 M18 6L6 18", fill: "none", stroke: "#ff8088", strokeWidth: "2.5", strokeLinecap: "round" }))))
+                    : React.createElement(React.Fragment, null,
+                        React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
+                          React.createElement("div", { style: { color: "#fff8dc", fontSize: 14, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, setObj.name || "Unnamed Set"),
+                          !setsMergeMode && React.createElement("div", { onClick: function(e) { e.stopPropagation(); setSetsRenamingId(setObj.id); setSetsRenameValue(setObj.name || ""); }, title: "Rename set", style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", color: "rgba(180,200,220,0.6)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", flexShrink: 0 } },
+                            WsIconPencil(11))),
+                        React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 10, marginTop: 2 } }, _date))
+                ),
+                !setsMergeMode && setsRenamingId !== setObj.id && React.createElement("div", { onClick: function(e) { e.stopPropagation(); setsToggleActive(setObj); }, style: Object.assign({}, _isActive ? BTN_ISACTIVE : BTN_SETACTIVE, { flexShrink: 0 }) }, _isActive ? "★ Active" : "Set Active")
               ),
               _chips.length > 0 && React.createElement("div", { style: { display: "flex", gap: 4, flexWrap: "wrap", marginBottom: 8 } },
                 _chips.map(function(chip) {
@@ -4744,10 +4778,9 @@ export default function CosmicWorkshop() {
                   "PLAY"
                 ),
                 React.createElement("div", { onClick: function() { setsOpenEditor(setObj); }, style: BTN_EDIT }, WsIconPencil(), "EDIT"),
-                React.createElement("div", { onClick: function(e) { e.stopPropagation(); setsEditCopy(setObj); }, style: BTN_EDIT }, "COPY"),
+                React.createElement("div", { onClick: function(e) { e.stopPropagation(); setsEditCopy(setObj); }, style: BTN_EDIT }, WsIconCopy(), "Edit Copy"),
                 React.createElement("div", { onClick: function(e) { e.stopPropagation(); setSetsMergeMode(true); setSetsMergeIds([setObj.id]); }, style: BTN_EDIT }, "MERGE"),
-                React.createElement("div", { onClick: function() { setsToggleActive(setObj); }, style: _isActive ? BTN_ISACTIVE : BTN_SETACTIVE }, _isActive ? "★ Active" : "Set Active"),
-                React.createElement("div", { onClick: function() { setsExportSet(setObj.id); }, style: BTN_EXPORT }, WsIconShare(), "EXPORT"),
+                React.createElement("div", { onClick: function() { setsExportSet(setObj.id); }, style: BTN_EXPORT }, WsIconShare(), "SHARE"),
                 React.createElement("div", { style: { flex: 1 } }),
                 React.createElement("div", { onClick: function() { setSetsDeleteId(setObj.id); }, style: BTN_DELETE_ICON }, WsIconTrash())
               )
@@ -5075,8 +5108,8 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { flex: 1 } },
                 renamingId === lv.id ? React.createElement("div", { style: { display: "flex", gap: 6, marginBottom: 8, alignItems: "center" } },
                   React.createElement("input", { value: renamingName, onChange: function(e) { setRenamingName(e.target.value); }, style: { flex: 1, padding: "4px 8px", borderRadius: 4, background: SCRN, border: SCRNB, color: "#b0c8d8", fontSize: 16, fontFamily: "'Quicksand',sans-serif", outline: "none" } }),
-                  React.createElement("div", { onClick: function() { renameLevel(lv.id, renamingName); }, style: { padding: "4px 8px", borderRadius: 4, background: "rgba(80,200,100,0.2)", border: "1px solid rgba(80,200,100,0.4)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" } }, React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M5 13l4 4L19 7", fill: "none", stroke: "#80dd90", strokeWidth: "2.5", strokeLinecap: "round", strokeLinejoin: "round" }))),
-                  React.createElement("div", { onClick: function() { setRenamingId(null); }, style: { padding: "4px 8px", borderRadius: 4, border: "1px solid rgba(120,80,255,0.3)", color: "#c8b8ff", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "X"))
+                  React.createElement("div", { onMouseDown: function(e) { e.preventDefault(); }, onClick: function() { renameLevel(lv.id, renamingName); }, style: { padding: "4px 8px", borderRadius: 4, background: "rgba(80,200,100,0.2)", border: "1px solid rgba(80,200,100,0.4)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } }, React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M5 13l4 4L19 7", fill: "none", stroke: "#80dd90", strokeWidth: "2.5", strokeLinecap: "round", strokeLinejoin: "round" }))),
+                  React.createElement("div", { onMouseDown: function(e) { e.preventDefault(); }, onClick: function() { setRenamingId(null); }, style: { padding: "4px 8px", borderRadius: 4, background: "rgba(220,60,80,0.18)", border: "1px solid rgba(220,60,80,0.45)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } }, React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M6 6L18 18 M18 6L6 18", fill: "none", stroke: "#ff8088", strokeWidth: "2.5", strokeLinecap: "round" }))))
                 : React.createElement("div", { style: { marginBottom: 8 } },
                   React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 5 } },
                     React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, lv.name || "Untitled"),
@@ -5240,8 +5273,8 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { flex: 1 } },
                 bdRenamingId === saved.id ? React.createElement("div", { style: { display: "flex", gap: 6, marginBottom: 8, alignItems: "center" } },
                   React.createElement("input", { value: bdRenamingName, onChange: function(e) { setBdRenamingName(e.target.value); }, style: { flex: 1, padding: "4px 8px", borderRadius: 4, background: SCRN, border: SCRNB, color: "#b0c8d8", fontSize: 16, fontFamily: "'Quicksand',sans-serif", outline: "none" } }),
-                  React.createElement("div", { onClick: function() { bdRenameDesign(saved.id, bdRenamingName); }, style: { padding: "4px 8px", borderRadius: 4, background: "rgba(80,200,100,0.2)", border: "1px solid rgba(80,200,100,0.4)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" } }, React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M5 13l4 4L19 7", fill: "none", stroke: "#80dd90", strokeWidth: "2.5", strokeLinecap: "round", strokeLinejoin: "round" }))),
-                  React.createElement("div", { onClick: function() { setBdRenamingId(null); }, style: { padding: "4px 8px", borderRadius: 4, border: "1px solid rgba(120,80,255,0.3)", color: "#c8b8ff", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "X"))
+                  React.createElement("div", { onMouseDown: function(e) { e.preventDefault(); }, onClick: function() { bdRenameDesign(saved.id, bdRenamingName); }, style: { padding: "4px 8px", borderRadius: 4, background: "rgba(80,200,100,0.2)", border: "1px solid rgba(80,200,100,0.4)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } }, React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M5 13l4 4L19 7", fill: "none", stroke: "#80dd90", strokeWidth: "2.5", strokeLinecap: "round", strokeLinejoin: "round" }))),
+                  React.createElement("div", { onMouseDown: function(e) { e.preventDefault(); }, onClick: function() { setBdRenamingId(null); }, style: { padding: "4px 8px", borderRadius: 4, background: "rgba(220,60,80,0.18)", border: "1px solid rgba(220,60,80,0.45)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } }, React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M6 6L18 18 M18 6L6 18", fill: "none", stroke: "#ff8088", strokeWidth: "2.5", strokeLinecap: "round" }))))
                 : React.createElement("div", { style: { display: "flex", gap: 10, marginBottom: 8, alignItems: "center" } },
                   React.createElement(BDBlockPreview, { design: saved, size: 38 }),
                   React.createElement("div", { style: { flex: 1, minWidth: 0 } },
@@ -5432,8 +5465,8 @@ export default function CosmicWorkshop() {
               React.createElement("div", { style: { flex: 1 } },
                 vfxRenamingId === saved.id ? React.createElement("div", { style: { display: "flex", gap: 6, marginBottom: 8, alignItems: "center" } },
                   React.createElement("input", { value: vfxRenamingName, onChange: function(e) { setVfxRenamingName(e.target.value); }, style: { flex: 1, padding: "4px 8px", borderRadius: 4, background: SCRN, border: SCRNB, color: "#b0c8d8", fontSize: 16, fontFamily: "'Quicksand',sans-serif", outline: "none" } }),
-                  React.createElement("div", { onClick: function() { vfxRenameDesign(saved.id, vfxRenamingName); }, style: { padding: "4px 10px", borderRadius: 4, background: "rgba(80,200,100,0.2)", border: "1px solid rgba(80,200,100,0.4)", color: "#80dd90", fontWeight: 700, cursor: "pointer" } }, "OK"),
-                  React.createElement("div", { onClick: function() { setVfxRenamingId(null); }, style: { padding: "4px 8px", borderRadius: 4, border: "1px solid rgba(255,180,60,0.3)", color: "#ffb43c", fontWeight: 700, cursor: "pointer" } }, "X"))
+                  React.createElement("div", { onMouseDown: function(e) { e.preventDefault(); }, onClick: function() { vfxRenameDesign(saved.id, vfxRenamingName); }, style: { padding: "4px 8px", borderRadius: 4, background: "rgba(80,200,100,0.2)", border: "1px solid rgba(80,200,100,0.4)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } }, React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M5 13l4 4L19 7", fill: "none", stroke: "#80dd90", strokeWidth: "2.5", strokeLinecap: "round", strokeLinejoin: "round" }))),
+                  React.createElement("div", { onMouseDown: function(e) { e.preventDefault(); }, onClick: function() { setVfxRenamingId(null); }, style: { padding: "4px 8px", borderRadius: 4, background: "rgba(220,60,80,0.18)", border: "1px solid rgba(220,60,80,0.45)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } }, React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M6 6L18 18 M18 6L6 18", fill: "none", stroke: "#ff8088", strokeWidth: "2.5", strokeLinecap: "round" }))))
                 : React.createElement("div", { style: { display: "flex", gap: 10, marginBottom: 8, alignItems: "center" } },
                   renderVfxIcon(saved),
                   React.createElement("div", { style: { flex: 1, minWidth: 0 } },
@@ -5582,9 +5615,16 @@ export default function CosmicWorkshop() {
                 React.createElement("div", { style: { width: 64, height: 64, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.2)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.06)", flexShrink: 0 } },
                   React.createElement(UFOBlockSvg, { size: 56, design: design, uid: design.id })),
                 React.createElement("div", { style: { flex: 1, minWidth: 0 } },
-                  React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700, marginBottom: 3 } }, design.name || "Untitled")),
-                !setsSelMode && React.createElement("div", { onClick: function() { ufoSetActive(design.id); }, style: isActive ? BTN_ISACTIVE : BTN_SETACTIVE }, isActive ? "★ Active" : "Set Active")),
-              !setsSelMode && React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" } },
+                  ufoRenamingId === design.id
+                    ? React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
+                        React.createElement("input", { value: ufoRenameValue, autoFocus: true, onChange: function(e) { setUfoRenameValue(e.target.value); }, onKeyDown: function(e) { if (e.key === "Enter") ufoCommitRename(); else if (e.key === "Escape") ufoCancelRename(); }, style: { flex: 1, minWidth: 0, padding: "4px 8px", borderRadius: 6, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(100,220,180,0.5)", color: "#b0c8d8", fontSize: 16, fontWeight: 700, fontFamily: "'Quicksand',sans-serif", outline: "none", boxSizing: "border-box" } }),
+                        React.createElement("div", { onMouseDown: function(e) { e.preventDefault(); }, onClick: ufoCommitRename, style: { padding: "4px 8px", borderRadius: 4, background: "rgba(80,200,100,0.2)", border: "1px solid rgba(80,200,100,0.4)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } }, React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M5 13l4 4L19 7", fill: "none", stroke: "#80dd90", strokeWidth: "2.5", strokeLinecap: "round", strokeLinejoin: "round" }))),
+                        React.createElement("div", { onMouseDown: function(e) { e.preventDefault(); }, onClick: ufoCancelRename, style: { padding: "4px 8px", borderRadius: 4, background: "rgba(220,60,80,0.18)", border: "1px solid rgba(220,60,80,0.45)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } }, React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M6 6L18 18 M18 6L6 18", fill: "none", stroke: "#ff8088", strokeWidth: "2.5", strokeLinecap: "round" }))))
+                    : React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
+                        React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, design.name || "Untitled"),
+                        !setsSelMode && React.createElement("div", { onClick: function(e) { e.stopPropagation(); setUfoRenamingId(design.id); setUfoRenameValue(design.name || ""); }, title: "Rename UFO", style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", color: "rgba(180,200,220,0.6)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", flexShrink: 0 } }, WsIconPencil(11)))),
+                !setsSelMode && ufoRenamingId !== design.id && React.createElement("div", { onClick: function() { ufoSetActive(design.id); }, style: isActive ? BTN_ISACTIVE : BTN_SETACTIVE }, isActive ? "★ Active" : "Set Active")),
+              !setsSelMode && ufoRenamingId !== design.id && React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" } },
                 React.createElement("div", { onClick: function() { ufoOpenEditor(design); }, style: BTN_EDIT }, WsIconPencil(), "EDIT"),
                 React.createElement("div", { onClick: function() { ufoEditDirtyRef.current = false; setUfoEditId(null); setUfoEditDesign(Object.assign({}, design, { name: (design.name || "My UFO") + " (copy)" })); setUfoView("editor"); }, style: BTN_EDIT }, WsIconCopy(), "Edit Copy"),
                 React.createElement("div", { onClick: function() { ufoExportDesign(design); }, style: BTN_EXPORT }, WsIconShare(), "SHARE"),
