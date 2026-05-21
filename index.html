@@ -13344,9 +13344,10 @@ function CosmicDriftGame() {
     onClick: hasSaveGame ? loadSaveGame : undefined,
     style: {
       flexShrink: 0,
-      padding: "8px 16px",
-      background: "linear-gradient(180deg, rgba(20,20,35,0.9), rgba(12,12,22,0.9))",
-      border: "1px solid " + (DIFF_COLORS[saveGameInfo && saveGameInfo.difficulty || "regular"] || GS.green) + "44",
+      margin: "0 10px",
+      padding: "8px 6px",
+      background: "linear-gradient(180deg, rgba(18,45,30,0.95), rgba(10,28,18,0.95))",
+      border: "1px solid rgba(80,200,120,0.35)",
       borderRadius: 8,
       cursor: hasSaveGame ? "pointer" : "default",
       display: "flex",
@@ -13355,7 +13356,8 @@ function CosmicDriftGame() {
       gap: 10,
       zIndex: 1,
       visibility: hasSaveGame ? "visible" : "hidden",
-      pointerEvents: hasSaveGame ? "auto" : "none"
+      pointerEvents: hasSaveGame ? "auto" : "none",
+      boxShadow: "0 0 12px rgba(80,200,120,0.12)"
     }
   }, /*#__PURE__*/React.createElement("svg", {
     width: "12",
@@ -13405,7 +13407,8 @@ function CosmicDriftGame() {
     style: {
       flexShrink: 0,
       display: "flex",
-      flexDirection: "column"
+      flexDirection: "column",
+      gap: 4
     }
   }, /*#__PURE__*/React.createElement(GsPanel, {
     style: {
@@ -13499,7 +13502,8 @@ function CosmicDriftGame() {
   }, /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 15,
-      lineHeight: 1
+      lineHeight: 1,
+      marginBottom: -3
     }
   }, "∞"), /*#__PURE__*/React.createElement("span", null, "INFINITE")), /*#__PURE__*/React.createElement("div", {
     onClick: function () {
