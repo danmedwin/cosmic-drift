@@ -5085,7 +5085,8 @@ function PlasmaContainer(props) {
     fontFamily: "Quicksand,sans-serif"
   }, props.current)));
 }
-function makeLightningPath(h) {
+function makeLightningPath(h, jagMul) {
+  var jag = jagMul != null ? Math.max(0.5, Math.min(2, jagMul)) : 1;
   var seg = Math.max(6, Math.floor(h / 18)),
     segH = h / seg,
     d = "M15 " + h,
@@ -5095,7 +5096,7 @@ function makeLightningPath(h) {
     }];
   for (var i = 1; i <= seg; i++) {
     var y = h - i * segH,
-      x = 15 + (i % 2 === 0 ? 1 : -1) * (4 + Math.sin(i * 2.7) * 6);
+      x = 15 + (i % 2 === 0 ? 1 : -1) * (4 + Math.sin(i * 2.7) * 6) * jag;
     pts.push({
       x: x,
       y: y
@@ -10923,8 +10924,19 @@ function CosmicDriftGame() {
       }
     }));
     if (v.type === "lightning") {
-      var bolt = makeLightningPath(v.height);
+      var _lc = vfxGet("lightning");
+      var _lglow = _lc.glowColor || "#ffe066";
+      var _lbolt = _lc.boltColor || "#ffe066";
+      var _lcore = _lc.coreColor || "#fffde0";
+      var _lthick = Math.max(0.5, Math.min(2, _lc.thickness || 1));
+      var _ljag = Math.max(0.5, Math.min(2, _lc.jaggedness || 1));
+      var _lspeed = Math.max(0.5, Math.min(2, _lc.speed || 1));
+      var _ldur = (0.5 / _lspeed).toFixed(2) + "s ease-out forwards";
+      var bolt = makeLightningPath(v.height, _ljag);
       var mp = bolt.pts[Math.floor(bolt.pts.length / 2)];
+      var _lgw = 6 * _lthick;
+      var _lmw = 3 * _lthick;
+      var _lcw = 1.5 * _lthick;
       return /*#__PURE__*/React.createElement("div", {
         key: v.id,
         style: {
@@ -10934,7 +10946,7 @@ function CosmicDriftGame() {
           width: 30,
           height: v.height,
           overflow: "visible",
-          animation: "lightningFlash 0.5s ease-out forwards",
+          animation: "lightningFlash " + _ldur,
           zIndex: 10
         }
       }, /*#__PURE__*/React.createElement("svg", {
@@ -10945,29 +10957,29 @@ function CosmicDriftGame() {
         }
       }, /*#__PURE__*/React.createElement("path", {
         d: bolt.main,
-        stroke: "#ffe066",
-        strokeWidth: "6",
+        stroke: _lglow,
+        strokeWidth: _lgw,
         fill: "none",
         opacity: "0.3",
         strokeLinecap: "round",
         strokeLinejoin: "round"
       }), /*#__PURE__*/React.createElement("path", {
         d: bolt.main,
-        stroke: "#ffe066",
-        strokeWidth: "3",
+        stroke: _lbolt,
+        strokeWidth: _lmw,
         fill: "none",
         strokeLinecap: "round",
         strokeLinejoin: "round"
       }), /*#__PURE__*/React.createElement("path", {
         d: bolt.main,
-        stroke: "#fffde0",
-        strokeWidth: "1.5",
+        stroke: _lcore,
+        strokeWidth: _lcw,
         fill: "none",
         strokeLinecap: "round",
         strokeLinejoin: "round"
       }), mp && /*#__PURE__*/React.createElement("path", {
         d: "M" + mp.x + " " + mp.y + "L" + (mp.x + 12) + " " + (mp.y - 20) + "L" + (mp.x + 8) + " " + (mp.y - 35),
-        stroke: "#ffe066",
+        stroke: _lbolt,
         strokeWidth: "2",
         fill: "none",
         opacity: "0.6",

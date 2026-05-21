@@ -59,7 +59,7 @@ var SCRNB = "2px solid #3a3a45";
 var SCRNS = "inset 0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.05)";
 
 // ── Animation CSS (subset needed for Workshop) ──
-var ANIM_CSS = "@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');\n@keyframes starDrift{0%{transform:translateY(-50%)}100%{transform:translateY(0)}}\n@keyframes introFadeIn{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}\n@keyframes pulse{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}\n@keyframes ufoWarpOut{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}\n@keyframes ufoWarpIn{0%{transform:scale(0.05);opacity:0}60%{transform:scale(1.08);opacity:0.9}100%{transform:scale(1);opacity:1}}\n@keyframes ufoLightSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}\n@keyframes splashFloat{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}\n@keyframes splashGlow{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}@keyframes cdSplashEnterFromGame{0%{transform:scale(0.95);filter:brightness(0.5)}100%{transform:scale(1);filter:brightness(1)}}@keyframes cdSplashExitShrink{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(0.93);filter:brightness(0.55)}100%{transform:scale(0.93);filter:brightness(0.55)}}\n* { box-sizing: border-box; }\ninput[type=range] { -webkit-appearance: none; appearance: none; background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; outline: none; }\ninput[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }\ninput[type=range]::-moz-range-thumb { width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }@keyframes vfxOozeDrip{0%{transform:scaleY(0);opacity:0}100%{transform:scaleY(1);opacity:0.85}}@keyframes vfxOozeWave{0%{transform:translateY(0)}100%{transform:translateY(50%)}}@keyframes vfxBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxRing{0%{transform:scale(0.1);opacity:1}100%{transform:scale(2.2);opacity:0}}@keyframes vfxFlash{0%{transform:scale(0.2);opacity:1}100%{transform:scale(1.8);opacity:0}}@keyframes vfxPop{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(1.2);filter:brightness(1.8)}100%{transform:scale(0);opacity:0}}@keyframes vfxBubble{0%{transform:translateY(0) scale(0.5);opacity:0}15%{opacity:0.55}85%{opacity:0.55}100%{transform:translateY(88px) scale(1);opacity:0}}@keyframes vfxSpark{0%{transform:translate(0,0) scale(1);opacity:1}35%{transform:translate(calc(var(--sx)*0.45),calc(var(--sy)*0.25 - 7px));opacity:0.9}100%{transform:translate(var(--sx),var(--sy)) scale(0.3);opacity:0}}@keyframes vfxBurnBlock{0%{opacity:1;filter:brightness(1)}10%{opacity:1;filter:brightness(2.3)}55%{opacity:0;filter:brightness(1)}100%{opacity:0;filter:brightness(1)}}@keyframes vfxShatter{0%{transform:translate(0,0) scale(1);opacity:0}15%{opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxDroneShard{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0.2);opacity:0}}@keyframes plasmaZip{0%{transform:translate(0,0) scale(1);opacity:1}80%{opacity:1}100%{transform:translate(var(--endX),var(--endY)) scale(0.5);opacity:0}}@keyframes plasmaFlash{0%{transform:scale(0.5);opacity:1}50%{transform:scale(1);opacity:0.8}100%{transform:scale(1.5);opacity:0}}";
+var ANIM_CSS = "@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');\n@keyframes starDrift{0%{transform:translateY(-50%)}100%{transform:translateY(0)}}\n@keyframes introFadeIn{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}\n@keyframes pulse{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}\n@keyframes ufoWarpOut{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}\n@keyframes ufoWarpIn{0%{transform:scale(0.05);opacity:0}60%{transform:scale(1.08);opacity:0.9}100%{transform:scale(1);opacity:1}}\n@keyframes ufoLightSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}\n@keyframes splashFloat{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}\n@keyframes splashGlow{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}@keyframes cdSplashEnterFromGame{0%{transform:scale(0.95);filter:brightness(0.5)}100%{transform:scale(1);filter:brightness(1)}}@keyframes cdSplashExitShrink{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(0.93);filter:brightness(0.55)}100%{transform:scale(0.93);filter:brightness(0.55)}}\n* { box-sizing: border-box; }\ninput[type=range] { -webkit-appearance: none; appearance: none; background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; outline: none; }\ninput[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }\ninput[type=range]::-moz-range-thumb { width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }@keyframes vfxOozeDrip{0%{transform:scaleY(0);opacity:0}100%{transform:scaleY(1);opacity:0.85}}@keyframes vfxOozeWave{0%{transform:translateY(0)}100%{transform:translateY(50%)}}@keyframes vfxBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxRing{0%{transform:scale(0.1);opacity:1}100%{transform:scale(2.2);opacity:0}}@keyframes vfxFlash{0%{transform:scale(0.2);opacity:1}100%{transform:scale(1.8);opacity:0}}@keyframes vfxPop{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(1.2);filter:brightness(1.8)}100%{transform:scale(0);opacity:0}}@keyframes vfxBubble{0%{transform:translateY(0) scale(0.5);opacity:0}15%{opacity:0.55}85%{opacity:0.55}100%{transform:translateY(88px) scale(1);opacity:0}}@keyframes vfxSpark{0%{transform:translate(0,0) scale(1);opacity:1}35%{transform:translate(calc(var(--sx)*0.45),calc(var(--sy)*0.25 - 7px));opacity:0.9}100%{transform:translate(var(--sx),var(--sy)) scale(0.3);opacity:0}}@keyframes vfxBurnBlock{0%{opacity:1;filter:brightness(1)}10%{opacity:1;filter:brightness(2.3)}55%{opacity:0;filter:brightness(1)}100%{opacity:0;filter:brightness(1)}}@keyframes vfxShatter{0%{transform:translate(0,0) scale(1);opacity:0}15%{opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxDroneShard{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0.2);opacity:0}}@keyframes plasmaZip{0%{transform:translate(0,0) scale(1);opacity:1}80%{opacity:1}100%{transform:translate(var(--endX),var(--endY)) scale(0.5);opacity:0}}@keyframes plasmaFlash{0%{transform:scale(0.5);opacity:1}50%{transform:scale(1);opacity:0.8}100%{transform:scale(1.5);opacity:0}}@keyframes vfxLightningBolt{0%{opacity:0;filter:brightness(1)}8%{opacity:1;filter:brightness(2.5)}50%{opacity:0.7;filter:brightness(1.3)}70%{opacity:0;filter:brightness(1)}100%{opacity:0}}";
 
 // ═══════════════════════════════════════════════════════════════
 // SHARED VISUAL COMPONENTS
@@ -756,7 +756,8 @@ var VFX_EFFECT_TYPES = [
   { id: "acid_ooze",     label: "Acid Ooze",     color: "#35a035" },
   { id: "burn",          label: "Burn",          color: "#ff6633" },
   { id: "block_destroy", label: "Block Destroy", color: "#80ddff" },
-  { id: "drone_explode", label: "Drone Explode", color: "#ffe066" }
+  { id: "drone_explode", label: "Drone Explode", color: "#ffe066" },
+  { id: "lightning",     label: "Lightning",     color: "#ffe066" }
 ];
 function vfxTypeInfo(id) {
   for (var i = 0; i < VFX_EFFECT_TYPES.length; i++) { if (VFX_EFFECT_TYPES[i].id === id) return VFX_EFFECT_TYPES[i]; }
@@ -768,7 +769,8 @@ var VFX_DEFAULTS = {
   acid_ooze:     { color1: "#1a6a1a", color2: "#35a035", width: 1.0, waveSize: 1.0, freq: 5, speed: 1.0, splash: 1.0 },
   burn:          { emberColor: "#ff6633", emberOpacity: 1.0, sparkColor: "#ffffff", sparkOpacity: 0.85, speed: 1.0, spread: 1.0, density: 1.0, emberSize: 1.0 },
   block_destroy: { burstColor: "#c8b8ff", burstOpacity: 1.0, accentColor: "#80ddff", accentOpacity: 1.0, speed: 1.0, spread: 1.0, count: 1.0, particleSize: 1.0 },
-  drone_explode: { coreColor: "#ffe066", coreOpacity: 1.0, blastColor: "#ff6633", blastOpacity: 1.0, speed: 1.0, spread: 1.0, count: 1.0, particleSize: 1.0 }
+  drone_explode: { coreColor: "#ffe066", coreOpacity: 1.0, blastColor: "#ff6633", blastOpacity: 1.0, speed: 1.0, spread: 1.0, count: 1.0, particleSize: 1.0 },
+  lightning:     { glowColor: "#ffe066", boltColor: "#ffe066", coreColor: "#fffde0", thickness: 1.0, jaggedness: 1.0, speed: 1.0 }
 };
 
 // Factory presets: the built-in look per effect type (Defaults tab + fallback
@@ -777,7 +779,8 @@ var VFX_FACTORY_PRESETS = [
   { id: "factory_acid_ooze",     name: "Default Acid Ooze",     effectType: "acid_ooze",     isFactory: true, color1: "#1a6a1a", color2: "#35a035", width: 1.3, waveSize: 0.8, freq: 8, speed: 0.5, splash: 1.8 },
   { id: "factory_burn",          name: "Default Burn",          effectType: "burn",          isFactory: true, emberColor: "#ff6633", emberOpacity: 1.0, sparkColor: "#ffffff", sparkOpacity: 0.85, speed: 1.0, spread: 1.0, density: 1.0, emberSize: 1.0 },
   { id: "factory_block_destroy", name: "Default Block Destroy", effectType: "block_destroy", isFactory: true, burstColor: "#c8b8ff", burstOpacity: 1.0, accentColor: "#80ddff", accentOpacity: 1.0, speed: 1.0, spread: 1.0, count: 1.0, particleSize: 1.0 },
-  { id: "factory_drone_explode", name: "Default Drone Explode", effectType: "drone_explode", isFactory: true, coreColor: "#ffe066", coreOpacity: 1.0, blastColor: "#ff6633", blastOpacity: 1.0, speed: 1.0, spread: 1.0, count: 1.0, particleSize: 1.0 }
+  { id: "factory_drone_explode", name: "Default Drone Explode", effectType: "drone_explode", isFactory: true, coreColor: "#ffe066", coreOpacity: 1.0, blastColor: "#ff6633", blastOpacity: 1.0, speed: 1.0, spread: 1.0, count: 1.0, particleSize: 1.0 },
+  { id: "factory_lightning",     name: "Default Lightning",     effectType: "lightning",     isFactory: true, glowColor: "#ffe066", boltColor: "#ffe066", coreColor: "#fffde0", thickness: 1.0, jaggedness: 1.0, speed: 1.0 }
 ];
 function vfxFactoryFor(effectType) {
   for (var i = 0; i < VFX_FACTORY_PRESETS.length; i++) { if (VFX_FACTORY_PRESETS[i].effectType === effectType) return VFX_FACTORY_PRESETS[i]; }
@@ -3179,6 +3182,32 @@ export default function CosmicWorkshop() {
           particles,
           React.createElement("div", { style: { position: "absolute", width: 44, height: 44, borderRadius: "50%", background: "radial-gradient(circle, #fff 0%, " + deCore + " 30%, " + deBlast + " 60%, transparent 80%)", animation: "vfxFlash " + drDur + " ease-out infinite" } })));
     }
+    if (effect === "lightning") {
+      var lGlow = c.glowColor || "#ffe066";
+      var lBolt = c.boltColor || "#ffe066";
+      var lCore = c.coreColor || "#fffde0";
+      var lThick = Math.max(0.5, Math.min(2, c.thickness || 1));
+      var lJag = Math.max(0.5, Math.min(2, c.jaggedness || 1));
+      var lSpeed = Math.max(0.5, Math.min(2, c.speed || 1));
+      var lDur = (1.4 / lSpeed).toFixed(2) + "s";
+      var lH = 96, lSegs = 6, lSegH = lH / lSegs, lCx = 40;
+      var lPath = "M" + lCx + " " + lH;
+      var lMidX = lCx, lMidY = lH / 2;
+      for (var li = 1; li <= lSegs; li++) {
+        var lY = lH - li * lSegH;
+        var lX = lCx + (li % 2 === 0 ? 1 : -1) * (6 + Math.sin(li * 2.7) * 8) * lJag;
+        lPath += " L" + lX.toFixed(1) + " " + lY.toFixed(1);
+        if (li === Math.floor(lSegs / 2)) { lMidX = lX; lMidY = lY; }
+      }
+      var lGW = (8 * lThick).toFixed(1), lMW = (3 * lThick).toFixed(1), lCW = (1.5 * lThick).toFixed(1);
+      var lArrow = "M" + lMidX.toFixed(1) + " " + lMidY.toFixed(1) + " L" + (lMidX + 14 * lJag).toFixed(1) + " " + (lMidY - 22).toFixed(1) + " L" + (lMidX + 10 * lJag).toFixed(1) + " " + (lMidY - 38).toFixed(1);
+      return React.createElement("div", { key: prevKey + "-" + effect, style: previewStyle },
+        React.createElement("svg", { width: 80, height: lH + 4, viewBox: "0 0 80 " + (lH + 4), style: { overflow: "visible", animation: "vfxLightningBolt " + lDur + " ease-out infinite" } },
+          React.createElement("path", { d: lPath, stroke: lGlow, strokeWidth: lGW, fill: "none", opacity: "0.3", strokeLinecap: "round", strokeLinejoin: "round" }),
+          React.createElement("path", { d: lPath, stroke: lBolt, strokeWidth: lMW, fill: "none", strokeLinecap: "round", strokeLinejoin: "round" }),
+          React.createElement("path", { d: lPath, stroke: lCore, strokeWidth: lCW, fill: "none", strokeLinecap: "round", strokeLinejoin: "round" }),
+          React.createElement("path", { d: lArrow, stroke: lBolt, strokeWidth: "2", fill: "none", opacity: "0.6", strokeLinecap: "round", strokeLinejoin: "round" })));
+    }
     return React.createElement("div", { key: prevKey + "-" + effect, style: previewStyle });
   }
 
@@ -4497,7 +4526,7 @@ export default function CosmicWorkshop() {
           React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 33, fontWeight: 700, letterSpacing: 7, color: "#ede8ff", textTransform: "uppercase", textShadow: "0 0 22px rgba(160,100,255,0.55), 0 0 44px rgba(120,60,220,0.25)", lineHeight: 1.1 } }, "WORKSHOP"),
           React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", gap: 8 } },
             React.createElement("div", { style: { height: 1, width: 22, background: "rgba(160,100,255,0.25)" } }),
-            React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,170,255,0.32)" }, "SERVICE PANEL  ·  v3.4"),
+            React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,170,255,0.32)" }, "SERVICE PANEL  ·  v3.5"),
             React.createElement("div", { style: { height: 1, width: 22, background: "rgba(160,100,255,0.25)" } })
           ),
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginTop: 2 } },
@@ -5613,6 +5642,13 @@ export default function CosmicWorkshop() {
               React.createElement(BDSlider, { label: "Spread", value: vfxEditDesign.spread, onChange: function(v) { vfxUpdateDesign("spread", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.spread || 1).toFixed(1) + "x" }),
               React.createElement(BDSlider, { label: "Count", value: vfxEditDesign.count, onChange: function(v) { vfxUpdateDesign("count", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.count || 1).toFixed(1) + "x" }),
               React.createElement(BDSlider, { label: "Particle Size", value: vfxEditDesign.particleSize, onChange: function(v) { vfxUpdateDesign("particleSize", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.particleSize || 1).toFixed(1) + "x" })),
+            vfxEditDesign.effectType === "lightning" && React.createElement(React.Fragment, null,
+              React.createElement(BDColorPicker, { label: "Glow Color", value: vfxEditDesign.glowColor, onChange: function(v) { vfxUpdateDesign("glowColor", v); } }),
+              React.createElement(BDColorPicker, { label: "Bolt Color", value: vfxEditDesign.boltColor, onChange: function(v) { vfxUpdateDesign("boltColor", v); } }),
+              React.createElement(BDColorPicker, { label: "Core Color", value: vfxEditDesign.coreColor, onChange: function(v) { vfxUpdateDesign("coreColor", v); } }),
+              React.createElement(BDSlider, { label: "Thickness", value: vfxEditDesign.thickness, onChange: function(v) { vfxUpdateDesign("thickness", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.thickness || 1).toFixed(1) + "x" }),
+              React.createElement(BDSlider, { label: "Jaggedness", value: vfxEditDesign.jaggedness, onChange: function(v) { vfxUpdateDesign("jaggedness", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.jaggedness || 1).toFixed(1) + "x" }),
+              React.createElement(BDSlider, { label: "Flash Speed", value: vfxEditDesign.speed, onChange: function(v) { vfxUpdateDesign("speed", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.speed || 1).toFixed(1) + "x" })),
             React.createElement("div", { style: { display: "flex", gap: 10, marginTop: 8, justifyContent: "center" } },
               React.createElement("div", { onClick: vfxResetDesign, style: Object.assign({}, BTN_RENAME, { padding: "8px 18px", fontSize: 11 }) }, "Reset to Default")))),
         vfxShowBackWarn && renderBackWarnOverlay(
