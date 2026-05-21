@@ -3191,6 +3191,14 @@ function logUfo(msg) {
           </div>
         </GsPanel>
 
+        {/* Continue row — right below radar, no gap */}
+        <div onClick={hasSaveGame ? loadSaveGame : undefined} style={{ flexShrink: 0, padding: "8px 16px", background: "linear-gradient(180deg, rgba(20,20,35,0.9), rgba(12,12,22,0.9))", border: "1px solid " + (DIFF_COLORS[(saveGameInfo && saveGameInfo.difficulty) || "regular"] || GS.green) + "44", borderRadius: 8, cursor: hasSaveGame ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, zIndex: 1, visibility: hasSaveGame ? "visible" : "hidden", pointerEvents: hasSaveGame ? "auto" : "none" }}>
+          <svg width="12" height="12" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="rgba(80,200,255,0.8)" /></svg>
+          <GsMono size={10} ls={1.5} color="#80ddff" style={{ fontWeight: 700 }}>CONTINUE</GsMono>
+          {saveGameInfo && <GsMono size={8} ls={0.5} color="rgba(128,200,255,0.4)">{"· Level " + saveGameInfo.level + " · " + (saveGameInfo.score || 0).toLocaleString() + " pts"}</GsMono>}
+          {saveGameInfo && saveGameInfo.difficulty && <GsMono size={7} ls={1} color={(DIFF_COLORS[saveGameInfo.difficulty] || GS.green) + "99"}>{"· " + (saveGameInfo.difficulty || "regular").toUpperCase()}</GsMono>}
+        </div>
+
         <div style={{ flex: 1, minHeight: 6 }} />
 
         {/* Digital readout strip — always present; shows set message or active set name */}
@@ -3198,6 +3206,8 @@ function logUfo(msg) {
           {showSetModeMsg ? <GsMono size={9} ls={0.5} color="rgba(255,208,96,0.85)">{"Load a set with levels in the Workshop."}</GsMono> : (gameMode === "set" && activeSetInfo && activeSetInfo.name ? <GsMono size={9} ls={0.5} color="rgba(255,208,96,0.7)">{activeSetInfo.name}</GsMono> : null)}
         </div>
 
+        {/* Mode / Difficulty / Play + Workshop — grouped, no gap between them */}
+        <div style={{ flexShrink: 0, display: "flex", flexDirection: "column" }}>
         {/* Mode / Difficulty / Play — unified panel */}
         <GsPanel style={{ padding: "10px", display: "flex", flexDirection: "column", gap: 8, flexShrink: 0, position: "relative", zIndex: 1 }}>
           <GsRivet pos={{ top: 5, left: 5 }} size={5} />
@@ -3222,7 +3232,7 @@ function logUfo(msg) {
                 <GsMono size={8} ls={2} color="rgba(255,180,60,0.7)">DIFFICULTY</GsMono>
               </div>
               <div style={{ background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: 3, display: "flex", gap: 3 }}>
-                {["easy","regular","hard"].map(function(d) { var dcol = DIFF_COLORS[d]; var isAct = difficulty === d; var icol = isAct ? "#0a0c12" : dcol; return <div key={d} onClick={function() { difficultyRef.current = d; setDifficulty(d); try { window.storage.set("cosmic_drift_difficulty", d); } catch(e) {} }} style={{ flex: 1, padding: "5px 0", textAlign: "center", fontFamily: "'Exo 2', sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: 1.5, cursor: "pointer", color: isAct ? "#0a0c12" : "rgba(200,220,240,0.55)", background: isAct ? "linear-gradient(180deg, " + dcol + " 0%, " + dcol + "cc 100%)" : "transparent", boxShadow: isAct ? "inset 0 1px 0 rgba(255,255,255,0.3), 0 0 10px " + dcol + "66" : "none", textTransform: "uppercase", borderRadius: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>{d === "easy" ? <svg width="12" height="10" viewBox="0 0 14 10"><rect x="0" y="6" width="3.5" height="4" rx="0.5" fill={icol} /><rect x="5" y="3" width="3.5" height="7" rx="0.5" fill={icol} opacity="0.35" /><rect x="10" y="0" width="3.5" height="10" rx="0.5" fill={icol} opacity="0.15" /></svg> : d === "hard" ? <svg width="12" height="10" viewBox="0 0 14 10"><rect x="0" y="6" width="3.5" height="4" rx="0.5" fill={icol} /><rect x="5" y="3" width="3.5" height="7" rx="0.5" fill={icol} /><rect x="10" y="0" width="3.5" height="10" rx="0.5" fill={icol} /></svg> : <svg width="12" height="10" viewBox="0 0 14 10"><rect x="0" y="6" width="3.5" height="4" rx="0.5" fill={icol} /><rect x="5" y="3" width="3.5" height="7" rx="0.5" fill={icol} /><rect x="10" y="0" width="3.5" height="10" rx="0.5" fill={icol} opacity="0.3" /></svg>}<span>{DIFF_LABELS[d]}</span></div>; })}
+                {["easy","regular","hard"].map(function(d) { var dcol = DIFF_COLORS[d]; var isAct = difficulty === d; var icol = isAct ? "#0a0c12" : dcol; return <div key={d} onClick={function() { difficultyRef.current = d; setDifficulty(d); try { window.storage.set("cosmic_drift_difficulty", d); } catch(e) {} }} style={{ flex: 1, padding: "5px 0", textAlign: "center", fontFamily: "'Exo 2', sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: 1.5, cursor: "pointer", color: isAct ? "#0a0c12" : "rgba(200,220,240,0.55)", background: isAct ? "linear-gradient(180deg, " + dcol + " 0%, " + dcol + "cc 100%)" : "transparent", boxShadow: isAct ? "inset 0 1px 0 rgba(255,255,255,0.3), 0 0 10px " + dcol + "66" : "none", textTransform: "uppercase", borderRadius: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>{d === "easy" ? <svg width="13" height="15" viewBox="0 0 14 15"><rect x="0" y="11" width="3.5" height="4" rx="0.5" fill={icol} /><rect x="5" y="6" width="3.5" height="9" rx="0.5" fill={icol} opacity="0.35" /><rect x="10" y="0" width="3.5" height="15" rx="0.5" fill={icol} opacity="0.15" /></svg> : d === "hard" ? <svg width="13" height="15" viewBox="0 0 14 15"><rect x="0" y="11" width="3.5" height="4" rx="0.5" fill={icol} /><rect x="5" y="6" width="3.5" height="9" rx="0.5" fill={icol} /><rect x="10" y="0" width="3.5" height="15" rx="0.5" fill={icol} /></svg> : <svg width="13" height="15" viewBox="0 0 14 15"><rect x="0" y="11" width="3.5" height="4" rx="0.5" fill={icol} /><rect x="5" y="6" width="3.5" height="9" rx="0.5" fill={icol} /><rect x="10" y="0" width="3.5" height="15" rx="0.5" fill={icol} opacity="0.3" /></svg>}<span>{DIFF_LABELS[d]}</span></div>; })}
               </div>
             </div>
           </div>
@@ -3234,14 +3244,6 @@ function logUfo(msg) {
             </div>
           </div>
         </GsPanel>
-
-        {/* Continue row — always rendered to prevent layout shift */}
-        <div onClick={hasSaveGame ? loadSaveGame : undefined} style={{ flexShrink: 0, padding: "8px 16px", background: "linear-gradient(180deg, rgba(20,20,35,0.9), rgba(12,12,22,0.9))", border: "1px solid " + (DIFF_COLORS[(saveGameInfo && saveGameInfo.difficulty) || "regular"] || GS.green) + "44", borderRadius: 8, cursor: hasSaveGame ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, zIndex: 1, visibility: hasSaveGame ? "visible" : "hidden", pointerEvents: hasSaveGame ? "auto" : "none" }}>
-          <svg width="12" height="12" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="rgba(80,200,255,0.8)" /></svg>
-          <GsMono size={10} ls={1.5} color="#80ddff" style={{ fontWeight: 700 }}>CONTINUE</GsMono>
-          {saveGameInfo && <GsMono size={8} ls={0.5} color="rgba(128,200,255,0.4)">{"· Level " + saveGameInfo.level + " · " + (saveGameInfo.score || 0).toLocaleString() + " pts"}</GsMono>}
-          {saveGameInfo && saveGameInfo.difficulty && <GsMono size={7} ls={1} color={(DIFF_COLORS[saveGameInfo.difficulty] || GS.green) + "99"}>{"· " + (saveGameInfo.difficulty || "regular").toUpperCase()}</GsMono>}
-        </div>
 
         {/* Workshop lever */}
         <div onClick={navigateToWorkshop} style={{ position: "relative", height: 60, borderRadius: 10, background: GS.brushedSolid, border: GS.pbl, boxShadow: GS.ps, padding: "8px 14px", display: "flex", alignItems: "center", gap: 10, overflow: "hidden", cursor: "pointer", flexShrink: 0, zIndex: 1 }}>
@@ -3269,6 +3271,7 @@ function logUfo(msg) {
               <div style={{ position: "absolute", top: 3, left: "50%", transform: "translateX(-50%)", width: 4, height: 4, borderRadius: 4, background: GS.green, boxShadow: "0 0 6px " + GS.green }} />
             </div>
           </div>
+        </div>
         </div>
 
         {/* iOS install prompt */}
