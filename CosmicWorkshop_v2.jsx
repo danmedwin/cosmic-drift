@@ -3052,6 +3052,18 @@ export default function CosmicWorkshop() {
         React.createElement("div", { style: { position: "absolute", left: 4, top: 4, width: 36, height: 36, borderRadius: "50%", background: "radial-gradient(circle, " + ir1 + " 0%, " + ir2 + "88 45%, transparent 72%)" } }),
         React.createElement("div", { style: { position: "absolute", left: 14, top: 14, width: 16, height: 16, borderRadius: "50%", background: "radial-gradient(circle, #fff 0%, " + (design.coreColor || "#ffe066") + " 35%, " + (design.blastColor || "#ff6633") + " 65%, transparent 85%)" } }));
     }
+    if (et === "lightning") {
+      var ilg = design.glowColor || "#ffe066";
+      var ilb = design.boltColor || "#ffe066";
+      var ilc = design.coreColor || "#fffde0";
+      var ilt = Math.max(0.5, Math.min(2, design.thickness || 1));
+      var ilp = "M22 40 L16 30 L27 22 L16 13 L22 4";
+      return React.createElement("div", { style: box },
+        React.createElement("svg", { width: 44, height: 44, viewBox: "0 0 44 44", style: { overflow: "visible" } },
+          React.createElement("path", { d: ilp, stroke: ilg, strokeWidth: 6 * ilt, fill: "none", opacity: "0.3", strokeLinecap: "round", strokeLinejoin: "round" }),
+          React.createElement("path", { d: ilp, stroke: ilb, strokeWidth: 2.5 * ilt, fill: "none", strokeLinecap: "round", strokeLinejoin: "round" }),
+          React.createElement("path", { d: ilp, stroke: ilc, strokeWidth: 1.2 * ilt, fill: "none", strokeLinecap: "round", strokeLinejoin: "round" })));
+    }
     return React.createElement("div", { style: box });
   }
   function renderVfxPreview(design, prevKey) {
@@ -5643,9 +5655,9 @@ export default function CosmicWorkshop() {
               React.createElement(BDSlider, { label: "Count", value: vfxEditDesign.count, onChange: function(v) { vfxUpdateDesign("count", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.count || 1).toFixed(1) + "x" }),
               React.createElement(BDSlider, { label: "Particle Size", value: vfxEditDesign.particleSize, onChange: function(v) { vfxUpdateDesign("particleSize", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.particleSize || 1).toFixed(1) + "x" })),
             vfxEditDesign.effectType === "lightning" && React.createElement(React.Fragment, null,
-              React.createElement(BDColorPicker, { label: "Glow Color", value: vfxEditDesign.glowColor, onChange: function(v) { vfxUpdateDesign("glowColor", v); } }),
-              React.createElement(BDColorPicker, { label: "Bolt Color", value: vfxEditDesign.boltColor, onChange: function(v) { vfxUpdateDesign("boltColor", v); } }),
               React.createElement(BDColorPicker, { label: "Core Color", value: vfxEditDesign.coreColor, onChange: function(v) { vfxUpdateDesign("coreColor", v); } }),
+              React.createElement(BDColorPicker, { label: "Bolt Color", value: vfxEditDesign.boltColor, onChange: function(v) { vfxUpdateDesign("boltColor", v); } }),
+              React.createElement(BDColorPicker, { label: "Glow Color", value: vfxEditDesign.glowColor, onChange: function(v) { vfxUpdateDesign("glowColor", v); } }),
               React.createElement(BDSlider, { label: "Thickness", value: vfxEditDesign.thickness, onChange: function(v) { vfxUpdateDesign("thickness", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.thickness || 1).toFixed(1) + "x" }),
               React.createElement(BDSlider, { label: "Jaggedness", value: vfxEditDesign.jaggedness, onChange: function(v) { vfxUpdateDesign("jaggedness", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.jaggedness || 1).toFixed(1) + "x" }),
               React.createElement(BDSlider, { label: "Flash Speed", value: vfxEditDesign.speed, onChange: function(v) { vfxUpdateDesign("speed", v); }, min: 0.5, max: 2, step: 0.1, displayValue: (vfxEditDesign.speed || 1).toFixed(1) + "x" })),
