@@ -1517,6 +1517,11 @@ export default function CosmicWorkshop() {
   var _plasmaHistVersion = useState(0), setPlasmaHistVersion = _plasmaHistVersion[1];
   var _plasmaSaveStatus = useState(""), plasmaSaveStatus = _plasmaSaveStatus[0], setPlasmaSaveStatus = _plasmaSaveStatus[1];
   var _plasmaDeletingId = useState(null), plasmaDeletingId = _plasmaDeletingId[0], setPlasmaDeletingId = _plasmaDeletingId[1];
+  var _plasmaRenamingId = useState(null), plasmaRenamingId = _plasmaRenamingId[0], setPlasmaRenamingId = _plasmaRenamingId[1];
+  var _plasmaRenameValue = useState(""), plasmaRenameValue = _plasmaRenameValue[0], setPlasmaRenameValue = _plasmaRenameValue[1];
+  var _plasmaExportId = useState(null), plasmaExportId = _plasmaExportId[0], setPlasmaExportId = _plasmaExportId[1];
+  var _plasmaExportText = useState(""), plasmaExportText = _plasmaExportText[0], setPlasmaExportText = _plasmaExportText[1];
+  var _plasmaCopied = useState(false), plasmaCopied = _plasmaCopied[0], setPlasmaCopied = _plasmaCopied[1];
   var _plasmaBackWarn = useState(false), plasmaShowBackWarn = _plasmaBackWarn[0], setPlasmaShowBackWarn = _plasmaBackWarn[1];
   var _plasmaEditTab = useState("design"), plasmaEditTab = _plasmaEditTab[0], setPlasmaEditTab = _plasmaEditTab[1];
   var _plasmaRangeKey = useState(0), plasmaRangeKey = _plasmaRangeKey[0], setPlasmaRangeKey = _plasmaRangeKey[1];
@@ -3667,6 +3672,33 @@ export default function CosmicWorkshop() {
     }
     setPlasmaDeletingId(null);
   }
+  function plasmaCommitRename() {
+    var id = plasmaRenamingId;
+    if (!id) return;
+    var name = (plasmaRenameValue || "").trim() || "My Plasma";
+    setPlasmaSaved(function(prev) {
+      var list = prev.map(function(d) { return d.id === id ? Object.assign({}, d, { name: name, savedAt: new Date().toISOString() }) : d; });
+      plasmaSaveDesigns(list);
+      return list;
+    });
+    setPlasmaRenamingId(null); setPlasmaRenameValue("");
+  }
+  function plasmaCancelRename() { setPlasmaRenamingId(null); setPlasmaRenameValue(""); }
+  function plasmaExportDesign(design) {
+    var exp = {}; Object.keys(design).forEach(function(k) { exp[k] = design[k]; });
+    setPlasmaExportText(JSON.stringify(exp, null, 2));
+    setPlasmaExportId(design.id);
+    setPlasmaCopied(false);
+  }
+  function plasmaEditCopy(design) {
+    plasmaEditDirtyRef.current = false;
+    setPlasmaEditId(null);
+    var copy = Object.assign({}, design, { name: (design.name || "My Plasma") + " (copy)" });
+    setPlasmaEditDesign(copy);
+    plasmaHistoryReset(copy);
+    setPlasmaEditTab("design");
+    setPlasmaView("editor");
+  }
 
   function shipGetActiveDesign() {
     if (shipActiveId) {
@@ -4465,7 +4497,7 @@ export default function CosmicWorkshop() {
           React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 33, fontWeight: 700, letterSpacing: 7, color: "#ede8ff", textTransform: "uppercase", textShadow: "0 0 22px rgba(160,100,255,0.55), 0 0 44px rgba(120,60,220,0.25)", lineHeight: 1.1 } }, "WORKSHOP"),
           React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", gap: 8 } },
             React.createElement("div", { style: { height: 1, width: 22, background: "rgba(160,100,255,0.25)" } }),
-            React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,170,255,0.32)" }, "SERVICE PANEL  ·  v3.2"),
+            React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,170,255,0.32)" }, "SERVICE PANEL  ·  v3.3"),
             React.createElement("div", { style: { height: 1, width: 22, background: "rgba(160,100,255,0.25)" } })
           ),
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginTop: 2 } },
@@ -5605,6 +5637,7 @@ export default function CosmicWorkshop() {
           ufoSaved.map(function(design) {
             var isActive = design.id === ufoActiveId;
             var _ufoSel = setsSelMode && setsSelMode.selectedIds.indexOf(design.id) !== -1;
+            var _ufoDateStr = design.savedAt ? new Date(design.savedAt).toLocaleString() : "";
             return React.createElement("div", { key: design.id, style: Object.assign({}, CARD_STYLE, _ufoSel ? { borderColor: "rgba(255,208,96,0.4)", background: "rgba(255,208,96,0.05)" } : {}) },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, marginBottom: setsSelMode ? 0 : 10 } },
                 setsSelMode && React.createElement("div", { onClick: function() {
@@ -5620,9 +5653,11 @@ export default function CosmicWorkshop() {
                         React.createElement("input", { value: ufoRenameValue, autoFocus: true, onChange: function(e) { setUfoRenameValue(e.target.value); }, onKeyDown: function(e) { if (e.key === "Enter") ufoCommitRename(); else if (e.key === "Escape") ufoCancelRename(); }, style: { flex: 1, minWidth: 0, padding: "4px 8px", borderRadius: 6, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(100,220,180,0.5)", color: "#b0c8d8", fontSize: 16, fontWeight: 700, fontFamily: "'Quicksand',sans-serif", outline: "none", boxSizing: "border-box" } }),
                         React.createElement("div", { onMouseDown: function(e) { e.preventDefault(); }, onClick: ufoCommitRename, style: { padding: "4px 8px", borderRadius: 4, background: "rgba(80,200,100,0.2)", border: "1px solid rgba(80,200,100,0.4)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } }, React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M5 13l4 4L19 7", fill: "none", stroke: "#80dd90", strokeWidth: "2.5", strokeLinecap: "round", strokeLinejoin: "round" }))),
                         React.createElement("div", { onMouseDown: function(e) { e.preventDefault(); }, onClick: ufoCancelRename, style: { padding: "4px 8px", borderRadius: 4, background: "rgba(220,60,80,0.18)", border: "1px solid rgba(220,60,80,0.45)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } }, React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M6 6L18 18 M18 6L6 18", fill: "none", stroke: "#ff8088", strokeWidth: "2.5", strokeLinecap: "round" }))))
-                    : React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
-                        React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, design.name || "Untitled"),
-                        !setsSelMode && React.createElement("div", { onClick: function(e) { e.stopPropagation(); setUfoRenamingId(design.id); setUfoRenameValue(design.name || ""); }, title: "Rename UFO", style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", color: "rgba(180,200,220,0.6)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", flexShrink: 0 } }, WsIconPencil(11)))),
+                    : React.createElement(React.Fragment, null,
+                        React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6, marginBottom: 2 } },
+                          React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, design.name || "Untitled"),
+                          !setsSelMode && React.createElement("div", { onClick: function(e) { e.stopPropagation(); setUfoRenamingId(design.id); setUfoRenameValue(design.name || ""); }, title: "Rename UFO", style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", color: "rgba(180,200,220,0.6)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", flexShrink: 0 } }, WsIconPencil(11))),
+                        _ufoDateStr && React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 10 } }, _ufoDateStr))),
                 !setsSelMode && ufoRenamingId !== design.id && React.createElement("div", { onClick: function() { ufoSetActive(design.id); }, style: isActive ? BTN_ISACTIVE : BTN_SETACTIVE }, isActive ? "★ Active" : "Set Active")),
               !setsSelMode && ufoRenamingId !== design.id && React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" } },
                 React.createElement("div", { onClick: function() { ufoOpenEditor(design); }, style: BTN_EDIT }, WsIconPencil(), "EDIT"),
@@ -5727,6 +5762,7 @@ export default function CosmicWorkshop() {
           shipSaved.map(function(design) {
             var isActive = design.id === shipActiveId;
             var _shipSel = setsSelMode && setsSelMode.selectedIds.indexOf(design.id) !== -1;
+            var _shipDateStr = design.savedAt ? new Date(design.savedAt).toLocaleString() : "";
             return React.createElement("div", { key: design.id, style: Object.assign({}, CARD_STYLE, _shipSel ? { borderColor: "rgba(255,208,96,0.4)", background: "rgba(255,208,96,0.05)" } : {}) },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, marginBottom: setsSelMode ? 0 : 10 } },
                 setsSelMode && React.createElement("div", { onClick: function() {
@@ -5756,12 +5792,14 @@ export default function CosmicWorkshop() {
                           style: { padding: "4px 8px", borderRadius: 4, background: "rgba(220,60,80,0.18)", border: "1px solid rgba(220,60,80,0.45)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto" } },
                           React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" },
                             React.createElement("path", { d: "M6 6L18 18 M18 6L6 18", fill: "none", stroke: "#ff8088", strokeWidth: "2.5", strokeLinecap: "round" }))))
-                    : React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6, marginBottom: 3 } },
-                        React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, design.name || "Untitled"),
-                        React.createElement("div", { onClick: function() { shipStartRename(design); },
-                          title: "Rename ship",
-                          style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", color: "rgba(180,200,220,0.6)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", flex: "0 0 auto" } },
-                          WsIconPencil(11)))),
+                    : React.createElement(React.Fragment, null,
+                        React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6, marginBottom: 2 } },
+                          React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, design.name || "Untitled"),
+                          React.createElement("div", { onClick: function() { shipStartRename(design); },
+                            title: "Rename ship",
+                            style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", color: "rgba(180,200,220,0.6)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", flex: "0 0 auto" } },
+                            WsIconPencil(11))),
+                        _shipDateStr && React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 10 } }, _shipDateStr))),
                 !setsSelMode && React.createElement("div", { onClick: function() { shipSetActive(design.id); }, style: isActive ? BTN_ISACTIVE : BTN_SETACTIVE }, isActive ? "★ Active" : "Set Active")),
               !setsSelMode && React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" } },
                 React.createElement("div", { onClick: function() { shipOpenEditor(design); }, style: BTN_EDIT }, WsIconPencil(), "EDIT"),
@@ -6161,6 +6199,7 @@ export default function CosmicWorkshop() {
           plasmaSaved.map(function(design) {
             var isActive = design.id === plasmaActiveId;
             var _plasmaSel = setsSelMode && setsSelMode.selectedIds.indexOf(design.id) !== -1;
+            var _plasmaDateStr = design.savedAt ? new Date(design.savedAt).toLocaleString() : "";
             return React.createElement("div", { key: design.id, style: Object.assign({}, CARD_STYLE, _plasmaSel ? { borderColor: "rgba(255,208,96,0.4)", background: "rgba(255,208,96,0.05)" } : {}) },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, marginBottom: setsSelMode ? 0 : 10 } },
                 setsSelMode && React.createElement("div", { onClick: function() {
@@ -6171,11 +6210,21 @@ export default function CosmicWorkshop() {
                 React.createElement("div", { style: { width: 56, height: 56, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.25)", borderRadius: 10, border: "1px solid rgba(255,255,255,0.06)", flexShrink: 0 } },
                   renderPlasmaShape(design, 28)),
                 React.createElement("div", { style: { flex: 1, minWidth: 0 } },
-                  React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700, marginBottom: 3 } }, design.name || "Untitled"),
-                  React.createElement("div", { style: { color: "rgba(80,200,255,0.5)", fontSize: 11 } }, PLASMA_SHAPE_LABELS[design.shape] || "Ball")),
-                !setsSelMode && React.createElement("div", { onClick: function() { plasmaSetActive(design.id); }, style: isActive ? BTN_ISACTIVE : BTN_SETACTIVE }, isActive ? "★ Active" : "Set Active")),
-              !setsSelMode && React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" } },
+                  plasmaRenamingId === design.id
+                    ? React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
+                        React.createElement("input", { value: plasmaRenameValue, autoFocus: true, onChange: function(e) { setPlasmaRenameValue(e.target.value); }, onKeyDown: function(e) { if (e.key === "Enter") plasmaCommitRename(); else if (e.key === "Escape") plasmaCancelRename(); }, style: { flex: 1, minWidth: 0, padding: "4px 8px", borderRadius: 6, background: "rgba(0,0,0,0.3)", border: "1px solid rgba(80,200,255,0.5)", color: "#b0c8d8", fontSize: 16, fontWeight: 700, fontFamily: "'Quicksand',sans-serif", outline: "none", boxSizing: "border-box" } }),
+                        React.createElement("div", { onMouseDown: function(e) { e.preventDefault(); }, onClick: plasmaCommitRename, style: { padding: "4px 8px", borderRadius: 4, background: "rgba(80,200,100,0.2)", border: "1px solid rgba(80,200,100,0.4)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } }, React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M5 13l4 4L19 7", fill: "none", stroke: "#80dd90", strokeWidth: "2.5", strokeLinecap: "round", strokeLinejoin: "round" }))),
+                        React.createElement("div", { onMouseDown: function(e) { e.preventDefault(); }, onClick: plasmaCancelRename, style: { padding: "4px 8px", borderRadius: 4, background: "rgba(220,60,80,0.18)", border: "1px solid rgba(220,60,80,0.45)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } }, React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M6 6L18 18 M18 6L6 18", fill: "none", stroke: "#ff8088", strokeWidth: "2.5", strokeLinecap: "round" }))))
+                    : React.createElement(React.Fragment, null,
+                        React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6, marginBottom: 2 } },
+                          React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, design.name || "Untitled"),
+                          !setsSelMode && React.createElement("div", { onClick: function(e) { e.stopPropagation(); setPlasmaRenamingId(design.id); setPlasmaRenameValue(design.name || ""); }, title: "Rename plasma", style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", color: "rgba(180,200,220,0.6)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", flexShrink: 0 } }, WsIconPencil(11))),
+                        React.createElement("div", { style: { color: "rgba(80,200,255,0.5)", fontSize: 11 } }, (PLASMA_SHAPE_LABELS[design.shape] || "Ball") + (_plasmaDateStr ? " · " + _plasmaDateStr : "")))),
+                !setsSelMode && plasmaRenamingId !== design.id && React.createElement("div", { onClick: function() { plasmaSetActive(design.id); }, style: isActive ? BTN_ISACTIVE : BTN_SETACTIVE }, isActive ? "★ Active" : "Set Active")),
+              !setsSelMode && plasmaRenamingId !== design.id && React.createElement("div", { style: { display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" } },
                 React.createElement("div", { onClick: function() { plasmaOpenEditor(design); }, style: BTN_EDIT }, WsIconPencil(), "EDIT"),
+                React.createElement("div", { onClick: function() { plasmaEditCopy(design); }, style: BTN_EDIT }, WsIconCopy(), "Edit Copy"),
+                React.createElement("div", { onClick: function() { plasmaExportDesign(design); }, style: BTN_EXPORT }, WsIconShare(), "SHARE"),
                 React.createElement("div", { style: { flex: 1 } }),
                 React.createElement("div", { onClick: function() {
                   var _inSets = setsDesignInSets(design.id);
@@ -6186,6 +6235,7 @@ export default function CosmicWorkshop() {
         plasmaDeletingId && renderDeleteOverlay("Delete Plasma Design?",
           function() { setPlasmaDeletingId(null); },
           function() { plasmaDeleteDesign(plasmaDeletingId); }),
+        plasmaExportId && renderExportOverlay("Export Plasma Design", plasmaExportText, plasmaCopied, function() { copyToClipboard(plasmaExportText, setPlasmaCopied); }, function() { setPlasmaExportId(null); }),
         renderSetsDeleteWarnOverlay()),
 
       // ── EDITOR VIEW ──
