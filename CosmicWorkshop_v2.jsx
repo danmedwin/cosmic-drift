@@ -1643,6 +1643,8 @@ export default function CosmicWorkshop() {
   var shipDragRef = useRef(null);
   // Tracks an active row-drag in the parts list (Z-order reordering by drag).
   var shipDragHandleRef = useRef(null);
+  // Which group headers are collapsed in the parts list. Keys are groupIds.
+  var _shipCollapsedGroups = useState({}), shipCollapsedGroups = _shipCollapsedGroups[0], setShipCollapsedGroups = _shipCollapsedGroups[1];
   var _shipHullPromptId = useState(null), shipHullPromptId = _shipHullPromptId[0], setShipHullPromptId = _shipHullPromptId[1];
   var _shipWhLocked = useState(true), shipWhLocked = _shipWhLocked[0], setShipWhLocked = _shipWhLocked[1];
   var bdScrollRef = useRef(null);
@@ -4332,6 +4334,47 @@ export default function CosmicWorkshop() {
     for (var i = 0; i < gid.length; i++) h = (h * 31 + gid.charCodeAt(i)) >>> 0;
     return "hsl(" + (h % 360) + ", 70%, 62%)";
   }
+  // Select every member of a group. The highest-index member becomes primary.
+  function shipSelectGroup(groupId) {
+    var parts = (shipEdit && shipEdit.parts) || [];
+    var members = [];
+    for (var i = 0; i < parts.length; i++) {
+      if (parts[i] && parts[i].groupId === groupId) members.push(i);
+    }
+    if (members.length === 0) return;
+    members.sort(function(a, b) { return a - b; });
+    var maxMem = members[members.length - 1];
+    setShipSelectedPart(maxMem);
+    setShipSelectedExtras(members.slice(0, members.length - 1));
+  }
+  // Move all members of a group together so the highest-index member lands at
+  // targetMaxIdx.  Non-members keep their relative order.
+  function shipReorderGroup(groupId, targetMaxIdx) {
+    shipApplyEdit(function(prev) {
+      var list = (prev.parts || []).slice();
+      var members = [], nonMembers = [];
+      for (var i = 0; i < list.length; i++) {
+        if (list[i] && list[i].groupId === groupId) members.push(list[i]);
+        else nonMembers.push(list[i]);
+      }
+      if (members.length === 0) return prev;
+      var insertStart = Math.max(0, Math.min(nonMembers.length, targetMaxIdx - members.length + 1));
+      var result = nonMembers.slice(0, insertStart).concat(members).concat(nonMembers.slice(insertStart));
+      shipDirtyRef.current = true;
+      setShipSelectedPart(insertStart + members.length - 1);
+      return Object.assign({}, prev, { parts: result });
+    }, "reorderGroup_" + groupId);
+  }
+  // Start dragging a group header row (moves the whole group).
+  function shipDragGroupHandleStart(groupId, maxIdx, e) {
+    if (e.preventDefault) e.preventDefault();
+    if (e.stopPropagation) e.stopPropagation();
+    shipSelectGroup(groupId);
+    shipDragHandleRef.current = { idx: maxIdx, groupId: groupId };
+    if (e.currentTarget.setPointerCapture && e.pointerId != null) {
+      try { e.currentTarget.setPointerCapture(e.pointerId); } catch(err) {}
+    }
+  }
   function shipSelectionHasGroup() {
     var sels = shipGetSelected();
     var parts = (shipEdit && shipEdit.parts) || [];
@@ -4761,7 +4804,11 @@ export default function CosmicWorkshop() {
       if (i === rows.length - 1) targetIdx = parseInt(rows[i].getAttribute("data-shippart-actual-idx"), 10);
     }
     if (!isNaN(targetIdx) && targetIdx !== d.idx) {
-      shipReorderPart(d.idx, targetIdx);
+      if (d.groupId) {
+        shipReorderGroup(d.groupId, targetIdx);
+      } else {
+        shipReorderPart(d.idx, targetIdx);
+      }
       d.idx = targetIdx;
     }
   }
@@ -6532,79 +6579,155 @@ export default function CosmicWorkshop() {
                 onChange: function(v) { shipUpdateSelected("tofs", v); } }),
               React.createElement(BDSlider, { label: selGroupId ? "Rotation" : shipMixedLbl("rot", "Rotation"), value: sel.rot || 0, min: 0, max: 360, step: 5, displayValue: (sel.rot || 0) + "°",
                 onChange: function(v) { if (selGroupId) { shipRotateGroupSelected(v, sel.rot || 0); } else { shipUpdateSelected("rot", v); } } }),
-              partsList.length > 1 && React.createElement(BDSlider, { label: "Z (layer)", value: shipSelectedPart, min: 0, max: partsList.length - 1, step: 1, displayValue: shipSelectedPart + " / " + (partsList.length - 1),
+              !selGroupId && partsList.length > 1 && React.createElement(BDSlider, { label: "Z (layer)", value: shipSelectedPart, min: 0, max: partsList.length - 1, step: 1, displayValue: shipSelectedPart + " / " + (partsList.length - 1),
                 onChange: function(v) { shipReorderPart(shipSelectedPart, Math.round(v)); } }));
           })(),
           // ── LIST: parts list ──
           shipTab === "list" && (function() {
             var partsList = Array.isArray(shipEdit.parts) ? shipEdit.parts : [];
+            // ── Shared part-row renderer (standalone or inside a group) ──────
+            function renderPartRow(idx, inGroup) {
+              var p = partsList[idx]; if (!p) return null;
+              var isPrimary = idx === shipSelectedPart;
+              var isSel = shipIsSelected(idx);
+              var displayName = p.name || SHIP_PART_LABELS[p.type];
+              var isRenaming = shipPartRenamingIdx === idx;
+              return React.createElement("div", Object.assign({ key: "pr-" + idx,
+                onClick: function() { shipApplyTap(idx, false); },
+                style: { display: "flex", alignItems: "center", gap: 6,
+                  padding: "6px 6px", paddingLeft: inGroup ? 18 : 6,
+                  borderRadius: 6, cursor: "pointer",
+                  background: isSel ? "rgba(255,138,170,0.12)" : "rgba(255,255,255,0.02)",
+                  border: isPrimary ? "1px solid rgba(255,138,170,0.6)" : (isSel ? "1px solid rgba(255,138,170,0.3)" : "1px solid rgba(255,255,255,0.05)") } },
+                { "data-shippart-row": "1", "data-shippart-actual-idx": String(idx) }),
+                React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipToggleSelected(idx); },
+                  title: isSel ? "Remove from selection" : "Add to selection",
+                  style: { width: 18, height: 18, borderRadius: 4,
+                    border: isSel ? "1.5px solid #ff8aaa" : "1.5px solid rgba(180,200,220,0.35)",
+                    background: isSel ? "#ff8aaa" : "transparent",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    cursor: "pointer", flex: "0 0 auto" } },
+                  isSel && React.createElement("svg", { width: 12, height: 12, viewBox: "0 0 24 24", fill: "none", stroke: "#1a0820", strokeWidth: 3.2, strokeLinecap: "round", strokeLinejoin: "round" },
+                    React.createElement("path", { d: "M5 12l5 5L20 7" }))),
+                !inGroup && React.createElement("div", {
+                  onPointerDown: function(e) { shipDragHandleStart(idx, e); },
+                  onPointerMove: shipDragHandleMove,
+                  onPointerUp: shipDragHandleEnd, onPointerCancel: shipDragHandleEnd,
+                  title: "Drag to reorder",
+                  style: { width: 16, height: 22, display: "flex", alignItems: "center", justifyContent: "center", cursor: "grab", touchAction: "none", flex: "0 0 auto", color: "rgba(180,200,220,0.5)" } },
+                  React.createElement("svg", { width: "10", height: "16", viewBox: "0 0 10 16", fill: "currentColor" },
+                    React.createElement("circle", { cx: 2.5, cy: 3,  r: 1.3 }), React.createElement("circle", { cx: 7.5, cy: 3,  r: 1.3 }),
+                    React.createElement("circle", { cx: 2.5, cy: 8,  r: 1.3 }), React.createElement("circle", { cx: 7.5, cy: 8,  r: 1.3 }),
+                    React.createElement("circle", { cx: 2.5, cy: 13, r: 1.3 }), React.createElement("circle", { cx: 7.5, cy: 13, r: 1.3 }))),
+                React.createElement("div", { style: { width: 14, height: 14, borderRadius: 3, background: p.color || "#80ddff", border: "1px solid rgba(255,255,255,0.2)", flex: "0 0 auto" } }),
+                isRenaming
+                  ? React.createElement("input", { autoFocus: true, value: shipPartRenameVal,
+                      onChange: function(e) { setShipPartRenameVal(e.target.value); },
+                      onBlur: function() { shipUpdatePart(idx, "name", shipPartRenameVal.trim() || null); setShipPartRenamingIdx(null); },
+                      onKeyDown: function(e) {
+                        if (e.key === "Enter") { shipUpdatePart(idx, "name", shipPartRenameVal.trim() || null); setShipPartRenamingIdx(null); }
+                        if (e.key === "Escape") { setShipPartRenamingIdx(null); }
+                      },
+                      onClick: function(e) { e.stopPropagation(); },
+                      style: { flex: 1, background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,138,170,0.5)", borderRadius: 4, color: "#ff8aaa", padding: "2px 6px", outline: "none", boxSizing: "border-box", fontFamily: "'Exo 2', sans-serif", fontSize: 16 } })
+                  : React.createElement("div", { style: { flex: 1, display: "flex", alignItems: "center", gap: 4, minWidth: 0 } },
+                      React.createElement("div", { style: { flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: isSel ? "#ff8aaa" : "rgba(200,210,220,0.7)", fontSize: 11, fontWeight: 600, fontFamily: "'Exo 2', sans-serif", letterSpacing: 0.4 } }, displayName + " \xB7 (" + p.x.toFixed(0) + "," + p.y.toFixed(0) + ")"),
+                      React.createElement("div", { onClick: function(e) { e.stopPropagation(); setShipPartRenamingIdx(idx); setShipPartRenameVal(p.name || ""); },
+                        title: "Rename part",
+                        style: { flexShrink: 0, cursor: "pointer", color: "rgba(180,200,220,0.35)", display: "flex", alignItems: "center", padding: "2px" } },
+                        WsIconPencil(11))),
+                React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipDuplicatePart(idx); },
+                  title: "Duplicate part",
+                  style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", background: "rgba(128,221,255,0.1)", border: "1px solid rgba(128,221,255,0.3)", flex: "0 0 auto" } },
+                  shipCopySvg(12, "#80ddff")),
+                React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipDeletePart(idx); },
+                  title: "Delete part",
+                  style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", background: "rgba(220,60,80,0.12)", border: "1px solid rgba(220,60,80,0.3)", flex: "0 0 auto" } },
+                  shipTrashSvg(12, "#ff8088")));
+            }
+            // ── Build displayItems (one entry per logical row, groups pre-expanded) ──
+            // Pass 1: collect group membership in reverse Z order.
+            var displayItems = [], seenGroups = {};
+            for (var dri = partsList.length - 1; dri >= 0; dri--) {
+              var drp = partsList[dri]; if (!drp) continue;
+              if (drp.groupId) {
+                if (!seenGroups[drp.groupId]) {
+                  seenGroups[drp.groupId] = true;
+                  var grpMems = [];
+                  for (var gmi = partsList.length - 1; gmi >= 0; gmi--) {
+                    if (partsList[gmi] && partsList[gmi].groupId === drp.groupId) grpMems.push(gmi);
+                  }
+                  displayItems.push({ type: "group", groupId: drp.groupId, members: grpMems, maxIdx: dri });
+                }
+              } else {
+                displayItems.push({ type: "part", idx: dri });
+              }
+            }
+            // Pass 2: flatten into renderItems — each entry maps to exactly one DOM row.
+            var renderItems = [];
+            for (var rii = 0; rii < displayItems.length; rii++) {
+              var ritem = displayItems[rii];
+              if (ritem.type === "part") {
+                renderItems.push(ritem);
+              } else {
+                renderItems.push({ type: "grphdr", groupId: ritem.groupId, members: ritem.members, maxIdx: ritem.maxIdx });
+                if (!shipCollapsedGroups[ritem.groupId]) {
+                  for (var rmi = 0; rmi < ritem.members.length; rmi++) {
+                    renderItems.push({ type: "grpmem", idx: ritem.members[rmi], groupId: ritem.groupId });
+                  }
+                }
+              }
+            }
             return React.createElement(React.Fragment, null,
               React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "10px 12px" } },
                 React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 11, marginBottom: 8, letterSpacing: 0.5 } }, "PARTS (" + partsList.length + ")"),
-                partsList.length === 0 ? React.createElement("div", { style: { color: "rgba(180,200,220,0.4)", fontSize: 11, fontStyle: "italic", padding: "6px 0" } }, "No parts yet — add one from the ADD tab.") :
-                React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 4 } },
-                  // Reverse the visual order so the top layer (highest Z, end of
-                  // the parts array) is at the top of the list. Underlying array
-                  // is unchanged; we just iterate from the end.
-                  partsList.slice().reverse().map(function(p, displayIdx) {
-                    var idx = partsList.length - 1 - displayIdx;
-                    var isPrimary = idx === shipSelectedPart;
-                    var isSel = shipIsSelected(idx);
-                    var displayName = p.name || SHIP_PART_LABELS[p.type];
-                    var isRenaming = shipPartRenamingIdx === idx;
-                    return React.createElement("div", Object.assign({ key: idx, onClick: function() { shipApplyTap(idx, false); },
-                      style: { display: "flex", alignItems: "center", gap: 6, padding: "6px 6px", borderRadius: 6, cursor: "pointer", background: isSel ? "rgba(255,138,170,0.12)" : "rgba(255,255,255,0.02)", border: isPrimary ? "1px solid rgba(255,138,170,0.6)" : (isSel ? "1px solid rgba(255,138,170,0.3)" : "1px solid rgba(255,255,255,0.05)") } }, { "data-shippart-row": "1", "data-shippart-actual-idx": String(idx) }),
-                      // Multi-select checkbox. Tap toggles in/out of the selection
-                      // without disturbing the row tap (which replaces selection).
-                      React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipToggleSelected(idx); },
-                        title: isSel ? "Remove from selection" : "Add to selection",
-                        style: { width: 18, height: 18, borderRadius: 4, border: isSel ? "1.5px solid #ff8aaa" : "1.5px solid rgba(180,200,220,0.35)", background: isSel ? "#ff8aaa" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flex: "0 0 auto" } },
-                        isSel && React.createElement("svg", { width: 12, height: 12, viewBox: "0 0 24 24", fill: "none", stroke: "#1a0820", strokeWidth: 3.2, strokeLinecap: "round", strokeLinejoin: "round" },
-                          React.createElement("path", { d: "M5 12l5 5L20 7" }))),
-                      // Drag handle (6-dot grip) for reordering Z-layer
-                      React.createElement("div", {
-                        onPointerDown: function(e) { shipDragHandleStart(idx, e); },
-                        onPointerMove: shipDragHandleMove,
-                        onPointerUp: shipDragHandleEnd,
-                        onPointerCancel: shipDragHandleEnd,
-                        title: "Drag to reorder",
-                        style: { width: 16, height: 22, display: "flex", alignItems: "center", justifyContent: "center", cursor: "grab", touchAction: "none", flex: "0 0 auto", color: "rgba(180,200,220,0.5)" }
-                      },
-                        React.createElement("svg", { width: "10", height: "16", viewBox: "0 0 10 16", fill: "currentColor" },
-                          React.createElement("circle", { cx: 2.5, cy: 3,  r: 1.3 }),
-                          React.createElement("circle", { cx: 7.5, cy: 3,  r: 1.3 }),
-                          React.createElement("circle", { cx: 2.5, cy: 8,  r: 1.3 }),
-                          React.createElement("circle", { cx: 7.5, cy: 8,  r: 1.3 }),
-                          React.createElement("circle", { cx: 2.5, cy: 13, r: 1.3 }),
-                          React.createElement("circle", { cx: 7.5, cy: 13, r: 1.3 }))),
-                      React.createElement("div", { style: { width: 14, height: 14, borderRadius: 3, background: p.color || "#80ddff", border: "1px solid rgba(255,255,255,0.2)", flex: "0 0 auto" } }),
-                      p.groupId && React.createElement("div", { title: "Group member",
-                        style: { width: 14, height: 14, borderRadius: "50%", background: shipGroupTint(p.groupId), border: "1.5px solid rgba(0,0,0,0.35)", flex: "0 0 auto", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 8, fontWeight: 800, color: "rgba(0,0,0,0.7)" } }, "G"),
-                      isRenaming
-                        ? React.createElement("input", { autoFocus: true, value: shipPartRenameVal,
-                            onChange: function(e) { setShipPartRenameVal(e.target.value); },
-                            onBlur: function() { shipUpdatePart(idx, "name", shipPartRenameVal.trim() || null); setShipPartRenamingIdx(null); },
-                            onKeyDown: function(e) {
-                              if (e.key === "Enter") { shipUpdatePart(idx, "name", shipPartRenameVal.trim() || null); setShipPartRenamingIdx(null); }
-                              if (e.key === "Escape") { setShipPartRenamingIdx(null); }
-                            },
-                            onClick: function(e) { e.stopPropagation(); },
-                            style: { flex: 1, background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,138,170,0.5)", borderRadius: 4, color: "#ff8aaa", padding: "2px 6px", outline: "none", boxSizing: "border-box", fontFamily: "'Exo 2', sans-serif", fontSize: 16 } })
-                        : React.createElement("div", { style: { flex: 1, display: "flex", alignItems: "center", gap: 4, minWidth: 0 } },
-                            React.createElement("div", { style: { flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: isSel ? "#ff8aaa" : "rgba(200,210,220,0.7)", fontSize: 11, fontWeight: 600, fontFamily: "'Exo 2', sans-serif", letterSpacing: 0.4 } }, displayName + " · (" + p.x.toFixed(0) + "," + p.y.toFixed(0) + ")"),
-                            React.createElement("div", { onClick: function(e) { e.stopPropagation(); setShipPartRenamingIdx(idx); setShipPartRenameVal(p.name || ""); },
-                              title: "Rename part",
-                              style: { flexShrink: 0, cursor: "pointer", color: "rgba(180,200,220,0.35)", display: "flex", alignItems: "center", padding: "2px" } },
-                              WsIconPencil(11))),
-                      React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipDuplicatePart(idx); },
-                        title: "Duplicate part",
-                        style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", background: "rgba(128,221,255,0.1)", border: "1px solid rgba(128,221,255,0.3)", flex: "0 0 auto" } },
-                        shipCopySvg(12, "#80ddff")),
-                      React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipDeletePart(idx); },
-                        title: "Delete part",
-                        style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", background: "rgba(220,60,80,0.12)", border: "1px solid rgba(220,60,80,0.3)", flex: "0 0 auto" } },
-                        shipTrashSvg(12, "#ff8088")));
-                  }))));
+                partsList.length === 0
+                  ? React.createElement("div", { style: { color: "rgba(180,200,220,0.4)", fontSize: 11, fontStyle: "italic", padding: "6px 0" } }, "No parts yet — add one from the ADD tab.")
+                  : React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 4 } },
+                      renderItems.map(function(item) {
+                        if (item.type === "part") return renderPartRow(item.idx, false);
+                        if (item.type === "grpmem") return renderPartRow(item.idx, true);
+                        // ── Group header row ─────────────────────────────────
+                        var gid = item.groupId;
+                        var tint = shipGroupTint(gid);
+                        var collapsed = !!shipCollapsedGroups[gid];
+                        var anyMemberSel = false;
+                        for (var gi = 0; gi < item.members.length; gi++) {
+                          if (shipIsSelected(item.members[gi])) { anyMemberSel = true; break; }
+                        }
+                        return React.createElement("div", Object.assign({ key: "grphdr-" + gid,
+                          onClick: function() { shipSelectGroup(gid); },
+                          style: { display: "flex", alignItems: "center", gap: 6, padding: "6px 6px",
+                            borderRadius: 6, cursor: "pointer",
+                            background: anyMemberSel ? "rgba(255,220,100,0.10)" : "rgba(255,220,100,0.05)",
+                            border: anyMemberSel ? "1px solid rgba(255,220,100,0.40)" : "1px solid rgba(255,255,255,0.08)",
+                            borderLeft: "3px solid " + tint } },
+                          { "data-shippart-row": "1", "data-shippart-actual-idx": String(item.maxIdx) }),
+                          // Collapse/expand triangle
+                          React.createElement("div", {
+                            onClick: function(e) { e.stopPropagation(); setShipCollapsedGroups(function(prev) { var n = Object.assign({}, prev); if (n[gid]) { delete n[gid]; } else { n[gid] = true; } return n; }); },
+                            style: { width: 16, height: 16, display: "flex", alignItems: "center", justifyContent: "center", flex: "0 0 auto", color: "rgba(220,200,140,0.7)", cursor: "pointer" } },
+                            React.createElement("svg", { width: 10, height: 10, viewBox: "0 0 10 10", fill: "currentColor" },
+                              collapsed
+                                ? React.createElement("polygon", { points: "2,2 8,5 2,8" })
+                                : React.createElement("polygon", { points: "2,2 8,2 5,8" }))),
+                          // Tint dot
+                          React.createElement("div", { style: { width: 10, height: 10, borderRadius: "50%", background: tint, flex: "0 0 auto", border: "1.5px solid rgba(0,0,0,0.35)" } }),
+                          // Label
+                          React.createElement("div", { style: { flex: 1, color: "rgba(220,200,140,0.85)", fontSize: 11, fontWeight: 700, fontFamily: "'Exo 2', sans-serif", letterSpacing: 0.4 } },
+                            "Group \xB7 " + item.members.length),
+                          // Drag handle
+                          React.createElement("div", {
+                            onPointerDown: function(e) { shipDragGroupHandleStart(gid, item.maxIdx, e); },
+                            onPointerMove: shipDragHandleMove,
+                            onPointerUp: shipDragHandleEnd, onPointerCancel: shipDragHandleEnd,
+                            title: "Drag group to reorder",
+                            style: { width: 16, height: 22, display: "flex", alignItems: "center", justifyContent: "center", cursor: "grab", touchAction: "none", flex: "0 0 auto", color: tint } },
+                            React.createElement("svg", { width: "10", height: "16", viewBox: "0 0 10 16", fill: "currentColor" },
+                              React.createElement("circle", { cx: 2.5, cy: 3,  r: 1.3 }), React.createElement("circle", { cx: 7.5, cy: 3,  r: 1.3 }),
+                              React.createElement("circle", { cx: 2.5, cy: 8,  r: 1.3 }), React.createElement("circle", { cx: 7.5, cy: 8,  r: 1.3 }),
+                              React.createElement("circle", { cx: 2.5, cy: 13, r: 1.3 }), React.createElement("circle", { cx: 7.5, cy: 13, r: 1.3 }))));
+                      }))));
           })()),
         shipShowBackWarn && renderBackWarnOverlay(
           function() { setShipShowBackWarn(false); },
