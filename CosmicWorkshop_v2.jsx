@@ -2204,10 +2204,10 @@ export default function CosmicWorkshop() {
     var _nShip = shipSaved.slice(), _nPlasma = plasmaSaved.slice(), _nLvl = savedLevels.slice();
     for (var _ii = 0; _ii < embedded.length; _ii++) {
       var _d2 = embedded[_ii]; var _use = resolutions[_d2.id] !== "keep"; var _found = false;
-      if (_d2.id && _d2.id.indexOf("bd_") === 0) {
+      if ((_d2.id && _d2.id.indexOf("bd_") === 0) || (_d2.assignedTo !== undefined && _d2.effectType === undefined && !_d2.grid)) {
         for (var _k = 0; _k < _nBd.length; _k++) { if (_nBd[_k].id === _d2.id) { if (_use) _nBd[_k] = _d2; _found = true; break; } }
         if (!_found) _nBd.push(_d2);
-      } else if (_d2.id && _d2.id.indexOf("vfx_") === 0) {
+      } else if ((_d2.id && _d2.id.indexOf("vfx_") === 0) || _d2.effectType !== undefined) {
         for (var _k2 = 0; _k2 < _nVfx.length; _k2++) { if (_nVfx[_k2].id === _d2.id) { if (_use) _nVfx[_k2] = _d2; _found = true; break; } }
         if (!_found) _nVfx.push(_d2);
       } else if (_d2.id && _d2.id.indexOf("ufo_") === 0) {
