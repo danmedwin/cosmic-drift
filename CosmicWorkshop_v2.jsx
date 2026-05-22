@@ -4285,6 +4285,23 @@ export default function CosmicWorkshop() {
       return Object.assign({}, prev, { parts: list });
     }, "multiSize_" + key);
   }
+  function shipMoveGroupSelected(key, val) {
+    var sels = shipGetSelected();
+    if (sels.length < 2) return;
+    var bbox = shipPartsBBox(sels);
+    var dx = key === "x" ? val - bbox.cx : 0;
+    var dy = key === "y" ? val - bbox.cy : 0;
+    if (dx === 0 && dy === 0) return;
+    shipDirtyRef.current = true;
+    shipApplyEdit(function(prev) {
+      var list = (prev.parts || []).slice();
+      for (var i = 0; i < sels.length; i++) {
+        var ix = sels[i]; var p = list[ix]; if (!p) continue;
+        list[ix] = Object.assign({}, p, { x: Math.max(0, Math.min(40, p.x + dx)), y: Math.max(0, Math.min(40, p.y + dy)) });
+      }
+      return Object.assign({}, prev, { parts: list });
+    }, "groupPos_" + key);
+  }
   // Replace / Add / Cancel popup shown when tapping a hull preset that would
   // overwrite existing parts.
   function renderHullPresetOverlay(hullId, onCancel, onChoose) {
@@ -4329,11 +4346,20 @@ export default function CosmicWorkshop() {
       var hw = ((p.w || 8) / 2) + 1.5, hh = ((p.h || 8) / 2) + 1.5;
       if (px >= p.x - hw && px <= p.x + hw && py >= p.y - hh && py <= p.y + hh) {
         shipApplyTap(i, shipMultiSelectOn);
-        // Only enable drag-to-move when the tap acts on a single part
-        // (multi-select + groups are about composition, not dragging).
-        if (!shipMultiSelectOn && !(p.groupId)) {
-          shipDragRef.current = { idx: i, offX: px - p.x, offY: py - p.y };
-          if (e.currentTarget.setPointerCapture && e.pointerId != null) {
+        if (!shipMultiSelectOn) {
+          var members = p.groupId ? shipGroupMembers(p.groupId) : [i];
+          if (p.groupId && members.length > 1) {
+            var parts2 = (shipEdit && shipEdit.parts) || [];
+            var startPos = [];
+            for (var j = 0; j < members.length; j++) {
+              var sp = parts2[members[j]];
+              startPos.push(sp ? { x: sp.x, y: sp.y } : { x: 0, y: 0 });
+            }
+            shipDragRef.current = { group: true, sels: members, startPos: startPos, startPx: px, startPy: py };
+          } else if (!p.groupId) {
+            shipDragRef.current = { idx: i, offX: px - p.x, offY: py - p.y };
+          }
+          if (shipDragRef.current && e.currentTarget.setPointerCapture && e.pointerId != null) {
             try { e.currentTarget.setPointerCapture(e.pointerId); } catch(err) {}
           }
         }
@@ -4354,6 +4380,22 @@ export default function CosmicWorkshop() {
     var px = (cx - rect.left) / rect.width * 40;
     var py = (cy - rect.top) / rect.height * 40;
     var di = shipDragRef.current;
+    if (di.group) {
+      var dx = px - di.startPx;
+      var dy = py - di.startPy;
+      var gsels = di.sels;
+      var gstart = di.startPos;
+      shipApplyEdit(function(prev) {
+        var list = (prev.parts || []).slice();
+        for (var i = 0; i < gsels.length; i++) {
+          var ix = gsels[i]; var p = list[ix]; if (!p) continue;
+          list[ix] = Object.assign({}, p, { x: Math.max(0, Math.min(40, gstart[i].x + dx)), y: Math.max(0, Math.min(40, gstart[i].y + dy)) });
+        }
+        shipDirtyRef.current = true;
+        return Object.assign({}, prev, { parts: list });
+      }, "groupDrag");
+      return;
+    }
     var nx = Math.max(0, Math.min(40, px - di.offX));
     var ny = Math.max(0, Math.min(40, py - di.offY));
     shipApplyEdit(function(prev) {
@@ -6165,11 +6207,11 @@ export default function CosmicWorkshop() {
               alignPanel,
               // Hide per-part Position X/Y while multi-selected — slamming all
               // selected parts to a single x or y would collapse them on top
-              // of each other. Use the Align buttons above instead.
-              !multi && React.createElement(BDSlider, { label: "Position X", value: sel.x, min: 0, max: 40, step: 0.5, displayValue: sel.x.toFixed(1),
-                onChange: function(v) { shipUpdateSelected("x", v); } }),
-              !multi && React.createElement(BDSlider, { label: "Position Y", value: sel.y, min: 0, max: 40, step: 0.5, displayValue: sel.y.toFixed(1),
-                onChange: function(v) { shipUpdateSelected("y", v); } }),
+              // of each other. For grouped selections show bbox-center sliders instead.
+              (!multi || selGroupBBox) && React.createElement(BDSlider, { label: selGroupBBox ? "Position X (Group)" : "Position X", value: selGroupBBox ? selGroupBBox.cx : sel.x, min: 0, max: 40, step: 0.5, displayValue: (selGroupBBox ? selGroupBBox.cx : sel.x).toFixed(1),
+                onChange: function(v) { if (selGroupBBox) { shipMoveGroupSelected("x", v); } else { shipUpdateSelected("x", v); } } }),
+              (!multi || selGroupBBox) && React.createElement(BDSlider, { label: selGroupBBox ? "Position Y (Group)" : "Position Y", value: selGroupBBox ? selGroupBBox.cy : sel.y, min: 0, max: 40, step: 0.5, displayValue: (selGroupBBox ? selGroupBBox.cy : sel.y).toFixed(1),
+                onChange: function(v) { if (selGroupBBox) { shipMoveGroupSelected("y", v); } else { shipUpdateSelected("y", v); } } }),
               React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 36px", gap: 8, alignItems: "stretch" } },
                 React.createElement("div", null,
                   React.createElement(BDSlider, { label: selGroupBBox ? "Width (Group)" : shipMixedLbl("w", "Width"), value: selGroupBBox ? selGroupBBox.w : sel.w, min: 1, max: selGroupBBox ? 60 : 30, step: 0.5, displayValue: (selGroupBBox ? selGroupBBox.w : sel.w).toFixed(1),
