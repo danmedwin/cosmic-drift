@@ -5091,23 +5091,6 @@ export default function CosmicWorkshop() {
             )
           );
         }()),
-        // Activation prompt overlay (blocks/VFX choice)
-        setsActivatePrompt && React.createElement("div", { style: OVERLAY_BG },
-          React.createElement("div", { style: Object.assign({}, OVERLAY_BOX, { border: "1px solid rgba(255,208,96,0.3)", maxWidth: 340, width: "92%", textAlign: "left" }) },
-            React.createElement("div", { style: { color: "#ffd060", fontSize: 14, fontWeight: 700, marginBottom: 8, fontFamily: "'Quicksand',sans-serif" } }, "Activate Set"),
-            React.createElement("div", { style: { color: "rgba(200,210,220,0.6)", fontSize: 12, marginBottom: 16 } }, "This set includes custom block and/or VFX designs. What should happen to your currently active designs that are not in this set?"),
-            React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 } },
-              React.createElement("div", { onClick: function() { setsApplyActivation(setsActivatePrompt, "keep"); }, style: { padding: "10px 14px", borderRadius: 8, background: "rgba(80,200,100,0.1)", border: "1px solid rgba(80,200,100,0.3)", cursor: "pointer" } },
-                React.createElement("div", { style: { color: "#80dd90", fontSize: 12, fontWeight: 700, marginBottom: 3 } }, "Keep current active"),
-                React.createElement("div", { style: { color: "rgba(200,210,220,0.5)", fontSize: 10 } }, "Only override the specific designs in this set. Everything else stays as-is.")),
-              React.createElement("div", { onClick: function() { setsApplyActivation(setsActivatePrompt, "defaults"); }, style: { padding: "10px 14px", borderRadius: 8, background: "rgba(255,208,96,0.08)", border: "1px solid rgba(255,208,96,0.25)", cursor: "pointer" } },
-                React.createElement("div", { style: { color: "#ffd060", fontSize: 12, fontWeight: 700, marginBottom: 3 } }, "Use defaults for the rest"),
-                React.createElement("div", { style: { color: "rgba(200,210,220,0.5)", fontSize: 10 } }, "Apply only this set's designs. All other block/VFX types revert to game defaults."))
-            ),
-            React.createElement("div", { style: { textAlign: "center" } },
-              React.createElement("div", { onClick: function() { setSetsActivatePrompt(null); }, style: { color: "rgba(200,210,220,0.5)", fontSize: 12, cursor: "pointer" } }, "Cancel"))
-          )
-        ),
         setsPlayPromptSet && React.createElement("div", { style: OVERLAY_BG },
           React.createElement("div", { style: Object.assign({}, OVERLAY_BOX, { border: "1px solid rgba(255,208,96,0.4)", maxWidth: 320, width: "92%", textAlign: "center" }) },
             React.createElement("div", { style: { color: "#ffd060", fontSize: 14, fontWeight: 700, marginBottom: 8, fontFamily: "'Quicksand',sans-serif" } }, setsPlayPromptSet.name || "Unnamed Set"),
@@ -5163,7 +5146,9 @@ export default function CosmicWorkshop() {
           backLabel: "My Sets",
           title: setsEditSet.id && setsSaved.some(function(s) { return s.id === setsEditSet.id; }) ? "Edit Set" : "New Set",
           color: "#ffd060",
-          rightContent: React.createElement("div", { onClick: setsSaveEdit, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg,#2a2000,#1a1400)", border: "1px solid rgba(255,208,96,0.5)", color: "#ffd060" }) }, "Save & Exit")
+          rightContent: React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
+            setsEditSet.id && setsSaved.some(function(s) { return s.id === setsEditSet.id; }) && React.createElement("div", { onClick: function() { setsToggleActive(setsEditSet); }, style: Object.assign({}, setsActiveId === setsEditSet.id ? BTN_ISACTIVE : BTN_SETACTIVE, { flexShrink: 0 }) }, setsActiveId === setsEditSet.id ? "★ Active" : "Set Active"),
+            React.createElement("div", { onClick: setsSaveEdit, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg,#2a2000,#1a1400)", border: "1px solid rgba(255,208,96,0.5)", color: "#ffd060" }) }, "Save & Exit"))
         }),
         React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "10px 12px 32px" } },
           // Name field
@@ -5249,6 +5234,23 @@ export default function CosmicWorkshop() {
               );
             });
           }())
+        )
+      ),
+      // Activation prompt overlay — rendered at sets-div level so it shows in both list and editor views
+      setsActivatePrompt && React.createElement("div", { style: OVERLAY_BG },
+        React.createElement("div", { style: Object.assign({}, OVERLAY_BOX, { border: "1px solid rgba(255,208,96,0.3)", maxWidth: 340, width: "92%", textAlign: "left" }) },
+          React.createElement("div", { style: { color: "#ffd060", fontSize: 14, fontWeight: 700, marginBottom: 8, fontFamily: "'Quicksand',sans-serif" } }, "Activate Set"),
+          React.createElement("div", { style: { color: "rgba(200,210,220,0.6)", fontSize: 12, marginBottom: 16 } }, "This set includes custom block and/or VFX designs. What should happen to your currently active designs that are not in this set?"),
+          React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 } },
+            React.createElement("div", { onClick: function() { setsApplyActivation(setsActivatePrompt, "keep"); }, style: { padding: "10px 14px", borderRadius: 8, background: "rgba(80,200,100,0.1)", border: "1px solid rgba(80,200,100,0.3)", cursor: "pointer" } },
+              React.createElement("div", { style: { color: "#80dd90", fontSize: 12, fontWeight: 700, marginBottom: 3 } }, "Keep current active"),
+              React.createElement("div", { style: { color: "rgba(200,210,220,0.5)", fontSize: 10 } }, "Only override the specific designs in this set. Everything else stays as-is.")),
+            React.createElement("div", { onClick: function() { setsApplyActivation(setsActivatePrompt, "defaults"); }, style: { padding: "10px 14px", borderRadius: 8, background: "rgba(255,208,96,0.08)", border: "1px solid rgba(255,208,96,0.25)", cursor: "pointer" } },
+              React.createElement("div", { style: { color: "#ffd060", fontSize: 12, fontWeight: 700, marginBottom: 3 } }, "Use defaults for the rest"),
+              React.createElement("div", { style: { color: "rgba(200,210,220,0.5)", fontSize: 10 } }, "Apply only this set's designs. All other block/VFX types revert to game defaults."))
+          ),
+          React.createElement("div", { style: { textAlign: "center" } },
+            React.createElement("div", { onClick: function() { setSetsActivatePrompt(null); }, style: { color: "rgba(200,210,220,0.5)", fontSize: 12, cursor: "pointer" } }, "Cancel"))
         )
       )
     ),
