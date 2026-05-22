@@ -9803,6 +9803,8 @@ function CosmicDriftGame() {
     var shipY = getShipY(),
       sx = getBlockX(fromCol),
       targetIdx = findBlockInCol(fromCol);
+    var srcYOffset = Math.round((GAME_PLASMA_DESIGN.sourceOffsetY != null ? GAME_PLASMA_DESIGN.sourceOffsetY : 0) / 100 * shipDisplaySize);
+    var startY = shipY + srcYOffset;
     var splitOn = !!GAME_PLASMA_DESIGN.splitEnabled;
     if (splitOn) {
       shotsFiredRef.current += 1;
@@ -9824,11 +9826,11 @@ function CosmicDriftGame() {
         var targetIdxSame = findBlockInCol(leftCol);
         if (targetIdxSame < 0) {
           var topYSame = getGridTop() - 20;
-          var durSame = (shipY - topYSame) / PLASMA_SPEED;
-          _spawnCanvasProj(sxL, shipY, topYSame, durSame, function () {
+          var durSame = (startY - topYSame) / PLASMA_SPEED;
+          _spawnCanvasProj(sxL, startY, topYSame, durSame, function () {
             spawnFizzle(sxL, topYSame + 10);
           }, SS);
-          _spawnCanvasProj(sxR, shipY, topYSame, durSame, function () {
+          _spawnCanvasProj(sxR, startY, topYSame, durSame, function () {
             spawnFizzle(sxR, topYSame + 10);
             scheduleRechargeCheck();
           }, SS);
@@ -9838,10 +9840,10 @@ function CosmicDriftGame() {
           if (tTypeSame !== 7) shotsHitRef.current += 1;
           if (tTypeSame !== 7 && tTypeSame !== 17 && !(tTypeSame === 10 && shieldRef.current[targetIdxSame] > 0)) removingRef.current.add(targetIdxSame);
           var tYSame = tTypeSame === 7 ? getBlockY(tRowSame) + blockSize / 2 + 2 : getBlockY(tRowSame);
-          var dur2Same = Math.max(100, (shipY - tYSame) / PLASMA_SPEED);
+          var dur2Same = Math.max(100, (startY - tYSame) / PLASMA_SPEED);
           var _fireTSame = Date.now();
-          _spawnCanvasProj(sxL, shipY, tYSame, dur2Same, function () {}, SS);
-          _spawnCanvasProj(sxR, shipY, tYSame, dur2Same, function (arriveT) {
+          _spawnCanvasProj(sxL, startY, tYSame, dur2Same, function () {}, SS);
+          _spawnCanvasProj(sxR, startY, tYSame, dur2Same, function (arriveT) {
             var _hitTSame = Date.now();
             _shotTimingLog.unshift({
               fireT: _fireTSame,
@@ -9861,8 +9863,8 @@ function CosmicDriftGame() {
         var targetIdxR = findBlockInCol(rightCol);
         if (targetIdxL < 0) {
           var topYL = getGridTop() - 20;
-          var durL = (shipY - topYL) / PLASMA_SPEED;
-          _spawnCanvasProj(sxL, shipY, topYL, durL, function () {
+          var durL = (startY - topYL) / PLASMA_SPEED;
+          _spawnCanvasProj(sxL, startY, topYL, durL, function () {
             spawnFizzle(sxL, topYL + 10);
           }, SS);
         } else {
@@ -9871,9 +9873,9 @@ function CosmicDriftGame() {
           if (targetTypeL !== 7) shotsHitRef.current += 1;
           if (targetTypeL !== 7 && targetTypeL !== 17 && !(targetTypeL === 10 && shieldRef.current[targetIdxL] > 0)) removingRef.current.add(targetIdxL);
           var targetYL = targetTypeL === 7 ? getBlockY(targetRowL) + blockSize / 2 + 2 : getBlockY(targetRowL);
-          var dur2L = Math.max(100, (shipY - targetYL) / PLASMA_SPEED);
+          var dur2L = Math.max(100, (startY - targetYL) / PLASMA_SPEED);
           var _fireTL = Date.now();
-          _spawnCanvasProj(sxL, shipY, targetYL, dur2L, function (arriveT) {
+          _spawnCanvasProj(sxL, startY, targetYL, dur2L, function (arriveT) {
             var _hitTL = Date.now();
             _shotTimingLog.unshift({
               fireT: _fireTL,
@@ -9890,8 +9892,8 @@ function CosmicDriftGame() {
         }
         if (targetIdxR < 0) {
           var topYR = getGridTop() - 20;
-          var durR = (shipY - topYR) / PLASMA_SPEED;
-          _spawnCanvasProj(sxR, shipY, topYR, durR, function () {
+          var durR = (startY - topYR) / PLASMA_SPEED;
+          _spawnCanvasProj(sxR, startY, topYR, durR, function () {
             spawnFizzle(sxR, topYR + 10);
             scheduleRechargeCheck();
           }, SS);
@@ -9901,9 +9903,9 @@ function CosmicDriftGame() {
           if (targetTypeR !== 7) shotsHitRef.current += 1;
           if (targetTypeR !== 7 && targetTypeR !== 17 && !(targetTypeR === 10 && shieldRef.current[targetIdxR] > 0)) removingRef.current.add(targetIdxR);
           var targetYR = targetTypeR === 7 ? getBlockY(targetRowR) + blockSize / 2 + 2 : getBlockY(targetRowR);
-          var dur2R = Math.max(100, (shipY - targetYR) / PLASMA_SPEED);
+          var dur2R = Math.max(100, (startY - targetYR) / PLASMA_SPEED);
           var _fireTR = Date.now();
-          _spawnCanvasProj(sxR, shipY, targetYR, dur2R, function (arriveT) {
+          _spawnCanvasProj(sxR, startY, targetYR, dur2R, function (arriveT) {
             var _hitTR = Date.now();
             _shotTimingLog.unshift({
               fireT: _fireTR,
@@ -9926,9 +9928,9 @@ function CosmicDriftGame() {
     }
     if (targetIdx < 0) {
       var topY = getGridTop() - 20,
-        dist = shipY - topY,
+        dist = startY - topY,
         dur = dist / PLASMA_SPEED;
-      _spawnCanvasProj(sx, shipY, topY, dur, function () {
+      _spawnCanvasProj(sx, startY, topY, dur, function () {
         spawnFizzle(sx, topY + 10);
         scheduleRechargeCheck();
       });
@@ -9938,10 +9940,10 @@ function CosmicDriftGame() {
       if (targetType !== 7) shotsHitRef.current += 1;
       if (targetType !== 7 && targetType !== 17 && !(targetType === 10 && shieldRef.current[targetIdx] > 0)) removingRef.current.add(targetIdx);
       var targetY = targetType === 7 ? getBlockY(targetRow) + blockSize / 2 + 2 : getBlockY(targetRow);
-      var dist2 = shipY - targetY,
+      var dist2 = startY - targetY,
         dur2 = Math.max(100, dist2 / PLASMA_SPEED);
       var _fireT = Date.now();
-      _spawnCanvasProj(sx, shipY, targetY, dur2, function (arriveT) {
+      _spawnCanvasProj(sx, startY, targetY, dur2, function (arriveT) {
         var _hitT = Date.now();
         _shotTimingLog.unshift({
           fireT: _fireT,
