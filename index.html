@@ -8392,6 +8392,7 @@ function CosmicDriftGame() {
 
   // Global win check
   useEffect(function () {
+    if (screen !== "game") return;
     if (gameState !== "playing" && gameState !== "needsRecharge") return;
     if (countDestructible() === 0 && pendingFFRef.current <= 0 && removingRef.current.size === 0) {
       // Level 8: intercept for acid barrel demo
@@ -8425,7 +8426,7 @@ function CosmicDriftGame() {
         clearTimeout(t);
       };
     }
-  }, [grid, gameState]);
+  }, [grid, gameState, screen]);
   // Acid demo: clear after barrel destroyed
   useEffect(function () {
     if (!acidDemo || gameState !== "playing" && gameState !== "needsRecharge") return;
