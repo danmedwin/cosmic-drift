@@ -1636,7 +1636,7 @@ export default function CosmicWorkshop() {
   // Tracks an active row-drag in the parts list (Z-order reordering by drag).
   var shipDragHandleRef = useRef(null);
   var _shipHullPromptId = useState(null), shipHullPromptId = _shipHullPromptId[0], setShipHullPromptId = _shipHullPromptId[1];
-  var _shipWhLocked = useState(false), shipWhLocked = _shipWhLocked[0], setShipWhLocked = _shipWhLocked[1];
+  var _shipWhLocked = useState(true), shipWhLocked = _shipWhLocked[0], setShipWhLocked = _shipWhLocked[1];
   var bdScrollRef = useRef(null);
 
   // ══ LEVEL BUILDER STATE ══
@@ -6356,9 +6356,9 @@ export default function CosmicWorkshop() {
                 onChange: function(v) { if (selGroupBBox) { shipMoveGroupSelected("y", v); } else { shipUpdateSelected("y", v); } } }),
               React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 36px", gap: 8, alignItems: "stretch" } },
                 React.createElement("div", null,
-                  React.createElement(BDSlider, { label: selGroupBBox ? "Width (Group)" : shipMixedLbl("w", "Width"), value: selGroupBBox ? selGroupBBox.w : sel.w, min: 1, max: selGroupBBox ? 60 : 30, step: 0.5, displayValue: (selGroupBBox ? selGroupBBox.w : sel.w).toFixed(1),
+                  React.createElement(BDSlider, { label: selGroupBBox ? "Width (Group)" : shipMixedLbl("w", sel && sel.type === "line" ? "Length" : "Width"), value: selGroupBBox ? selGroupBBox.w : sel.w, min: 1, max: selGroupBBox ? 60 : 30, step: 0.5, displayValue: (selGroupBBox ? selGroupBBox.w : sel.w).toFixed(1),
                     onChange: function(v) { shipUpdatePartSizeSelected("w", v); } }),
-                  React.createElement(BDSlider, { label: selGroupBBox ? "Height (Group)" : shipMixedLbl("h", "Height"), value: selGroupBBox ? selGroupBBox.h : sel.h, min: 0.5, max: selGroupBBox ? 60 : 30, step: 0.5, displayValue: (selGroupBBox ? selGroupBBox.h : sel.h).toFixed(1),
+                  React.createElement(BDSlider, { label: selGroupBBox ? "Height (Group)" : shipMixedLbl("h", sel && sel.type === "line" ? "Thickness" : "Height"), value: selGroupBBox ? selGroupBBox.h : sel.h, min: 0.5, max: selGroupBBox ? 60 : 30, step: 0.5, displayValue: (selGroupBBox ? selGroupBBox.h : sel.h).toFixed(1),
                     onChange: function(v) { shipUpdatePartSizeSelected("h", v); } })),
                 React.createElement("div", {
                   onClick: function() { setShipWhLocked(!shipWhLocked); },
