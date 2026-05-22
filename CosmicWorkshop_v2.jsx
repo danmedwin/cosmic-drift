@@ -6276,9 +6276,6 @@ export default function CosmicWorkshop() {
               shipGlowPanel,
               React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,138,170,0.25)", borderRadius: 12, padding: "12px 16px 8px" } },
               renderShipSelectedHeader(sel),
-              fillMode !== "radial" && React.createElement(BDColorPicker, { label: shipMixedLbl("color", fillMode === "solid" ? "Color" : "Color 1"), value: sel.color,
-                presets: ["#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70cc", "#a0a8b8", "#ffffff", "#222a3a"],
-                onChange: function(v) { shipUpdateSelected("color", v); } }),
               React.createElement(BDSlider, { label: shipMixedLbl("opacity", "Opacity"), value: sel.opacity, min: 0, max: 1, step: 0.05, displayValue: Math.round((sel.opacity || 0) * 100) + "%",
                 onChange: function(v) { shipUpdateSelected("opacity", v); } }),
               // Fill mode selector + gradient controls (color2, angle for linear).
@@ -6289,6 +6286,9 @@ export default function CosmicWorkshop() {
                   return React.createElement("div", { key: m.id, onClick: function() { shipUpdateSelected("fillMode", m.id); },
                     style: { flex: 1, padding: "7px 6px", textAlign: "center", borderRadius: 6, cursor: "pointer", fontSize: 11, fontWeight: 700, letterSpacing: 0.5, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase", background: on ? "rgba(255,138,170,0.2)" : "rgba(255,255,255,0.04)", border: on ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.1)", color: on ? "#ff8aaa" : "rgba(180,200,220,0.6)" } }, m.label);
                 })),
+              fillMode !== "radial" && React.createElement(BDColorPicker, { label: shipMixedLbl("color", fillMode === "solid" ? "Color" : "Color 1"), value: sel.color,
+                presets: ["#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70cc", "#a0a8b8", "#ffffff", "#222a3a"],
+                onChange: function(v) { shipUpdateSelected("color", v); } }),
               fillMode !== "solid" && React.createElement(BDColorPicker, { label: shipMixedLbl("color2", fillMode === "radial" ? "Outer Color" : "Color 2"), value: sel.color2 || sel.color,
                 presets: ["#80ddff", "#ffd060", "#ff8aaa", "#80ff80", "#cc70cc", "#a0a8b8", "#ffffff", "#222a3a"],
                 onChange: function(v) { shipUpdateSelected("color2", v); } }),
