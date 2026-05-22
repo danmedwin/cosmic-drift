@@ -4459,6 +4459,51 @@ export default function CosmicWorkshop() {
       return Object.assign({}, prev, { parts: list });
     }, "groupPos_" + key);
   }
+  // Rotate every part in the group selection around the group's bounding-box
+  // center.  newRot is the absolute target for the primary part; currentRot is
+  // what it displayed before (sel.rot || 0).  Both positions AND individual
+  // rotations are updated so the group moves as a rigid body.
+  function shipRotateGroupSelected(newRot, currentRot) {
+    var sels = shipGetSelected();
+    if (sels.length < 2) return;
+    var delta = newRot - currentRot;
+    if (delta === 0) return;
+    // Use axis-aligned bbox of part centers as the pivot — this matches the
+    // visual centroid for un-scaled groups and stays stable across sliders.
+    var partsNow = (shipEdit && shipEdit.parts) || [];
+    var minX = 99999, maxX = -99999, minY = 99999, maxY = -99999;
+    for (var pi = 0; pi < sels.length; pi++) {
+      var pn = partsNow[sels[pi]]; if (!pn) continue;
+      if (pn.x < minX) minX = pn.x; if (pn.x > maxX) maxX = pn.x;
+      if (pn.y < minY) minY = pn.y; if (pn.y > maxY) maxY = pn.y;
+    }
+    var pcx = (minX + maxX) / 2, pcy = (minY + maxY) / 2;
+    var deltaRad = delta * Math.PI / 180;
+    var cosD = Math.cos(deltaRad), sinD = Math.sin(deltaRad);
+    shipDirtyRef.current = true;
+    shipApplyEdit(function(prev) {
+      var list = (prev.parts || []).slice();
+      for (var i = 0; i < sels.length; i++) {
+        var ix = sels[i]; var p = list[ix]; if (!p) continue;
+        // Orbit part center around group pivot
+        var dx = p.x - pcx, dy = p.y - pcy;
+        var nx = pcx + dx * cosD - dy * sinD;
+        var ny = pcy + dx * sinD + dy * cosD;
+        // Update individual rotation
+        var nrot = ((p.rot || 0) + delta) % 360;
+        if (nrot < 0) nrot += 360;
+        // Orbit the group scale pivot (gcx/gcy) too, so scaling still works after rotation
+        var ngcx = p.gcx, ngcy = p.gcy;
+        if (p.gcx != null && p.gcy != null) {
+          var gcdx = p.gcx - pcx, gcdy = p.gcy - pcy;
+          ngcx = pcx + gcdx * cosD - gcdy * sinD;
+          ngcy = pcy + gcdx * sinD + gcdy * cosD;
+        }
+        list[ix] = Object.assign({}, p, { x: nx, y: ny, rot: nrot, gcx: ngcx, gcy: ngcy });
+      }
+      return Object.assign({}, prev, { parts: list });
+    }, "groupRot");
+  }
   // Replace / Add / Cancel popup shown when tapping a hull preset that would
   // overwrite existing parts.
   function renderHullPresetOverlay(hullId, onCancel, onChoose) {
@@ -6401,7 +6446,7 @@ export default function CosmicWorkshop() {
               sel.type === "trapezoid" && React.createElement(BDSlider, { label: selGroupId ? "Top Offset" : shipMixedLbl("tofs", "Top Offset"), value: sel.tofs || 0, min: -sel.w / 2, max: sel.w / 2, step: 0.25, displayValue: (sel.tofs || 0).toFixed(2),
                 onChange: function(v) { shipUpdateSelected("tofs", v); } }),
               React.createElement(BDSlider, { label: selGroupId ? "Rotation" : shipMixedLbl("rot", "Rotation"), value: sel.rot || 0, min: 0, max: 360, step: 5, displayValue: (sel.rot || 0) + "°",
-                onChange: function(v) { shipUpdateSelected("rot", v); } }),
+                onChange: function(v) { if (selGroupId) { shipRotateGroupSelected(v, sel.rot || 0); } else { shipUpdateSelected("rot", v); } } }),
               partsList.length > 1 && React.createElement(BDSlider, { label: "Z (layer)", value: shipSelectedPart, min: 0, max: partsList.length - 1, step: 1, displayValue: shipSelectedPart + " / " + (partsList.length - 1),
                 onChange: function(v) { shipReorderPart(shipSelectedPart, Math.round(v)); } }));
           })(),
