@@ -1010,8 +1010,18 @@ var BD_FACTORY_PRESETS = [
   { id: "factory_core", name: "Extra Core", assignedTo: "core", isFactory: true, shape: "square", shapeRotation: 0, cornerRadius: 6, color: "#2090a0", borderColor: "#1a7888", borderWidth: 2, glowEnabled: true, glowColor: "#30c0d0", glowIntensity: 4, pattern: "none", patternColor: "#fff", patternOpacity: 0.3, patternScale: 1, patternRotation: 0, patternFilled: false, patternLineWidth: 1.5, icon: "hex_core", iconColor: "#50e8f0", iconOpacity: 0.9, iconGlow: true, iconGlowColor: "#50e8f0", iconGlowIntensity: 4 },
 ];
 
-// ── Open Space — pre-loaded block design collection ──
-// Seeded into storage on first launch. Users can edit or delete these freely.
+// ── Open Space — pre-loaded set + block design collection ──
+// Both seeded into storage on first Workshop launch. Users can edit or delete freely.
+var OPEN_SPACE_SET = {
+  id: "preset_openspace",
+  name: "Open Space",
+  savedAt: "2026-05-22T18:43:51.139Z",
+  shipDesignId: null,
+  plasmaDesignId: null,
+  levelIds: [],
+  blockDesignIds: ["mpev6urtrgwfsw","mpev7n6nloz04b","mpev7whpsrc8js","mpev82o5ap3qhn","mpev88kduh1ae4","mpev8reoqahqiy","mpev8v0ub1z3ce","mpev9x9m11artw","mpev3ctjt1g4qy"],
+  blockActive: { lightning: "mpev6urtrgwfsw", plasma: "mpev7n6nloz04b", crate: "mpev7whpsrc8js", drone: "mpev82o5ap3qhn", acid_barrel: "mpev88kduh1ae4", force_field: "mpev8reoqahqiy", core: "mpev8v0ub1z3ce", regular: "mpev9x9m11artw", cross_shot: "mpev3ctjt1g4qy" }
+};
 var OPEN_SPACE_BLOCK_DESIGNS = [
   { id: "mpev6urtrgwfsw", name: "OS Lightning", assignedTo: "lightning", isFactory: false, shape: "none", shapeRotation: 0, cornerRadius: 6, color: "#9a7020", borderColor: "#7a5a18", borderWidth: 2, glowEnabled: true, glowColor: "#b8862a", glowIntensity: 4, pattern: "none", patternColor: "#fff", patternOpacity: 0.3, patternScale: 1, patternRotation: 0, patternFilled: false, patternLineWidth: 1.5, icon: "bolt", iconColor: "#ffe066", iconOpacity: 0.9, iconGlow: false, iconGlowColor: "#ffe066", iconGlowIntensity: 4, createdAt: "2026-05-21T02:21:22.889Z", modifiedAt: "2026-05-21T02:21:22.889Z" },
   { id: "mpev7n6nloz04b", name: "OS Plasma", assignedTo: "plasma", isFactory: false, shape: "none", shapeRotation: 0, cornerRadius: 6, color: "#3060b0", borderColor: "#2850a0", borderWidth: 2, glowEnabled: true, glowColor: "#4080d8", glowIntensity: 4, pattern: "none", patternColor: "#fff", patternOpacity: 0.3, patternScale: 1, patternRotation: 0, patternFilled: false, patternLineWidth: 1.5, icon: "dot", iconColor: "#80ddff", iconOpacity: 0.85, iconGlow: true, iconGlowColor: "#50c8ff", iconGlowIntensity: 5, createdAt: "2026-05-21T02:21:59.711Z", modifiedAt: "2026-05-21T02:21:59.711Z" },
@@ -1783,7 +1793,9 @@ export default function CosmicWorkshop() {
     });
     try { window.storage.get("cosmic_drift_ship_size").then(function(r) { if (r && r.value) { var v = Number(r.value); if (v >= 34 && v <= 204) setPlasmaShipSize(v); } }).catch(function() {}); } catch(e) {}
     setsLoadAll().then(function(all) {
-      setSetsSaved(all);
+      var _hasOsSet = false;
+      for (var _ssi = 0; _ssi < all.length; _ssi++) { if (all[_ssi].id === OPEN_SPACE_SET.id) { _hasOsSet = true; break; } }
+      if (!_hasOsSet) { var _seededSets = [OPEN_SPACE_SET].concat(all); setsSaveAll(_seededSets); setSetsSaved(_seededSets); } else { setSetsSaved(all); }
       setsLoadActiveId().then(function(id) { setSetsActiveId(id || null); });
     });
   }, []);
