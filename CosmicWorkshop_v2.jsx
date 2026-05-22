@@ -5091,16 +5091,6 @@ export default function CosmicWorkshop() {
             )
           );
         }()),
-        setsPlayPromptSet && React.createElement("div", { style: OVERLAY_BG },
-          React.createElement("div", { style: Object.assign({}, OVERLAY_BOX, { border: "1px solid rgba(255,208,96,0.4)", maxWidth: 320, width: "92%", textAlign: "center" }) },
-            React.createElement("div", { style: { color: "#ffd060", fontSize: 14, fontWeight: 700, marginBottom: 8, fontFamily: "'Quicksand',sans-serif" } }, setsPlayPromptSet.name || "Unnamed Set"),
-            React.createElement("div", { style: { color: "rgba(200,210,220,0.6)", fontSize: 12, marginBottom: 20 } }, "Activate this set and play?"),
-            React.createElement("div", { style: { display: "flex", gap: 10, justifyContent: "center" } },
-              React.createElement("div", { onClick: function() { setSetsPlayPromptSet(null); }, style: { padding: "9px 18px", borderRadius: 8, border: "1px solid rgba(200,210,220,0.2)", color: "rgba(200,210,220,0.5)", fontSize: 12, fontWeight: 600, cursor: "pointer" } }, "Cancel"),
-              React.createElement("div", { onClick: function() { setsPlayAfterActivateRef.current = true; setsToggleActive(setsPlayPromptSet); setSetsPlayPromptSet(null); }, style: { padding: "9px 18px", borderRadius: 8, background: "linear-gradient(180deg, #2a2000, #1a1400)", border: "1px solid rgba(255,208,96,0.6)", color: "#ffd060", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "Activate & Play")
-            )
-          )
-        ),
         // Save Current modal
         showSaveCurrent && saveCurrentSels && React.createElement("div", { style: OVERLAY_BG },
           React.createElement("div", { style: Object.assign({}, OVERLAY_BOX, { border: "1px solid rgba(255,208,96,0.3)", maxWidth: 360, width: "92%", textAlign: "left", maxHeight: "80vh", overflowY: "auto" }) },
@@ -5147,6 +5137,7 @@ export default function CosmicWorkshop() {
           title: setsEditSet.id && setsSaved.some(function(s) { return s.id === setsEditSet.id; }) ? "Edit Set" : "New Set",
           color: "#ffd060",
           rightContent: React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 6 } },
+            setsEditSet.levelIds && setsEditSet.levelIds.length > 0 && React.createElement("div", { onClick: function() { setsPlaySet(setsEditSet); }, style: BTN_PLAYSET }, React.createElement("svg", { width: 9, height: 10, viewBox: "0 0 9 10" }, React.createElement("path", { d: "M0 0 L9 5 L0 10 Z", fill: "#ffd060" })), "PLAY"),
             setsEditSet.id && setsSaved.some(function(s) { return s.id === setsEditSet.id; }) && React.createElement("div", { onClick: function() { setsToggleActive(setsEditSet); }, style: Object.assign({}, setsActiveId === setsEditSet.id ? BTN_ISACTIVE : BTN_SETACTIVE, { flexShrink: 0 }) }, setsActiveId === setsEditSet.id ? "★ Active" : "Set Active"),
             React.createElement("div", { onClick: setsSaveEdit, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg,#2a2000,#1a1400)", border: "1px solid rgba(255,208,96,0.5)", color: "#ffd060" }) }, "Save & Exit"))
         }),
@@ -5234,6 +5225,17 @@ export default function CosmicWorkshop() {
               );
             });
           }())
+        )
+      ),
+      // Play prompt overlay — rendered at sets-div level so it shows in both list and editor views
+      setsPlayPromptSet && React.createElement("div", { style: OVERLAY_BG },
+        React.createElement("div", { style: Object.assign({}, OVERLAY_BOX, { border: "1px solid rgba(255,208,96,0.4)", maxWidth: 320, width: "92%", textAlign: "center" }) },
+          React.createElement("div", { style: { color: "#ffd060", fontSize: 14, fontWeight: 700, marginBottom: 8, fontFamily: "'Quicksand',sans-serif" } }, setsPlayPromptSet.name || "Unnamed Set"),
+          React.createElement("div", { style: { color: "rgba(200,210,220,0.6)", fontSize: 12, marginBottom: 20 } }, "Activate this set and play?"),
+          React.createElement("div", { style: { display: "flex", gap: 10, justifyContent: "center" } },
+            React.createElement("div", { onClick: function() { setSetsPlayPromptSet(null); }, style: { padding: "9px 18px", borderRadius: 8, border: "1px solid rgba(200,210,220,0.2)", color: "rgba(200,210,220,0.5)", fontSize: 12, fontWeight: 600, cursor: "pointer" } }, "Cancel"),
+            React.createElement("div", { onClick: function() { setsPlayAfterActivateRef.current = true; setsToggleActive(setsPlayPromptSet); setSetsPlayPromptSet(null); }, style: { padding: "9px 18px", borderRadius: 8, background: "linear-gradient(180deg, #2a2000, #1a1400)", border: "1px solid rgba(255,208,96,0.6)", color: "#ffd060", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "Activate & Play")
+          )
         )
       ),
       // Activation prompt overlay — rendered at sets-div level so it shows in both list and editor views
