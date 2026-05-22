@@ -4017,6 +4017,35 @@ export default function CosmicWorkshop() {
     }
     return out;
   }
+  // Returns the shared groupId if ALL selected parts belong to the same group, null otherwise.
+  function shipAreSelectedSameGroup() {
+    var sels = shipGetSelected();
+    if (sels.length < 2) return null;
+    var parts = (shipEdit && shipEdit.parts) || [];
+    var gid = null;
+    for (var i = 0; i < sels.length; i++) {
+      var p = parts[sels[i]];
+      if (!p || !p.groupId) return null;
+      if (gid === null) { gid = p.groupId; }
+      else if (p.groupId !== gid) return null;
+    }
+    return gid;
+  }
+  // Axis-aligned bounding box (center + size) for a list of part indices.
+  function shipPartsBBox(idxList) {
+    var parts = (shipEdit && shipEdit.parts) || [];
+    var minX = 99999, maxX = -99999, minY = 99999, maxY = -99999;
+    for (var i = 0; i < idxList.length; i++) {
+      var p = parts[idxList[i]];
+      if (!p) continue;
+      var hw = p.w / 2, hh = p.h / 2;
+      if (p.x - hw < minX) minX = p.x - hw;
+      if (p.x + hw > maxX) maxX = p.x + hw;
+      if (p.y - hh < minY) minY = p.y - hh;
+      if (p.y + hh > maxY) maxY = p.y + hh;
+    }
+    return { cx: (minX + maxX) / 2, cy: (minY + maxY) / 2, w: maxX - minX, h: maxY - minY };
+  }
   // Single entry point for canvas / list-row taps. addMode comes from the
   // multi-select toggle; when true, the tap adds/removes the tapped part
   // (and any group members) instead of replacing the selection.
@@ -4214,11 +4243,37 @@ export default function CosmicWorkshop() {
       return Object.assign({}, prev, { parts: list });
     }, "align_" + mode + "_" + Date.now());
   }
-  // Size-aware fan-out: respects shipWhLocked per-part.
+  // Size-aware fan-out: when all selected parts are in the same group, scales
+  // the group as one unit (positions + sizes); otherwise applies the same
+  // absolute value to each selected part individually.
   function shipUpdatePartSizeSelected(key, val) {
     var sels = shipGetSelected();
     if (sels.length === 0) return;
     if (sels.length === 1) { shipUpdatePartSize(sels[0], key, val); return; }
+    if (shipAreSelectedSameGroup()) {
+      var bbox = shipPartsBBox(sels);
+      if (bbox.w <= 0 || bbox.h <= 0) return;
+      var sx = 1, sy = 1;
+      if (key === "w") { sx = val / bbox.w; if (shipWhLocked) sy = sx; }
+      else { sy = val / bbox.h; if (shipWhLocked) sx = sy; }
+      var bcx = bbox.cx, bcy = bbox.cy;
+      shipDirtyRef.current = true;
+      shipApplyEdit(function(prev) {
+        var list = (prev.parts || []).slice();
+        for (var i = 0; i < sels.length; i++) {
+          var ix = sels[i];
+          var p = list[ix]; if (!p) continue;
+          list[ix] = Object.assign({}, p, {
+            x: bcx + (p.x - bcx) * sx,
+            y: bcy + (p.y - bcy) * sy,
+            w: Math.max(0.5, p.w * sx),
+            h: Math.max(0.5, p.h * sy)
+          });
+        }
+        return Object.assign({}, prev, { parts: list });
+      }, "groupSize_" + key);
+      return;
+    }
     shipDirtyRef.current = true;
     shipApplyEdit(function(prev) {
       var list = (prev.parts || []).slice();
@@ -6086,6 +6141,8 @@ export default function CosmicWorkshop() {
             if (!sel) return renderShipSelectMessage();
             var selCount = shipGetSelected().length;
             var multi = selCount >= 2;
+            var selGroupId = multi ? shipAreSelectedSameGroup() : null;
+            var selGroupBBox = selGroupId ? shipPartsBBox(shipGetSelected()) : null;
             // Alignment buttons are SVG glyphs: a thick bar showing the
             // reference edge/axis plus two rectangles snapped against it.
             var alignBtns = [
@@ -6118,9 +6175,9 @@ export default function CosmicWorkshop() {
                 onChange: function(v) { shipUpdateSelected("y", v); } }),
               React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 36px", gap: 8, alignItems: "stretch" } },
                 React.createElement("div", null,
-                  React.createElement(BDSlider, { label: shipMixedLbl("w", "Width"), value: sel.w, min: 1, max: 30, step: 0.5, displayValue: sel.w.toFixed(1),
+                  React.createElement(BDSlider, { label: selGroupBBox ? "Width (Group)" : shipMixedLbl("w", "Width"), value: selGroupBBox ? selGroupBBox.w : sel.w, min: 1, max: selGroupBBox ? 60 : 30, step: 0.5, displayValue: (selGroupBBox ? selGroupBBox.w : sel.w).toFixed(1),
                     onChange: function(v) { shipUpdatePartSizeSelected("w", v); } }),
-                  React.createElement(BDSlider, { label: shipMixedLbl("h", "Height"), value: sel.h, min: 0.5, max: 30, step: 0.5, displayValue: sel.h.toFixed(1),
+                  React.createElement(BDSlider, { label: selGroupBBox ? "Height (Group)" : shipMixedLbl("h", "Height"), value: selGroupBBox ? selGroupBBox.h : sel.h, min: 0.5, max: selGroupBBox ? 60 : 30, step: 0.5, displayValue: (selGroupBBox ? selGroupBBox.h : sel.h).toFixed(1),
                     onChange: function(v) { shipUpdatePartSizeSelected("h", v); } })),
                 React.createElement("div", {
                   onClick: function() { setShipWhLocked(!shipWhLocked); },
