@@ -460,10 +460,18 @@ function ShipDesignSvg(props) {
     for (var si = 0; si < selSet.length; si++) {
       var sp = parts[selSet[si]]; if (!sp) continue;
       var shw = sp.w / 2, shh = sp.h / 2;
-      if (sp.x - shw < minX) minX = sp.x - shw;
-      if (sp.x + shw > maxX) maxX = sp.x + shw;
-      if (sp.y - shh < minY) minY = sp.y - shh;
-      if (sp.y + shh > maxY) maxY = sp.y + shh;
+      var srot = (sp.rot || 0) * Math.PI / 180;
+      var cosR = Math.cos(srot), sinR = Math.sin(srot);
+      var dxs = [-shw, shw, shw, -shw];
+      var dys = [-shh, -shh, shh, shh];
+      for (var cki = 0; cki < 4; cki++) {
+        var rx = sp.x + dxs[cki] * cosR - dys[cki] * sinR;
+        var ry = sp.y + dxs[cki] * sinR + dys[cki] * cosR;
+        if (rx < minX) minX = rx;
+        if (rx > maxX) maxX = rx;
+        if (ry < minY) minY = ry;
+        if (ry > maxY) maxY = ry;
+      }
     }
     // Apply group scale transform to bbox corners
     var vminX = bgcx + (minX - bgcx) * bgsx - 1;
@@ -4122,7 +4130,7 @@ export default function CosmicWorkshop() {
     }
     return true;
   }
-  // Axis-aligned bounding box (center + size) for a list of part indices.
+  // Rotation-aware bounding box (center + size) for a list of part indices.
   function shipPartsBBox(idxList) {
     var parts = (shipEdit && shipEdit.parts) || [];
     var minX = 99999, maxX = -99999, minY = 99999, maxY = -99999;
@@ -4130,10 +4138,18 @@ export default function CosmicWorkshop() {
       var p = parts[idxList[i]];
       if (!p) continue;
       var hw = p.w / 2, hh = p.h / 2;
-      if (p.x - hw < minX) minX = p.x - hw;
-      if (p.x + hw > maxX) maxX = p.x + hw;
-      if (p.y - hh < minY) minY = p.y - hh;
-      if (p.y + hh > maxY) maxY = p.y + hh;
+      var prot = (p.rot || 0) * Math.PI / 180;
+      var cosP = Math.cos(prot), sinP = Math.sin(prot);
+      var pdxs = [-hw, hw, hw, -hw];
+      var pdys = [-hh, -hh, hh, hh];
+      for (var ci = 0; ci < 4; ci++) {
+        var prx = p.x + pdxs[ci] * cosP - pdys[ci] * sinP;
+        var pry = p.y + pdxs[ci] * sinP + pdys[ci] * cosP;
+        if (prx < minX) minX = prx;
+        if (prx > maxX) maxX = prx;
+        if (pry < minY) minY = pry;
+        if (pry > maxY) maxY = pry;
+      }
     }
     return { cx: (minX + maxX) / 2, cy: (minY + maxY) / 2, w: maxX - minX, h: maxY - minY };
   }
@@ -4150,10 +4166,18 @@ export default function CosmicWorkshop() {
       var vy = p.y * gsy + gcy * (1 - gsy);
       var vhw = p.w * gsx / 2;
       var vhh = p.h * gsy / 2;
-      if (vx - vhw < minX) minX = vx - vhw;
-      if (vx + vhw > maxX) maxX = vx + vhw;
-      if (vy - vhh < minY) minY = vy - vhh;
-      if (vy + vhh > maxY) maxY = vy + vhh;
+      var vrot = (p.rot || 0) * Math.PI / 180;
+      var vcosR = Math.cos(vrot), vsinR = Math.sin(vrot);
+      var vdxs = [-vhw, vhw, vhw, -vhw];
+      var vdys = [-vhh, -vhh, vhh, vhh];
+      for (var vci = 0; vci < 4; vci++) {
+        var vrx = vx + vdxs[vci] * vcosR - vdys[vci] * vsinR;
+        var vry = vy + vdxs[vci] * vsinR + vdys[vci] * vcosR;
+        if (vrx < minX) minX = vrx;
+        if (vrx > maxX) maxX = vrx;
+        if (vry < minY) minY = vry;
+        if (vry > maxY) maxY = vry;
+      }
     }
     return { cx: (minX + maxX) / 2, cy: (minY + maxY) / 2, w: maxX - minX, h: maxY - minY };
   }
