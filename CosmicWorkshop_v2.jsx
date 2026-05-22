@@ -323,11 +323,12 @@ function shipMigrateDesign(d) {
   }
   return d;
 }
-function shipRenderPart(part, key, isSelected) {
+function shipRenderPart(part, key, isSelected, gxform) {
   var x = typeof part.x === "number" ? part.x : 20;
   var y = typeof part.y === "number" ? part.y : 20;
   var w = typeof part.w === "number" ? part.w : 8;
   var h = typeof part.h === "number" ? part.h : 8;
+  if (gxform) { x = x * gxform.gsx + gxform.tx; y = y * gxform.gsy + gxform.ty; w = w * gxform.gsx; h = h * gxform.gsy; }
   var rot = part.rot || 0;
   var color = part.color || "#80ddff";
   var op = typeof part.opacity === "number" ? part.opacity : 1;
@@ -379,6 +380,7 @@ function shipRenderPart(part, key, isSelected) {
   } else if (part.type === "trapezoid") {
     var tw = typeof part.tw === "number" ? part.tw : w * 0.5;
     var tofs = typeof part.tofs === "number" ? part.tofs : 0;
+    if (gxform) { if (typeof part.tw === "number") tw = tw * gxform.gsx; if (typeof part.tofs === "number") tofs = tofs * gxform.gsx; }
     var blX = x - w / 2, brX = x + w / 2, bY = y + h / 2;
     var tlX = x - tw / 2 + tofs, trX = x + tw / 2 + tofs, tY = y - h / 2;
     var pts = tlX + "," + tY + " " + trX + "," + tY + " " + brX + "," + bY + " " + blX + "," + bY;
@@ -414,20 +416,84 @@ function ShipDesignSvg(props) {
   var d = props.design || SHIP_DEFAULT_DESIGN;
   var parts = Array.isArray(d.parts) ? d.parts : [];
   var selIdx = typeof props.selectedIdx === "number" ? props.selectedIdx : -1;
-  // selectedIndices is the multi-select extension; falls back to single selIdx
-  // when not provided so existing callers keep working.
   var selSet = Array.isArray(props.selectedIndices) ? props.selectedIndices : null;
   var idRef = useRef(null);
   if (idRef.current === null) idRef.current = "auto" + (++shipSvgUidCounter);
   var uid = props.uid || idRef.current;
+  // Detect group selection: all selected parts have a groupId
+  var isGroupSel = false;
+  if (selSet && selSet.length >= 2) {
+    isGroupSel = true;
+    for (var ci = 0; ci < selSet.length; ci++) {
+      var cp = parts[selSet[ci]];
+      if (!cp || !cp.groupId) { isGroupSel = false; break; }
+    }
+  }
   var els = [];
   for (var pi = 0; pi < parts.length; pi++) {
+    var p = parts[pi];
     var isSel = selSet ? selSet.indexOf(pi) >= 0 : (pi === selIdx);
-    var el = shipRenderPart(parts[pi], uid + "-p" + pi, isSel);
+    // Suppress individual selection boxes when the whole selection is a group
+    var drawBox = isSel && !isGroupSel;
+    // Build per-part group transform when the part has a non-unity group scale
+    var gxform = null;
+    if (p && p.groupId && p.gsx != null) {
+      var pgsx = p.gsx !== undefined ? p.gsx : 1;
+      var pgsy = p.gsy !== undefined ? p.gsy : 1;
+      if (pgsx !== 1 || pgsy !== 1) {
+        var pgcx = p.gcx !== undefined ? p.gcx : 20;
+        var pgcy = p.gcy !== undefined ? p.gcy : 20;
+        gxform = { gsx: pgsx, gsy: pgsy, tx: pgcx * (1 - pgsx), ty: pgcy * (1 - pgsy) };
+      }
+    }
+    var el = shipRenderPart(p, uid + "-p" + pi, drawBox, gxform);
     if (el) els.push(el);
+  }
+  // Draw a single dashed bbox around the whole group selection
+  if (isGroupSel && selSet.length > 0) {
+    var gp0 = parts[selSet[0]];
+    var bgsx = gp0 && gp0.gsx != null ? gp0.gsx : 1;
+    var bgsy = gp0 && gp0.gsy != null ? gp0.gsy : 1;
+    var bgcx = gp0 && gp0.gcx != null ? gp0.gcx : 20;
+    var bgcy = gp0 && gp0.gcy != null ? gp0.gcy : 20;
+    var minX = 99999, maxX = -99999, minY = 99999, maxY = -99999;
+    for (var si = 0; si < selSet.length; si++) {
+      var sp = parts[selSet[si]]; if (!sp) continue;
+      var shw = sp.w / 2, shh = sp.h / 2;
+      if (sp.x - shw < minX) minX = sp.x - shw;
+      if (sp.x + shw > maxX) maxX = sp.x + shw;
+      if (sp.y - shh < minY) minY = sp.y - shh;
+      if (sp.y + shh > maxY) maxY = sp.y + shh;
+    }
+    // Apply group scale transform to bbox corners
+    var vminX = bgcx + (minX - bgcx) * bgsx - 1;
+    var vmaxX = bgcx + (maxX - bgcx) * bgsx + 1;
+    var vminY = bgcy + (minY - bgcy) * bgsy - 1;
+    var vmaxY = bgcy + (maxY - bgcy) * bgsy + 1;
+    els.push(React.createElement("rect", { key: uid + "-grpsel", x: vminX, y: vminY, width: vmaxX - vminX, height: vmaxY - vminY, fill: "none", stroke: "#ffd060", strokeWidth: 0.6, strokeDasharray: "1.5 1", pointerEvents: "none" }));
   }
   return React.createElement("svg", { ref: svgRef, viewBox: "0 0 40 40", width: String(size), height: String(size), style: Object.assign({ display: "block" }, svgStyle) },
     React.createElement("g", null, els));
+}
+// Bakes a part's group scale transform (gsx/gsy) into its geometry so the
+// part can be returned to an ungrouped state with correct visual coordinates.
+function shipBakeGroupTransform(p) {
+  var gsx = (p.gsx != null) ? p.gsx : 1;
+  var gsy = (p.gsy != null) ? p.gsy : 1;
+  var out = Object.assign({}, p);
+  if (gsx !== 1 || gsy !== 1) {
+    var gcx = (p.gcx != null) ? p.gcx : p.x;
+    var gcy = (p.gcy != null) ? p.gcy : p.y;
+    out.x = p.x * gsx + gcx * (1 - gsx);
+    out.y = p.y * gsy + gcy * (1 - gsy);
+    out.w = Math.max(0.5, p.w * gsx);
+    out.h = Math.max(0.5, p.h * gsy);
+    if (typeof p.tw === "number") out.tw = p.tw * gsx;
+    if (typeof p.tofs === "number") out.tofs = p.tofs * gsx;
+    if (typeof p.cr === "number") out.cr = p.cr * gsx;
+  }
+  delete out.gsx; delete out.gsy; delete out.gcx; delete out.gcy;
+  return out;
 }
 // Mini shape glyph next to each "+ TYPE" add-part button.
 function shipPartIcon(type) {
@@ -4043,6 +4109,26 @@ export default function CosmicWorkshop() {
     }
     return { cx: (minX + maxX) / 2, cy: (minY + maxY) / 2, w: maxX - minX, h: maxY - minY };
   }
+  function shipGroupVisualBBox(idxList) {
+    var parts = (shipEdit && shipEdit.parts) || [];
+    var minX = 99999, maxX = -99999, minY = 99999, maxY = -99999;
+    for (var i = 0; i < idxList.length; i++) {
+      var p = parts[idxList[i]]; if (!p) continue;
+      var gsx = (p.gsx != null) ? p.gsx : 1;
+      var gsy = (p.gsy != null) ? p.gsy : 1;
+      var gcx = (p.gcx != null) ? p.gcx : p.x;
+      var gcy = (p.gcy != null) ? p.gcy : p.y;
+      var vx = p.x * gsx + gcx * (1 - gsx);
+      var vy = p.y * gsy + gcy * (1 - gsy);
+      var vhw = p.w * gsx / 2;
+      var vhh = p.h * gsy / 2;
+      if (vx - vhw < minX) minX = vx - vhw;
+      if (vx + vhw > maxX) maxX = vx + vhw;
+      if (vy - vhh < minY) minY = vy - vhh;
+      if (vy + vhh > maxY) maxY = vy + vhh;
+    }
+    return { cx: (minX + maxX) / 2, cy: (minY + maxY) / 2, w: maxX - minX, h: maxY - minY };
+  }
   // Single entry point for canvas / list-row taps. addMode comes from the
   // multi-select toggle; when true, the tap adds/removes the tapped part
   // (and any group members) instead of replacing the selection.
@@ -4141,7 +4227,22 @@ export default function CosmicWorkshop() {
       var list = (prev.parts || []).slice();
       for (var i = 0; i < sels.length; i++) {
         var p = list[sels[i]]; if (!p) continue;
-        list[sels[i]] = Object.assign({}, p, { groupId: gid });
+        list[sels[i]] = shipBakeGroupTransform(p);
+      }
+      var minX = 99999, maxX = -99999, minY = 99999, maxY = -99999;
+      for (var j = 0; j < sels.length; j++) {
+        var sp = list[sels[j]]; if (!sp) continue;
+        var hw = sp.w / 2, hh = sp.h / 2;
+        if (sp.x - hw < minX) minX = sp.x - hw;
+        if (sp.x + hw > maxX) maxX = sp.x + hw;
+        if (sp.y - hh < minY) minY = sp.y - hh;
+        if (sp.y + hh > maxY) maxY = sp.y + hh;
+      }
+      var gcx = (minX + maxX) / 2;
+      var gcy = (minY + maxY) / 2;
+      for (var k = 0; k < sels.length; k++) {
+        var q = list[sels[k]]; if (!q) continue;
+        list[sels[k]] = Object.assign({}, q, { groupId: gid, gsx: 1, gsy: 1, gcx: gcx, gcy: gcy });
       }
       return Object.assign({}, prev, { parts: list });
     }, "__group_" + Date.now());
@@ -4161,7 +4262,8 @@ export default function CosmicWorkshop() {
       var list = (prev.parts || []).slice();
       for (var i = 0; i < sels.length; i++) {
         var p = list[sels[i]]; if (!p || !p.groupId) continue;
-        var copy = Object.assign({}, p);
+        var baked = shipBakeGroupTransform(p);
+        var copy = Object.assign({}, baked);
         delete copy.groupId;
         list[sels[i]] = copy;
       }
@@ -4248,24 +4350,20 @@ export default function CosmicWorkshop() {
     if (sels.length === 0) return;
     if (sels.length === 1) { shipUpdatePartSize(sels[0], key, val); return; }
     if (shipAreSelectedSameGroup()) {
-      var bbox = shipPartsBBox(sels);
-      if (bbox.w <= 0 || bbox.h <= 0) return;
+      var vbbox = shipGroupVisualBBox(sels);
+      if (vbbox.w <= 0 || vbbox.h <= 0) return;
       var sx = 1, sy = 1;
-      if (key === "w") { sx = val / bbox.w; if (shipWhLocked) sy = sx; }
-      else { sy = val / bbox.h; if (shipWhLocked) sx = sy; }
-      var bcx = bbox.cx, bcy = bbox.cy;
+      if (key === "w") { sx = val / vbbox.w; if (shipWhLocked) sy = sx; }
+      else { sy = val / vbbox.h; if (shipWhLocked) sx = sy; }
       shipDirtyRef.current = true;
       shipApplyEdit(function(prev) {
         var list = (prev.parts || []).slice();
         for (var i = 0; i < sels.length; i++) {
           var ix = sels[i];
           var p = list[ix]; if (!p) continue;
-          list[ix] = Object.assign({}, p, {
-            x: bcx + (p.x - bcx) * sx,
-            y: bcy + (p.y - bcy) * sy,
-            w: Math.max(0.5, p.w * sx),
-            h: Math.max(0.5, p.h * sy)
-          });
+          var cur_gsx = (p.gsx != null) ? p.gsx : 1;
+          var cur_gsy = (p.gsy != null) ? p.gsy : 1;
+          list[ix] = Object.assign({}, p, { gsx: cur_gsx * sx, gsy: cur_gsy * sy });
         }
         return Object.assign({}, prev, { parts: list });
       }, "groupSize_" + key);
@@ -4288,16 +4386,23 @@ export default function CosmicWorkshop() {
   function shipMoveGroupSelected(key, val) {
     var sels = shipGetSelected();
     if (sels.length < 2) return;
-    var bbox = shipPartsBBox(sels);
-    var dx = key === "x" ? val - bbox.cx : 0;
-    var dy = key === "y" ? val - bbox.cy : 0;
+    var vbbox = shipGroupVisualBBox(sels);
+    var dx = key === "x" ? val - vbbox.cx : 0;
+    var dy = key === "y" ? val - vbbox.cy : 0;
     if (dx === 0 && dy === 0) return;
     shipDirtyRef.current = true;
     shipApplyEdit(function(prev) {
       var list = (prev.parts || []).slice();
       for (var i = 0; i < sels.length; i++) {
         var ix = sels[i]; var p = list[ix]; if (!p) continue;
-        list[ix] = Object.assign({}, p, { x: Math.max(0, Math.min(40, p.x + dx)), y: Math.max(0, Math.min(40, p.y + dy)) });
+        var pgcx = (p.gcx != null) ? p.gcx : p.x;
+        var pgcy = (p.gcy != null) ? p.gcy : p.y;
+        list[ix] = Object.assign({}, p, {
+          x: Math.max(0, Math.min(40, p.x + dx)),
+          y: Math.max(0, Math.min(40, p.y + dy)),
+          gcx: pgcx + dx,
+          gcy: pgcy + dy
+        });
       }
       return Object.assign({}, prev, { parts: list });
     }, "groupPos_" + key);
@@ -4353,7 +4458,7 @@ export default function CosmicWorkshop() {
             var startPos = [];
             for (var j = 0; j < members.length; j++) {
               var sp = parts2[members[j]];
-              startPos.push(sp ? { x: sp.x, y: sp.y } : { x: 0, y: 0 });
+              startPos.push(sp ? { x: sp.x, y: sp.y, gcx: (sp.gcx != null) ? sp.gcx : sp.x, gcy: (sp.gcy != null) ? sp.gcy : sp.y } : { x: 0, y: 0, gcx: 0, gcy: 0 });
             }
             shipDragRef.current = { group: true, sels: members, startPos: startPos, startPx: px, startPy: py };
           } else if (!p.groupId) {
@@ -4389,7 +4494,7 @@ export default function CosmicWorkshop() {
         var list = (prev.parts || []).slice();
         for (var i = 0; i < gsels.length; i++) {
           var ix = gsels[i]; var p = list[ix]; if (!p) continue;
-          list[ix] = Object.assign({}, p, { x: Math.max(0, Math.min(40, gstart[i].x + dx)), y: Math.max(0, Math.min(40, gstart[i].y + dy)) });
+          list[ix] = Object.assign({}, p, { x: Math.max(0, Math.min(40, gstart[i].x + dx)), y: Math.max(0, Math.min(40, gstart[i].y + dy)), gcx: gstart[i].gcx + dx, gcy: gstart[i].gcy + dy });
         }
         shipDirtyRef.current = true;
         return Object.assign({}, prev, { parts: list });
@@ -6181,7 +6286,7 @@ export default function CosmicWorkshop() {
             var selCount = shipGetSelected().length;
             var multi = selCount >= 2;
             var selGroupId = multi ? shipAreSelectedSameGroup() : null;
-            var selGroupBBox = selGroupId ? shipPartsBBox(shipGetSelected()) : null;
+            var selGroupBBox = selGroupId ? shipGroupVisualBBox(shipGetSelected()) : null;
             // Alignment buttons are SVG glyphs: a thick bar showing the
             // reference edge/axis plus two rectangles snapped against it.
             var alignBtns = [
