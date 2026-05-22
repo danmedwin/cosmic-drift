@@ -7299,6 +7299,7 @@ function CosmicDriftGame() {
   var _npChoice = useState(null),
     npSavedChoice = _npChoice[0],
     setNpSavedChoice = _npChoice[1];
+  var npSavedChoiceRef = useRef(null);
   var _gameMode = useState("infinite"),
     gameMode = _gameMode[0],
     setGameMode = _gameMode[1];
@@ -7625,6 +7626,9 @@ function CosmicDriftGame() {
       }).catch(function () {});
     } catch (e) {}
   }, []);
+  useEffect(function () {
+    npSavedChoiceRef.current = npSavedChoice;
+  }, [npSavedChoice]);
   useEffect(function () {
     try {
       window.storage.get("cosmic_drift_ios_prompt_dismissed").then(function (r) {
@@ -8644,6 +8648,7 @@ function CosmicDriftGame() {
     var rmDelay = isBurnt ? 100 : 250;
     setTimeout(function () {
       gridRef2.current[idx] = 0;
+      delete shieldRef.current[idx];
       removingRef.current.delete(idx);
       visualRemovingRef.current.delete(idx);
       burntBlocksRef.current.delete(idx);
@@ -9890,7 +9895,6 @@ function CosmicDriftGame() {
     var startY = shipY + srcYOffset;
     var splitOn = !!GAME_PLASMA_DESIGN.splitEnabled;
     if (splitOn) {
-      shotsFiredRef.current += 1;
       var SS = 0.7;
       var srcXPx = ((GAME_PLASMA_DESIGN.sourceOffsetX != null ? GAME_PLASMA_DESIGN.sourceOffsetX : 50) - 50) / 100 * shipDisplaySize;
       var splPx = (GAME_PLASMA_DESIGN.splitDistance != null ? GAME_PLASMA_DESIGN.splitDistance : 30) / 100 * shipDisplaySize;
@@ -9942,6 +9946,7 @@ function CosmicDriftGame() {
           }, SS);
         }
       } else {
+        shotsFiredRef.current += 1;
         var targetIdxL = findBlockInCol(leftCol);
         var targetIdxR = findBlockInCol(rightCol);
         if (targetIdxL < 0) {
@@ -10569,7 +10574,8 @@ function CosmicDriftGame() {
       }
       return;
     }
-    var startLv = gameModeRef.current === "solve" ? getFirstSigLevel() : 1;
+    var skipTuts = gameModeRef.current === "infinite" && npSavedChoiceRef.current === "skip";
+    var startLv = gameModeRef.current === "solve" ? getFirstSigLevel() : skipTuts ? 10 : 1;
     baseCoresRef.current = 3;
     extraCoresRef.current = 0;
     setBaseCores(3);
@@ -10589,7 +10595,7 @@ function CosmicDriftGame() {
     setShipCol(sc);
     shipColRef.current = sc;
     clearBoardState();
-    seenPowerUpsRef.current = gameModeRef.current === "solve" ? {
+    seenPowerUpsRef.current = gameModeRef.current === "solve" || skipTuts ? {
       crossshot: true,
       drone: true,
       lightning: true,
