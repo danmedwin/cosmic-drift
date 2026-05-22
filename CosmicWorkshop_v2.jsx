@@ -5163,7 +5163,7 @@ export default function CosmicWorkshop() {
           backLabel: "My Sets",
           title: setsEditSet.id && setsSaved.some(function(s) { return s.id === setsEditSet.id; }) ? "Edit Set" : "New Set",
           color: "#ffd060",
-          rightContent: React.createElement("div", { onClick: setsSaveEdit, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg,#2a2000,#1a1400)", border: "1px solid rgba(255,208,96,0.5)", color: "#ffd060" }) }, "Save")
+          rightContent: React.createElement("div", { onClick: setsSaveEdit, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg,#2a2000,#1a1400)", border: "1px solid rgba(255,208,96,0.5)", color: "#ffd060" }) }, "Save & Exit")
         }),
         React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "10px 12px 32px" } },
           // Name field
