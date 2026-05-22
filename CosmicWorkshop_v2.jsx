@@ -4020,16 +4020,13 @@ export default function CosmicWorkshop() {
   // Returns the shared groupId if ALL selected parts belong to the same group, null otherwise.
   function shipAreSelectedSameGroup() {
     var sels = shipGetSelected();
-    if (sels.length < 2) return null;
+    if (sels.length < 2) return false;
     var parts = (shipEdit && shipEdit.parts) || [];
-    var gid = null;
     for (var i = 0; i < sels.length; i++) {
       var p = parts[sels[i]];
-      if (!p || !p.groupId) return null;
-      if (gid === null) { gid = p.groupId; }
-      else if (p.groupId !== gid) return null;
+      if (!p || !p.groupId) return false;
     }
-    return gid;
+    return true;
   }
   // Axis-aligned bounding box (center + size) for a list of part indices.
   function shipPartsBBox(idxList) {
