@@ -4401,26 +4401,7 @@ export default function CosmicWorkshop() {
     var sels = shipGetSelected();
     if (sels.length === 0) return;
     if (sels.length === 1) { shipUpdatePartSize(sels[0], key, val); return; }
-    if (shipAreSelectedSameGroup()) {
-      var vbbox = shipGroupVisualBBox(sels);
-      if (vbbox.w <= 0 || vbbox.h <= 0) return;
-      var sx = 1, sy = 1;
-      if (key === "w") { sx = val / vbbox.w; if (shipWhLocked) sy = sx; }
-      else { sy = val / vbbox.h; if (shipWhLocked) sx = sy; }
-      shipDirtyRef.current = true;
-      shipApplyEdit(function(prev) {
-        var list = (prev.parts || []).slice();
-        for (var i = 0; i < sels.length; i++) {
-          var ix = sels[i];
-          var p = list[ix]; if (!p) continue;
-          var cur_gsx = (p.gsx != null) ? p.gsx : 1;
-          var cur_gsy = (p.gsy != null) ? p.gsy : 1;
-          list[ix] = Object.assign({}, p, { gsx: cur_gsx * sx, gsy: cur_gsy * sy });
-        }
-        return Object.assign({}, prev, { parts: list });
-      }, "groupSize_" + key);
-      return;
-    }
+    if (shipAreSelectedSameGroup()) { shipScaleGroupSelected(key, val); return; }
     shipDirtyRef.current = true;
     shipApplyEdit(function(prev) {
       var list = (prev.parts || []).slice();
@@ -4459,23 +4440,45 @@ export default function CosmicWorkshop() {
       return Object.assign({}, prev, { parts: list });
     }, "groupPos_" + key);
   }
-  // Rotate every part in the group selection around the group's bounding-box
-  // center.  newRot is the absolute target for the primary part; currentRot is
-  // what it displayed before (sel.rot || 0).  Both positions AND individual
-  // rotations are updated so the group moves as a rigid body.
+  // Bake a part's gsx/gsy group-scale transform into its geometry.
+  // Returns plain {x,y,w,h,tw,tofs,cr} with scale already applied.
+  // Doesn't touch the part object itself — caller decides what to store.
+  function shipBakePartGs(p) {
+    var bgsx = (p.gsx != null) ? p.gsx : 1;
+    var bgsy = (p.gsy != null) ? p.gsy : 1;
+    var bgcx = (p.gcx != null) ? p.gcx : p.x;
+    var bgcy = (p.gcy != null) ? p.gcy : p.y;
+    return {
+      x:    p.x * bgsx + bgcx * (1 - bgsx),
+      y:    p.y * bgsy + bgcy * (1 - bgsy),
+      w:    Math.max(0.5, p.w * bgsx),
+      h:    Math.max(0.5, p.h * bgsy),
+      tw:   typeof p.tw   === "number" ? p.tw   * bgsx : p.tw,
+      tofs: typeof p.tofs === "number" ? p.tofs * bgsx : p.tofs,
+      cr:   typeof p.cr   === "number" ? p.cr   * Math.min(bgsx, bgsy) : p.cr
+    };
+  }
+  // Rotate every part in the group selection around the group's visual-center
+  // pivot.  Bakes any accumulated gsx/gsy first so the rotation is always
+  // applied to the true on-screen positions.
   function shipRotateGroupSelected(newRot, currentRot) {
     var sels = shipGetSelected();
     if (sels.length < 2) return;
     var delta = newRot - currentRot;
     if (delta === 0) return;
-    // Use axis-aligned bbox of part centers as the pivot — this matches the
-    // visual centroid for un-scaled groups and stays stable across sliders.
     var partsNow = (shipEdit && shipEdit.parts) || [];
+    // Bake gsx/gsy so we work with real visual positions
+    var baked = {};
+    for (var bi = 0; bi < sels.length; bi++) {
+      var bp = partsNow[sels[bi]]; if (!bp) continue;
+      baked[sels[bi]] = shipBakePartGs(bp);
+    }
+    // Pivot = center of baked visual positions
     var minX = 99999, maxX = -99999, minY = 99999, maxY = -99999;
     for (var pi = 0; pi < sels.length; pi++) {
-      var pn = partsNow[sels[pi]]; if (!pn) continue;
-      if (pn.x < minX) minX = pn.x; if (pn.x > maxX) maxX = pn.x;
-      if (pn.y < minY) minY = pn.y; if (pn.y > maxY) maxY = pn.y;
+      var bk = baked[sels[pi]]; if (!bk) continue;
+      if (bk.x < minX) minX = bk.x; if (bk.x > maxX) maxX = bk.x;
+      if (bk.y < minY) minY = bk.y; if (bk.y > maxY) maxY = bk.y;
     }
     var pcx = (minX + maxX) / 2, pcy = (minY + maxY) / 2;
     var deltaRad = delta * Math.PI / 180;
@@ -4485,24 +4488,106 @@ export default function CosmicWorkshop() {
       var list = (prev.parts || []).slice();
       for (var i = 0; i < sels.length; i++) {
         var ix = sels[i]; var p = list[ix]; if (!p) continue;
-        // Orbit part center around group pivot
-        var dx = p.x - pcx, dy = p.y - pcy;
+        var bk2 = baked[ix]; if (!bk2) continue;
+        var dx = bk2.x - pcx, dy = bk2.y - pcy;
         var nx = pcx + dx * cosD - dy * sinD;
         var ny = pcy + dx * sinD + dy * cosD;
-        // Update individual rotation
         var nrot = ((p.rot || 0) + delta) % 360;
         if (nrot < 0) nrot += 360;
-        // Orbit the group scale pivot (gcx/gcy) too, so scaling still works after rotation
-        var ngcx = p.gcx, ngcy = p.gcy;
-        if (p.gcx != null && p.gcy != null) {
-          var gcdx = p.gcx - pcx, gcdy = p.gcy - pcy;
-          ngcx = pcx + gcdx * cosD - gcdy * sinD;
-          ngcy = pcy + gcdx * sinD + gcdy * cosD;
-        }
-        list[ix] = Object.assign({}, p, { x: nx, y: ny, rot: nrot, gcx: ngcx, gcy: ngcy });
+        // Write baked geometry back + reset scale; keep gcx/gcy as the pivot
+        list[ix] = Object.assign({}, p, {
+          x: nx, y: ny, w: bk2.w, h: bk2.h,
+          rot: nrot, gsx: 1, gsy: 1, gcx: pcx, gcy: pcy
+        });
       }
       return Object.assign({}, prev, { parts: list });
     }, "groupRot");
+  }
+  // Scale every part in the group as a rigid body.  Bakes any existing
+  // gsx/gsy first, then applies world-space (sx, sy) scaling to positions
+  // and uses a rotation-aware formula to find new (w, h) so the group's
+  // VISUAL bounding box changes by exactly the requested amount.
+  function shipScaleGroupSelected(key, val) {
+    var sels = shipGetSelected();
+    if (sels.length < 2) return;
+    var partsNow = (shipEdit && shipEdit.parts) || [];
+    var baked = {};
+    for (var gbi = 0; gbi < sels.length; gbi++) {
+      var gbp = partsNow[sels[gbi]]; if (!gbp) continue;
+      baked[sels[gbi]] = shipBakePartGs(gbp);
+    }
+    // Rotation-aware visual bbox of baked parts
+    var vminX = 99999, vmaxX = -99999, vminY = 99999, vmaxY = -99999;
+    for (var gvi = 0; gvi < sels.length; gvi++) {
+      var gvp = partsNow[sels[gvi]]; if (!gvp) continue;
+      var gvbk = baked[sels[gvi]]; if (!gvbk) continue;
+      var gvr = (gvp.rot || 0) * Math.PI / 180;
+      var gvcos = Math.cos(gvr), gvsin = Math.sin(gvr);
+      var gvhw = gvbk.w / 2, gvhh = gvbk.h / 2;
+      var gvdxs = [-gvhw, gvhw, gvhw, -gvhw], gvdys = [-gvhh, -gvhh, gvhh, gvhh];
+      for (var gvci = 0; gvci < 4; gvci++) {
+        var gvrx = gvbk.x + gvdxs[gvci] * gvcos - gvdys[gvci] * gvsin;
+        var gvry = gvbk.y + gvdxs[gvci] * gvsin + gvdys[gvci] * gvcos;
+        if (gvrx < vminX) vminX = gvrx; if (gvrx > vmaxX) vmaxX = gvrx;
+        if (gvry < vminY) vminY = gvry; if (gvry > vmaxY) vmaxY = gvry;
+      }
+    }
+    var vbboxW = vmaxX - vminX, vbboxH = vmaxY - vminY;
+    if (vbboxW < 0.01 || vbboxH < 0.01) return;
+    var gsx = 1, gsy = 1;
+    if (key === "w") { gsx = val / vbboxW; if (shipWhLocked) gsy = gsx; }
+    else             { gsy = val / vbboxH; if (shipWhLocked) gsx = gsy; }
+    if (Math.abs(gsx - 1) < 0.001 && Math.abs(gsy - 1) < 0.001) return;
+    // Pivot = center of baked-part-center bbox
+    var cminX = 99999, cmaxX = -99999, cminY = 99999, cmaxY = -99999;
+    for (var gci = 0; gci < sels.length; gci++) {
+      var gcbk = baked[sels[gci]]; if (!gcbk) continue;
+      if (gcbk.x < cminX) cminX = gcbk.x; if (gcbk.x > cmaxX) cmaxX = gcbk.x;
+      if (gcbk.y < cminY) cminY = gcbk.y; if (gcbk.y > cmaxY) cmaxY = gcbk.y;
+    }
+    var pcx = (cminX + cmaxX) / 2, pcy = (cminY + cmaxY) / 2;
+    shipDirtyRef.current = true;
+    shipApplyEdit(function(prev) {
+      var list = (prev.parts || []).slice();
+      for (var i = 0; i < sels.length; i++) {
+        var ix = sels[i]; var p = list[ix]; if (!p) continue;
+        var bk3 = baked[ix]; if (!bk3) continue;
+        // Scale position relative to pivot
+        var nx = pcx + (bk3.x - pcx) * gsx;
+        var ny = pcy + (bk3.y - pcy) * gsy;
+        // Rotation-aware dimension scaling: find new (w, h) so the part's
+        // world-space bounding-box contribution scales by (gsx, gsy).
+        // For a part with rotation r:
+        //   world_x_halfextent = w/2*|cos r| + h/2*|sin r|
+        //   world_y_halfextent = w/2*|sin r| + h/2*|cos r|
+        // We solve the 2×2 system for new w/2 and h/2.
+        var r = (p.rot || 0) * Math.PI / 180;
+        var cosR = Math.abs(Math.cos(r)), sinR = Math.abs(Math.sin(r));
+        var det = cosR * cosR - sinR * sinR;
+        var nw, nh;
+        if (Math.abs(det) < 0.02) {
+          // Near 45° / 135° — system is singular; use geometric mean scale
+          var sm = Math.sqrt(gsx * gsy);
+          nw = Math.max(0.5, bk3.w * sm);
+          nh = Math.max(0.5, bk3.h * sm);
+        } else {
+          var hw3 = bk3.w / 2, hh3 = bk3.h / 2;
+          var rhs1 = gsx * (hw3 * cosR + hh3 * sinR);
+          var rhs2 = gsy * (hw3 * sinR + hh3 * cosR);
+          nw = Math.max(0.5, 2 * Math.abs((cosR * rhs1 - sinR * rhs2) / det));
+          nh = Math.max(0.5, 2 * Math.abs((cosR * rhs2 - sinR * rhs1) / det));
+        }
+        // Scale trapezoid tw/tofs by the same ratio w changed
+        var wRatio = bk3.w > 0.01 ? nw / bk3.w : 1;
+        var hRatio = bk3.h > 0.01 ? nh / bk3.h : 1;
+        var patch = { x: nx, y: ny, w: nw, h: nh, gsx: 1, gsy: 1, gcx: pcx, gcy: pcy };
+        if (typeof bk3.tw   === "number") patch.tw   = Math.max(0, bk3.tw   * wRatio);
+        if (typeof bk3.tofs === "number") patch.tofs  = bk3.tofs * wRatio;
+        if (typeof bk3.cr   === "number") patch.cr    = Math.max(0, bk3.cr   * Math.min(wRatio, hRatio));
+        list[ix] = Object.assign({}, p, patch);
+      }
+      return Object.assign({}, prev, { parts: list });
+    }, "groupSize_" + key);
   }
   // Replace / Add / Cancel popup shown when tapping a hull preset that would
   // overwrite existing parts.
