@@ -12316,6 +12316,12 @@ function CosmicDriftGame() {
   }, "Next: ", setModeLevelsRef.current[setModeIdxRef.current + 1].name), bonusDone && /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
+      flexDirection: "column",
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
       gap: 6
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -12430,13 +12436,87 @@ function CosmicDriftGame() {
     size: 7,
     ls: 1,
     color: GS.green + "aa"
-  }, "Edit")), /*#__PURE__*/React.createElement("div", {
+  }, "Edit"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("div", {
     onClick: function () {
       if (customLevelMode) {
         backToMyLevels();
-      } else {
-        setShowLevelClearExit(true);
+        return;
       }
+      var mdKey = gameModeRef.current + "_" + difficultyRef.current;
+      if (gameModeRef.current === "infinite" && scoreRef.current > bestScoreRef.current) {
+        bestScoreRef.current = scoreRef.current;
+        setBestScore(scoreRef.current);
+        try {
+          window.storage.set("cosmic_drift_best_score_" + mdKey, String(scoreRef.current));
+        } catch (e3) {}
+      }
+      if (gameModeRef.current === "infinite" && levelRef.current > bestLevelRef.current) {
+        bestLevelRef.current = levelRef.current;
+        setBestLevel(levelRef.current);
+        try {
+          window.storage.set("cosmic_drift_best_level_" + mdKey, String(levelRef.current));
+        } catch (e4) {}
+      }
+      setCustomLevelMode(false);
+      customGridRef.current = null;
+      customLevelDataRef.current = null;
+      customPlasmaRef.current = START_PLASMA;
+      setGameState("playing");
+      stopMusic();
+      setScreen("splash");
+    },
+    style: {
+      flex: 1,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 3,
+      padding: "8px 4px",
+      borderRadius: 6,
+      background: GS.inset,
+      border: GS.ib,
+      boxShadow: GS.is,
+      cursor: "pointer",
+      color: GS.green
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "14",
+    height: "14",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"
+  }), /*#__PURE__*/React.createElement("polyline", {
+    points: "17 21 17 13 7 13 7 21"
+  }), /*#__PURE__*/React.createElement("polyline", {
+    points: "7 3 7 8 15 8"
+  })), /*#__PURE__*/React.createElement(GsMono, {
+    size: 7,
+    ls: 1,
+    color: GS.green + "88"
+  }, "Save & Exit")), /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      if (customLevelMode) {
+        backToMyLevels();
+        return;
+      }
+      setCustomLevelMode(false);
+      customGridRef.current = null;
+      customLevelDataRef.current = null;
+      customPlasmaRef.current = START_PLASMA;
+      setGameState("playing");
+      stopMusic();
+      setScreen("splash");
     },
     style: {
       flex: 1,
@@ -12464,7 +12544,7 @@ function CosmicDriftGame() {
     size: 7,
     ls: 1,
     color: "#ff886688"
-  }, "Exit")))), /*#__PURE__*/React.createElement("div", {
+  }, "Exit w/o Saving"))))), /*#__PURE__*/React.createElement("div", {
     style: {
       height: 16,
       background: "repeating-linear-gradient(45deg, rgba(80,255,174,0.12) 0px, rgba(80,255,174,0.12) 10px, rgba(0,0,0,0.35) 10px, rgba(0,0,0,0.35) 20px)"
