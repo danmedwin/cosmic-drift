@@ -2134,10 +2134,10 @@ export default function CosmicWorkshop() {
     }
     setSetsActiveId(setObj.id); setsSaveActiveId(setObj.id);
     setSetsActivatePrompt(null);
-    if (setsPlayAfterActivateRef.current) { setsPlayAfterActivateRef.current = false; handleSplashToGame(); }
+    if (setsPlayAfterActivateRef.current) { setsPlayAfterActivateRef.current = false; handleSplashToGamePlaySet(); }
   }
   function setsPlaySet(setObj) {
-    if (setsActiveId === setObj.id) { handleSplashToGame(); return; }
+    if (setsActiveId === setObj.id) { handleSplashToGamePlaySet(); return; }
     setSetsPlayPromptSet(setObj);
   }
   function setsCommitRename() {
@@ -4688,6 +4688,11 @@ export default function CosmicWorkshop() {
     setSplashTransition("exit");
     try { sessionStorage.setItem("cd_transition_from", "workshop"); } catch(e4) {}
     setTimeout(function() { window.location.href = "index.html?play=" + levelId; }, 620);
+  }
+  function handleSplashToGamePlaySet() {
+    setSplashTransition("exit");
+    try { sessionStorage.setItem("cd_transition_from", "workshop"); } catch(e5) {}
+    setTimeout(function() { window.location.href = "index.html?playset=1"; }, 620);
   }
   function handleSplashTouchStart(e) {
     splashTouchRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };

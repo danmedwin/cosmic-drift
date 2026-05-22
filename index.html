@@ -8081,6 +8081,88 @@ function CosmicDriftGame() {
       }).catch(function () {});
     } catch (e) {}
   }, []);
+  // ?playset=1 deep link: auto-start set mode immediately (used by Workshop "Play" button on sets).
+  useEffect(function () {
+    try {
+      var playSetParam = new URLSearchParams(window.location.search).get("playset");
+      if (!playSetParam) return;
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+      if (!window.storage || !window.storage.get) return;
+      window.storage.get("cosmic-drift-sets-active").then(function (r1) {
+        if (!r1 || !r1.value) return;
+        var activeId = r1.value;
+        window.storage.get("cosmic-drift-sets").then(function (r2) {
+          if (!r2 || !r2.value) return;
+          var sets = JSON.parse(r2.value);
+          var activeSet = null;
+          for (var si = 0; si < sets.length; si++) {
+            if (sets[si].id === activeId) {
+              activeSet = sets[si];
+              break;
+            }
+          }
+          if (!activeSet || !activeSet.levelIds || !activeSet.levelIds.length) return;
+          var levelIds = activeSet.levelIds;
+          window.storage.get("cosmic_drift_levels").then(function (r3) {
+            var allLevels = r3 && r3.value ? JSON.parse(r3.value) : [];
+            var setLevels = [];
+            for (var li = 0; li < levelIds.length; li++) {
+              for (var lj = 0; lj < allLevels.length; lj++) {
+                if (allLevels[lj].id === levelIds[li]) {
+                  setLevels.push(allLevels[lj]);
+                  break;
+                }
+              }
+            }
+            if (!setLevels.length) return;
+            setModeLevelsRef.current = setLevels;
+            setModeIdxRef.current = 0;
+            var lv0 = setLevels[0];
+            gameModeRef.current = "set";
+            setGameMode("set");
+            baseCoresRef.current = 3;
+            extraCoresRef.current = 0;
+            setBaseCores(3);
+            setExtraCores(0);
+            scoreRef.current = 0;
+            setScore(0);
+            gridRef2.current = lv0.grid.slice();
+            customGridRef.current = lv0.grid.slice();
+            customShipRef.current = lv0.shipStart != null ? lv0.shipStart : 3;
+            var lv0Plasma = lv0.startPlasma || START_PLASMA;
+            customPlasmaRef.current = lv0Plasma;
+            shieldRef.current = initShields(gridRef2.current);
+            setGrid(gridRef2.current.slice());
+            plasmaRef.current = lv0Plasma;
+            setPlasma(lv0Plasma);
+            var lv0Sc = customShipRef.current;
+            setShipCol(lv0Sc);
+            shipColRef.current = lv0Sc;
+            setLevel(1);
+            levelRef.current = 1;
+            clearInventory();
+            clearBoardState();
+            seenPowerUpsRef.current = {
+              crossshot: true,
+              drone: true,
+              lightning: true,
+              anglebounce: true,
+              hammer: true
+            };
+            setCustomLevelMode(false);
+            customLevelDataRef.current = null;
+            setCustomLevelName(lv0.name || "Level 1");
+            highestLevelNotifiedRef.current = false;
+            setNewHighScore(false);
+            startMusic();
+            setScreen("game");
+          }).catch(function () {});
+        }).catch(function () {});
+      }).catch(function () {});
+    } catch (e) {}
+  }, []);
   function toggleSfxMute() {
     var nv = !_sfxMuteRef.current;
     if (nv) {
