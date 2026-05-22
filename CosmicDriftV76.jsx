@@ -2972,7 +2972,7 @@ function logUfo(msg) {
   for (var glj = 1; glj < ROWS; glj++) gridLines.push(<div key={"gh" + glj} style={{ position: "absolute", left: BOARD_PAD, right: BOARD_PAD, top: gridPadTop + glj * (blockSize + GAP) - GAP / 2, height: 1, background: "rgba(100,140,180,0.08)" }} />);
 
   // Tutorial instruction text
-  var tutorialText = (level <= 9 && (gameState === "playing" || (level === 4 && gameState === "needsRecharge"))) ? getTutorialText(level, tutPhase, tutReminder) : null;
+  var tutorialText = (gameMode === "infinite" && level <= 9 && (gameState === "playing" || (level === 4 && gameState === "needsRecharge"))) ? getTutorialText(level, tutPhase, tutReminder) : null;
   if (!tutorialText && acidDemo && gameState === "playing") tutorialText = "Try the acid barrel! Careful, the ooze drains plasma.";
   // Level 4 tutorial phase transitions
   useEffect(function () { if (levelRef.current === 4 && tutPhaseRef.current === 0 && plasma > 1) { setTutPhase(1); tutPhaseRef.current = 1; setTutTextKey(function (k) { return k + 1; }); } }, [plasma]);
@@ -2982,8 +2982,8 @@ function logUfo(msg) {
   var hasPowerUps = invDrones > 0 || invLightnings > 0 || invCrossShots > 0 || invAngleBounces > 0 || invHammers > 0 || !!armedItem;
   if (isStuck && hasPowerUps) tutorialText = "Use a power-up to reach the blocked blocks.";
   else if (isStuck && !hasPowerUps && (baseCores + extraCores) > 0) tutorialText = "Stuck? Tap an empty power-up to convert a reactor core.";
-  var showTutorialHint = (level === 3 && tutPhase === 2 && gameState === "playing") || (level === 6 && tutPhase === 1 && gameState === "playing");
-  var showShipRowHint = level === 1 && tutPhase === 2 && gameState === "playing";
+  var showTutorialHint = gameMode === "infinite" && ((level === 3 && tutPhase === 2 && gameState === "playing") || (level === 6 && tutPhase === 1 && gameState === "playing"));
+  var showShipRowHint = gameMode === "infinite" && level === 1 && tutPhase === 2 && gameState === "playing";
   var showTrainingBtns = level <= 9 && gameModeRef.current === "infinite" && !customLevelMode && (gameState === "playing" || gameState === "needsRecharge");
   var setHasLevels = activeSetInfo && activeSetInfo.levelIds && activeSetInfo.levelIds.length > 0;
   // Insta-shoot hint: find remaining block in level 1 phase 4
