@@ -3933,7 +3933,7 @@ export default function CosmicWorkshop() {
       arrow:     { w: 12, h: 16, color: "#efb6ed" }
     };
     var dflt = defaults[type] || defaults.circle;
-    var part = { type: type, x: 20, y: 22, w: dflt.w, h: dflt.h, rot: 0, color: dflt.color, opacity: 0.9, bw: 0, bc: "#000000", bo: 1 };
+    var part = { type: type, x: 20, y: 22, w: dflt.w, h: dflt.h, rot: 0, color: dflt.color, opacity: 1, bw: 0, bc: "#000000", bo: 1 };
     if (type === "rect") part.cr = 0;
     if (type === "trapezoid") { part.tw = dflt.tw; part.tofs = dflt.tofs; }
     shipDirtyRef.current = true;
