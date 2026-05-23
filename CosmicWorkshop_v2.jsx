@@ -4023,6 +4023,29 @@ export default function CosmicWorkshop() {
       var p = list[fromIdx];
       list.splice(fromIdx, 1);
       list.splice(t, 0, p);
+      // Update groupId based on new neighbors so parts can be dragged in/out of groups.
+      var below = t > 0 ? list[t - 1] : null;
+      var above = t < list.length - 1 ? list[t + 1] : null;
+      var belowGid = (below && below.groupId) || null;
+      var aboveGid = (above && above.groupId) || null;
+      var currentGid = p.groupId || null;
+      var newGid;
+      if (belowGid === aboveGid) {
+        newGid = belowGid;
+      } else if (currentGid && (belowGid === currentGid || aboveGid === currentGid)) {
+        newGid = currentGid;
+      } else {
+        newGid = belowGid;
+      }
+      if (newGid !== currentGid) {
+        var newGroupName = null;
+        if (newGid) {
+          for (var ni = 0; ni < list.length; ni++) {
+            if (list[ni] && list[ni].groupId === newGid && list[ni].groupName) { newGroupName = list[ni].groupName; break; }
+          }
+        }
+        list[t] = Object.assign({}, p, { groupId: newGid || null, groupName: newGroupName });
+      }
       shipDirtyRef.current = true;
       setShipSelectedPart(t);
       return Object.assign({}, prev, { parts: list });
@@ -6674,18 +6697,16 @@ export default function CosmicWorkshop() {
                         WsIconPencil(10)),
                       React.createElement("div", { style: { flexShrink: 0, color: "rgba(140,160,180,0.5)", fontSize: 10, fontFamily: "'Exo 2', sans-serif", whiteSpace: "nowrap" } },
                         "(" + p.x.toFixed(0) + "," + p.y.toFixed(0) + ")")),
-                React.createElement("div", { style: { flex: 1 } }),
                 React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipDuplicatePart(idx); },
                   title: "Duplicate part",
                   style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", background: "rgba(128,221,255,0.1)", border: "1px solid rgba(128,221,255,0.3)", flex: "0 0 auto" } },
                   shipCopySvg(12, "#80ddff")),
-                React.createElement("div", { style: { flex: 1 } }),
                 React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipDeletePart(idx); },
                   title: "Delete part",
                   style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", background: "rgba(220,60,80,0.12)", border: "1px solid rgba(220,60,80,0.3)", flex: "0 0 auto" } },
                   shipTrashSvg(12, "#ff8088")),
-                !inGroup && React.createElement("div", { style: { flex: 1 } }),
-                !inGroup && React.createElement("div", {
+                React.createElement("div", { style: { flex: "0 0 48px" } }),
+                React.createElement("div", {
                   onPointerDown: function(e) { shipDragHandleStart(idx, e); },
                   onPointerMove: shipDragHandleMove,
                   onPointerUp: shipDragHandleEnd, onPointerCancel: shipDragHandleEnd,
@@ -6802,22 +6823,17 @@ export default function CosmicWorkshop() {
                                   WsIconPencil(10)),
                                 React.createElement("div", { style: { flexShrink: 0, color: "rgba(140,160,180,0.5)", fontSize: 10, fontFamily: "'Exo 2', sans-serif", whiteSpace: "nowrap" } },
                                   gbboxText)),
-                          // Flex spacer
-                          React.createElement("div", { style: { flex: 1 } }),
                           // Copy group
                           React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipDuplicateGroup(gid); },
                             title: "Duplicate group",
                             style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", background: "rgba(128,221,255,0.1)", border: "1px solid rgba(128,221,255,0.3)", flex: "0 0 auto" } },
                             shipCopySvg(12, "#80ddff")),
-                          // Flex spacer
-                          React.createElement("div", { style: { flex: 1 } }),
                           // Delete group
                           React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipDeleteGroup(gid); },
                             title: "Delete group",
                             style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", background: "rgba(220,60,80,0.12)", border: "1px solid rgba(220,60,80,0.3)", flex: "0 0 auto" } },
                             shipTrashSvg(12, "#ff8088")),
-                          // Flex spacer
-                          React.createElement("div", { style: { flex: 1 } }),
+                          React.createElement("div", { style: { flex: "0 0 48px" } }),
                           // Drag handle
                           React.createElement("div", {
                             onPointerDown: function(e) { shipDragGroupHandleStart(gid, item.maxIdx, e); },
