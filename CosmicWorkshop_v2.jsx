@@ -1144,6 +1144,13 @@ var OPEN_SPACE_BLOCK_DESIGNS = [
   { id: "mpev3ctjt1g4qy", name: "OS Cross Shot", assignedTo: "cross_shot", isFactory: false, shape: "none", shapeRotation: 0, cornerRadius: 6, color: "#e0457b", borderColor: "#c03868", borderWidth: 2, glowEnabled: true, glowColor: "#ff6b9d", glowIntensity: 4, pattern: "none", patternColor: "#fff", patternOpacity: 0.3, patternScale: 1, patternRotation: 0, patternFilled: false, patternLineWidth: 1.5, icon: "cross", iconColor: "#ff0000", iconOpacity: 0.85, iconGlow: false, iconGlowColor: "#fff", iconGlowIntensity: 4, createdAt: "2026-05-21T02:18:45.953Z", modifiedAt: "2026-05-21T02:18:45.953Z" },
 ];
 
+var USE_THE_FORCE_SHIP = { id: "ship_1779507928877", name: "Red 5", hull: "none", parts: JSON.parse(JSON.stringify(HULL_PRESETS.red5)), savedAt: "2026-05-23T04:35:37.905Z" };
+var TIE_FIGHTS_SHIP    = { id: "ship_1779483721711", name: "My Tie", hull: "none", parts: JSON.parse(JSON.stringify(HULL_PRESETS.mytie)), savedAt: "2026-05-22T22:31:22.050Z" };
+var USE_THE_FORCE_PLASMA = { shape: "blast", color: "#ff4488", colorMode: "radial", colorOpacity: 1, glowColor: "#ff4488", glowSize: 13, splitEnabled: true, splitDistance: 42, flashEnabled: true, flashColor: "#ff4488", flashSize: 8, flashOpacity: 0.9, sourceOffsetX: 50, sourceOffsetY: 22, speed: 2, name: "Hope in Red", id: "plasma_1779501546068", savedAt: "2026-05-23T04:40:31.115Z" };
+var TIE_FIGHTS_PLASMA    = { shape: "blast", color: "#44ffaa", colorMode: "radial", colorOpacity: 1, glowColor: "#44ffaa", glowSize: 8, splitEnabled: true, splitDistance: 10, flashEnabled: true, flashColor: "#44ffaa", flashSize: 24, flashOpacity: 0.9, sourceOffsetX: 50, sourceOffsetY: 37, speed: 1, name: "Empire Green", id: "plasma_1779424414320", savedAt: "2026-05-22T22:32:28.874Z" };
+var USE_THE_FORCE_SET = { id: "set_1779512592664", name: "Use the Force", savedAt: "2026-05-23T05:03:47.522Z", shipDesignId: "ship_1779507928877", plasmaDesignId: "plasma_1779501546068" };
+var TIE_FIGHTS_SET    = { id: "set_1779512653579", name: "Tie Fights",     savedAt: "2026-05-23T05:07:04.177Z", shipDesignId: "ship_1779483721711", plasmaDesignId: "plasma_1779424414320" };
+
 // ── SVG Pattern renderer ──
 function PatternDef(props) {
   var id = props.id, patternId = props.patternId, color = props.color, opacity = props.opacity, scale = props.scale, rotation = props.rotation, filled = props.filled, lineWidth = props.lineWidth;
@@ -1881,37 +1888,64 @@ export default function CosmicWorkshop() {
       }
     });
     shipLoadDesigns().then(function(designs) {
+      var migrated, _shipNeedsSave = false, _hasUtfShip = false, _hasTfShip = false;
       if (designs && designs.length > 0) {
-        // Backfill parts for legacy designs whose parts array is empty
-        var migrated = designs.map(shipMigrateDesign);
+        migrated = designs.map(shipMigrateDesign);
+        for (var _psi = 0; _psi < migrated.length; _psi++) {
+          if (migrated[_psi].id === USE_THE_FORCE_SHIP.id) _hasUtfShip = true;
+          if (migrated[_psi].id === TIE_FIGHTS_SHIP.id)    _hasTfShip  = true;
+        }
+        if (!_hasTfShip)  { migrated = [TIE_FIGHTS_SHIP].concat(migrated);    _shipNeedsSave = true; }
+        if (!_hasUtfShip) { migrated = [USE_THE_FORCE_SHIP].concat(migrated);  _shipNeedsSave = true; }
+        if (_shipNeedsSave) { shipSaveDesigns(migrated); }
         setShipSaved(migrated);
         shipLoadActiveId().then(function(id) { setShipActiveId(id); });
       } else {
-        // First-time install: seed the "Default" ship from the arrow preset.
+        // First-time install: seed preset ships + "Default" from the arrow preset.
         var seed = { id: "ship_default", name: "Default", hull: "arrow", parts: shipHullPresetParts("arrow"), savedAt: new Date().toISOString() };
-        setShipSaved([seed]);
+        migrated = [USE_THE_FORCE_SHIP, TIE_FIGHTS_SHIP, seed];
+        setShipSaved(migrated);
         setShipActiveId(seed.id);
-        shipSaveDesigns([seed]);
+        shipSaveDesigns(migrated);
         shipSaveActiveId(seed.id);
       }
     });
     plasmaLoadDesigns().then(function(designs) {
+      var _plasmaList, _plasmaNeedsSave = false, _hasUtfPlasma = false, _hasTfPlasma = false;
       if (designs && designs.length > 0) {
-        setPlasmaSaved(designs);
+        _plasmaList = designs;
+        for (var _ppi = 0; _ppi < _plasmaList.length; _ppi++) {
+          if (_plasmaList[_ppi].id === USE_THE_FORCE_PLASMA.id) _hasUtfPlasma = true;
+          if (_plasmaList[_ppi].id === TIE_FIGHTS_PLASMA.id)    _hasTfPlasma  = true;
+        }
+        if (!_hasTfPlasma)  { _plasmaList = [TIE_FIGHTS_PLASMA].concat(_plasmaList);    _plasmaNeedsSave = true; }
+        if (!_hasUtfPlasma) { _plasmaList = [USE_THE_FORCE_PLASMA].concat(_plasmaList);  _plasmaNeedsSave = true; }
+        if (_plasmaNeedsSave) { plasmaSaveDesigns(_plasmaList); }
+        setPlasmaSaved(_plasmaList);
         plasmaLoadActiveId().then(function(id) { setPlasmaActiveId(id); });
       } else {
         var seed = Object.assign({}, PLASMA_DEFAULT_DESIGN, { id: "plasma_default", name: "Default", savedAt: new Date().toISOString() });
-        setPlasmaSaved([seed]);
+        _plasmaList = [USE_THE_FORCE_PLASMA, TIE_FIGHTS_PLASMA, seed];
+        setPlasmaSaved(_plasmaList);
         setPlasmaActiveId(seed.id);
-        plasmaSaveDesigns([seed]);
+        plasmaSaveDesigns(_plasmaList);
         plasmaSaveActiveIdToStorage(seed.id);
       }
     });
     try { window.storage.get("cosmic_drift_ship_size").then(function(r) { if (r && r.value) { var v = Number(r.value); if (v >= 34 && v <= 204) setPlasmaShipSize(v); } }).catch(function() {}); } catch(e) {}
     setsLoadAll().then(function(all) {
-      var _hasOsSet = false;
-      for (var _ssi = 0; _ssi < all.length; _ssi++) { if (all[_ssi].id === OPEN_SPACE_SET.id) { _hasOsSet = true; break; } }
-      if (!_hasOsSet) { var _seededSets = [OPEN_SPACE_SET].concat(all); setsSaveAll(_seededSets); setSetsSaved(_seededSets); } else { setSetsSaved(all); }
+      var _hasOsSet = false, _hasUtfSet = false, _hasTfSet = false;
+      for (var _ssi = 0; _ssi < all.length; _ssi++) {
+        if (all[_ssi].id === OPEN_SPACE_SET.id)      _hasOsSet  = true;
+        if (all[_ssi].id === USE_THE_FORCE_SET.id)   _hasUtfSet = true;
+        if (all[_ssi].id === TIE_FIGHTS_SET.id)      _hasTfSet  = true;
+      }
+      var _seededSets = all.slice();
+      if (!_hasTfSet)  _seededSets = [TIE_FIGHTS_SET].concat(_seededSets);
+      if (!_hasUtfSet) _seededSets = [USE_THE_FORCE_SET].concat(_seededSets);
+      if (!_hasOsSet)  _seededSets = [OPEN_SPACE_SET].concat(_seededSets);
+      if (!_hasOsSet || !_hasUtfSet || !_hasTfSet) { setsSaveAll(_seededSets); }
+      setSetsSaved(_seededSets);
       setsLoadActiveId().then(function(id) { setSetsActiveId(id || null); });
     });
   }, []);
