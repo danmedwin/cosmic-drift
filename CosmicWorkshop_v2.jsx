@@ -3930,10 +3930,10 @@ export default function CosmicWorkshop() {
   function shipOpenNew() {
     shipDirtyRef.current = false;
     setShipEditId(null);
-    var initial = { hull: "arrow", name: "", parts: shipHullPresetParts("arrow") };
+    var initial = { hull: "none", name: "", parts: [] };
     setShipEdit(initial);
     shipHistoryReset(initial);
-    setShipTab("templates");
+    setShipTab("add");
     setShipSelectedPart(-1);
     setShipSelectedExtras([]);
     setShipView("editor");
@@ -4111,7 +4111,12 @@ export default function CosmicWorkshop() {
         nh = val;
         if (shipWhLocked && p.h > 0) nw = p.w * (val / p.h);
       }
-      list[idx] = Object.assign({}, p, { w: Math.max(0.5, nw), h: Math.max(0.5, nh) });
+      var finalW = Math.max(0.5, nw);
+      var patch = { w: finalW, h: Math.max(0.5, nh) };
+      if (p.type === "trapezoid" && typeof p.tw === "number" && p.w > 0) {
+        patch.tw = Math.max(0, p.tw * (finalW / p.w));
+      }
+      list[idx] = Object.assign({}, p, patch);
       return Object.assign({}, prev, { parts: list });
     }, "size_" + idx + "_" + key);
   }
@@ -6620,18 +6625,35 @@ export default function CosmicWorkshop() {
             // active tab's column visually drips into the content area.
             (function() {
               var tabs = [
-                { id: "templates", label: "Templates" },
-                { id: "add",       label: "Add" },
-                { id: "color",     label: "Color" },
-                { id: "position",  label: "Position" },
-                { id: "list",      label: "List" }
+                { id: "templates", label: "Models",
+                  icon: React.createElement("svg", { width: 14, height: 10, viewBox: "0 0 24 18", fill: "currentColor" },
+                    React.createElement("polygon", { points: "12,1 22,14 17,12 12,18 7,12 2,14" })) },
+                { id: "add", label: "+ Part",
+                  icon: React.createElement("svg", { width: 12, height: 12, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 3, strokeLinecap: "round" },
+                    React.createElement("line", { x1: 12, y1: 4, x2: 12, y2: 20 }),
+                    React.createElement("line", { x1: 4, y1: 12, x2: 20, y2: 12 })) },
+                { id: "color", label: "Color",
+                  icon: React.createElement("svg", { width: 14, height: 10, viewBox: "0 0 28 20" },
+                    React.createElement("circle", { cx: 8, cy: 10, r: 7, fill: "#ff7070", opacity: 0.85 }),
+                    React.createElement("circle", { cx: 14, cy: 4, r: 7, fill: "#70aaff", opacity: 0.85 }),
+                    React.createElement("circle", { cx: 20, cy: 10, r: 7, fill: "#70dd88", opacity: 0.85 })) },
+                { id: "position", label: "Arrange",
+                  icon: React.createElement("svg", { width: 12, height: 12, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", strokeLinejoin: "round" },
+                    React.createElement("path", { d: "M12 2l-3 4h6zM12 22l3-4H9zM2 12l4 3V9zM22 12l-4-3v6z" }),
+                    React.createElement("circle", { cx: 12, cy: 12, r: 2, fill: "currentColor" })) },
+                { id: "list", label: "List",
+                  icon: React.createElement("svg", { width: 14, height: 10, viewBox: "0 0 22 14", fill: "none", stroke: "currentColor", strokeWidth: 2.5, strokeLinecap: "round" },
+                    React.createElement("line", { x1: 1, y1: 2, x2: 21, y2: 2 }),
+                    React.createElement("line", { x1: 1, y1: 7, x2: 21, y2: 7 }),
+                    React.createElement("line", { x1: 1, y1: 12, x2: 21, y2: 12 })) }
               ];
               return React.createElement(React.Fragment, null,
                 React.createElement("div", { style: { display: "flex", gap: 3, padding: "8px 14px 0", marginTop: 8, borderTop: "1px solid rgba(255,255,255,0.09)", width: "100%", boxSizing: "border-box" } },
                   tabs.map(function(t) {
                     var on = shipTab === t.id;
                     return React.createElement("div", { key: t.id, onClick: function() { setShipTab(t.id); },
-                      style: { flex: 1, padding: "8px 4px", textAlign: "center", borderTopLeftRadius: 8, borderTopRightRadius: 8, borderBottomLeftRadius: on ? 0 : 8, borderBottomRightRadius: on ? 0 : 8, cursor: "pointer", fontSize: 10, fontWeight: 700, letterSpacing: 0.5, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase", background: on ? "rgba(255,138,170,0.2)" : "rgba(255,255,255,0.04)", border: on ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.08)", borderBottom: on ? "none" : "1px solid rgba(255,255,255,0.08)", color: on ? "#ff8aaa" : "rgba(180,200,220,0.55)" } }, t.label);
+                      style: { flex: 1, padding: "5px 4px 6px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, borderTopLeftRadius: 8, borderTopRightRadius: 8, borderBottomLeftRadius: on ? 0 : 8, borderBottomRightRadius: on ? 0 : 8, cursor: "pointer", fontSize: 10, fontWeight: 700, letterSpacing: 0.5, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase", background: on ? "rgba(255,138,170,0.2)" : "rgba(255,255,255,0.04)", border: on ? "1px solid rgba(255,138,170,0.5)" : "1px solid rgba(255,255,255,0.08)", borderBottom: on ? "none" : "1px solid rgba(255,255,255,0.08)", color: on ? "#ff8aaa" : "rgba(180,200,220,0.55)" } },
+                      t.icon, t.label);
                   })),
                 React.createElement("div", { style: { display: "flex", gap: 3, padding: "0 14px", width: "100%", boxSizing: "border-box", height: 6 } },
                   tabs.map(function(t) {
