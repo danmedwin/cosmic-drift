@@ -4795,6 +4795,7 @@ export default function CosmicWorkshop() {
         if (typeof fbk.tw   === "number") fupd.tw   = fbk.tw;
         if (typeof fbk.cr   === "number") fupd.cr   = fbk.cr;
         if (typeof fbk.tofs === "number") fupd.tofs = (axis === "h") ? -fbk.tofs : fbk.tofs;
+        if (typeof fp.gradAngle === "number") fupd.gradAngle = (axis === "h") ? (180 - fp.gradAngle + 360) % 360 : (360 - fp.gradAngle) % 360;
         list[fix] = Object.assign({}, fp, fupd);
       }
       return Object.assign({}, prev, { parts: list });
