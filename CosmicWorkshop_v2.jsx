@@ -4477,19 +4477,26 @@ export default function CosmicWorkshop() {
     shipDirtyRef.current = true;
     shipApplyEdit(function(prev) {
       var list = (prev.parts || []).slice();
+      // Find the canonical group name from the clicked group.
+      var origName = null;
+      for (var ni = 0; ni < list.length; ni++) {
+        if (list[ni] && list[ni].groupId === groupId && list[ni].groupName) { origName = list[ni].groupName; break; }
+      }
+      // Collect by groupId AND by matching groupName — catches split groups where
+      // some parts ended up with a different groupId (e.g. from old duplicate ops)
+      // but the same human-visible name.
       var members = [];
       var maxIdx = -1;
       for (var i = 0; i < list.length; i++) {
-        if (list[i] && list[i].groupId === groupId) {
+        var p = list[i]; if (!p) continue;
+        var byId   = p.groupId === groupId;
+        var byName = origName && p.groupId && p.groupName === origName;
+        if (byId || byName) {
           members.push(i);
           if (i > maxIdx) maxIdx = i;
         }
       }
       if (members.length === 0) return prev;
-      var origName = null;
-      for (var ni = 0; ni < members.length; ni++) {
-        if (list[members[ni]] && list[members[ni]].groupName) { origName = list[members[ni]].groupName; break; }
-      }
       var copyName = origName ? origName + " copy" : null;
       var newParts = [];
       for (var j = 0; j < members.length; j++) {
