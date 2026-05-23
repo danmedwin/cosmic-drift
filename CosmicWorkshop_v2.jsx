@@ -432,6 +432,7 @@ function ShipDesignSvg(props) {
   var els = [];
   for (var pi = 0; pi < parts.length; pi++) {
     var p = parts[pi];
+    if (p && p.hidden === 1) continue; // invisible — skip rendering
     var isSel = selSet ? selSet.indexOf(pi) >= 0 : (pi === selIdx);
     // Suppress individual selection boxes when the whole selection is a group
     var drawBox = isSel && !isGroupSel;
@@ -446,8 +447,13 @@ function ShipDesignSvg(props) {
         gxform = { gsx: pgsx, gsy: pgsy, tx: pgcx * (1 - pgsx), ty: pgcy * (1 - pgsy) };
       }
     }
-    var el = shipRenderPart(p, uid + "-p" + pi, drawBox, gxform);
-    if (el) els.push(el);
+    if (p && p.hidden === 2) {
+      var ghostEl = shipRenderPart(p, uid + "-p" + pi, drawBox, gxform);
+      if (ghostEl) els.push(React.createElement("g", { key: uid + "-p" + pi, opacity: 0.25 }, ghostEl));
+    } else {
+      var el = shipRenderPart(p, uid + "-p" + pi, drawBox, gxform);
+      if (el) els.push(el);
+    }
   }
   // Draw a single dashed bbox around the whole group selection
   if (isGroupSel && selSet.length > 0) {
@@ -527,6 +533,25 @@ function shipCopySvg(size, color) {
   return React.createElement("svg", { width: String(size), height: String(size), viewBox: "0 0 24 24", fill: "none", stroke: color, strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
     React.createElement("rect", { x: "9", y: "9", width: "12", height: "12", rx: "2" }),
     React.createElement("path", { d: "M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" }));
+}
+// Eye icon: state 0=visible (dim), 1=hidden (slashed red), 2=ghost (dashed blue)
+function shipEyeSvg(size, hidden) {
+  var s = String(size || 12);
+  if (hidden === 1) {
+    return React.createElement("svg", { width: s, height: s, viewBox: "0 0 24 24", fill: "none", stroke: "rgba(255,120,100,0.75)", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+      React.createElement("path", { d: "M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" }),
+      React.createElement("path", { d: "M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" }),
+      React.createElement("path", { d: "M14.12 14.12a3 3 0 1 1-4.24-4.24" }),
+      React.createElement("line", { x1: "1", y1: "1", x2: "23", y2: "23" }));
+  }
+  if (hidden === 2) {
+    return React.createElement("svg", { width: s, height: s, viewBox: "0 0 24 24", fill: "none", stroke: "rgba(128,200,255,0.65)", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", strokeDasharray: "3 1.5" },
+      React.createElement("path", { d: "M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" }),
+      React.createElement("circle", { cx: "12", cy: "12", r: "3" }));
+  }
+  return React.createElement("svg", { width: s, height: s, viewBox: "0 0 24 24", fill: "none", stroke: "rgba(180,200,220,0.4)", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" },
+    React.createElement("path", { d: "M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" }),
+    React.createElement("circle", { cx: "12", cy: "12", r: "3" }));
 }
 function shipLockSvg(size, locked) {
   var color = locked ? "#ff8aaa" : "rgba(180,200,220,0.65)";
@@ -3971,6 +3996,18 @@ export default function CosmicWorkshop() {
       return Object.assign({}, prev, { parts: list });
     }, "part_" + idx + "_" + key);
   }
+  // Cycle a part's visibility: visible (0) → invisible (1) → ghost (2) → visible.
+  function shipCyclePartVisibility(idx) {
+    shipDirtyRef.current = true;
+    shipApplyEdit(function(prev) {
+      var list = (prev.parts || []).slice();
+      if (!list[idx]) return prev;
+      var cur = list[idx].hidden || 0;
+      var next = cur === 0 ? 1 : cur === 1 ? 2 : 0;
+      list[idx] = Object.assign({}, list[idx], { hidden: next });
+      return Object.assign({}, prev, { parts: list });
+    });
+  }
   // Duplicate the part at idx: deep-copies, nudges by (1.5, 1.5) so the copy is
   // visible, inserts right after the original, and selects the new copy.
   function shipDuplicatePart(idx) {
@@ -4440,6 +4477,29 @@ export default function CosmicWorkshop() {
       }
       return Object.assign({}, prev, { parts: list.concat(newParts) });
     }, "dupGroup_" + groupId);
+  }
+  // Cycle all group members atomically: visible→hidden→ghost→visible.
+  // Mixed states normalize to visible first.
+  function shipCycleGroupVisibility(groupId) {
+    shipDirtyRef.current = true;
+    shipApplyEdit(function(prev) {
+      var list = (prev.parts || []).slice();
+      var members = [];
+      for (var i = 0; i < list.length; i++) {
+        if (list[i] && list[i].groupId === groupId) members.push(i);
+      }
+      if (members.length === 0) return prev;
+      var firstHidden = list[members[0]].hidden || 0;
+      var allSame = true;
+      for (var j = 1; j < members.length; j++) {
+        if ((list[members[j]].hidden || 0) !== firstHidden) { allSame = false; break; }
+      }
+      var next = allSame ? (firstHidden === 0 ? 1 : firstHidden === 1 ? 2 : 0) : 0;
+      for (var k = 0; k < members.length; k++) {
+        list[members[k]] = Object.assign({}, list[members[k]], { hidden: next });
+      }
+      return Object.assign({}, prev, { parts: list });
+    });
   }
   function shipSelectionHasGroup() {
     var sels = shipGetSelected();
@@ -6658,6 +6718,7 @@ export default function CosmicWorkshop() {
               var isSel = shipIsSelected(idx);
               var displayName = p.name || SHIP_PART_LABELS[p.type];
               var isRenaming = shipPartRenamingIdx === idx;
+              var hiddenVal = p.hidden || 0;
               var swatchBg = p.color || "#80ddff";
               if (p.color2 && p.fillMode === "linear") { swatchBg = "linear-gradient(90deg," + p.color + "," + p.color2 + ")"; }
               if (p.color2 && p.fillMode === "radial") { swatchBg = "radial-gradient(circle," + p.color + "," + p.color2 + ")"; }
@@ -6669,6 +6730,10 @@ export default function CosmicWorkshop() {
                   background: isSel ? "rgba(255,138,170,0.12)" : "rgba(255,255,255,0.02)",
                   border: isPrimary ? "1px solid rgba(255,138,170,0.6)" : (isSel ? "1px solid rgba(255,138,170,0.3)" : "1px solid rgba(255,255,255,0.05)") } },
                 { "data-shippart-row": "1", "data-shippart-actual-idx": String(idx) }),
+                React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipCyclePartVisibility(idx); },
+                  title: hiddenVal === 1 ? "Hidden — click for ghost" : hiddenVal === 2 ? "Ghost — click to show" : "Visible — click to hide",
+                  style: { width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flex: "0 0 auto" } },
+                  shipEyeSvg(12, hiddenVal)),
                 React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipToggleSelected(idx); },
                   title: isSel ? "Remove from selection" : "Add to selection",
                   style: { width: 16, height: 16, borderRadius: 3,
@@ -6776,6 +6841,13 @@ export default function CosmicWorkshop() {
                         var gbboxText = "(" + Math.round(gbbox.cx) + "," + Math.round(gbbox.cy) + ")";
                         var gGroupName = shipGroupDisplayName(gid);
                         var gIsRenaming = shipGroupRenamingId === gid;
+                        var gHiddenAll = item.members.length > 0, gGhostAll = item.members.length > 0;
+                        for (var ghi = 0; ghi < item.members.length; ghi++) {
+                          var ghv = (partsList[item.members[ghi]] && partsList[item.members[ghi]].hidden) || 0;
+                          if (ghv !== 1) gHiddenAll = false;
+                          if (ghv !== 2) gGhostAll = false;
+                        }
+                        var gHiddenVal = gHiddenAll ? 1 : gGhostAll ? 2 : 0;
                         return React.createElement("div", Object.assign({ key: "grphdr-" + gid,
                           onClick: function() { shipSelectGroup(gid); },
                           style: { display: "flex", alignItems: "center", gap: 4, padding: "6px 6px",
@@ -6784,6 +6856,11 @@ export default function CosmicWorkshop() {
                             border: anyMemberSel ? "1px solid rgba(255,220,100,0.40)" : "1px solid rgba(255,255,255,0.08)",
                             borderLeft: "3px solid " + tint } },
                           { "data-shippart-row": "1", "data-shippart-actual-idx": String(item.maxIdx) }),
+                          // 0. Eye — cycles group visibility
+                          React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipCycleGroupVisibility(gid); },
+                            title: gHiddenVal === 1 ? "All hidden — click for ghost" : gHiddenVal === 2 ? "All ghost — click to show" : "Visible — click to hide all",
+                            style: { width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flex: "0 0 auto" } },
+                            shipEyeSvg(12, gHiddenVal)),
                           // 1. Collapse/expand triangle
                           React.createElement("div", {
                             onClick: function(e) { e.stopPropagation(); setShipCollapsedGroups(function(prev) { var n = Object.assign({}, prev); if (n[gid]) { delete n[gid]; } else { n[gid] = true; } return n; }); },
