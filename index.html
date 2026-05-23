@@ -5933,6 +5933,39 @@ function spawnFizzle(x, y) {
   });
   _kickCvfx();
 }
+function spawnMuzzleFlash(x, y) {
+  if (!GAME_PLASMA_DESIGN.flashEnabled) return;
+  var now = Date.now();
+  var fc = GAME_PLASMA_DESIGN.flashColor || "#ffffff";
+  var fs = (GAME_PLASMA_DESIGN.flashSize || 24) / 2;
+  var fo = GAME_PLASMA_DESIGN.flashOpacity != null ? GAME_PLASMA_DESIGN.flashOpacity : 0.9;
+  var frames = 12;
+  _cvfxParticles.push({
+    x: x,
+    y: y,
+    vx: 0,
+    vy: 0,
+    gravity: 0,
+    life: fo,
+    decay: fo / frames,
+    size: fs,
+    color: fc,
+    round: true,
+    startTime: now
+  });
+  _cvfxParticles.push({
+    ring: true,
+    x: x,
+    y: y,
+    r: 1,
+    maxR: fs * 1.4,
+    life: fo,
+    decay: fo / frames,
+    color: fc,
+    startTime: now
+  });
+  _kickCvfx();
+}
 function spawnWallSpark(x, y) {
   var now = Date.now();
   var frames = 18;
@@ -9894,6 +9927,16 @@ function CosmicDriftGame() {
     var srcYOffset = Math.round((GAME_PLASMA_DESIGN.sourceOffsetY != null ? GAME_PLASMA_DESIGN.sourceOffsetY : 0) / 100 * shipDisplaySize);
     var startY = shipY + srcYOffset;
     var splitOn = !!GAME_PLASMA_DESIGN.splitEnabled;
+    if (GAME_PLASMA_DESIGN.flashEnabled) {
+      var _fxofs = ((GAME_PLASMA_DESIGN.sourceOffsetX != null ? GAME_PLASMA_DESIGN.sourceOffsetX : 50) - 50) / 100 * shipDisplaySize;
+      if (splitOn) {
+        var _fxSpl = (GAME_PLASMA_DESIGN.splitDistance != null ? GAME_PLASMA_DESIGN.splitDistance : 30) / 100 * shipDisplaySize;
+        spawnMuzzleFlash(sx + _fxofs - _fxSpl, startY);
+        spawnMuzzleFlash(sx + _fxofs + _fxSpl, startY);
+      } else {
+        spawnMuzzleFlash(sx + _fxofs, startY);
+      }
+    }
     if (splitOn) {
       var SS = 0.7;
       var srcXPx = ((GAME_PLASMA_DESIGN.sourceOffsetX != null ? GAME_PLASMA_DESIGN.sourceOffsetX : 50) - 50) / 100 * shipDisplaySize;
