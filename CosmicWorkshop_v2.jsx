@@ -203,20 +203,19 @@ var HULL_PRESETS = {
   // Star Track: layer names match star-track.svg. Render order puts arms
   // and body at the back so the saucer + dome sit on top.
   startrack: [
-    { type: "rect", name: "Pylon-Left", x: 13.89, y: 27, w: 10, h: 1.6, cr: 0.6, rot: -38, color: "#2a2f3a", color2: "#9aa3b2", fillMode: "linear", gradAngle: 270, opacity: 1 },
-    { type: "rect", name: "Pylon-Right", x: 25.81, y: 26.95, w: 10, h: 1.6, cr: 0.6, rot: 38, color: "#2a2f3a", color2: "#9aa3b2", fillMode: "linear", gradAngle: 255, opacity: 1 },
-    { type: "rect", name: "Neck", x: 20, y: 17.47, w: 2.6, h: 6, cr: 0.6, rot: 0, color: "#3a4150", color2: "#cfd6df", fillMode: "linear", gradAngle: 0, opacity: 1 },
-    { type: "rect", name: "Secondary-Hull", x: 20, y: 26.5, w: 5.6, h: 13, cr: 2.6, rot: 0, color: "#1a1e28", color2: "#b0b8c4", fillMode: "linear", gradAngle: 0, opacity: 1 },
-    { type: "circle", name: "Deflector", x: 20, y: 21.5, w: 3.2, h: 1.8, rot: 0, color: "#ffd070", color2: "#7a3010", fillMode: "radial", opacity: 0.95, glowEnabled: true, glowColor: "#ff6040", glowIntensity: 1 },
-    { type: "circle", name: "Saucer", x: 19.69, y: 12.97, w: 22, h: 8, rot: 0, color: "#2a2f3a", color2: "#dde3ec", fillMode: "radial", gradStop: 0.75, opacity: 1 },
-    { type: "circle", name: "Bridge", x: 19.93, y: 11.01, w: 6.5, h: 3.5, rot: 0, color: "#cfd6df", color2: "#3a4150", fillMode: "radial", opacity: 1 },
-    { type: "circle", name: "Bridge-Lamp", x: 19.92, y: 10, w: 1.4, h: 1, rot: 0, color: "#e9f6ff", color2: "#4a7a8e", fillMode: "radial", opacity: 0.95, glowEnabled: true, glowIntensity: 1 },
-    { type: "rect", name: "Nacelle-Left", x: 9, y: 25, w: 3, h: 20, cr: 1.5, rot: 0, color: "#15181f", color2: "#6a7484", fillMode: "linear", gradAngle: 0, opacity: 1 },
-    { type: "rect", name: "Nacelle-Right", x: 31, y: 25, w: 3, h: 20, cr: 1.5, rot: 0, color: "#15181f", color2: "#6a7484", fillMode: "linear", gradAngle: 180, opacity: 1 },
-    { type: "rect", name: "Warp-Glow-Left", x: 9.0302316700611, y: 27, w: 1.4, h: 14, cr: 0.7, rot: 0, color: "#80ddff", color2: "#1a4a5e", fillMode: "linear", gradAngle: 0, opacity: 0.9, glowEnabled: true, glowIntensity: 1 },
-    { type: "rect", name: "Warp-Glow-Right", x: 31.015911405295316, y: 27, w: 1.4, h: 14, cr: 0.7, rot: 0, color: "#80ddff", color2: "#1a4a5e", fillMode: "linear", gradAngle: 180, opacity: 0.9, glowEnabled: true, glowIntensity: 1 },
-    { type: "circle", name: "Bussard-Left", x: 9, y: 16.8, w: 2.6, h: 2.6, rot: 0, color: "#ff7a50", color2: "#7a1d0e", fillMode: "radial", opacity: 0.95, glowEnabled: true, glowColor: "#ff6040", glowIntensity: 1 },
-    { type: "circle", name: "Bussard-Right", x: 31.04, y: 16.83054989816701, w: 2.6, h: 2.6, rot: 0, color: "#ff7a50", color2: "#7a1d0e", fillMode: "radial", opacity: 0.95, glowEnabled: true, glowColor: "#ff6040", glowIntensity: 1 }
+    { "type": "rect", "name": "Pylon-Left", "x": 13.89, "y": 27, "w": 10, "h": 1.6, "cr": 0.6, "rot": -38, "color": "#2a2f3a", "color2": "#9aa3b2", "fillMode": "linear", "gradAngle": 270, "opacity": 1 },
+    { "type": "rect", "name": "Pylon-Right", "x": 25.81, "y": 26.95, "w": 10, "h": 1.6, "cr": 0.6, "rot": 38, "color": "#2a2f3a", "color2": "#9aa3b2", "fillMode": "linear", "gradAngle": 255, "opacity": 1 },
+    { "type": "rect", "name": "Secondary-Hull", "x": 20.032038643533127, "y": 26.516758675078865, "w": 5.6, "h": 13, "cr": 2.6, "rot": 0, "color": "#1a1e28", "color2": "#b0b8c4", "fillMode": "linear", "gradAngle": 0, "opacity": 1 },
+    { "type": "rect", "name": "Neck", "x": 20, "y": 17.47, "w": 2.6, "h": 10, "cr": 0.6, "rot": 0, "color": "#3a4150", "color2": "#cfd6df", "fillMode": "linear", "gradAngle": 0, "opacity": 1 },
+    { "type": "circle", "name": "Saucer", "x": 19.69, "y": 12.97, "w": 22, "h": 8, "rot": 0, "color": "#2a2f3a", "color2": "#dde3ec", "fillMode": "radial", "gradStop": 0.75, "opacity": 1, "groupId": "g1779514987121", "gsx": 1, "gsy": 1, "gcx": 19.69, "gcy": 12.969999999999999, "groupName": "Saucer" },
+    { "type": "circle", "name": "Bridge", "x": 19.93, "y": 11.01, "w": 6.5, "h": 3.5, "rot": 0, "color": "#cfd6df", "color2": "#3a4150", "fillMode": "radial", "opacity": 1, "groupId": "g1779514987121", "gsx": 1, "gsy": 1, "gcx": 19.69, "gcy": 12.969999999999999, "groupName": "Saucer" },
+    { "type": "circle", "name": "Bridge-Lamp", "x": 19.92, "y": 10, "w": 1.4, "h": 1, "rot": 0, "color": "#e9f6ff", "color2": "#4a7a8e", "fillMode": "radial", "opacity": 0.95, "glowEnabled": true, "glowIntensity": 1, "groupId": "g1779514987121", "gsx": 1, "gsy": 1, "gcx": 19.69, "gcy": 12.969999999999999, "groupName": "Saucer" },
+    { "type": "rect", "name": "Nacelle-Left", "x": 9, "y": 25, "w": 3, "h": 20, "cr": 1.5, "rot": 0, "color": "#15181f", "color2": "#6a7484", "fillMode": "linear", "gradAngle": 0, "opacity": 1 },
+    { "type": "rect", "name": "Nacelle-Right", "x": 31, "y": 25, "w": 3, "h": 20, "cr": 1.5, "rot": 0, "color": "#15181f", "color2": "#6a7484", "fillMode": "linear", "gradAngle": 180, "opacity": 1 },
+    { "type": "rect", "name": "Warp-Glow-Left", "x": 8.571339714225138, "y": 27, "w": 1.4, "h": 14, "cr": 0.7, "rot": 0, "color": "#80ddff", "color2": "#1a4a5e", "fillMode": "linear", "gradAngle": 0, "opacity": 0.9, "glowEnabled": true, "glowIntensity": 1 },
+    { "type": "rect", "name": "Warp-Glow-Right", "x": 31.779909828008247, "y": 26.591876971608833, "w": 1.4, "h": 14, "cr": 0.7, "rot": 0, "color": "#80ddff", "color2": "#1a4a5e", "fillMode": "linear", "gradAngle": 180, "opacity": 0.9, "glowEnabled": true, "glowIntensity": 1 },
+    { "type": "circle", "name": "Bussard-Left", "x": 9.054712145110411, "y": 15.70920741324921, "w": 2.6, "h": 1.5, "rot": 0, "color": "#ff7a50", "color2": "#7a1d0e", "fillMode": "radial", "opacity": 0.95, "glowEnabled": true, "glowColor": "#ff6040", "glowIntensity": 1, "bw": 0.1 },
+    { "type": "circle", "name": "Bussard-Right", "x": 30.802421135646682, "y": 15.919666617409913, "w": 2.6, "h": 1.5, "rot": 0, "color": "#ff7a50", "color2": "#7a1d0e", "fillMode": "radial", "opacity": 0.95, "glowEnabled": true, "glowColor": "#ff6040", "glowIntensity": 1, "bw": 0.1 }
   ],
   // Millenia Falcor: layer names match Millenia Falcor.svg. Mandibles are
   // approximated as rotated isoceles triangles (the SVG quadrilaterals taper
