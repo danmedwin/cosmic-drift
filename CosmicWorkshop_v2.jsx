@@ -155,8 +155,8 @@ function UFOBlockSvg(props) {
       React.createElement("ellipse", { cx: hx - dRx * 0.22, cy: dY - dRy * 0.28, rx: dRx * 0.27, ry: dRy * 0.22, fill: "white", opacity: "0.25", transform: "rotate(-20," + (hx - dRx * 0.22) + "," + (dY - dRy * 0.28) + ")", clipPath: "url(#ufo-dc-" + uid + ")" })));
 }
 
-var SHIP_HULLS = ["red5", "fireflight", "saucer", "startrack", "falcor", "birdofplay", "vespa", "mytie", "callbox"];
-var SHIP_HULL_LABELS = { red5: "Red 5", arrow: "Default", fireflight: "Fireflight", saucer: "Saucer", startrack: "Star Track", falcor: "Millenia Falcor", birdofplay: "Bird of Play", vespa: "Stinger-II", mytie: "My Tie", ironeye: "Hex Fighter", callbox: "Police Box", none: "None" };
+var SHIP_HULLS = ["red5", "fireflight", "saucer", "startrack", "falcor", "birdofplay", "vespa", "mytie", "callbox", "artie2"];
+var SHIP_HULL_LABELS = { red5: "Red 5", arrow: "Default", fireflight: "Fireflight", saucer: "Saucer", startrack: "Star Track", falcor: "Millenia Falcor", birdofplay: "Bird of Play", vespa: "Stinger-II", mytie: "My Tie", ironeye: "Hex Fighter", callbox: "Police Box", artie2: "Artie-2", none: "None" };
 var SHIP_PART_TYPES = ["circle", "rect", "triangle", "trapezoid", "line", "arrow"];
 var SHIP_PART_LABELS = { circle: "Oval", rect: "Rect", triangle: "Triangle", trapezoid: "Trapezoid", line: "Line", arrow: "Arrow" };
 // Normalized 6-point swept-arrow polygon (centered, range [-0.5, 0.5]).
@@ -384,6 +384,27 @@ var HULL_PRESETS = {
     { "type": "circle", "x": 23.9162291808216, "y": 38.22949720524927, "w": 2, "h": 1, "rot": 0, "color": "#e0b000", "opacity": 0.9, "bw": 0, "bc": "#000000", "bo": 1, "fillMode": "radial", "color2": "#ff0000", "gradStop": 0.4, "glowEnabled": true, "glowColor": "#ffd060", "glowIntensity": 1.5, "name": "Upper right flame", "groupId": "g1779504353518", "gsx": 1, "gsy": 1, "gcx": 20.86102634440999, "gcy": 38.20426633453687, "groupName": "Jet flames", "hidden": 0 },
     { "type": "circle", "x": 22.149647184418836, "y": 38.01346818150257, "w": 1, "h": 0.5, "rot": 0, "color": "#e0b000", "opacity": 0.9, "bw": 0, "bc": "#000000", "bo": 1, "fillMode": "radial", "color2": "#ff0000", "gradStop": 0.4, "glowEnabled": true, "glowColor": "#ffd060", "glowIntensity": 1.5, "name": "lower right flame", "groupId": "g1779504353518", "gsx": 1, "gsy": 1, "gcx": 20.74706637966949, "gcy": 38.20426633453687, "groupName": "Jet flames", "hidden": 0 },
     { "type": "circle", "x": 18.663994150118047, "y": 37.894734672267745, "w": 1, "h": 0.5, "rot": 0, "color": "#e0b000", "opacity": 0.9, "bw": 0, "bc": "#000000", "bo": 1, "fillMode": "radial", "color2": "#ff0000", "gradStop": 0.4, "glowEnabled": true, "glowColor": "#ffd060", "glowIntensity": 1.5, "name": "Lower left flame", "groupId": "g1779504353518", "gsx": 1, "gsy": 1, "gcx": 19.99706637966949, "gcy": 38.20426633453687, "groupName": "Jet flames", "hidden": 0 }
+  ],
+  artie2: [
+    { "type": "trapezoid", "x": 18.795857405462186, "y": 38.328387605042, "w": 2, "h": 2.5, "rot": 0, "color": "#222a3a", "opacity": 1, "bw": 0, "bc": "#000000", "bo": 1, "tw": 1, "tofs": 0, "fillMode": "linear", "color2": "#707070" },
+    { "type": "trapezoid", "x": 21.054785976890756, "y": 38.328387605042, "w": 2, "h": 2.5, "rot": 0, "color": "#222a3a", "opacity": 1, "bw": 0, "bc": "#000000", "bo": 1, "tw": 1, "tofs": 0, "fillMode": "linear", "color2": "#707070" },
+    { "type": "rect", "x": 20.103728991596636, "y": 9.521336659663866, "w": 3, "h": 6, "rot": 0, "color": "#ffffff", "opacity": 1, "bw": 0, "bc": "#000000", "bo": 1, "cr": 1.25, "fillMode": "linear", "color2": "#222a3a", "name": "Capsul" },
+    { "type": "rect", "x": 20, "y": 34.5, "w": 5, "h": 6, "rot": 0, "color": "#ffffff", "opacity": 1, "bw": 0, "bc": "#000000", "bo": 1, "cr": 0.75, "fillMode": "linear", "color2": "#222a3a" },
+    { "type": "rect", "x": 20, "y": 25, "w": 5, "h": 15, "rot": 0, "color": "#cb7111", "opacity": 1, "bw": 0, "bc": "#000000", "bo": 1, "cr": 0, "fillMode": "linear", "color2": "#6a3d03" },
+    { "type": "trapezoid", "x": 20, "y": 14.6, "w": 5, "h": 6, "rot": 0, "color": "#ca7111", "opacity": 1, "bw": 0, "bc": "#000000", "bo": 1, "tw": 2.5, "tofs": 0, "fillMode": "linear", "color2": "#6b3d03" },
+    { "type": "rect", "x": 24.045401610086714, "y": 31.183626575630257, "w": 2.5, "h": 14, "rot": 0, "color": "#222a3a", "opacity": 1, "bw": 0, "bc": "#000000", "bo": 1, "cr": 0, "fillMode": "linear", "color2": "#ffffff", "groupId": "g1779513674906", "gsx": 1, "gsy": 1, "gcx": 24.021008403361343, "gcy": 30.872439600840337, "groupName": "Left Booster" },
+    { "type": "trapezoid", "x": 23.989659926470587, "y": 39.043723739495796, "w": 2.5, "h": 1.875, "rot": 0, "color": "#222a3a", "opacity": 1, "bw": 0, "bc": "#000000", "bo": 1, "tw": 1.25, "tofs": 0, "fillMode": "linear", "color2": "#ffffff", "groupId": "g1779513674906", "gsx": 1, "gsy": 1, "gcx": 24.021008403361343, "gcy": 30.872439600840337, "groupName": "Left Booster" },
+    { "type": "triangle", "x": 24.0523568802521, "y": 23.01365546218488, "w": 2.5, "h": 2.5, "rot": 0, "color": "#222a3a", "opacity": 1, "bw": 0, "bc": "#000000", "bo": 1, "fillMode": "linear", "color2": "#ffffff", "groupId": "g1779513674906", "gsx": 1, "gsy": 1, "gcx": 24.021008403361343, "gcy": 30.872439600840337, "groupName": "Left Booster" },
+    { "type": "rect", "x": 16.167874036557304, "y": 31.183626575630257, "w": 2.5, "h": 14, "rot": 0, "color": "#ffffff", "opacity": 1, "bw": 0, "bc": "#000000", "bo": 1, "cr": 0, "fillMode": "linear", "color2": "#222a3a", "groupId": "g1779513686997_40786", "gsx": 1, "gsy": 1, "gcx": 16.143480829831933, "gcy": 30.872439600840337, "groupName": "Right Booster" },
+    { "type": "trapezoid", "x": 16.112132352941178, "y": 39.043723739495796, "w": 2.5, "h": 1.875, "rot": 0, "color": "#ffffff", "opacity": 1, "bw": 0, "bc": "#000000", "bo": 1, "tw": 1.25, "tofs": 0, "fillMode": "linear", "color2": "#222a3a", "groupId": "g1779513686997_40786", "gsx": 1, "gsy": 1, "gcx": 16.143480829831933, "gcy": 30.872439600840337, "groupName": "Right Booster" },
+    { "type": "triangle", "x": 16.17482930672269, "y": 23.01365546218488, "w": 2.5, "h": 2.5, "rot": 0, "color": "#ffffff", "opacity": 1, "bw": 0, "bc": "#000000", "bo": 1, "fillMode": "linear", "color2": "#222a3a", "groupId": "g1779513686997_40786", "gsx": 1, "gsy": 1, "gcx": 16.143480829831933, "gcy": 30.872439600840337, "groupName": "Right Booster" },
+    { "type": "triangle", "x": 20, "y": 4.059480042016807, "w": 2, "h": 5.5, "rot": 0, "color": "#ffffff", "opacity": 1, "bw": 0, "bc": "#000000", "bo": 1, "fillMode": "linear", "color2": "#222a3a" },
+    { "type": "line", "x": 20, "y": 26, "w": 5, "h": 1, "rot": 0, "color": "#f3a309", "opacity": 1, "bw": 0, "bc": "#000000", "bo": 1, "fillMode": "linear", "color2": "#503607" },
+    { "type": "line", "x": 20, "y": 18, "w": 5, "h": 1, "rot": 0, "color": "#f3a309", "opacity": 1, "bw": 0, "bc": "#000000", "bo": 1, "fillMode": "linear", "color2": "#503607" },
+    { "type": "line", "x": 20, "y": 33, "w": 5, "h": 1, "rot": 0, "color": "#f3a309", "opacity": 1, "bw": 0, "bc": "#000000", "bo": 1, "fillMode": "linear", "color2": "#503607" },
+    { "type": "line", "x": 20, "y": 23, "w": 5, "h": 1, "rot": 0, "color": "#f3a309", "opacity": 1, "bw": 0, "bc": "#000000", "bo": 1, "fillMode": "linear", "color2": "#503607" },
+    { "type": "line", "x": 20, "y": 29.991071428571434, "w": 11, "h": 0.5, "rot": 90, "color": "#f3a309", "opacity": 1, "bw": 0, "bc": "#000000", "bo": 1, "fillMode": "linear", "color2": "#503607", "gradAngle": 270, "name": "Pipe", "hidden": 2 },
+    { "type": "circle", "x": 20, "y": 9.5, "w": 1.5, "h": 1.5, "rot": 0, "color": "#002c71", "opacity": 1, "bw": 0, "bc": "#000000", "bo": 1 }
   ],
   none: []
 };
