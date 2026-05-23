@@ -4766,6 +4766,49 @@ export default function CosmicWorkshop() {
       return Object.assign({}, prev, { parts: list });
     }, "groupSize_" + key);
   }
+  // Flip / Mirror core: bake group-scale, reflect positions + rotations, clear gs.
+  // axis "h" = flip left↔right about cx; axis "v" = flip top↔bottom about cy.
+  function shipTransformFlip(axis, cx, cy) {
+    var sels = shipGetSelected();
+    if (sels.length === 0) return;
+    var partsNow = (shipEdit && shipEdit.parts) || [];
+    var baked = {};
+    for (var fbi = 0; fbi < sels.length; fbi++) {
+      var fbp = partsNow[sels[fbi]]; if (!fbp) continue;
+      baked[sels[fbi]] = shipBakePartGs(fbp);
+    }
+    shipDirtyRef.current = true;
+    shipApplyEdit(function(prev) {
+      var list = (prev.parts || []).slice();
+      for (var fi = 0; fi < sels.length; fi++) {
+        var fix = sels[fi]; var fp = list[fix]; if (!fp) continue;
+        var fbk = baked[fix]; if (!fbk) continue;
+        var fnx = fbk.x, fny = fbk.y, fnrot;
+        if (axis === "h") {
+          fnx = 2 * cx - fbk.x;
+          fnrot = (360 - (fp.rot || 0)) % 360;
+        } else {
+          fny = 2 * cy - fbk.y;
+          fnrot = ((180 - (fp.rot || 0)) + 360) % 360;
+        }
+        var fupd = { x: fnx, y: fny, w: fbk.w, h: fbk.h, rot: fnrot, gsx: 1, gsy: 1, gcx: fnx, gcy: fny };
+        if (typeof fbk.tw   === "number") fupd.tw   = fbk.tw;
+        if (typeof fbk.cr   === "number") fupd.cr   = fbk.cr;
+        if (typeof fbk.tofs === "number") fupd.tofs = (axis === "h") ? -fbk.tofs : fbk.tofs;
+        list[fix] = Object.assign({}, fp, fupd);
+      }
+      return Object.assign({}, prev, { parts: list });
+    }, "flip_" + axis);
+  }
+  function shipFlipSelected(axis) {
+    var sels = shipGetSelected();
+    if (sels.length === 0) return;
+    var bbox = shipGroupVisualBBox(sels);
+    shipTransformFlip(axis, bbox.cx, bbox.cy);
+  }
+  function shipMirrorSelected(axis) {
+    shipTransformFlip(axis, 20, 20);
+  }
   // Replace / Add / Cancel popup shown when tapping a hull preset that would
   // overwrite existing parts.
   function renderHullPresetOverlay(hullId, onCancel, onChoose) {
@@ -6696,9 +6739,43 @@ export default function CosmicWorkshop() {
                     b.svg,
                     React.createElement("div", { style: { color: "#ff8aaa", fontSize: 9, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, b.label));
                 })));
+            var flipBtns = [
+              { fn: function() { shipFlipSelected("h"); },   label: "Flip H",   title: "Flip selection horizontally (about its center)",
+                svg: React.createElement("svg", { width: 22, height: 22, viewBox: "0 0 24 24" },
+                  React.createElement("rect", { x: 11, y: 2, width: 2, height: 20, fill: "#8fd4ff" }),
+                  React.createElement("path", { d: "M3 7 L9 12 L3 17 Z", fill: "rgba(143,212,255,0.55)" }),
+                  React.createElement("path", { d: "M21 7 L15 12 L21 17 Z", fill: "rgba(143,212,255,0.55)" })) },
+              { fn: function() { shipFlipSelected("v"); },   label: "Flip V",   title: "Flip selection vertically (about its center)",
+                svg: React.createElement("svg", { width: 22, height: 22, viewBox: "0 0 24 24" },
+                  React.createElement("rect", { x: 2, y: 11, width: 20, height: 2, fill: "#8fd4ff" }),
+                  React.createElement("path", { d: "M7 3 L12 9 L17 3 Z", fill: "rgba(143,212,255,0.55)" }),
+                  React.createElement("path", { d: "M7 21 L12 15 L17 21 Z", fill: "rgba(143,212,255,0.55)" })) },
+              { fn: function() { shipMirrorSelected("h"); }, label: "Mir H",   title: "Mirror selection horizontally about canvas center",
+                svg: React.createElement("svg", { width: 22, height: 22, viewBox: "0 0 24 24" },
+                  React.createElement("rect", { x: 11, y: 2, width: 2, height: 20, fill: "rgba(143,212,255,0.4)", strokeDasharray: "3 2" }),
+                  React.createElement("circle", { cx: 12, cy: 12, r: 1.5, fill: "#8fd4ff" }),
+                  React.createElement("path", { d: "M3 7 L8 12 L3 17 Z", fill: "rgba(143,212,255,0.55)" }),
+                  React.createElement("path", { d: "M21 7 L16 12 L21 17 Z", fill: "rgba(143,212,255,0.25)", stroke: "rgba(143,212,255,0.55)", strokeWidth: "1" })) },
+              { fn: function() { shipMirrorSelected("v"); }, label: "Mir V",   title: "Mirror selection vertically about canvas center",
+                svg: React.createElement("svg", { width: 22, height: 22, viewBox: "0 0 24 24" },
+                  React.createElement("rect", { x: 2, y: 11, width: 20, height: 2, fill: "rgba(143,212,255,0.4)" }),
+                  React.createElement("circle", { cx: 12, cy: 12, r: 1.5, fill: "#8fd4ff" }),
+                  React.createElement("path", { d: "M7 3 L12 8 L17 3 Z", fill: "rgba(143,212,255,0.55)" }),
+                  React.createElement("path", { d: "M7 21 L12 16 L17 21 Z", fill: "rgba(143,212,255,0.25)", stroke: "rgba(143,212,255,0.55)", strokeWidth: "1" })) }
+            ];
+            var flipPanel = React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(143,212,255,0.2)", borderRadius: 12, padding: "10px 14px", marginBottom: 8 } },
+              React.createElement("div", { style: { color: "rgba(143,212,255,0.5)", fontSize: 10, letterSpacing: 0.5, textTransform: "uppercase", marginBottom: 8 } }, "Flip / Mirror"),
+              React.createElement("div", { style: { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 } },
+                flipBtns.map(function(b) {
+                  return React.createElement("div", { key: b.label, onClick: b.fn, title: b.title,
+                    style: { padding: "6px 4px", display: "flex", flexDirection: "column", alignItems: "center", gap: 3, borderRadius: 6, cursor: "pointer", background: "rgba(143,212,255,0.08)", border: "1px solid rgba(143,212,255,0.3)" } },
+                    b.svg,
+                    React.createElement("div", { style: { color: "#8fd4ff", fontSize: 9, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, b.label));
+                })));
             return React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,138,170,0.25)", borderRadius: 12, padding: "12px 16px 8px" } },
               renderShipSelectedHeader(sel),
               alignPanel,
+              flipPanel,
               // Hide per-part Position X/Y while multi-selected — slamming all
               // selected parts to a single x or y would collapse them on top
               // of each other. For grouped selections show bbox-center sliders instead.
