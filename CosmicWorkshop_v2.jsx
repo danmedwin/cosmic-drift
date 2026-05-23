@@ -6816,14 +6816,15 @@ export default function CosmicWorkshop() {
                                 onClick: function(e) { e.stopPropagation(); },
                                 style: { flex: 1, background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,220,100,0.5)", borderRadius: 4, color: "rgba(255,220,100,0.9)", padding: "2px 6px", outline: "none", boxSizing: "border-box", fontFamily: "'Exo 2', sans-serif", fontSize: 16 } })
                             : React.createElement("div", { style: { flex: 1, display: "flex", alignItems: "center", gap: 3, minWidth: 0 } },
-                                React.createElement("div", { style: { flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "rgba(220,200,140,0.85)", fontSize: 11, fontWeight: 700, fontFamily: "'Exo 2', sans-serif", letterSpacing: 0.4 } },
+                                React.createElement("div", { style: { flex: "0 1 auto", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "rgba(220,200,140,0.85)", fontSize: 11, fontWeight: 700, fontFamily: "'Exo 2', sans-serif", letterSpacing: 0.4, minWidth: 0 } },
                                   gGroupName || ("Group \xB7 " + item.members.length)),
                                 React.createElement("div", { onClick: function(e) { e.stopPropagation(); setShipGroupRenamingId(gid); setShipGroupRenameVal(gGroupName || ""); },
                                   title: "Rename group",
                                   style: { flexShrink: 0, cursor: "pointer", color: "rgba(180,200,220,0.35)", display: "flex", alignItems: "center", padding: "2px" } },
                                   WsIconPencil(10)),
                                 React.createElement("div", { style: { flexShrink: 0, color: "rgba(140,160,180,0.5)", fontSize: 10, fontFamily: "'Exo 2', sans-serif", whiteSpace: "nowrap" } },
-                                  gbboxText)),
+                                  gbboxText),
+                                React.createElement("div", { style: { flex: 1 } })),
                           // Copy group
                           React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipDuplicateGroup(gid); },
                             title: "Duplicate group",
