@@ -1668,6 +1668,8 @@ export default function CosmicWorkshop() {
   var shipDragRef = useRef(null);
   // Tracks an active row-drag in the parts list (Z-order reordering by drag).
   var shipDragHandleRef = useRef(null);
+  // Hover target while dragging a list row (drop-on-release). Null when not dragging.
+  var _shipDragHover = useState(null), shipDragHover = _shipDragHover[0], setShipDragHover = _shipDragHover[1];
   // Which group headers are collapsed in the parts list. Keys are groupIds.
   var _shipCollapsedGroups = useState({}), shipCollapsedGroups = _shipCollapsedGroups[0], setShipCollapsedGroups = _shipCollapsedGroups[1];
   var _shipGroupRenamingId = useState(null), shipGroupRenamingId = _shipGroupRenamingId[0], setShipGroupRenamingId = _shipGroupRenamingId[1];
@@ -4051,28 +4053,34 @@ export default function CosmicWorkshop() {
   }
   // Moves a part from its current index to `toIdx`, shifting others.
   // Used by the Z (layer) slider.
-  function shipReorderPart(fromIdx, toIdx) {
+  function shipReorderPart(fromIdx, toIdx, clearGroup) {
     if (fromIdx === toIdx) return;
     shipApplyEdit(function(prev) {
       var list = (prev.parts || []).slice();
       if (fromIdx < 0 || fromIdx >= list.length) return prev;
-      var t = Math.max(0, Math.min(list.length - 1, toIdx));
+      // Allow t == list.length (after splice) so a part can reach the very top display position.
+      var t = Math.max(0, Math.min(list.length, toIdx));
       var p = list[fromIdx];
       list.splice(fromIdx, 1);
+      if (t > list.length) t = list.length;
       list.splice(t, 0, p);
-      // Update groupId based on new neighbors so parts can be dragged in/out of groups.
-      var below = t > 0 ? list[t - 1] : null;
-      var above = t < list.length - 1 ? list[t + 1] : null;
-      var belowGid = (below && below.groupId) || null;
-      var aboveGid = (above && above.groupId) || null;
-      var currentGid = p.groupId || null;
+      // Update groupId. clearGroup forces ungrouped regardless of neighbors.
       var newGid;
-      if (belowGid === aboveGid) {
-        newGid = belowGid;
-      } else if (currentGid && (belowGid === currentGid || aboveGid === currentGid)) {
-        newGid = currentGid;
+      if (clearGroup) {
+        newGid = null;
       } else {
-        newGid = belowGid;
+        var below = t > 0 ? list[t - 1] : null;
+        var above = t < list.length - 1 ? list[t + 1] : null;
+        var belowGid = (below && below.groupId) || null;
+        var aboveGid = (above && above.groupId) || null;
+        var currentGid = p.groupId || null;
+        if (belowGid === aboveGid) {
+          newGid = belowGid;
+        } else if (currentGid && (belowGid === currentGid || aboveGid === currentGid)) {
+          newGid = currentGid;
+        } else {
+          newGid = belowGid;
+        }
       }
       if (newGid !== currentGid) {
         var newGroupName = null;
@@ -4917,29 +4925,43 @@ export default function CosmicWorkshop() {
     if (e.preventDefault) e.preventDefault();
     var rows = document.querySelectorAll("[data-shippart-row]");
     var cy = e.clientY != null ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
-    var targetIdx = d.idx;
-    // Rows are rendered in reverse Z order (top layer first), so we read each
-    // row's data-shippart-actual-idx attribute to translate display position
-    // back to the part's underlying index.
+    // Find display position (0 = before first row, rows.length = after last row).
+    var displayPos = rows.length;
     for (var i = 0; i < rows.length; i++) {
       var r = rows[i].getBoundingClientRect();
-      if (cy < r.top + r.height / 2) {
-        targetIdx = parseInt(rows[i].getAttribute("data-shippart-actual-idx"), 10);
-        break;
-      }
-      if (i === rows.length - 1) targetIdx = parseInt(rows[i].getAttribute("data-shippart-actual-idx"), 10);
+      if (cy < r.top + r.height / 2) { displayPos = i; break; }
     }
-    if (!isNaN(targetIdx) && targetIdx !== d.idx) {
-      if (d.groupId) {
-        shipReorderGroup(d.groupId, targetIdx);
-      } else {
-        shipReorderPart(d.idx, targetIdx);
-      }
-      d.idx = targetIdx;
+    // Compute the target array index from the row at displayPos (clamped).
+    var clampedPos = Math.min(displayPos, rows.length - 1);
+    var toIdx = rows.length > 0 ? parseInt(rows[clampedPos].getAttribute("data-shippart-actual-idx"), 10) : d.idx;
+    if (isNaN(toIdx)) toIdx = d.idx;
+    // freeSlot = true when drop would clear groupId (top/bottom boundary or between different groups).
+    var freeSlot = false;
+    if (displayPos === 0 || displayPos >= rows.length) {
+      freeSlot = true;
+    } else {
+      var gAbove = rows[displayPos - 1].getAttribute("data-shippart-gid") || "";
+      var gBelow = rows[displayPos].getAttribute("data-shippart-gid") || "";
+      freeSlot = gAbove !== gBelow;
+    }
+    // Only re-render when position actually changes.
+    var prev = d.hover;
+    if (!prev || prev.displayPos !== displayPos || prev.toIdx !== toIdx || prev.freeSlot !== freeSlot) {
+      d.hover = { displayPos: displayPos, toIdx: toIdx, freeSlot: freeSlot };
+      setShipDragHover({ displayPos: displayPos, toIdx: toIdx, freeSlot: freeSlot });
     }
   }
   function shipDragHandleEnd(e) {
+    var d = shipDragHandleRef.current;
+    var hover = d && d.hover;
     shipDragHandleRef.current = null;
+    setShipDragHover(null);
+    if (!d || !hover || hover.toIdx === d.idx) return;
+    if (d.groupId) {
+      shipReorderGroup(d.groupId, hover.toIdx);
+    } else {
+      shipReorderPart(d.idx, hover.toIdx, hover.freeSlot);
+    }
   }
   function shipUpdateEdit(key, val) {
     shipDirtyRef.current = true;
@@ -6729,7 +6751,7 @@ export default function CosmicWorkshop() {
                   borderRadius: 6, cursor: "pointer",
                   background: isSel ? "rgba(255,138,170,0.12)" : "rgba(255,255,255,0.02)",
                   border: isPrimary ? "1px solid rgba(255,138,170,0.6)" : (isSel ? "1px solid rgba(255,138,170,0.3)" : "1px solid rgba(255,255,255,0.05)") } },
-                { "data-shippart-row": "1", "data-shippart-actual-idx": String(idx) }),
+                { "data-shippart-row": "1", "data-shippart-actual-idx": String(idx), "data-shippart-gid": p.groupId || "" }),
                 React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipCyclePartVisibility(idx); },
                   title: hiddenVal === 1 ? "Hidden — click for ghost" : hiddenVal === 2 ? "Ghost — click to show" : "Visible — click to hide",
                   style: { width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flex: "0 0 auto" } },
@@ -6816,13 +6838,25 @@ export default function CosmicWorkshop() {
                 }
               }
             }
+            // Build displayRows: renderItems with a drop-zone entry injected at hover position.
+            var displayRows = renderItems;
+            if (shipDragHover) {
+              var dzPos = Math.max(0, Math.min(renderItems.length, shipDragHover.displayPos));
+              displayRows = renderItems.slice(0, dzPos)
+                .concat([{ type: "dropzone", freeSlot: shipDragHover.freeSlot }])
+                .concat(renderItems.slice(dzPos));
+            }
             return React.createElement(React.Fragment, null,
               React.createElement("div", { style: { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "10px 12px" } },
                 React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 11, marginBottom: 8, letterSpacing: 0.5 } }, "PARTS (" + partsList.length + ")"),
                 partsList.length === 0
                   ? React.createElement("div", { style: { color: "rgba(180,200,220,0.4)", fontSize: 11, fontStyle: "italic", padding: "6px 0" } }, "No parts yet — add one from the ADD tab.")
                   : React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 4 } },
-                      renderItems.map(function(item) {
+                      displayRows.map(function(item) {
+                        if (item.type === "dropzone") return React.createElement("div", { key: "dz",
+                          style: { height: 3, borderRadius: 2, margin: "1px 0",
+                            background: item.freeSlot ? "rgba(80,200,255,0.45)" : "rgba(128,160,255,0.35)",
+                            border: "1px solid " + (item.freeSlot ? "rgba(80,200,255,0.8)" : "rgba(100,140,255,0.55)") } });
                         if (item.type === "part") return renderPartRow(item.idx, false);
                         if (item.type === "grpmem") return renderPartRow(item.idx, true);
                         // ── Group header row ─────────────────────────────────
@@ -6855,7 +6889,7 @@ export default function CosmicWorkshop() {
                             background: anyMemberSel ? "rgba(255,220,100,0.10)" : "rgba(255,220,100,0.05)",
                             border: anyMemberSel ? "1px solid rgba(255,220,100,0.40)" : "1px solid rgba(255,255,255,0.08)",
                             borderLeft: "3px solid " + tint } },
-                          { "data-shippart-row": "1", "data-shippart-actual-idx": String(item.maxIdx) }),
+                          { "data-shippart-row": "1", "data-shippart-actual-idx": String(item.maxIdx), "data-shippart-gid": gid }),
                           // 0. Eye — cycles group visibility
                           React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipCycleGroupVisibility(gid); },
                             title: gHiddenVal === 1 ? "All hidden — click for ghost" : gHiddenVal === 2 ? "All ghost — click to show" : "Visible — click to hide all",
