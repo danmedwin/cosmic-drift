@@ -6662,7 +6662,7 @@ export default function CosmicWorkshop() {
               if (p.color2 && p.fillMode === "linear") { swatchBg = "linear-gradient(90deg," + p.color + "," + p.color2 + ")"; }
               if (p.color2 && p.fillMode === "radial") { swatchBg = "radial-gradient(circle," + p.color + "," + p.color2 + ")"; }
               return React.createElement("div", Object.assign({ key: "pr-" + idx,
-                onClick: function() { shipApplyTap(idx, false); },
+                onClick: function() { setShipSelectedPart(idx); setShipSelectedExtras([]); },
                 style: { display: "flex", alignItems: "center", gap: 4,
                   padding: "6px 6px", paddingLeft: inGroup ? 18 : 6,
                   borderRadius: 6, cursor: "pointer",
@@ -6690,13 +6690,14 @@ export default function CosmicWorkshop() {
                       onClick: function(e) { e.stopPropagation(); },
                       style: { flex: 1, background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,138,170,0.5)", borderRadius: 4, color: "#ff8aaa", padding: "2px 6px", outline: "none", boxSizing: "border-box", fontFamily: "'Exo 2', sans-serif", fontSize: 16 } })
                   : React.createElement("div", { style: { flex: 1, display: "flex", alignItems: "center", gap: 3, minWidth: 0 } },
-                      React.createElement("div", { style: { flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: isSel ? "#ff8aaa" : "rgba(200,210,220,0.7)", fontSize: 11, fontWeight: 600, fontFamily: "'Exo 2', sans-serif", letterSpacing: 0.4 } }, displayName),
+                      React.createElement("div", { style: { flex: "0 1 auto", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: isSel ? "#ff8aaa" : "rgba(200,210,220,0.7)", fontSize: 11, fontWeight: 600, fontFamily: "'Exo 2', sans-serif", letterSpacing: 0.4, minWidth: 0 } }, displayName),
                       React.createElement("div", { onClick: function(e) { e.stopPropagation(); setShipPartRenamingIdx(idx); setShipPartRenameVal(p.name || ""); },
                         title: "Rename part",
                         style: { flexShrink: 0, cursor: "pointer", color: "rgba(180,200,220,0.35)", display: "flex", alignItems: "center", padding: "2px" } },
                         WsIconPencil(10)),
                       React.createElement("div", { style: { flexShrink: 0, color: "rgba(140,160,180,0.5)", fontSize: 10, fontFamily: "'Exo 2', sans-serif", whiteSpace: "nowrap" } },
-                        "(" + p.x.toFixed(0) + "," + p.y.toFixed(0) + ")")),
+                        "(" + p.x.toFixed(0) + "," + p.y.toFixed(0) + ")"),
+                      React.createElement("div", { style: { flex: 1 } })),
                 React.createElement("div", { onClick: function(e) { e.stopPropagation(); shipDuplicatePart(idx); },
                   title: "Duplicate part",
                   style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", background: "rgba(128,221,255,0.1)", border: "1px solid rgba(128,221,255,0.3)", flex: "0 0 auto" } },
@@ -6792,7 +6793,7 @@ export default function CosmicWorkshop() {
                                 ? React.createElement("polygon", { points: "2,2 8,5 2,8" })
                                 : React.createElement("polygon", { points: "2,2 8,2 5,8" }))),
                           // 2. Checkbox — selects/deselects all members
-                          React.createElement("div", { onClick: function(e) { e.stopPropagation(); if (allMemberSel) { setShipSelectedPart(-1); setShipSelectedExtras([]); } else { shipSelectGroup(gid); } },
+                          React.createElement("div", { onClick: function(e) { e.stopPropagation(); if (allMemberSel) { var cur = shipGetSelected(); var rem = cur.filter(function(c) { return item.members.indexOf(c) < 0; }); if (rem.length === 0) { setShipSelectedPart(-1); setShipSelectedExtras([]); } else { setShipSelectedPart(rem[rem.length - 1]); setShipSelectedExtras(rem.slice(0, rem.length - 1)); } } else { shipSelectGroup(gid); } },
                             title: allMemberSel ? "Deselect all in group" : "Select all in group",
                             style: { width: 16, height: 16, borderRadius: 3,
                               border: anyMemberSel ? "1.5px solid rgba(255,220,100,0.7)" : "1.5px solid rgba(180,200,220,0.35)",
