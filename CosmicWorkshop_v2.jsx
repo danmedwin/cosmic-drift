@@ -4473,17 +4473,34 @@ export default function CosmicWorkshop() {
     setShipSelectedExtras([]);
   }
   function shipDuplicateGroup(groupId) {
-    var newGroupId = "g_" + Date.now();
+    var newGroupId = "g" + Date.now() + "_" + Math.floor(Math.random() * 100000);
     shipDirtyRef.current = true;
     shipApplyEdit(function(prev) {
       var list = (prev.parts || []).slice();
-      var newParts = [];
+      var members = [];
+      var maxIdx = -1;
       for (var i = 0; i < list.length; i++) {
         if (list[i] && list[i].groupId === groupId) {
-          newParts.push(Object.assign({}, list[i], { groupId: newGroupId }));
+          members.push(i);
+          if (i > maxIdx) maxIdx = i;
         }
       }
-      return Object.assign({}, prev, { parts: list.concat(newParts) });
+      if (members.length === 0) return prev;
+      var origName = null;
+      for (var ni = 0; ni < members.length; ni++) {
+        if (list[members[ni]] && list[members[ni]].groupName) { origName = list[members[ni]].groupName; break; }
+      }
+      var copyName = origName ? origName + " copy" : null;
+      var newParts = [];
+      for (var j = 0; j < members.length; j++) {
+        var upd = { groupId: newGroupId };
+        if (copyName) upd.groupName = copyName;
+        newParts.push(Object.assign({}, list[members[j]], upd));
+      }
+      // Insert immediately after the original group so the copy appears
+      // right above it in the reverse-Z list display.
+      var newList = list.slice(0, maxIdx + 1).concat(newParts).concat(list.slice(maxIdx + 1));
+      return Object.assign({}, prev, { parts: newList });
     }, "dupGroup_" + groupId);
   }
   // Cycle all group members atomically: visible→hidden→ghost→visible.
