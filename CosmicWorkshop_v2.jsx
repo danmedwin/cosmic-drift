@@ -2012,16 +2012,18 @@ export default function CosmicWorkshop() {
   function encodeShareData(text) {
     return btoa(encodeURIComponent(text).replace(/%([0-9A-F]{2})/g, function(match, p1) {
       return String.fromCharCode(parseInt(p1, 16));
-    }));
+    })).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
   }
   function decodeShareData(encoded) {
-    return decodeURIComponent(atob(encoded).split("").map(function(c) {
+    var b64 = encoded.replace(/-/g, "+").replace(/_/g, "/");
+    while (b64.length % 4) { b64 += "="; }
+    return decodeURIComponent(atob(b64).split("").map(function(c) {
       return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(""));
   }
   function makeShareUrl(type, text) {
     try {
-      return window.location.origin + "/workshop.html#share=" + type + ":" + encodeShareData(text);
+      return window.location.origin + "/workshop.html#share=" + type + "." + encodeShareData(text);
     } catch(e) { return null; }
   }
   function copyLinkToClipboard(url) {
@@ -2038,10 +2040,10 @@ export default function CosmicWorkshop() {
       var hash = window.location.hash;
       if (!hash || hash.indexOf("#share=") !== 0) return;
       var payload = hash.slice(7);
-      var colon = payload.indexOf(":");
-      if (colon === -1) return;
-      var type = payload.slice(0, colon);
-      var json = decodeShareData(payload.slice(colon + 1));
+      var dot = payload.indexOf(".");
+      if (dot === -1) return;
+      var type = payload.slice(0, dot);
+      var json = decodeShareData(payload.slice(dot + 1));
       if (window.history && window.history.replaceState) {
         window.history.replaceState({}, "", window.location.pathname);
       }
@@ -3575,10 +3577,72 @@ export default function CosmicWorkshop() {
           React.createElement("div", { onClick: onCopy, style: { padding: "8px 16px", borderRadius: 16, background: isCopied ? "rgba(80,200,100,0.3)" : "linear-gradient(135deg,#7b5ea7,#9f7fd0)", border: isCopied ? "1px solid rgba(80,200,100,0.5)" : "none", color: isCopied ? "#80dd90" : "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, isCopied ? "Code Copied!" : "Copy Code"))));
   }
 
-  function renderImportOverlay(title, text, setText, error, setError, onImport, onClose) {
+  function getShipImportPreview(parsed) {
+    try {
+      var arr = Array.isArray(parsed) ? parsed : [parsed];
+      var d = arr[0];
+      if (!d || typeof d.hull !== "string") return null;
+      return React.createElement(ShipDesignSvg, { size: 80, design: d, uid: "imp-ship-prev" });
+    } catch(e) { return null; }
+  }
+  function getPlasmaImportPreview(parsed) {
+    try {
+      var arr = Array.isArray(parsed) ? parsed : [parsed];
+      var d = arr[0];
+      if (!d || typeof d.shape !== "string") return null;
+      return renderPlasmaShape(d, 48);
+    } catch(e) { return null; }
+  }
+  function getUfoImportPreview(parsed) {
+    try {
+      var arr = Array.isArray(parsed) ? parsed : [parsed];
+      var d = arr[0];
+      if (!d || typeof d.hullColor !== "string") return null;
+      return React.createElement(UFOBlockSvg, { size: 64, design: d, uid: "imp-ufo-prev" });
+    } catch(e) { return null; }
+  }
+  function getSetsImportPreview(parsed) {
+    try {
+      if (!parsed || typeof parsed !== "object" || !parsed.id) return null;
+      var parts = [];
+      if (parsed._shipDesign && typeof parsed._shipDesign.hull === "string") {
+        parts.push(React.createElement(ShipDesignSvg, { key: "s", size: 64, design: parsed._shipDesign, uid: "imp-set-ship" }));
+      }
+      if (parsed._plasmaDesign && typeof parsed._plasmaDesign.shape === "string") {
+        parts.push(React.createElement("div", { key: "p", style: { display: "flex", alignItems: "center" } }, renderPlasmaShape(parsed._plasmaDesign, 32)));
+      }
+      if (parts.length === 0) return null;
+      return React.createElement("div", { style: { display: "flex", justifyContent: "center", alignItems: "center", gap: 12 } }, parts);
+    } catch(e) { return null; }
+  }
+  function getLevelImportPreview(parsed) {
+    try {
+      var arr = Array.isArray(parsed) ? parsed : [parsed];
+      var d = arr[0];
+      if (!d || !d.grid || !d.grid.length) return null;
+      var cs = 9;
+      var cells = [];
+      for (var ri = 0; ri < d.grid.length; ri++) {
+        for (var ci = 0; ci < d.grid[ri].length; ci++) {
+          var t = d.grid[ri][ci];
+          if (!t) continue;
+          var bc = BLOCK_COLORS[t];
+          cells.push(React.createElement("rect", { key: ri + "-" + ci, x: ci * (cs + 1), y: ri * (cs + 1), width: cs, height: cs, fill: bc ? bc.particle : "rgba(200,200,200,0.5)", rx: 1.5, opacity: 0.85 }));
+        }
+      }
+      return React.createElement("svg", { width: COLS * (cs + 1) - 1, height: d.grid.length * (cs + 1) - 1, style: { borderRadius: 3 } }, cells);
+    } catch(e) { return null; }
+  }
+
+  function renderImportOverlay(title, text, setText, error, setError, onImport, onClose, getPreview) {
+    var preview = null;
+    if (getPreview && text.trim()) {
+      try { preview = getPreview(JSON.parse(text.trim())); } catch(e) {}
+    }
     return React.createElement("div", { style: OVERLAY_BG, onClick: function(e) { e.stopPropagation(); } },
-      React.createElement("div", { onClick: function(e) { e.stopPropagation(); }, style: Object.assign({}, OVERLAY_BOX, { border: "1px solid rgba(80,200,255,0.3)", maxWidth: 320, width: "90%" }) },
+      React.createElement("div", { onClick: function(e) { e.stopPropagation(); }, style: Object.assign({}, OVERLAY_BOX, { border: "1px solid rgba(80,200,255,0.3)", maxWidth: 320, width: "90%", maxHeight: "88vh", overflowY: "auto" }) },
         React.createElement("div", { style: { color: "#80ddff", fontSize: 15, fontWeight: 700, marginBottom: 8, fontFamily: "'Quicksand',sans-serif" } }, title),
+        preview && React.createElement("div", { style: { display: "flex", justifyContent: "center", alignItems: "center", marginBottom: 10, padding: "10px 0", background: "rgba(0,0,0,0.25)", borderRadius: 8, border: "1px solid rgba(255,255,255,0.06)" } }, preview),
         React.createElement("div", { style: { color: "rgba(180,200,220,0.4)", fontSize: 11, marginBottom: 12 } }, "Paste an exported code:"),
         React.createElement("textarea", { value: text, onChange: function(e) { setText(e.target.value); setError(""); }, placeholder: "Paste JSON here...", style: { width: "100%", height: 90, padding: 8, borderRadius: 6, background: SCRN, border: error ? "2px solid rgba(255,80,60,0.5)" : SCRNB, color: "#b0c8d8", fontSize: 16, fontFamily: "monospace", resize: "none", outline: "none", boxSizing: "border-box" } }),
         error && React.createElement("div", { style: { color: "#ff8866", fontSize: 11, marginTop: 6, fontWeight: 600 } }, error),
@@ -5731,7 +5795,7 @@ export default function CosmicWorkshop() {
         ),
         setsDeletingId && renderDeleteOverlay("Delete Set?", function() { setSetsDeleteId(null); }, function() { setsDeleteSet(setsDeletingId); }),
         setsExportId && renderExportOverlay("Export Set", setsExportText, setsCopied, function() { copyToClipboard(setsExportText, setSetsCopied); }, function() { setSetsExportId(null); }, makeShareUrl("set", setsExportText)),
-        setsShowImport && renderImportOverlay("Import Set", setsImportText, setSetsImportText, setsImportError, setSetsImportError, setsHandleImport, function() { setSetsShowImport(false); setSetsImportText(""); setSetsImportError(""); }),
+        setsShowImport && renderImportOverlay("Import Set", setsImportText, setSetsImportText, setsImportError, setSetsImportError, setsHandleImport, function() { setSetsShowImport(false); setSetsImportText(""); setSetsImportError(""); }, getSetsImportPreview),
         // Import conflict resolution overlay
         setsImportConflicts.length > 0 && setsImportPending && (function() {
           var _ci = 0; var _c = setsImportConflicts[_ci];
@@ -6077,7 +6141,7 @@ export default function CosmicWorkshop() {
         deletingId && renderDeleteOverlay("Delete Level?", function() { setDeletingId(null); }, function() { deleteLevel(deletingId); }),
         renderSetsDeleteWarnOverlay(),
         exportId && renderExportOverlay("Export Level", exportText, copied, function() { copyToClipboard(exportText, setCopied); }, function() { setExportId(null); }, makeShareUrl("level", exportText)),
-        showImport && renderImportOverlay("Import Level", importText, setImportText, importError, setImportError, handleImport, function() { setShowImport(false); setImportText(""); setImportError(""); }),
+        showImport && renderImportOverlay("Import Level", importText, setImportText, importError, setImportError, handleImport, function() { setShowImport(false); setImportText(""); setImportError(""); }, getLevelImportPreview),
         showExportAll && renderExportOverlay("Export All Levels (" + savedLevels.length + ")", exportAllText, copied, function() { copyToClipboard(exportAllText, setCopied); }, function() { setShowExportAll(false); }, makeShareUrl("alllevels", exportAllText))),
 
       // ── BUILDER EDITOR ──
@@ -6596,7 +6660,7 @@ export default function CosmicWorkshop() {
           })),
         ufoDeletingId && renderDeleteOverlay("Delete UFO Design?", function() { setUfoDeletingId(null); }, function() { ufoDeleteDesign(ufoDeletingId); }),
         ufoExportId && renderExportOverlay("Export UFO Design", ufoExportText, ufoCopied, function() { copyToClipboard(ufoExportText, setUfoCopied); }, function() { setUfoExportId(null); }, makeShareUrl("ufo", ufoExportText)),
-        ufoShowImport && renderImportOverlay("Import UFO Design", ufoImportText, setUfoImportText, ufoImportError, setUfoImportError, ufoHandleImport, function() { setUfoShowImport(false); setUfoImportText(""); setUfoImportError(""); }),
+        ufoShowImport && renderImportOverlay("Import UFO Design", ufoImportText, setUfoImportText, ufoImportError, setUfoImportError, ufoHandleImport, function() { setUfoShowImport(false); setUfoImportText(""); setUfoImportError(""); }, getUfoImportPreview),
         renderSetsDeleteWarnOverlay()),
 
       // ── EDITOR VIEW ──
@@ -6738,7 +6802,7 @@ export default function CosmicWorkshop() {
           })),
         shipDeletingId && renderDeleteOverlay("Delete Ship Design?", function() { setShipDeletingId(null); }, function() { shipDeleteDesign(shipDeletingId); }),
         shipExportId && renderExportOverlay("Export Ship Design", shipExportText, shipCopied, function() { copyToClipboard(shipExportText, setShipCopied); }, function() { setShipExportId(null); }, makeShareUrl("ship", shipExportText)),
-        shipShowImport && renderImportOverlay("Import Ship Design", shipImportText, setShipImportText, shipImportError, setShipImportError, shipHandleImport, function() { setShipShowImport(false); setShipImportText(""); setShipImportError(""); }),
+        shipShowImport && renderImportOverlay("Import Ship Design", shipImportText, setShipImportText, shipImportError, setShipImportError, shipHandleImport, function() { setShipShowImport(false); setShipImportText(""); setShipImportError(""); }, getShipImportPreview),
         renderSetsDeleteWarnOverlay()),
 
       // ── EDITOR VIEW ──
@@ -7376,7 +7440,7 @@ export default function CosmicWorkshop() {
           function() { setPlasmaDeletingId(null); },
           function() { plasmaDeleteDesign(plasmaDeletingId); }),
         plasmaExportId && renderExportOverlay("Export Plasma Design", plasmaExportText, plasmaCopied, function() { copyToClipboard(plasmaExportText, setPlasmaCopied); }, function() { setPlasmaExportId(null); }, makeShareUrl("plasma", plasmaExportText)),
-        plasmaShowImport && renderImportOverlay("Import Plasma Design", plasmaImportText, setPlasmaImportText, plasmaImportError, setPlasmaImportError, plasmaHandleImport, function() { setPlasmaShowImport(false); setPlasmaImportText(""); setPlasmaImportError(""); }),
+        plasmaShowImport && renderImportOverlay("Import Plasma Design", plasmaImportText, setPlasmaImportText, plasmaImportError, setPlasmaImportError, plasmaHandleImport, function() { setPlasmaShowImport(false); setPlasmaImportText(""); setPlasmaImportError(""); }, getPlasmaImportPreview),
         renderSetsDeleteWarnOverlay()),
 
       // ── EDITOR VIEW ──
