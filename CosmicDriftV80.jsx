@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect, memo } from "react";
 
 var COLS = 8, ROWS = 6, GAP = 5, BOARD_PAD = 10, PLASMA_SPEED = 0.85, START_PLASMA = 10, BONUS_PTS = 2;
-var GAME_VERSION = "v76";
+var GAME_VERSION = "v80";
 var RELEASE_NOTES = [
   { version: "v76", title: "Muzzle Flash + Splash Polish", notes: [
     "Muzzle flash VFX fires on every plasma shot",
