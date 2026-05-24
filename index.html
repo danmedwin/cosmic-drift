@@ -6015,6 +6015,61 @@ function spawnWallSpark(x, y) {
   }
   _kickCvfx();
 }
+// ── Dark Level (level 101+) ──
+var _isDarkLevel = false;
+var _darkShipX = 0;
+var _darkShipY = 0;
+var _darkPlayRect = null; // { x, y, w, h } in CSS pixels covering grid + ship zone
+
+// Draw a radial transparency hole in the darkness layer.
+// `strength` 0..1: how fully the centre is cleared (1 = fully transparent, 0.4 = dim glow).
+function _paintLight(ctx, x, y, radius, strength) {
+  var g = ctx.createRadialGradient(x, y, 0, x, y, radius);
+  g.addColorStop(0, 'rgba(0,0,0,' + strength.toFixed(2) + ')');
+  g.addColorStop(0.45, 'rgba(0,0,0,' + (strength * 0.5).toFixed(2) + ')');
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, 6.2832);
+  ctx.fill();
+}
+
+// Called at the top of each rAF frame when _isDarkLevel is true.
+// 1. Fills the play area with near-opaque darkness (source-over).
+// 2. Cuts transparent holes at every active light source (destination-out).
+//    The DOM block cells beneath the canvas are visible only inside those holes.
+function _renderDarkness(ctx, now) {
+  var r = _darkPlayRect;
+  if (!r) return;
+  ctx.save();
+  // 1. Darkness slab over the play area
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = 'rgba(0,0,10,0.97)';
+  ctx.fillRect(r.x, r.y, r.w, r.h);
+  // 2. Punch holes — switch to destination-out so alpha erases darkness
+  ctx.globalCompositeOperation = 'destination-out';
+  // Ship: small persistent dim glow so the player can see where they're aiming
+  if (_darkShipX && _darkShipY) {
+    _paintLight(ctx, _darkShipX, _darkShipY, 55, 0.45);
+  }
+  // Plasma shots in flight — each illuminates roughly a 2.5-cell radius
+  for (var pi = 0; pi < _canvasProjectiles.length; pi++) {
+    var cp = _canvasProjectiles[pi];
+    if (cp.startTime < 0) continue;
+    var prog = Math.min((now - cp.startTime) / cp.duration, 1);
+    var py = cp.startY + (cp.endY - cp.startY) * prog;
+    _paintLight(ctx, cp.x, py, 125, 1.0);
+  }
+  // VFX particles — illuminate in proportion to their remaining life
+  for (var vi = 0; vi < _cvfxParticles.length; vi++) {
+    var p = _cvfxParticles[vi];
+    if (!p || p.life <= 0.05 || now < p.startTime) continue;
+    var pr = p.ring ? p.r * 2.5 : Math.max(20, p.life * 90);
+    _paintLight(ctx, p.x, p.y, pr, Math.min(p.life * 0.9, 0.85));
+  }
+  ctx.restore();
+}
 var _cvfxLoopRunning = false;
 var _cvfxCanvasRef = null;
 var _cvfxRafRef = null;
@@ -6033,6 +6088,9 @@ function _startCvfxLoop() {
     var dpr = window.devicePixelRatio || 1;
     ctx.save();
     ctx.scale(dpr, dpr);
+    if (_isDarkLevel) {
+      _renderDarkness(ctx, now);
+    }
     var next = [];
     for (var i = 0; i < _cvfxParticles.length; i++) {
       var p = _cvfxParticles[i];
@@ -6163,7 +6221,7 @@ function _startCvfxLoop() {
     }
     _canvasProjectiles = nextProj;
     ctx.restore();
-    if (_cvfxParticles.length > 0 || _canvasProjectiles.length > 0) {
+    if (_isDarkLevel || _cvfxParticles.length > 0 || _canvasProjectiles.length > 0) {
       _cvfxRafRef = requestAnimationFrame(loop);
     } else {
       _cvfxLoopRunning = false;
@@ -6176,7 +6234,7 @@ function clearCanvasVfx() {
   _canvasProjectiles = [];
 }
 function _kickCvfx() {
-  if (_cvfxParticles.length > 0) _startCvfxLoop();
+  if (_isDarkLevel || _cvfxParticles.length > 0) _startCvfxLoop();
 }
 
 // ── Canvas Projectiles (bypass React entirely) ──
@@ -7658,6 +7716,45 @@ function CosmicDriftGame() {
     };
   }, []);
   // Prevent iOS zoom on input focus
+  // ── Dark Level sync ──
+  // Toggle darkness on/off as level and screen change.
+  useEffect(function () {
+    var nowDark = level >= 101 && screen === "game";
+    _isDarkLevel = nowDark;
+    if (nowDark) {
+      _startCvfxLoop();
+    }
+  }, [level, screen]);
+  // Keep the play-area rect current so _renderDarkness knows where to draw.
+  useEffect(function () {
+    function updateDarkRect() {
+      if (!boardRef.current || !gridAreaRef.current) return;
+      var br = boardRef.current.getBoundingClientRect();
+      var gr = gridAreaRef.current.getBoundingClientRect();
+      var bot = shipZoneRef.current ? shipZoneRef.current.getBoundingClientRect().bottom : gr.bottom;
+      _darkPlayRect = {
+        x: br.left,
+        y: gr.top,
+        w: br.width,
+        h: bot - gr.top
+      };
+    }
+    updateDarkRect();
+    window.addEventListener("resize", updateDarkRect);
+    return function () {
+      window.removeEventListener("resize", updateDarkRect);
+    };
+  }, [boardWidth]);
+  // Keep ship glow position current as the ship moves or board resizes.
+  useEffect(function () {
+    if (!boardRef.current) return;
+    var br = boardRef.current.getBoundingClientRect();
+    _darkShipX = br.left + BOARD_PAD + shipCol * (blockSize + GAP) + blockSize / 2;
+    if (shipZoneRef.current) {
+      var sz = shipZoneRef.current.getBoundingClientRect();
+      _darkShipY = sz.top + sz.height * 0.4;
+    }
+  }, [shipCol, blockSize]);
   useEffect(function () {
     var meta = document.querySelector("meta[name=viewport]");
     if (meta) {
