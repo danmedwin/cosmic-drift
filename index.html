@@ -13173,7 +13173,7 @@ function CosmicDriftGame() {
       fontFamily: "'Quicksand', sans-serif",
       display: "flex",
       flexDirection: "column",
-      gap: 6,
+      gap: 0,
       padding: 8,
       animation: splashEntering ? "cdSplashEnterFromWs 0.48s ease-out both" : splashTransition === "exit" ? "cdSplashExitLeft 0.68s ease-in both" : "none",
       willChange: "transform, filter"
@@ -13198,6 +13198,7 @@ function CosmicDriftGame() {
   }), /*#__PURE__*/React.createElement(GsPanel, {
     style: {
       flexShrink: 0,
+      marginBottom: 6,
       padding: "8px 8px 8px 18px",
       display: "flex",
       alignItems: "center",
@@ -13356,12 +13357,20 @@ function CosmicDriftGame() {
       borderRadius: 1,
       background: splashMenuOpen ? "#80ddff" : "rgba(200,210,220,0.6)"
     }
-  })))), /*#__PURE__*/React.createElement(GsPanel, {
+  })))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minHeight: 0,
+      overflowY: "auto",
+      display: "flex",
+      flexDirection: "column",
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement(GsPanel, {
     style: {
       flexShrink: 1,
       minHeight: 120,
       aspectRatio: "1",
-      margin: "0 auto",
       padding: 12,
       position: "relative",
       overflow: "hidden",
@@ -13614,9 +13623,15 @@ function CosmicDriftGame() {
     size: 7,
     ls: 1,
     color: (DIFF_COLORS[saveGameInfo.difficulty] || GS.green) + "99"
-  }, "· " + (saveGameInfo.difficulty || "regular").toUpperCase())), /*#__PURE__*/React.createElement("div", {
+  }, "· " + (saveGameInfo.difficulty || "regular").toUpperCase()))), /*#__PURE__*/React.createElement("div", {
     style: {
       flexShrink: 0,
+      display: "flex",
+      flexDirection: "column",
+      gap: 4
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
       height: 22,
       display: "flex",
       alignItems: "center",
@@ -13631,14 +13646,7 @@ function CosmicDriftGame() {
     size: 9,
     ls: 0.5,
     color: "rgba(255,208,96,0.7)"
-  }, activeSetInfo.name) : null), /*#__PURE__*/React.createElement("div", {
-    style: {
-      flexShrink: 0,
-      display: "flex",
-      flexDirection: "column",
-      gap: 4
-    }
-  }, /*#__PURE__*/React.createElement(GsPanel, {
+  }, activeSetInfo.name) : null), /*#__PURE__*/React.createElement(GsPanel, {
     style: {
       padding: "10px",
       display: "flex",
@@ -14264,6 +14272,7 @@ function CosmicDriftGame() {
   }))))), isIosSafari && !iosPromptDismissed && /*#__PURE__*/React.createElement("div", {
     style: {
       flexShrink: 0,
+      marginTop: 6,
       background: "rgba(8,8,20,0.75)",
       border: "1px solid rgba(80,200,255,0.15)",
       borderRadius: 10,

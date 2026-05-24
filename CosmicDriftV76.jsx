@@ -3207,14 +3207,14 @@ function logUfo(msg) {
 
       {/* ═══ SPLASH SCREEN ═══ */}
       {screen === "splash" && <iframe src="workshop.html" style={{ position: "fixed", inset: 0, zIndex: 399, border: "none", width: "100%", height: "100%", transform: "scale(0.95)", filter: "brightness(0.5)", pointerEvents: "none" }} />}
-      {screen === "splash" && <div onTouchStart={handleSplashTouchStartGame} onTouchEnd={handleSplashTouchEndGame} style={{ position: "fixed", inset: 0, zIndex: 400, overflow: "hidden", background: splashTransition === "exit" ? "transparent" : "radial-gradient(ellipse 90% 60% at 50% 28%, #0e0820 0%, #0a0618 45%, #06040f 100%)" }}><div style={{ position: "absolute", inset: 0, background: GS.bg, color: "#e8f4fb", fontFamily: "'Quicksand', sans-serif", display: "flex", flexDirection: "column", gap: 6, padding: 8, animation: splashEntering ? "cdSplashEnterFromWs 0.48s ease-out both" : (splashTransition === "exit" ? "cdSplashExitLeft 0.68s ease-in both" : "none"), willChange: "transform, filter" }}>
+      {screen === "splash" && <div onTouchStart={handleSplashTouchStartGame} onTouchEnd={handleSplashTouchEndGame} style={{ position: "fixed", inset: 0, zIndex: 400, overflow: "hidden", background: splashTransition === "exit" ? "transparent" : "radial-gradient(ellipse 90% 60% at 50% 28%, #0e0820 0%, #0a0618 45%, #06040f 100%)" }}><div style={{ position: "absolute", inset: 0, background: GS.bg, color: "#e8f4fb", fontFamily: "'Quicksand', sans-serif", display: "flex", flexDirection: "column", gap: 0, padding: 8, animation: splashEntering ? "cdSplashEnterFromWs 0.48s ease-out both" : (splashTransition === "exit" ? "cdSplashExitLeft 0.68s ease-in both" : "none"), willChange: "transform, filter" }}>
         {/* Starfield */}
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(1.2px 1.2px at 12% 18%, rgba(255,255,255,0.4), transparent 60%),radial-gradient(1px 1px at 78% 9%, rgba(255,255,255,0.35), transparent 60%),radial-gradient(1px 1px at 42% 24%, rgba(255,255,255,0.35), transparent 60%),radial-gradient(1.2px 1.2px at 88% 38%, rgba(200,184,255,0.5), transparent 60%),radial-gradient(1px 1px at 28% 52%, rgba(255,255,255,0.3), transparent 60%),radial-gradient(1.2px 1.2px at 18% 78%, rgba(128,221,255,0.5), transparent 60%)", pointerEvents: "none", opacity: 0.7 }} />
         {/* Wear overlay */}
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80px 18px at 10% 8%, rgba(255,255,255,0.04) 0%, transparent 70%),radial-gradient(ellipse 60px 14px at 88% 92%, rgba(0,0,0,0.25) 0%, transparent 70%),radial-gradient(circle 2px at 30% 80%, rgba(180,200,220,0.18) 0%, transparent 70%),radial-gradient(circle 1.5px at 72% 18%, rgba(180,200,220,0.15) 0%, transparent 70%)", pointerEvents: "none", mixBlendMode: "overlay", opacity: 0.6 }} />
 
         {/* Title + status header */}
-        <GsPanel style={{ flexShrink: 0, padding: "8px 8px 8px 18px", display: "flex", alignItems: "center", gap: 10, position: "relative", zIndex: 1, overflow: "hidden" }}>
+        <GsPanel style={{ flexShrink: 0, marginBottom: 6, padding: "8px 8px 8px 18px", display: "flex", alignItems: "center", gap: 10, position: "relative", zIndex: 1, overflow: "hidden" }}>
           <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, background: "repeating-linear-gradient(135deg, #ffb43c 0 5px, #1a1f2a 5px 10px)", opacity: 0.55 }} />
           <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: 3, background: "repeating-linear-gradient(135deg, #ffb43c 0 5px, #1a1f2a 5px 10px)", opacity: 0.55 }} />
           <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
@@ -3242,8 +3242,10 @@ function logUfo(msg) {
           </div>
         </GsPanel>
 
+        {/* Scrollable area: radar + continue; can scroll under header on very short screens */}
+        <div style={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", gap: 6 }}>
         {/* Radar / tactical scope */}
-        <GsPanel style={{ flexShrink: 1, minHeight: 120, aspectRatio: "1", margin: "0 auto", padding: 12, position: "relative", overflow: "hidden", zIndex: 1 }}>
+        <GsPanel style={{ flexShrink: 1, minHeight: 120, aspectRatio: "1", padding: 12, position: "relative", overflow: "hidden", zIndex: 1 }}>
           <div style={{ position: "absolute", inset: 18, background: GS.inset, border: GS.ib, borderRadius: 8, boxShadow: GS.is + ", inset 0 0 80px rgba(0,0,0,0.65)", overflow: "hidden" }}>
             <svg width="100%" height="100%" viewBox="0 0 320 320" preserveAspectRatio="xMidYMid meet" style={{ position: "absolute", inset: 0 }}>
               <defs>
@@ -3275,14 +3277,14 @@ function logUfo(msg) {
           {saveGameInfo && <GsMono size={8} ls={0.5} color="rgba(128,200,255,0.4)">{"· Level " + saveGameInfo.level + " · " + (saveGameInfo.score || 0).toLocaleString() + " pts"}</GsMono>}
           {saveGameInfo && saveGameInfo.difficulty && <GsMono size={7} ls={1} color={(DIFF_COLORS[saveGameInfo.difficulty] || GS.green) + "99"}>{"· " + (saveGameInfo.difficulty || "regular").toUpperCase()}</GsMono>}
         </div>
-
-        {/* Digital readout strip — always present; shows set message or active set name */}
-        <div style={{ flexShrink: 0, height: 22, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 16px" }}>
-          {showSetModeMsg ? <GsMono size={9} ls={0.5} color="rgba(255,208,96,0.85)">{"Load a set with levels in the Workshop."}</GsMono> : (gameMode === "set" && activeSetInfo && activeSetInfo.name ? <GsMono size={9} ls={0.5} color="rgba(255,208,96,0.7)">{activeSetInfo.name}</GsMono> : null)}
         </div>
 
-        {/* Mode / Difficulty / Play + Workshop — grouped with slight gap */}
+        {/* Locked bottom — play panel + Workshop always visible */}
         <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", gap: 4 }}>
+        {/* Digital readout strip — always present; shows set message or active set name */}
+        <div style={{ height: 22, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 16px" }}>
+          {showSetModeMsg ? <GsMono size={9} ls={0.5} color="rgba(255,208,96,0.85)">{"Load a set with levels in the Workshop."}</GsMono> : (gameMode === "set" && activeSetInfo && activeSetInfo.name ? <GsMono size={9} ls={0.5} color="rgba(255,208,96,0.7)">{activeSetInfo.name}</GsMono> : null)}
+        </div>
         {/* Mode / Difficulty / Play — unified panel */}
         <GsPanel style={{ padding: "10px", display: "flex", flexDirection: "column", gap: 8, flexShrink: 0, position: "relative", zIndex: 1 }}>
           <GsRivet pos={{ top: 5, left: 5 }} size={5} />
@@ -3350,7 +3352,7 @@ function logUfo(msg) {
         </div>
 
         {/* iOS install prompt */}
-        {isIosSafari && !iosPromptDismissed && <div style={{ flexShrink: 0, background: "rgba(8,8,20,0.75)", border: "1px solid rgba(80,200,255,0.15)", borderRadius: 10, padding: "10px 12px 10px 10px", display: "flex", gap: 10, alignItems: "flex-start", zIndex: 1 }}>
+        {isIosSafari && !iosPromptDismissed && <div style={{ flexShrink: 0, marginTop: 6, background: "rgba(8,8,20,0.75)", border: "1px solid rgba(80,200,255,0.15)", borderRadius: 10, padding: "10px 12px 10px 10px", display: "flex", gap: 10, alignItems: "flex-start", zIndex: 1 }}>
           <svg width="16" height="20" viewBox="0 0 16 20" style={{ flexShrink: 0, marginTop: 2 }}><path d="M8 1v11M5 4l3-3 3 3" fill="none" stroke="rgba(80,200,255,0.75)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /><path d="M2 9v9a1 1 0 001 1h10a1 1 0 001-1V9" fill="none" stroke="rgba(80,200,255,0.4)" strokeWidth="1.5" strokeLinecap="round" /></svg>
           <div style={{ flex: 1 }}>
             <div style={{ color: "rgba(180,200,220,0.8)", fontSize: 11, fontWeight: 700, letterSpacing: 0.3, marginBottom: 3 }}>Make this an app</div>
