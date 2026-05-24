@@ -3243,7 +3243,7 @@ function logUfo(msg) {
         </GsPanel>
 
         {/* Radar / tactical scope */}
-        <GsPanel style={{ flexShrink: 0, aspectRatio: "1", padding: 12, position: "relative", overflow: "hidden", zIndex: 1 }}>
+        <GsPanel style={{ flexShrink: 1, minHeight: 120, aspectRatio: "1", margin: "0 auto", padding: 12, position: "relative", overflow: "hidden", zIndex: 1 }}>
           <div style={{ position: "absolute", inset: 18, background: GS.inset, border: GS.ib, borderRadius: 8, boxShadow: GS.is + ", inset 0 0 80px rgba(0,0,0,0.65)", overflow: "hidden" }}>
             <svg width="100%" height="100%" viewBox="0 0 320 320" preserveAspectRatio="xMidYMid meet" style={{ position: "absolute", inset: 0 }}>
               <defs>
@@ -3266,15 +3266,15 @@ function logUfo(msg) {
           </div>
         </GsPanel>
 
-        {/* Continue row — right below radar, matched width to Play button */}
+        <div style={{ flex: 1, minHeight: 0 }} />
+
+        {/* Continue row — locked above play panel */}
         <div onClick={hasSaveGame ? loadSaveGame : undefined} style={{ flexShrink: 0, margin: "0 10px", padding: "8px 6px", background: "linear-gradient(180deg, rgba(18,45,30,0.95), rgba(10,28,18,0.95))", border: "1px solid rgba(80,200,120,0.35)", borderRadius: 8, cursor: hasSaveGame ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, zIndex: 1, visibility: hasSaveGame ? "visible" : "hidden", pointerEvents: hasSaveGame ? "auto" : "none", boxShadow: "0 0 12px rgba(80,200,120,0.12)" }}>
           <svg width="12" height="12" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="rgba(80,200,255,0.8)" /></svg>
           <GsMono size={10} ls={1.5} color="#80ddff" style={{ fontWeight: 700 }}>CONTINUE</GsMono>
           {saveGameInfo && <GsMono size={8} ls={0.5} color="rgba(128,200,255,0.4)">{"· Level " + saveGameInfo.level + " · " + (saveGameInfo.score || 0).toLocaleString() + " pts"}</GsMono>}
           {saveGameInfo && saveGameInfo.difficulty && <GsMono size={7} ls={1} color={(DIFF_COLORS[saveGameInfo.difficulty] || GS.green) + "99"}>{"· " + (saveGameInfo.difficulty || "regular").toUpperCase()}</GsMono>}
         </div>
-
-        <div style={{ flex: 1, minHeight: 6 }} />
 
         {/* Digital readout strip — always present; shows set message or active set name */}
         <div style={{ flexShrink: 0, height: 22, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 16px" }}>

@@ -13358,8 +13358,10 @@ function CosmicDriftGame() {
     }
   })))), /*#__PURE__*/React.createElement(GsPanel, {
     style: {
-      flexShrink: 0,
+      flexShrink: 1,
+      minHeight: 120,
       aspectRatio: "1",
+      margin: "0 auto",
       padding: 12,
       position: "relative",
       overflow: "hidden",
@@ -13567,6 +13569,11 @@ function CosmicDriftGame() {
     x: "246",
     y: "307"
   }, bestLevel > 0 ? "L·" + bestLevel : "—"))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minHeight: 0
+    }
+  }), /*#__PURE__*/React.createElement("div", {
     onClick: hasSaveGame ? loadSaveGame : undefined,
     style: {
       flexShrink: 0,
@@ -13608,11 +13615,6 @@ function CosmicDriftGame() {
     ls: 1,
     color: (DIFF_COLORS[saveGameInfo.difficulty] || GS.green) + "99"
   }, "· " + (saveGameInfo.difficulty || "regular").toUpperCase())), /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1,
-      minHeight: 6
-    }
-  }), /*#__PURE__*/React.createElement("div", {
     style: {
       flexShrink: 0,
       height: 22,
