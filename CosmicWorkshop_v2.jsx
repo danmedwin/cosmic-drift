@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect, memo } from "react";
+import { useState, useRef, useEffect } from "react";
 
 /* ============================================================
    COSMIC WORKSHOP v15.5
@@ -8,13 +8,11 @@ import { useState, useRef, useCallback, useEffect, memo } from "react";
    Created by Dan Medwin and Claude (Opus 4.6), 2026
    ============================================================ */
 
-var WORKSHOP_VERSION = "v15.5";
-
 // ═══════════════════════════════════════════════════════════════
 // SHARED CONSTANTS (duplicated from game for independence)
 // ═══════════════════════════════════════════════════════════════
 
-var COLS = 8, ROWS = 6, GAP = 5, BOARD_PAD = 10, START_PLASMA = 10;
+var COLS = 8, ROWS = 6, GAP = 5, START_PLASMA = 10;
 
 var BLOCK_COLORS = {
   1: { bg: "linear-gradient(135deg,#7b5ea7,#9f7fd0)", border: "#6b4e97", shadow: "0 0 10px rgba(159,127,208,0.4)", particle: "#9f7fd0" },
@@ -36,7 +34,6 @@ var BLOCK_COLORS = {
 };
 
 var BLOCK_LABELS = { 1: "Standard", 2: "Cross Shot", 3: "Lightning", 4: "Extra Core", 5: "Plasma Cell", 6: "Drone Strike", 7: "Indestructible", 8: "Acid Barrel", 9: "Treasure Crate", 10: "Force Field", 11: "Drone Crate", 12: "Lightning Crate", 13: "Cross Crate", 14: "Split Crate", 15: "Hammer Crate", 16: "Core Crate", 17: "UFO" };
-var BLOCK_DESC = { 1: "1 pt. Destroyed by any hit.", 2: "Fires plasma in 4 directions. +3 pts.", 3: "Lightning upward through the column. +3 pts.", 4: "Adds an extra reactor core. +2 pts.", 5: "Recharges plasma (+3). +2 pts.", 6: "Drone targets densest 3x3 area. +5 pts.", 7: "Cannot be destroyed. Blocks plasma and lightning.", 8: "Ooze melts down the column. No points. Drains plasma if ship is below.", 9: "Contains one random power-up for your inventory.", 10: "Protected by an energy shield. Takes 3 hits to destroy. +5 pts.", 11: "Contains a Drone power-up.", 12: "Contains a Lightning power-up.", 13: "Contains a Cross Shot power-up.", 14: "Contains a Split power-up.", 15: "Contains a Smash power-up.", 16: "Contains a Reactor Core.", 17: "Warps every 2 plasma shots. Drops EMP that drains 25% plasma in 3 columns." };
 var WIN_EXEMPT = { 7: true, 8: true, 9: true, 11: true, 12: true, 13: true, 14: true, 15: true, 16: true, 17: true };
 function isCrate(t) { return t === 9 || (t >= 11 && t <= 16); }
 var CRATE_VARIANTS = [{ type: 9, name: "Random", color: "rgba(212,168,67,0.8)" }, { type: 11, name: "Drone", color: "rgba(136,68,204,0.8)" }, { type: 12, name: "Zap", color: "rgba(180,130,40,0.8)" }, { type: 13, name: "Cross", color: "rgba(224,69,123,0.8)" }, { type: 14, name: "Split", color: "rgba(80,200,255,0.8)" }, { type: 15, name: "Hammer", color: "rgba(160,160,180,0.8)" }, { type: 16, name: "Core", color: "rgba(80,200,255,0.8)" }];
@@ -53,7 +50,6 @@ var BUILDER_TOUR_STEPS = [
 // ── Style constants (match game HUD) ──
 var PNL = "linear-gradient(180deg, #3d3d4a 0%, #2a2a35 100%)";
 var PNLB = "2px solid #505058";
-var PNLS = "inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -2px 4px rgba(0,0,0,0.4), 0 2px 3px rgba(0,0,0,0.3)";
 var SCRN = "linear-gradient(180deg, #0a0a14 0%, #12121e 100%)";
 var SCRNB = "2px solid #3a3a45";
 var SCRNS = "inset 0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.05)";
@@ -1380,12 +1376,6 @@ function BDOptionGrid(props) {
     }));
 }
 
-function BDHeaderBtn(props) {
-  var bg = props.accent ? "linear-gradient(135deg, #4488ff, #44ddcc)" : props.active ? "rgba(68,136,255,0.2)" : "rgba(255,255,255,0.06)";
-  var clr = props.accent ? "#fff" : props.active ? "#88bbff" : "#889";
-  var brd = props.accent ? "none" : props.active ? "1px solid rgba(68,136,255,0.4)" : "1px solid rgba(255,255,255,0.08)";
-  return React.createElement("button", { onClick: props.onClick, style: { padding: "8px 14px", borderRadius: 8, border: brd, background: bg, color: clr, fontSize: 12, fontFamily: "'Exo 2', sans-serif", fontWeight: 600, cursor: "pointer", WebkitTapHighlightColor: "transparent", letterSpacing: 0.5, textTransform: "uppercase", whiteSpace: "nowrap" } }, props.label);
-}
 
 // ═══════════════════════════════════════════════════════════════
 // SHARED UI STYLES
@@ -1396,7 +1386,6 @@ var BTN_BASE = { borderRadius: 4, fontSize: 10, fontWeight: 700, cursor: "pointe
 var BTN_EDIT = Object.assign({}, BTN_BASE, { padding: "5px 12px", background: PNL, border: "1px solid rgba(80,200,255,0.3)", color: "#80ddff", display: "flex", alignItems: "center", gap: 5 });
 var BTN_RENAME = Object.assign({}, BTN_BASE, { padding: "5px 10px", background: PNL, border: PNLB, color: "rgba(200,210,220,0.6)", display: "flex", alignItems: "center", gap: 5 });
 var BTN_EXPORT = Object.assign({}, BTN_BASE, { padding: "5px 10px", background: PNL, border: "1px solid rgba(200,184,255,0.3)", color: "#c8b8ff", display: "flex", alignItems: "center", gap: 5 });
-var BTN_DELETE = Object.assign({}, BTN_BASE, { padding: "5px 10px", background: "rgba(80,20,20,0.4)", border: "1px solid rgba(255,80,80,0.3)", color: "#ff8866" });
 var BTN_DELETE_ICON = Object.assign({}, BTN_BASE, { padding: "5px 8px", background: "rgba(80,20,20,0.4)", border: "1px solid rgba(255,80,80,0.3)", color: "#ff8866", display: "flex", alignItems: "center", justifyContent: "center" });
 function WsIconPencil(sz) { var s = sz || 11; return React.createElement("svg", { width: s, height: s, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2.3", strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("path", { d: "M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" }), React.createElement("path", { d: "M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" })); }
 function WsIconCopy(sz) { var s = sz || 11; return React.createElement("svg", { width: s, height: s, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2.3", strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("rect", { x: "9", y: "9", width: "13", height: "13", rx: "2" }), React.createElement("path", { d: "M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" })); }
@@ -1586,10 +1575,10 @@ function renderPlasmaShape(design, size) {
 var WS = {
   brushed: "linear-gradient(180deg, #3a4250 0%, #2c333f 35%, #1f2530 70%, #1a1f2a 100%), repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 3px)",
   inset: "linear-gradient(180deg, #060810 0%, #0a0e16 60%, #050810 100%)",
-  pb: "1px solid #404a58", pbl: "1px solid #525c6c",
+  pb: "1px solid #404a58",
   ps: "inset 0 1px 0 rgba(200,230,240,0.10), inset 0 -2px 4px rgba(0,0,0,0.55), 0 3px 6px rgba(0,0,0,0.5)",
   ib: "1px solid #14202e", is: "inset 0 2px 8px rgba(0,0,0,0.7)",
-  green: "#50ffae", blue: "#80ddff",
+  green: "#50ffae",
 };
 function WsRivet(pos) { return null; }
 function WsPanel(props) {
@@ -1638,7 +1627,6 @@ export default function CosmicWorkshop() {
   var _bdEditId = useState(null), bdEditId = _bdEditId[0], setBdEditId = _bdEditId[1];
   var _bdActivePanel = useState(null), bdActivePanel = _bdActivePanel[0], setBdActivePanel = _bdActivePanel[1];
   var _bdPhase = useState(1), bdPhase = _bdPhase[0], setBdPhase = _bdPhase[1];
-  var _bdLoaded = useState(false), bdLoaded = _bdLoaded[0], setBdLoaded = _bdLoaded[1];
   var _bdSavedTab = useState("custom"), bdSavedTab = _bdSavedTab[0], setBdSavedTab = _bdSavedTab[1];
   var _bdView = useState("list"), bdCurrentView = _bdView[0], setBdCurrentView = _bdView[1];
   var _bdStatus = useState(""), bdSaveStatus = _bdStatus[0], setBdSaveStatus = _bdStatus[1];
@@ -1732,9 +1720,6 @@ export default function CosmicWorkshop() {
   var shipResizeDragRef = useRef(null);
   var shipPreviewStickyRef = useRef(null);
   var _shipRenamingId = useState(null), shipRenamingId = _shipRenamingId[0], setShipRenamingId = _shipRenamingId[1];
-  // Saved-game snapshot loaded on splash mount so the CONTINUE button can show
-  // the level + difficulty under "Saved Game". Stays null when no save exists.
-  var _wsSaveInfo = useState(null), wsSaveInfo = _wsSaveInfo[0], setWsSaveInfo = _wsSaveInfo[1];
   var _shipRenameValue = useState(""), shipRenameValue = _shipRenameValue[0], setShipRenameValue = _shipRenameValue[1];
   var _shipPartRenamingIdx = useState(null), shipPartRenamingIdx = _shipPartRenamingIdx[0], setShipPartRenamingIdx = _shipPartRenamingIdx[1];
   var _shipPartRenameVal = useState(""), shipPartRenameVal = _shipPartRenameVal[0], setShipPartRenameVal = _shipPartRenameVal[1];
@@ -1884,7 +1869,6 @@ export default function CosmicWorkshop() {
       var _hasOs = false;
       for (var _osi = 0; _osi < designs.length; _osi++) { if (designs[_osi].id === OPEN_SPACE_BLOCK_DESIGNS[0].id) { _hasOs = true; break; } }
       if (!_hasOs) { var _seeded = designs.concat(OPEN_SPACE_BLOCK_DESIGNS); bdSaveDesigns(_seeded); setBdSaved(_seeded); } else { setBdSaved(designs); }
-      setBdLoaded(true);
     });
     bdLoadActive().then(function(map) { setBdActiveMap(map); });
     vfxLoadDesigns().then(function(designs) { setVfxSaved(designs); });
@@ -1974,19 +1958,6 @@ export default function CosmicWorkshop() {
       setSetsSaved(_seededSets);
       setsLoadActiveId().then(function(id) { setSetsActiveId(id || null); });
     });
-  }, []);
-
-  // Load saved-game snapshot (written by the game) so the CONTINUE button can
-  // surface the player's current level + difficulty.
-  useEffect(function() {
-    try {
-      if (!window.storage || !window.storage.get) return;
-      window.storage.get("cosmic_drift_save").then(function(r) {
-        if (r && r.value) {
-          try { setWsSaveInfo(JSON.parse(r.value)); } catch(e) {}
-        }
-      }).catch(function() {});
-    } catch(e) {}
   }, []);
 
   // Entry animation when arriving from game splash
@@ -4438,29 +4409,6 @@ export default function CosmicWorkshop() {
     }
     return true;
   }
-  // Rotation-aware bounding box (center + size) for a list of part indices.
-  function shipPartsBBox(idxList) {
-    var parts = (shipEdit && shipEdit.parts) || [];
-    var minX = 99999, maxX = -99999, minY = 99999, maxY = -99999;
-    for (var i = 0; i < idxList.length; i++) {
-      var p = parts[idxList[i]];
-      if (!p) continue;
-      var hw = p.w / 2, hh = p.h / 2;
-      var prot = (p.rot || 0) * Math.PI / 180;
-      var cosP = Math.cos(prot), sinP = Math.sin(prot);
-      var pdxs = [-hw, hw, hw, -hw];
-      var pdys = [-hh, -hh, hh, hh];
-      for (var ci = 0; ci < 4; ci++) {
-        var prx = p.x + pdxs[ci] * cosP - pdys[ci] * sinP;
-        var pry = p.y + pdxs[ci] * sinP + pdys[ci] * cosP;
-        if (prx < minX) minX = prx;
-        if (prx > maxX) maxX = prx;
-        if (pry < minY) minY = pry;
-        if (pry > maxY) maxY = pry;
-      }
-    }
-    return { cx: (minX + maxX) / 2, cy: (minY + maxY) / 2, w: maxX - minX, h: maxY - minY };
-  }
   function shipGroupVisualBBox(idxList) {
     var parts = (shipEdit && shipEdit.parts) || [];
     var minX = 99999, maxX = -99999, minY = 99999, maxY = -99999;
@@ -5360,15 +5308,6 @@ export default function CosmicWorkshop() {
     setSplashTransition("exit");
     try { sessionStorage.setItem("cd_transition_from", "workshop"); } catch(e2) {}
     setTimeout(function() { window.location.href = "index.html"; }, 620);
-  }
-  function handleSplashToGameAutoload() {
-    try { sessionStorage.setItem("cd_autoload_save", "true"); } catch(e3) {}
-    handleSplashToGame();
-  }
-  function handleSplashToGamePlay(levelId) {
-    setSplashTransition("exit");
-    try { sessionStorage.setItem("cd_transition_from", "workshop"); } catch(e4) {}
-    setTimeout(function() { window.location.href = "index.html?play=" + levelId; }, 620);
   }
   function handleSplashToGamePlaySet() {
     setSplashTransition("exit");
