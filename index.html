@@ -85,35 +85,6 @@ var COLS = 8,
   START_PLASMA = 10,
   BONUS_PTS = 2;
 var GAME_VERSION = "v80";
-var RELEASE_NOTES = [{
-  version: "v76",
-  title: "Muzzle Flash + Splash Polish",
-  notes: ["Muzzle flash VFX fires on every plasma shot", "Flash position accounts for split-shot barrels and source offset", "Radar shrinks proportionally on short screens before scrolling", "Play panel and Workshop button locked to bottom of splash"]
-}, {
-  version: "v75",
-  title: "Game Splash Rework",
-  notes: ["High Score and Best Level moved into the radar HUD corners", "Best score now also saved at each level transition", "Mode / Difficulty / Play merged into a single unified panel", "Scores update when difficulty selector changes"]
-}, {
-  version: "v74",
-  title: "Set Mode + 9-Slot Saves",
-  notes: ["New Set mode: play a custom sequence of Workshop levels in order", "Set mode button shows active set name; dimmed when no set is loaded", "9-slot save system: separate save per mode and difficulty", "Continue button only appears when a save exists for current mode + difficulty", "Best score and best level tracked per mode and difficulty"]
-}, {
-  version: "v73",
-  title: "Mode Renames + Stats Rework",
-  notes: ["Campaign renamed to Infinite; Signature renamed to Solve", "Level Clear and Game Over cards now show Hits, Accuracy, and Misses", "Accuracy capped at 100%; indestructible-block hits count as misses", "In-game guide updated with Infinite, Solve, and Set mode descriptions"]
-}, {
-  version: "v72",
-  title: "Customization System",
-  notes: ["Game loads active ship, plasma, block, VFX, and UFO designs from Workshop", "Custom designs apply at game start without any extra steps"]
-}, {
-  version: "v71",
-  title: "UFO Enemy",
-  notes: ["New UFO block type appears at level 51+", "UFO warps to a new cell every 2 plasma shots", "Drops EMP that drains plasma in 3 columns", "One shot to destroy -- earns 10 points", "UFO targets the ship column when choosing where to land"]
-}, {
-  version: "v70",
-  title: "Polish + Fixes",
-  notes: ["Improved split shot preview reliability", "Fixed game-over timing with ricochet chains", "Warp animation and EMP bloom VFX"]
-}];
 var DIFFICULTY_CAPS = {
   easy: 5,
   regular: 3,
@@ -16631,56 +16602,6 @@ function CosmicDriftGame() {
       whiteSpace: "nowrap"
     }
   }, "Go"))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginBottom: 18
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 9,
-      color: "rgba(180,200,220,0.3)",
-      letterSpacing: 2,
-      marginBottom: 8
-    }
-  }, "RELEASE NOTES"), RELEASE_NOTES.map(function (r, ri) {
-    return /*#__PURE__*/React.createElement("div", {
-      key: ri,
-      style: {
-        marginBottom: 10,
-        padding: "10px 12px",
-        background: "rgba(255,255,255,0.02)",
-        borderRadius: 6,
-        border: "1px solid rgba(180,200,220,0.06)"
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        justifyContent: "space-between",
-        marginBottom: 5
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 11,
-        fontWeight: 700,
-        color: "rgba(180,200,220,0.6)"
-      }
-    }, r.title), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 9,
-        color: "rgba(180,200,220,0.25)",
-        letterSpacing: 1
-      }
-    }, r.version)), r.notes.map(function (n, ni) {
-      return /*#__PURE__*/React.createElement("div", {
-        key: ni,
-        style: {
-          fontSize: 11,
-          color: "rgba(180,200,220,0.4)",
-          lineHeight: 1.7,
-          paddingLeft: 8
-        }
-      }, "- " + n);
-    }));
-  })), /*#__PURE__*/React.createElement("div", {
     onClick: function () {
       window.location.href = "mailto:cosmicdriftapp@gmail.com?subject=I%20found%20a%20bug!";
     },
