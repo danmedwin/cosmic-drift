@@ -1663,6 +1663,9 @@ export default function CosmicWorkshop() {
   var _vfxView = useState("list"), vfxCurrentView = _vfxView[0], setVfxCurrentView = _vfxView[1];
   var _vfxSavedTab = useState("custom"), vfxSavedTab = _vfxSavedTab[0], setVfxSavedTab = _vfxSavedTab[1];
   var _vfxSortMode = useState("date_new"), vfxSortMode = _vfxSortMode[0], setVfxSortMode = _vfxSortMode[1];
+  var _ufoSortMode = useState("date_new"), ufoSortMode = _ufoSortMode[0], setUfoSortMode = _ufoSortMode[1];
+  var _shipSortMode = useState("date_new"), shipSortMode = _shipSortMode[0], setShipSortMode = _shipSortMode[1];
+  var _plasmaSortMode = useState("date_new"), plasmaSortMode = _plasmaSortMode[0], setPlasmaSortMode = _plasmaSortMode[1];
   var _vfxEditDesign = useState(function() { return vfxDefaultDesign(null); }), vfxEditDesign = _vfxEditDesign[0], setVfxEditDesign = _vfxEditDesign[1];
   // Undo/redo (same pattern as BD: see bdHistoryPush comment for details).
   var vfxHistoryRef = useRef({ stack: [], idx: -1, lastKey: null, lastTime: 0 });
@@ -2023,7 +2026,7 @@ export default function CosmicWorkshop() {
   }
   function makeShareUrl(type, text) {
     try {
-      return window.location.origin + "/workshop.html#share=" + type + "." + encodeShareData(text);
+      return window.location.origin + "/workshop.html#share/" + type + "." + encodeShareData(text);
     } catch(e) { return null; }
   }
   function copyLinkToClipboard(url) {
@@ -2038,7 +2041,7 @@ export default function CosmicWorkshop() {
   useEffect(function() {
     try {
       var hash = window.location.hash;
-      if (!hash || hash.indexOf("#share=") !== 0) return;
+      if (!hash || hash.indexOf("#share/") !== 0) return;
       var payload = hash.slice(7);
       var dot = payload.indexOf(".");
       if (dot === -1) return;
@@ -3568,12 +3571,13 @@ export default function CosmicWorkshop() {
         React.createElement("div", { style: { color: "#c8b8ff", fontSize: 15, fontWeight: 700, marginBottom: 10, fontFamily: "'Quicksand',sans-serif" } }, title),
         shareUrl && React.createElement(React.Fragment, null,
           React.createElement("div", { style: { color: "rgba(120,220,140,0.6)", fontSize: 11, marginBottom: 5 } }, "Share link:"),
-          React.createElement("textarea", { readOnly: true, value: shareUrl, style: { width: "100%", height: 52, padding: 8, borderRadius: 6, background: SCRN, border: "2px solid rgba(80,180,100,0.3)", color: "#80ddaa", fontSize: 10, fontFamily: "monospace", resize: "none", outline: "none", boxSizing: "border-box", marginBottom: 10 }, onClick: function(e) { e.target.select(); } })),
+          React.createElement("textarea", { readOnly: true, value: shareUrl, style: { width: "100%", height: 52, padding: 8, borderRadius: 6, background: SCRN, border: "2px solid rgba(80,180,100,0.3)", color: "#80ddaa", fontSize: 10, fontFamily: "monospace", resize: "none", outline: "none", boxSizing: "border-box", marginBottom: 6 }, onClick: function(e) { e.target.select(); } }),
+          React.createElement("div", { style: { display: "flex", justifyContent: "flex-end", marginBottom: 10 } },
+            React.createElement("div", { onClick: function() { copyLinkToClipboard(shareUrl); }, style: { padding: "5px 14px", borderRadius: 12, background: linkCopied ? "rgba(80,200,100,0.3)" : "rgba(20,80,40,0.5)", border: linkCopied ? "1px solid rgba(80,200,100,0.5)" : "1px solid rgba(80,180,100,0.4)", color: linkCopied ? "#80dd90" : "#70cc88", fontSize: 11, fontWeight: 700, cursor: "pointer" } }, linkCopied ? "Link Copied!" : "Copy Link"))),
         React.createElement("div", { style: { color: "rgba(200,184,255,0.4)", fontSize: 11, marginBottom: 5 } }, "Or copy the code:"),
         React.createElement("textarea", { readOnly: true, value: text, style: { width: "100%", height: 64, padding: 8, borderRadius: 6, background: SCRN, border: SCRNB, color: "#80ddff", fontSize: 16, fontFamily: "monospace", resize: "none", outline: "none", boxSizing: "border-box" }, onClick: function(e) { e.target.select(); } }),
         React.createElement("div", { style: { display: "flex", gap: 8, justifyContent: "center", marginTop: 12, flexWrap: "wrap" } },
           React.createElement("div", { onClick: onClose, style: { padding: "8px 16px", borderRadius: 16, border: "1px solid rgba(120,80,255,0.3)", color: "#c8b8ff", fontSize: 12, fontWeight: 600, cursor: "pointer" } }, "Close"),
-          shareUrl && React.createElement("div", { onClick: function() { copyLinkToClipboard(shareUrl); }, style: { padding: "8px 16px", borderRadius: 16, background: linkCopied ? "rgba(80,200,100,0.3)" : "rgba(20,80,40,0.5)", border: linkCopied ? "1px solid rgba(80,200,100,0.5)" : "1px solid rgba(80,180,100,0.4)", color: linkCopied ? "#80dd90" : "#70cc88", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, linkCopied ? "Link Copied!" : "Copy Link"),
           React.createElement("div", { onClick: onCopy, style: { padding: "8px 16px", borderRadius: 16, background: isCopied ? "rgba(80,200,100,0.3)" : "linear-gradient(135deg,#7b5ea7,#9f7fd0)", border: isCopied ? "1px solid rgba(80,200,100,0.5)" : "none", color: isCopied ? "#80dd90" : "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, isCopied ? "Code Copied!" : "Copy Code"))));
   }
 
@@ -3844,6 +3848,17 @@ export default function CosmicWorkshop() {
         var aeo = eorder[a.effectType] != null ? eorder[a.effectType] : 99;
         var beo = eorder[b.effectType] != null ? eorder[b.effectType] : 99;
         if (aeo !== beo) return aeo - beo;
+        return (a.name || "").localeCompare(b.name || "");
+      }
+      if (mode === "hull") {
+        var hi = SHIP_HULLS.indexOf(a.hull), hj = SHIP_HULLS.indexOf(b.hull);
+        if (hi !== hj) return (hi === -1 ? 99 : hi) - (hj === -1 ? 99 : hj);
+        return (a.name || "").localeCompare(b.name || "");
+      }
+      if (mode === "shape") {
+        var shapes = ["circle", "blast", "torpedo"];
+        var si = shapes.indexOf(a.shape), sj = shapes.indexOf(b.shape);
+        if (si !== sj) return (si === -1 ? 99 : si) - (sj === -1 ? 99 : sj);
         return (a.name || "").localeCompare(b.name || "");
       }
       if (mode === "date_old") return ((a[dateKey] ? new Date(a[dateKey]).getTime() : 0) || 0) - ((b[dateKey] ? new Date(b[dateKey]).getTime() : 0) || 0);
@@ -6618,11 +6633,12 @@ export default function CosmicWorkshop() {
             React.createElement("div", { onClick: ufoOpenNew, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #1a3a30, #0f2a22)", boxShadow: "0 0 8px rgba(100,220,180,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, "+ New"))
         }),
         renderSetsSelBar("ufo", ufoSaved.map(function(d) { return d.id; })),
+        !setsSelMode && ufoSaved.length > 1 && renderSortBar(ufoSortMode, setUfoSortMode),
         React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "6px 10px 20px" } },
           ufoSaved.length === 0 && React.createElement("div", { style: { textAlign: "center", padding: 40 } },
             React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 14, marginBottom: 8 } }, "No saved UFO designs"),
             React.createElement("div", { style: { color: "rgba(180,200,220,0.2)", fontSize: 12 } }, "Tap + New to design your first UFO.")),
-          ufoSaved.map(function(design) {
+          sortItems(ufoSaved, ufoSortMode, "savedAt").map(function(design) {
             var isActive = design.id === ufoActiveId;
             var _ufoSel = setsSelMode && setsSelMode.selectedIds.indexOf(design.id) !== -1;
             var _ufoDateStr = design.savedAt ? new Date(design.savedAt).toLocaleDateString() : "";
@@ -6743,11 +6759,12 @@ export default function CosmicWorkshop() {
             React.createElement("div", { onClick: shipOpenNew, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #3a1030, #280820)", boxShadow: "0 0 8px rgba(255,138,170,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, "+ New"))
         }),
         renderSetsSelBar("ship", shipSaved.map(function(d) { return d.id; })),
+        !setsSelMode && shipSaved.length > 1 && renderSortBar(shipSortMode, setShipSortMode, [["hull", "Hull"]]),
         React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "6px 10px 20px" } },
           shipSaved.length === 0 && React.createElement("div", { style: { textAlign: "center", padding: 40 } },
             React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 14, marginBottom: 8 } }, "No saved ship designs"),
             React.createElement("div", { style: { color: "rgba(180,200,220,0.2)", fontSize: 12 } }, "Tap + New to design your first ship.")),
-          shipSaved.map(function(design) {
+          sortItems(shipSaved, shipSortMode, "savedAt").map(function(design) {
             var isActive = design.id === shipActiveId;
             var _shipSel = setsSelMode && setsSelMode.selectedIds.indexOf(design.id) !== -1;
             var _shipDateStr = design.savedAt ? new Date(design.savedAt).toLocaleDateString() : "";
@@ -7396,11 +7413,12 @@ export default function CosmicWorkshop() {
             React.createElement("div", { onClick: plasmaOpenNew, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #0a2040, #061828)", boxShadow: "0 0 8px rgba(80,200,255,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, "+ New"))
         }),
         renderSetsSelBar("plasma", plasmaSaved.map(function(d) { return d.id; })),
+        !setsSelMode && plasmaSaved.length > 1 && renderSortBar(plasmaSortMode, setPlasmaSortMode, [["shape", "Shape"]]),
         React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "6px 10px 20px" } },
           plasmaSaved.length === 0 && React.createElement("div", { style: { textAlign: "center", padding: 40 } },
             React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 14, marginBottom: 8 } }, "No saved plasma designs"),
             React.createElement("div", { style: { color: "rgba(180,200,220,0.2)", fontSize: 12 } }, "Tap + New to design your first plasma.")),
-          plasmaSaved.map(function(design) {
+          sortItems(plasmaSaved, plasmaSortMode, "savedAt").map(function(design) {
             var isActive = design.id === plasmaActiveId;
             var _plasmaSel = setsSelMode && setsSelMode.selectedIds.indexOf(design.id) !== -1;
             var _plasmaDateStr = design.savedAt ? new Date(design.savedAt).toLocaleDateString() : "";
