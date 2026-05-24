@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 
 /* ============================================================
-   COSMIC WORKSHOP v15.5
+   COSMIC WORKSHOP v3.7
    Creative suite for Cosmic Drift: Level Builder + Block Designer
    + VFX Studio + UFO Customizer + Hangar (ship designer).
    Shares storage with the game via window.storage.
