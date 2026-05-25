@@ -1761,7 +1761,7 @@ export default function CosmicDriftGame() {
   var _slvls = useState([]), savedLevels = _slvls[0], setSavedLevels = _slvls[1];
   var _sload = useState(false), levelsLoading = _sload[0], setLevelsLoading = _sload[1];
   var myLevelsQueueRef = useRef(null);
-  var _sortMode = useState("date_new"), sortMode = _sortMode[0], setSortMode = _sortMode[1];
+  var _sortMode = useState(function() { try { return localStorage.getItem("cosmic-drift-levels-sort") || "date_new"; } catch(e) { return "date_new"; } }), sortMode = _sortMode[0], setSortMode = _sortMode[1];
   var _sigOpen = useState(false), sigLevelsOpen = _sigOpen[0], setSigLevelsOpen = _sigOpen[1];
   var _npPopup = useState(false), showNewPlayerPopup = _npPopup[0], setShowNewPlayerPopup = _npPopup[1];
   var _npDontShow = useState(true), npDontShow = _npDontShow[0], setNpDontShow = _npDontShow[1];
@@ -3614,6 +3614,7 @@ function logUfo(msg) {
           {!levelsLoading && savedLevels.slice().sort(function (a, b) {
             if (sortMode === "name") return (a.name || "").localeCompare(b.name || "");
             if (sortMode === "date_old") return (a.modified || 0) - (b.modified || 0);
+            if (sortMode === "level_num") return (a.levelNum != null ? a.levelNum : 9999) - (b.levelNum != null ? b.levelNum : 9999);
             return (b.modified || 0) - (a.modified || 0);
           }).map(function (lv) {
             var dateStr = lv.savedAt || (lv.modified ? new Date(lv.modified).toLocaleString() : "");
@@ -3623,7 +3624,7 @@ function logUfo(msg) {
                 <div style={{ color: "rgba(180,200,220,0.3)", fontSize: 10 }}>{dateStr}</div>
               </div>
               <div style={{ display: "flex", gap: 6 }}>
-                <div onClick={function () { var sorted = savedLevels.slice().sort(function(a, b) { if (sortMode === "name") return (a.name || "").localeCompare(b.name || ""); if (sortMode === "date_old") return (a.modified || 0) - (b.modified || 0); return (b.modified || 0) - (a.modified || 0); }); var qi = 0; for (var _qi = 0; _qi < sorted.length; _qi++) { if (sorted[_qi].id === lv.id) { qi = _qi; break; } } myLevelsQueueRef.current = { levels: sorted, idx: qi }; playCustomLevel(lv); }} style={{ padding: "5px 16px", borderRadius: 4, background: "linear-gradient(180deg, #2a5a3a, #1a3a28)", border: "1px solid rgba(80,200,100,0.4)", color: "#80dd90", fontSize: 10, fontWeight: 700, cursor: "pointer", letterSpacing: 0.5 }}>PLAY</div>
+                <div onClick={function () { var sorted = savedLevels.slice().sort(function(a, b) { if (sortMode === "name") return (a.name || "").localeCompare(b.name || ""); if (sortMode === "date_old") return (a.modified || 0) - (b.modified || 0); if (sortMode === "level_num") return (a.levelNum != null ? a.levelNum : 9999) - (b.levelNum != null ? b.levelNum : 9999); return (b.modified || 0) - (a.modified || 0); }); var qi = 0; for (var _qi = 0; _qi < sorted.length; _qi++) { if (sorted[_qi].id === lv.id) { qi = _qi; break; } } myLevelsQueueRef.current = { levels: sorted, idx: qi }; playCustomLevel(lv); }} style={{ padding: "5px 16px", borderRadius: 4, background: "linear-gradient(180deg, #2a5a3a, #1a3a28)", border: "1px solid rgba(80,200,100,0.4)", color: "#80dd90", fontSize: 10, fontWeight: 700, cursor: "pointer", letterSpacing: 0.5 }}>PLAY</div>
               </div>
             </div>;
           })}

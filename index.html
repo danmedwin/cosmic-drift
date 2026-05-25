@@ -7345,7 +7345,13 @@ function CosmicDriftGame() {
     levelsLoading = _sload[0],
     setLevelsLoading = _sload[1];
   var myLevelsQueueRef = useRef(null);
-  var _sortMode = useState("date_new"),
+  var _sortMode = useState(function () {
+      try {
+        return localStorage.getItem("cosmic-drift-levels-sort") || "date_new";
+      } catch (e) {
+        return "date_new";
+      }
+    }),
     sortMode = _sortMode[0],
     setSortMode = _sortMode[1];
   var _sigOpen = useState(false),
@@ -15274,6 +15280,7 @@ function CosmicDriftGame() {
   }, "Open Workshop")), !levelsLoading && savedLevels.slice().sort(function (a, b) {
     if (sortMode === "name") return (a.name || "").localeCompare(b.name || "");
     if (sortMode === "date_old") return (a.modified || 0) - (b.modified || 0);
+    if (sortMode === "level_num") return (a.levelNum != null ? a.levelNum : 9999) - (b.levelNum != null ? b.levelNum : 9999);
     return (b.modified || 0) - (a.modified || 0);
   }).map(function (lv) {
     var dateStr = lv.savedAt || (lv.modified ? new Date(lv.modified).toLocaleString() : "");
@@ -15311,6 +15318,7 @@ function CosmicDriftGame() {
         var sorted = savedLevels.slice().sort(function (a, b) {
           if (sortMode === "name") return (a.name || "").localeCompare(b.name || "");
           if (sortMode === "date_old") return (a.modified || 0) - (b.modified || 0);
+          if (sortMode === "level_num") return (a.levelNum != null ? a.levelNum : 9999) - (b.levelNum != null ? b.levelNum : 9999);
           return (b.modified || 0) - (a.modified || 0);
         });
         var qi = 0;

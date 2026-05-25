@@ -1821,7 +1821,7 @@ export default function CosmicWorkshop() {
   var _copied = useState(false), copied = _copied[0], setCopied = _copied[1];
   var _expAll = useState(false), showExportAll = _expAll[0], setShowExportAll = _expAll[1];
   var _expAllText = useState(""), exportAllText = _expAllText[0], setExportAllText = _expAllText[1];
-  var _sortMode = useState("date_new"), sortMode = _sortMode[0], setSortMode = _sortMode[1];
+  var _sortMode = useState(function() { try { return localStorage.getItem("cosmic-drift-levels-sort") || "date_new"; } catch(e) { return "date_new"; } }), sortMode = _sortMode[0], setSortMode = _sortMode[1];
   var _showImp = useState(false), showImport = _showImp[0], setShowImport = _showImp[1];
   var _impText = useState(""), importText = _impText[0], setImportText = _impText[1];
   var _impErr = useState(""), importError = _impErr[0], setImportError = _impErr[1];
@@ -2026,6 +2026,8 @@ export default function CosmicWorkshop() {
     var r = el.getBoundingClientRect();
     setBuilderTourRect({ top: r.top, left: r.left, width: r.width, height: r.height });
   }, [builderTourStep]);
+
+  useEffect(function() { try { localStorage.setItem("cosmic-drift-levels-sort", sortMode); } catch(e) {} }, [sortMode]);
 
   // Tooltip placement: below the target if it's in the upper half, else above.
   var tourTipBelow = false, tourTipLeft = 0;
