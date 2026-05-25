@@ -15205,7 +15205,12 @@ function CosmicDriftGame() {
       textAlign: "center"
     }
   }, "My Levels"), /*#__PURE__*/React.createElement("div", {
-    onClick: navigateToWorkshop,
+    onClick: function () {
+      try {
+        sessionStorage.setItem("cd_open_section", "levels");
+      } catch (e) {}
+      navigateToWorkshop();
+    },
     style: {
       padding: "6px 10px",
       borderRadius: 4,
@@ -15332,22 +15337,7 @@ function CosmicDriftGame() {
         cursor: "pointer",
         letterSpacing: 0.5
       }
-    }, "PLAY"), /*#__PURE__*/React.createElement("div", {
-      onClick: function () {
-        openLevelInBuilder(lv);
-      },
-      style: {
-        padding: "5px 16px",
-        borderRadius: 4,
-        background: "linear-gradient(180deg, #1a3a4a, #0f2a38)",
-        border: "1px solid rgba(80,200,255,0.4)",
-        color: "#80ddff",
-        fontSize: 10,
-        fontWeight: 700,
-        cursor: "pointer",
-        letterSpacing: 0.5
-      }
-    }, "EDIT")));
+    }, "PLAY")));
   }))), /*#__PURE__*/React.createElement(ConfirmOverlay, {
     open: confirmOpen,
     onCancel: function () {

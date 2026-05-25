@@ -3602,7 +3602,7 @@ function logUfo(msg) {
         <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 10px", background: PNL, borderBottom: PNLB, boxShadow: "0 3px 6px rgba(0,0,0,0.4)", position: "relative", zIndex: 2 }}>
           <div onClick={function () { stopMusic(); setScreen("splash"); }} style={{ padding: "6px 12px", borderRadius: 4, background: PNL, border: PNLB, color: "rgba(200,210,220,0.8)", fontSize: 10, fontWeight: 700, letterSpacing: 1, cursor: "pointer", textTransform: "uppercase", boxShadow: "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }}>Back</div>
           <div style={{ flex: 1, fontSize: 15, fontWeight: 700, color: "#c8b8ff", letterSpacing: 2, textTransform: "uppercase", textAlign: "center" }}>My Levels</div>
-          <div onClick={navigateToWorkshop} style={{ padding: "6px 10px", borderRadius: 4, background: "linear-gradient(180deg, #1a3a4a, #0f2a38)", border: "2px solid rgba(80,200,255,0.3)", color: "#80ddff", fontSize: 10, fontWeight: 700, letterSpacing: 1, cursor: "pointer", textTransform: "uppercase", boxShadow: "0 0 8px rgba(80,200,255,0.25), 0 2px 4px rgba(0,0,0,0.3)" }}>Workshop</div>
+          <div onClick={function() { try { sessionStorage.setItem("cd_open_section", "levels"); } catch(e) {} navigateToWorkshop(); }} style={{ padding: "6px 10px", borderRadius: 4, background: "linear-gradient(180deg, #1a3a4a, #0f2a38)", border: "2px solid rgba(80,200,255,0.3)", color: "#80ddff", fontSize: 10, fontWeight: 700, letterSpacing: 1, cursor: "pointer", textTransform: "uppercase", boxShadow: "0 0 8px rgba(80,200,255,0.25), 0 2px 4px rgba(0,0,0,0.3)" }}>Workshop</div>
         </div>
         <div style={{ flex: 1, overflowY: "auto", padding: "6px 10px 20px", position: "relative", zIndex: 1 }}>
           {levelsLoading && <div style={{ textAlign: "center", padding: 40, color: "rgba(180,200,220,0.4)", fontSize: 14 }}>Loading...</div>}
@@ -3624,7 +3624,6 @@ function logUfo(msg) {
               </div>
               <div style={{ display: "flex", gap: 6 }}>
                 <div onClick={function () { var sorted = savedLevels.slice().sort(function(a, b) { if (sortMode === "name") return (a.name || "").localeCompare(b.name || ""); if (sortMode === "date_old") return (a.modified || 0) - (b.modified || 0); return (b.modified || 0) - (a.modified || 0); }); var qi = 0; for (var _qi = 0; _qi < sorted.length; _qi++) { if (sorted[_qi].id === lv.id) { qi = _qi; break; } } myLevelsQueueRef.current = { levels: sorted, idx: qi }; playCustomLevel(lv); }} style={{ padding: "5px 16px", borderRadius: 4, background: "linear-gradient(180deg, #2a5a3a, #1a3a28)", border: "1px solid rgba(80,200,100,0.4)", color: "#80dd90", fontSize: 10, fontWeight: 700, cursor: "pointer", letterSpacing: 0.5 }}>PLAY</div>
-                <div onClick={function () { openLevelInBuilder(lv); }} style={{ padding: "5px 16px", borderRadius: 4, background: "linear-gradient(180deg, #1a3a4a, #0f2a38)", border: "1px solid rgba(80,200,255,0.4)", color: "#80ddff", fontSize: 10, fontWeight: 700, cursor: "pointer", letterSpacing: 0.5 }}>EDIT</div>
               </div>
             </div>;
           })}
