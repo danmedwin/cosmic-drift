@@ -3357,7 +3357,6 @@ function logUfo(msg) {
               </svg>
             </div>
             <GsMono size={9} ls={2} color="rgba(90,130,200,0.6)" style={{ display: "block", marginBottom: 8 }}>ENTERING THE DARK ZONE</GsMono>
-            <div style={{ color: "#90b8e0", fontSize: 16, fontWeight: 800, marginBottom: 4, fontFamily: "'Exo 2', sans-serif", letterSpacing: 1 }}>Levels 91–100</div>
             <div style={{ color: "rgba(150,180,215,0.6)", fontSize: 13, lineHeight: 1.55, marginBottom: 24 }}>The lights are out. Fire your plasma to illuminate the board.</div>
             <div onClick={function () { setIntroQueue(function (q) { return q.slice(1); }); }} style={{ display: "inline-block", padding: "10px 36px", borderRadius: 6, background: GS.brushedSolid, border: GS.pbl, color: "#b0c8d8", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: GS.ps }}>Got It</div>
           </GsPanel>
