@@ -1792,6 +1792,8 @@ export default function CosmicWorkshop() {
   var _erase = useState(false), eraserActive = _erase[0], setEraserActive = _erase[1];
   var _bplasma = useState(START_PLASMA), builderPlasma = _bplasma[0], setBuilderPlasma = _bplasma[1];
   var _wsGuide = useState(false), showWsGuide = _wsGuide[0], setShowWsGuide = _wsGuide[1];
+  var _wsTester = useState(false), showWsTesterMenu = _wsTester[0], setShowWsTesterMenu = _wsTester[1];
+  var _wsTutsReset = useState(false), wsTutsReset = _wsTutsReset[0], setWsTutsReset = _wsTutsReset[1];
   var _wsMenu = useState(false), showWsMenu = _wsMenu[0], setShowWsMenu = _wsMenu[1];
   var builderDragRef = useRef(null);
   var builderTouchUsedRef = useRef(false);
@@ -5914,6 +5916,22 @@ export default function CosmicWorkshop() {
       )
     ),
 
+    // ═══ FOR TESTERS PANEL ═══
+    showWsTesterMenu && React.createElement("div", { onClick: function() { setShowWsTesterMenu(false); }, style: { position: "fixed", inset: 0, zIndex: 450, display: "flex", alignItems: "flex-end", justifyContent: "center", background: "rgba(5,5,15,0.75)", backdropFilter: "blur(5px)", paddingBottom: 0 } },
+      React.createElement("div", { onClick: function(e) { e.stopPropagation(); }, style: { width: "100%", maxWidth: 420, background: "linear-gradient(180deg,#0d1022,#080d1a)", borderTop: "1px solid rgba(80,120,200,0.25)", borderRadius: "16px 16px 0 0", padding: "20px 22px 36px", fontFamily: "'Quicksand',sans-serif" } },
+        React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 } },
+          React.createElement("div", { style: { fontSize: 11, fontWeight: 700, color: "rgba(180,200,220,0.5)", letterSpacing: 3 } }, "FOR TESTERS"),
+          React.createElement("div", { onClick: function() { setShowWsTesterMenu(false); }, style: { fontSize: 11, color: "rgba(180,200,220,0.3)", cursor: "pointer", padding: "4px 8px" } }, "CLOSE")
+        ),
+        React.createElement("div", { style: { marginBottom: 18, padding: "10px 14px", background: "rgba(255,255,255,0.03)", borderRadius: 8, border: "1px solid rgba(180,200,220,0.08)" } },
+          React.createElement("div", { style: { fontSize: 9, color: "rgba(180,200,220,0.3)", letterSpacing: 2, marginBottom: 4 } }, "VERSION"),
+          React.createElement("div", { style: { fontSize: 15, fontWeight: 700, color: "rgba(180,200,220,0.55)", letterSpacing: 1 } }, "SERVICE PANEL  ·  v5.0")
+        ),
+        React.createElement("div", { onClick: function() { window.location.href = "mailto:cosmicdriftapp@gmail.com?subject=I%20found%20a%20bug!"; }, style: { width: "100%", padding: "11px 0", borderRadius: 8, background: "rgba(255,80,80,0.07)", border: "1px solid rgba(255,80,80,0.18)", color: "rgba(255,140,140,0.7)", fontSize: 12, fontWeight: 700, cursor: "pointer", textAlign: "center", letterSpacing: 1, boxSizing: "border-box" } }, "Report a Bug"),
+        React.createElement("div", { onClick: function() { try { window.storage.delete("cosmic_drift_builder_tour"); } catch(e) {} builderTourSeenRef.current = false; setWsTutsReset(true); setTimeout(function() { setWsTutsReset(false); }, 2500); }, style: { width: "100%", padding: "11px 0", marginTop: 10, borderRadius: 8, background: wsTutsReset ? "rgba(80,200,120,0.12)" : "rgba(80,140,255,0.1)", border: wsTutsReset ? "1px solid rgba(80,200,120,0.3)" : "1px solid rgba(80,140,255,0.25)", color: wsTutsReset ? "rgba(130,220,150,0.9)" : "rgba(120,170,255,0.85)", fontSize: 12, fontWeight: 700, cursor: "pointer", textAlign: "center", letterSpacing: 1, boxSizing: "border-box" } }, wsTutsReset ? "Builder Tour Reset ✓" : "Reset Builder Tour")
+      )
+    ),
+
     // ═══ WORKSHOP MENU OVERLAY ═══
     showWsMenu && React.createElement("div", { onClick: function() { setShowWsMenu(false); }, style: { position: "fixed", inset: 0, zIndex: 60, background: "radial-gradient(circle 220px at calc(100% - 26px) 26px, rgba(160,80,255,0.08) 0%, transparent 70%), rgba(5,5,15,0.5)" } },
       React.createElement(WsPanel, { onClick: function(e) { e.stopPropagation(); }, style: { position: "absolute", top: 48, right: 8, zIndex: 61, minWidth: 210, padding: "4px 0" } },
@@ -5921,56 +5939,19 @@ export default function CosmicWorkshop() {
         WsRivet({ top: 5, right: 5 }),
         WsRivet({ bottom: 5, left: 5 }),
         WsRivet({ bottom: 5, right: 5 }),
-        React.createElement("div", { onClick: function() { setShowWsMenu(false); loadSavedLevels(); setScreen("builder"); setLbScreen("list"); }, style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 } },
-          React.createElement("svg", { width: "16", height: "16", viewBox: "0 0 24 24" },
-            React.createElement("rect", { x: "3", y: "3", width: "7", height: "7", rx: "1", fill: "none", stroke: "rgba(128,221,255,0.55)", strokeWidth: "1.5" }),
-            React.createElement("rect", { x: "14", y: "3", width: "7", height: "7", rx: "1", fill: "rgba(128,221,255,0.35)" }),
-            React.createElement("rect", { x: "3", y: "14", width: "7", height: "7", rx: "1", fill: "rgba(128,221,255,0.35)" }),
-            React.createElement("rect", { x: "14", y: "14", width: "7", height: "7", rx: "1", fill: "none", stroke: "rgba(128,221,255,0.4)", strokeWidth: "1.5", strokeDasharray: "2 2" })
-          ),
-          React.createElement("span", { style: { flex: 1 } }, "Level Builder"),
-          React.createElement("span", { style: { width: 6, height: 6, borderRadius: 6, background: "#80ddff", boxShadow: "0 0 6px #80ddff", flexShrink: 0 } })
-        ),
-        React.createElement("div", { onClick: function() { setShowWsMenu(false); setScreen("designer"); setBdCurrentView("list"); setBdSavedTab("active"); }, style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 } },
-          React.createElement("svg", { width: "16", height: "16", viewBox: "0 0 24 24" },
-            React.createElement("rect", { x: "4", y: "4", width: "16", height: "16", rx: "3", fill: "none", stroke: "rgba(200,184,255,0.55)", strokeWidth: "1.5" }),
-            React.createElement("circle", { cx: "12", cy: "12", r: "4", fill: "rgba(200,184,255,0.4)" }),
-            React.createElement("path", { d: "M8 4v16M16 4v16M4 8h16M4 16h16", stroke: "rgba(200,184,255,0.2)", strokeWidth: "0.5" })
-          ),
-          React.createElement("span", { style: { flex: 1 } }, "Block Designer"),
-          React.createElement("span", { style: { width: 6, height: 6, borderRadius: 6, background: "#c8b8ff", boxShadow: "0 0 6px #c8b8ff", flexShrink: 0 } })
-        ),
-        React.createElement("div", { onClick: function() { setShowWsMenu(false); setScreen("vfx"); setVfxCurrentView("list"); setVfxSavedTab("active"); }, style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 } },
-          React.createElement("svg", { width: "16", height: "16", viewBox: "0 0 24 24" },
-            React.createElement("circle", { cx: "12", cy: "12", r: "3", fill: "rgba(255,180,60,0.8)" }),
-            React.createElement("path", { d: "M12 2v3M12 19v3M2 12h3M19 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M16.3 7.7l-2.1 2.1M7.7 16.3l-2.1 2.1", stroke: "rgba(255,180,60,0.55)", strokeWidth: "1.8", strokeLinecap: "round" })
-          ),
-          React.createElement("span", { style: { flex: 1 } }, "VFX Studio"),
-          React.createElement("span", { style: { width: 6, height: 6, borderRadius: 6, background: "#ffb43c", boxShadow: "0 0 6px #ffb43c", flexShrink: 0 } })
-        ),
-        React.createElement("div", { onClick: function() { setShowWsMenu(false); setScreen("ufo"); }, style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 } },
-          React.createElement(UFOBlockSvg, { size: 16, design: ufoGetActiveDesign(), uid: "menu-ufo" }),
-          React.createElement("span", { style: { flex: 1 } }, "UFO Customizer"),
-          React.createElement("span", { style: { width: 6, height: 6, borderRadius: 6, background: "#64dcb4", boxShadow: "0 0 6px #64dcb4", flexShrink: 0 } })
-        ),
-        React.createElement("div", { onClick: function() { setShowWsMenu(false); setScreen("hangar"); setShipView("list"); }, style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 } },
-          React.createElement(ShipDesignSvg, { size: 16, design: shipGetActiveDesign(), uid: "menu-ship" }),
-          React.createElement("span", { style: { flex: 1 } }, "Hangar"),
-          React.createElement("span", { style: { width: 6, height: 6, borderRadius: 6, background: "#ff8aaa", boxShadow: "0 0 6px #ff8aaa", flexShrink: 0 } })
-        ),
-        React.createElement("div", { onClick: function() { setShowWsMenu(false); setScreen("plasma"); setPlasmaView("list"); }, style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 } },
-          React.createElement("div", { style: { width: 16, height: 16, display: "flex", alignItems: "center", justifyContent: "center" } },
-            renderPlasmaShape(plasmaGetActiveDesign(), 14)),
-          React.createElement("span", { style: { flex: 1 } }, "Plasma Lab"),
-          React.createElement("span", { style: { width: 6, height: 6, borderRadius: 6, background: "#50c8ff", boxShadow: "0 0 6px #50c8ff", flexShrink: 0 } })
-        ),
-        React.createElement("div", { style: { height: 1, background: "rgba(80,100,140,0.2)", margin: "2px 12px" } }),
         React.createElement("div", { onClick: function() { setShowWsMenu(false); setShowWsGuide(true); }, style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 } },
           React.createElement("svg", { width: "16", height: "16", viewBox: "0 0 24 24" },
             React.createElement("circle", { cx: "12", cy: "12", r: "10", fill: "none", stroke: "rgba(200,170,255,0.5)", strokeWidth: "2" }),
             React.createElement("text", { x: "12", y: "17", textAnchor: "middle", fill: "rgba(200,170,255,0.6)", fontSize: "14", fontWeight: "700" }, "?")
           ),
           "Workshop Guide"
+        ),
+        React.createElement("div", { onClick: function() { setShowWsMenu(false); setShowWsTesterMenu(true); }, style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(100,180,255,0.6)", fontSize: 12, fontWeight: 600 } },
+          React.createElement("svg", { width: "16", height: "16", viewBox: "0 0 24 24" },
+            React.createElement("path", { d: "M12 2a10 10 0 100 20A10 10 0 0012 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z", fill: "rgba(100,180,255,0.5)" })
+          ),
+          React.createElement("span", { style: { flex: 1 } }, "For Testers"),
+          React.createElement("span", { style: { width: 6, height: 6, borderRadius: 6, background: "#48cc80", boxShadow: "0 0 6px #48cc80", flexShrink: 0 } })
         ),
         React.createElement("div", { style: { height: 1, background: "rgba(80,100,140,0.2)", margin: "2px 12px" } }),
         React.createElement("div", { onClick: function() { setShowWsMenu(false); handleSplashToGame(); }, style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "#ff8866", fontSize: 12, fontWeight: 600 } },

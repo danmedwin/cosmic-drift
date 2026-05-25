@@ -3491,19 +3491,6 @@ function logUfo(msg) {
             <svg width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="rgba(200,210,220,0.5)" strokeWidth="2" /><text x="12" y="17" textAnchor="middle" fill="rgba(200,210,220,0.6)" fontSize="14" fontWeight="700">?</text></svg>
             Guide
           </div>
-          <div onClick={function() { setSplashMenuOpen(false); navigateToWorkshop(); }} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 }}>
-            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="rgba(200,210,220,0.5)" /></svg>
-            <span style={{ flex: 1 }}>Open in Workshop</span>
-            <span style={{ width: 6, height: 6, borderRadius: 6, background: "#c8b8ff", boxShadow: "0 0 6px #c8b8ff", flexShrink: 0 }} />
-          </div>
-          <div onClick={function() { setSplashMenuOpen(false); loadSavedLevels(); setScreen("mylevels"); }} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="3" rx="1" fill="rgba(200,210,220,0.5)" /><rect x="3" y="10.5" width="18" height="3" rx="1" fill="rgba(200,210,220,0.4)" /><rect x="3" y="16" width="18" height="3" rx="1" fill="rgba(200,210,220,0.3)" /></svg>
-            <span style={{ flex: 1 }}>My Levels</span>
-          </div>
-          <div onClick={function() { setSplashMenuOpen(false); fullRestart(); startMusic(); setScreen("game"); }} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 }}>
-            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M17.65 6.35A7.96 7.96 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="rgba(200,210,220,0.5)" /></svg>
-            Restart
-          </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", color: "rgba(80,200,100,0.4)", fontSize: 12, fontWeight: 600, opacity: 0.4, cursor: "default" }}>
             <svg width="16" height="16" viewBox="0 0 24 24"><path d="M17 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V7l-4-4zm-5 16a3 3 0 110-6 3 3 0 010 6zm3-10H7V5h8v4z" fill="rgba(80,200,100,0.6)" /></svg>
             <span style={{ flex: 1 }}>Save + Quit</span>
@@ -3524,12 +3511,6 @@ function logUfo(msg) {
             <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" fill="rgba(100,180,255,0.5)" /></svg>
             <span style={{ flex: 1 }}>For Testers</span>
             <span style={{ width: 6, height: 6, borderRadius: 6, background: GS.green, boxShadow: "0 0 6px " + GS.green, flexShrink: 0 }} />
-          </div>
-          <div style={{ height: 1, background: "rgba(80,100,140,0.2)", margin: "2px 12px" }} />
-          <div onClick={function() { setSplashMenuOpen(false); try { window.close(); } catch(e) {} }} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "#ff8866", fontSize: 12, fontWeight: 600 }}>
-            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5a2 2 0 00-2 2v4h2V5h14v14H5v-4H3v4a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z" fill="rgba(255,100,80,0.7)" /></svg>
-            <span style={{ flex: 1 }}>Exit</span>
-            <span style={{ width: 6, height: 6, borderRadius: 6, background: "#ff8866", boxShadow: "0 0 6px #ff8866", flexShrink: 0 }} />
           </div>
         </GsPanel>}
 
