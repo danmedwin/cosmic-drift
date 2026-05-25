@@ -1854,6 +1854,7 @@ export default function CosmicWorkshop() {
   var setsLevelDragRef = useRef(null);
   var _setsLevelInput = useState(null), setsLevelInput = _setsLevelInput[0], setSetsLevelInput = _setsLevelInput[1];
   var lvDragRef = useRef(null);
+  var _lvDragHover = useState(null), lvDragHover = _lvDragHover[0], setLvDragHover = _lvDragHover[1];
   var _lvNumInput = useState(null), lvNumInput = _lvNumInput[0], setLvNumInput = _lvNumInput[1];
   var _setsDeleteWarn = useState(null), setsDeleteWarn = _setsDeleteWarn[0], setSetsDeleteWarn = _setsDeleteWarn[1];
   var _setsSelectAllConflicts = useState(null), setsSelectAllConflicts = _setsSelectAllConflicts[0], setSetsSelectAllConflicts = _setsSelectAllConflicts[1];
@@ -2600,6 +2601,12 @@ export default function CosmicWorkshop() {
       if (r && r.value) {
         var levels = JSON.parse(r.value);
         levels.sort(function(a, b) { return (b.modified || 0) - (a.modified || 0); });
+        var _needsNums = false;
+        for (var _ni = 0; _ni < levels.length; _ni++) { if (levels[_ni].levelNum == null) { _needsNums = true; break; } }
+        if (_needsNums) {
+          for (var _ai = 0; _ai < levels.length; _ai++) { if (levels[_ai].levelNum == null) levels[_ai].levelNum = _ai + 1; }
+          persistLevels(levels);
+        }
         if (levels.length === 0) { levels = [SAMPLE_LEVEL]; persistLevels(levels); }
         setSavedLevels(levels);
         storageWorking.current = true;
@@ -2765,15 +2772,17 @@ export default function CosmicWorkshop() {
     var rows = document.querySelectorAll("[data-lv-row]");
     var cy = e.clientY != null ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
     var targetIdx = d.idx;
+    var displayPos = rows.length;
     for (var _li = 0; _li < rows.length; _li++) {
       var r = rows[_li].getBoundingClientRect();
-      if (cy < r.top + r.height / 2) { targetIdx = parseInt(rows[_li].getAttribute("data-lv-idx"), 10); break; }
+      if (cy < r.top + r.height / 2) { targetIdx = parseInt(rows[_li].getAttribute("data-lv-idx"), 10); displayPos = _li; break; }
       if (_li === rows.length - 1) targetIdx = parseInt(rows[_li].getAttribute("data-lv-idx"), 10);
     }
+    setLvDragHover(displayPos);
     if (!isNaN(targetIdx) && targetIdx !== d.idx) { lvReorder(d.idx, targetIdx); d.idx = targetIdx; }
   }
 
-  function lvDragEnd(e) { lvDragRef.current = null; }
+  function lvDragEnd(e) { lvDragRef.current = null; setLvDragHover(null); }
 
   function doSaveLevel(id, name) {
     if (savingRef.current) return;
@@ -6099,13 +6108,13 @@ export default function CosmicWorkshop() {
             savedLevels.length > 0 && React.createElement("div", { onClick: exportAllLevels, style: Object.assign({}, BTN_TOPBAR, { color: "rgba(200,184,255,0.6)", fontSize: 8 }) }, "Exp All"),
             React.createElement("div", { onClick: function() { openBuilder(); }, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #1a3a4a, #0f2a38)", boxShadow: "0 0 8px rgba(80,200,255,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, "+ New")) }),
         renderSetsSelBar("level", savedLevels.map(function(lv) { return lv.id; })),
-        !setsSelMode && savedLevels.length > 1 && renderSortBar(sortMode, setSortMode, [["level_num", "Number"]]),
+        !setsSelMode && savedLevels.length > 1 && renderSortBar(sortMode, setSortMode, [["level_num", "Order"]]),
         React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "6px 10px 20px", position: "relative", zIndex: 1 }, onPointerMove: lvDragMove, onPointerUp: lvDragEnd },
           levelsLoading && React.createElement("div", { style: { textAlign: "center", padding: 40, color: "rgba(180,200,220,0.4)", fontSize: 14 } }, "Loading..."),
           !levelsLoading && savedLevels.length === 0 && React.createElement("div", { style: { textAlign: "center", padding: 40 } },
             React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 14, marginBottom: 8 } }, "No saved levels yet"),
             React.createElement("div", { style: { color: "rgba(180,200,220,0.2)", fontSize: 12 } }, "Build a new level or tap Import to paste a level code.")),
-          !levelsLoading && sortItems(savedLevels, sortMode, "modified").map(function(lv, sortedIdx) {
+          !levelsLoading && (function() { var _lvsorted = sortItems(savedLevels, sortMode, "modified"); var _mapped = _lvsorted.map(function(lv, sortedIdx) {
             var _lvDateObj = new Date(lv.savedAt);
             var dateStr = (lv.savedAt && !isNaN(_lvDateObj.getTime())) ? _lvDateObj.toLocaleDateString() : (lv.modified ? new Date(lv.modified).toLocaleDateString() : "");
             var _lvSel = setsSelMode && setsSelMode.selectedIds.indexOf(lv.id) !== -1;
@@ -6144,7 +6153,7 @@ export default function CosmicWorkshop() {
                     if (_inSets.length > 0) { setSetsDeleteWarn({ setNames: _inSets, onConfirm: function() { setDeletingId(lv.id); setSetsDeleteWarn(null); } }); }
                     else { setDeletingId(lv.id); }
                   }, style: BTN_DELETE_ICON }, WsIconTrash()))));
-          })),
+          }); if (sortMode === "level_num" && lvDragHover != null) { var _dzPos = Math.max(0, Math.min(_lvsorted.length, lvDragHover)); var _dz = React.createElement("div", { key: "dz", style: { height: 3, borderRadius: 2, margin: "1px 0", background: "rgba(80,200,255,0.4)", border: "1px solid rgba(80,200,255,0.7)" } }); return _mapped.slice(0, _dzPos).concat([_dz]).concat(_mapped.slice(_dzPos)); } return _mapped; }())),
         deletingId && renderDeleteOverlay("Delete Level?", function() { setDeletingId(null); }, function() { deleteLevel(deletingId); }),
         renderSetsDeleteWarnOverlay(),
         exportId && renderExportOverlay("Export Level", exportText, copied, function() { copyToClipboard(exportText, setCopied); }, function() { setExportId(null); }),
