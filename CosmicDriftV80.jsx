@@ -1289,6 +1289,8 @@ function spawnWallSpark(x, y) {
 var _isDarkLevel = false;
 var _darkShipX = 0;
 var _darkShipY = 0;
+var _darkShipCol = 3;
+var _darkColXs = []; // viewport-x of each column centre, kept in sync by ship-pos useEffect
 var _darkPlayRect = null; // { x, y, w, h } in CSS pixels covering grid + ship zone
 
 // Draw a radial transparency hole in the darkness layer.
@@ -1316,9 +1318,18 @@ function _renderDarkness(ctx, now) {
   ctx.fillRect(r.x, r.y, r.w, r.h);
   // 2. Punch holes — switch to destination-out so alpha erases darkness
   ctx.globalCompositeOperation = 'destination-out';
-  // Ship: small persistent dim glow so the player can see where they're aiming
+  // Column guide lines — faint vertical strips so the player can navigate the board
+  if (_darkColXs.length) {
+    for (var ci = 0; ci < _darkColXs.length; ci++) {
+      ctx.globalAlpha = (ci === _darkShipCol) ? 0.15 : 0.07;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(_darkColXs[ci] - 1, r.y, 2, r.h);
+    }
+    ctx.globalAlpha = 1;
+  }
+  // Ship: persistent glow so the player can see where they're aiming
   if (_darkShipX && _darkShipY) {
-    _paintLight(ctx, _darkShipX, _darkShipY, 55, 0.45);
+    _paintLight(ctx, _darkShipX, _darkShipY, 80, 0.6);
   }
   // Plasma shots in flight — each illuminates roughly a 2.5-cell radius
   for (var pi = 0; pi < _canvasProjectiles.length; pi++) {
@@ -1901,11 +1912,16 @@ export default function CosmicDriftGame() {
     window.addEventListener("resize", updateDarkRect);
     return function () { window.removeEventListener("resize", updateDarkRect); };
   }, [boardWidth]);
-  // Keep ship glow position current as the ship moves or board resizes.
+  // Keep ship glow position and column guide positions current as the ship moves or board resizes.
   useEffect(function () {
     if (!boardRef.current) return;
     var br = boardRef.current.getBoundingClientRect();
+    _darkShipCol = shipCol;
     _darkShipX = br.left + BOARD_PAD + shipCol * (blockSize + GAP) + blockSize / 2;
+    _darkColXs = [];
+    for (var ci = 0; ci < COLS; ci++) {
+      _darkColXs.push(br.left + BOARD_PAD + ci * (blockSize + GAP) + blockSize / 2);
+    }
     if (shipZoneRef.current) {
       var sz = shipZoneRef.current.getBoundingClientRect();
       _darkShipY = sz.top + sz.height * 0.4;
@@ -3637,7 +3653,7 @@ function logUfo(msg) {
         <Stars />
 
         {/* ═══ TOP NAV - COCKPIT BAR ═══ */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 6px", position: "relative", zIndex: 10, background: GS.brushed, backgroundBlendMode: "overlay", borderBottom: GS.pb, boxShadow: "0 3px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(200,230,240,0.08)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 6px", position: "relative", zIndex: 55, background: GS.brushed, backgroundBlendMode: "overlay", borderBottom: GS.pb, boxShadow: "0 3px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(200,230,240,0.08)" }}>
           <GsRivet pos={{ top: 4, left: 2 }} />
           <GsRivet pos={{ bottom: 6, left: 2 }} />
           <GsRivet pos={{ top: 2, right: 1 }} />
@@ -3721,8 +3737,8 @@ function logUfo(msg) {
           </div>
           <div onTouchStart={handleGridTS} onTouchMove={handleGridTM} onTouchEnd={handleGridTE} onClick={handleGridTap} style={{ flex: 1, minHeight: 20, position: "relative", zIndex: 1, cursor: "pointer" }} />
           {/* Tutorial instruction overlay */}
-          {showTrainingBtns && <div style={{ position: "absolute", left: 0, right: 0, bottom: 80, zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "0 8px" }}><div onClick={replayLevel} style={{ width: 62, minHeight: 48, borderRadius: 8, background: "rgba(8,8,20,0.88)", border: "1px solid rgba(80,200,255,0.2)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", gap: 3, padding: "6px 2px" }}><svg width="16" height="16" viewBox="0 0 24 24"><path d="M17.65 6.35A7.96 7.96 0 0012 4c-4.42 0-8 3.58-8 8s3.58 8 8 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="rgba(80,200,255,0.5)" /></svg><div style={{ fontSize: 9, color: "rgba(80,200,255,0.45)", fontWeight: 600, whiteSpace: "nowrap" }}>Retry Level</div></div>{tutorialText ? <div key={tutTextKey} style={{ flex: "0 1 auto", maxWidth: "60%", background: "rgba(8,8,20,0.92)", border: "1px solid rgba(80,200,255,0.35)", borderRadius: 10, padding: "10px 18px", textAlign: "center", animation: "introFadeIn 0.35s ease-out, tutPulseGlow 3s ease-in-out infinite", pointerEvents: "none" }}><div style={{ color: "#c0d8e8", fontSize: 13, fontWeight: 600, lineHeight: 1.5, letterSpacing: 0.3 }}>{tutorialText}</div></div> : <div style={{ flex: 1 }} />}<div onClick={skipLevel} style={{ width: 62, minHeight: 48, borderRadius: 8, background: "rgba(8,8,20,0.88)", border: "1px solid rgba(80,200,255,0.2)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", gap: 3, padding: "6px 2px" }}><svg width="16" height="16" viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z" fill="rgba(80,200,255,0.5)" /></svg><div style={{ fontSize: 9, color: "rgba(80,200,255,0.45)", fontWeight: 600, whiteSpace: "nowrap" }}>Skip Level</div></div></div>}
-          {tutorialText && !showTrainingBtns && <div key={tutTextKey} style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", bottom: 80, zIndex: 10, background: "rgba(8,8,20,0.92)", border: "1px solid rgba(80,200,255,0.35)", borderRadius: 10, padding: "10px 18px", maxWidth: "85%", textAlign: "center", animation: "tutFadeIn 0.35s ease-out, tutPulseGlow 3s ease-in-out infinite", pointerEvents: "none" }}><div style={{ color: "#c0d8e8", fontSize: 13, fontWeight: 600, lineHeight: 1.5, letterSpacing: 0.3 }}>{tutorialText}</div></div>}
+          {showTrainingBtns && <div style={{ position: "absolute", left: 0, right: 0, bottom: 80, zIndex: 55, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "0 8px" }}><div onClick={replayLevel} style={{ width: 62, minHeight: 48, borderRadius: 8, background: "rgba(8,8,20,0.88)", border: "1px solid rgba(80,200,255,0.2)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", gap: 3, padding: "6px 2px" }}><svg width="16" height="16" viewBox="0 0 24 24"><path d="M17.65 6.35A7.96 7.96 0 0012 4c-4.42 0-8 3.58-8 8s3.58 8 8 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="rgba(80,200,255,0.5)" /></svg><div style={{ fontSize: 9, color: "rgba(80,200,255,0.45)", fontWeight: 600, whiteSpace: "nowrap" }}>Retry Level</div></div>{tutorialText ? <div key={tutTextKey} style={{ flex: "0 1 auto", maxWidth: "60%", background: "rgba(8,8,20,0.92)", border: "1px solid rgba(80,200,255,0.35)", borderRadius: 10, padding: "10px 18px", textAlign: "center", animation: "introFadeIn 0.35s ease-out, tutPulseGlow 3s ease-in-out infinite", pointerEvents: "none" }}><div style={{ color: "#c0d8e8", fontSize: 13, fontWeight: 600, lineHeight: 1.5, letterSpacing: 0.3 }}>{tutorialText}</div></div> : <div style={{ flex: 1 }} />}<div onClick={skipLevel} style={{ width: 62, minHeight: 48, borderRadius: 8, background: "rgba(8,8,20,0.88)", border: "1px solid rgba(80,200,255,0.2)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", gap: 3, padding: "6px 2px" }}><svg width="16" height="16" viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z" fill="rgba(80,200,255,0.5)" /></svg><div style={{ fontSize: 9, color: "rgba(80,200,255,0.45)", fontWeight: 600, whiteSpace: "nowrap" }}>Skip Level</div></div></div>}
+          {tutorialText && !showTrainingBtns && <div key={tutTextKey} style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", bottom: 80, zIndex: 55, background: "rgba(8,8,20,0.92)", border: "1px solid rgba(80,200,255,0.35)", borderRadius: 10, padding: "10px 18px", maxWidth: "85%", textAlign: "center", animation: "tutFadeIn 0.35s ease-out, tutPulseGlow 3s ease-in-out infinite", pointerEvents: "none" }}><div style={{ color: "#c0d8e8", fontSize: 13, fontWeight: 600, lineHeight: 1.5, letterSpacing: 0.3 }}>{tutorialText}</div></div>}
           {/* Ship zone */}
           {showShipRowHint && <div style={{ position: "absolute", left: BOARD_PAD - 4, right: BOARD_PAD - 4, bottom: 0, height: 72, borderRadius: 10, border: "2px solid rgba(80,200,255,0.4)", animation: "targetPulse 1.5s ease-in-out infinite", pointerEvents: "none", zIndex: 5 }} />}
           <div ref={shipZoneRef} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onMouseDown={handleShipMouseDown} onMouseMove={handleShipMouseMove} onMouseUp={handleShipMouseUp} onMouseLeave={function () { mouseDragRef.current = null; }} style={{ position: "relative", zIndex: 2, padding: "0 " + BOARD_PAD + "px", cursor: "pointer", userSelect: "none", WebkitUserSelect: "none" }}>
@@ -3741,7 +3757,7 @@ function logUfo(msg) {
         {showShipSizeSlider && <div onClick={function () { setShowShipSizeSlider(false); }} style={{ position: "fixed", inset: 0, zIndex: 1 }} />}
 
         {/* ═══ COCKPIT DASHBOARD - METALLIC PANEL ═══ */}
-        <div ref={hudRef} style={{ position: "relative", zIndex: 2, flexShrink: 0, background: GS.brushed, backgroundBlendMode: "overlay", borderTop: "3px solid #404a58", padding: "6px 6px 8px", boxShadow: "0 -4px 12px rgba(0,0,0,0.55), inset 0 1px 0 rgba(200,230,240,0.08)" }}>
+        <div ref={hudRef} style={{ position: "relative", zIndex: 55, flexShrink: 0, background: GS.brushed, backgroundBlendMode: "overlay", borderTop: "3px solid #404a58", padding: "6px 6px 8px", boxShadow: "0 -4px 12px rgba(0,0,0,0.55), inset 0 1px 0 rgba(200,230,240,0.08)" }}>
           <GsRivet pos={{ top: 1, left: 2 }} />
           <GsRivet pos={{ bottom: 4, left: 2 }} />
           <GsRivet pos={{ bottom: 4, right: 2 }} />

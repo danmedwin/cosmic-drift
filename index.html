@@ -5990,6 +5990,8 @@ function spawnWallSpark(x, y) {
 var _isDarkLevel = false;
 var _darkShipX = 0;
 var _darkShipY = 0;
+var _darkShipCol = 3;
+var _darkColXs = []; // viewport-x of each column centre, kept in sync by ship-pos useEffect
 var _darkPlayRect = null; // { x, y, w, h } in CSS pixels covering grid + ship zone
 
 // Draw a radial transparency hole in the darkness layer.
@@ -6020,9 +6022,18 @@ function _renderDarkness(ctx, now) {
   ctx.fillRect(r.x, r.y, r.w, r.h);
   // 2. Punch holes — switch to destination-out so alpha erases darkness
   ctx.globalCompositeOperation = 'destination-out';
-  // Ship: small persistent dim glow so the player can see where they're aiming
+  // Column guide lines — faint vertical strips so the player can navigate the board
+  if (_darkColXs.length) {
+    for (var ci = 0; ci < _darkColXs.length; ci++) {
+      ctx.globalAlpha = ci === _darkShipCol ? 0.15 : 0.07;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(_darkColXs[ci] - 1, r.y, 2, r.h);
+    }
+    ctx.globalAlpha = 1;
+  }
+  // Ship: persistent glow so the player can see where they're aiming
   if (_darkShipX && _darkShipY) {
-    _paintLight(ctx, _darkShipX, _darkShipY, 55, 0.45);
+    _paintLight(ctx, _darkShipX, _darkShipY, 80, 0.6);
   }
   // Plasma shots in flight — each illuminates roughly a 2.5-cell radius
   for (var pi = 0; pi < _canvasProjectiles.length; pi++) {
@@ -7716,11 +7727,16 @@ function CosmicDriftGame() {
       window.removeEventListener("resize", updateDarkRect);
     };
   }, [boardWidth]);
-  // Keep ship glow position current as the ship moves or board resizes.
+  // Keep ship glow position and column guide positions current as the ship moves or board resizes.
   useEffect(function () {
     if (!boardRef.current) return;
     var br = boardRef.current.getBoundingClientRect();
+    _darkShipCol = shipCol;
     _darkShipX = br.left + BOARD_PAD + shipCol * (blockSize + GAP) + blockSize / 2;
+    _darkColXs = [];
+    for (var ci = 0; ci < COLS; ci++) {
+      _darkColXs.push(br.left + BOARD_PAD + ci * (blockSize + GAP) + blockSize / 2);
+    }
     if (shipZoneRef.current) {
       var sz = shipZoneRef.current.getBoundingClientRect();
       _darkShipY = sz.top + sz.height * 0.4;
@@ -15599,7 +15615,7 @@ function CosmicDriftGame() {
       alignItems: "center",
       padding: "5px 6px",
       position: "relative",
-      zIndex: 10,
+      zIndex: 55,
       background: GS.brushed,
       backgroundBlendMode: "overlay",
       borderBottom: GS.pb,
@@ -16177,7 +16193,7 @@ function CosmicDriftGame() {
       left: 0,
       right: 0,
       bottom: 80,
-      zIndex: 10,
+      zIndex: 55,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -16276,7 +16292,7 @@ function CosmicDriftGame() {
       left: "50%",
       transform: "translateX(-50%)",
       bottom: 80,
-      zIndex: 10,
+      zIndex: 55,
       background: "rgba(8,8,20,0.92)",
       border: "1px solid rgba(80,200,255,0.35)",
       borderRadius: 10,
@@ -16373,7 +16389,7 @@ function CosmicDriftGame() {
     ref: hudRef,
     style: {
       position: "relative",
-      zIndex: 2,
+      zIndex: 55,
       flexShrink: 0,
       background: GS.brushed,
       backgroundBlendMode: "overlay",
