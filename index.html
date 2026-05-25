@@ -7436,6 +7436,7 @@ function CosmicDriftGame() {
   var bestScoreRef = useRef(0),
     bestLevelRef = useRef(0);
   var highestLevelNotifiedRef = useRef(false);
+  var darkIntroShownRef = useRef(false);
   var _newHighScore = useState(false),
     newHighScore = _newHighScore[0],
     setNewHighScore = _newHighScore[1];
@@ -7705,6 +7706,16 @@ function CosmicDriftGame() {
     _isDarkLevel = nowDark;
     if (nowDark) {
       _startCvfxLoop();
+      if (!darkIntroShownRef.current) {
+        darkIntroShownRef.current = true;
+        setTimeout(function () {
+          setIntroQueue(function (q) {
+            return q.concat([{
+              type: "darklevel"
+            }]);
+          });
+        }, 800);
+      }
     }
   }, [level, screen]);
   // Keep the play-area rect current so _renderDarkness knows where to draw.
@@ -8305,6 +8316,7 @@ function CosmicDriftGame() {
             customLevelDataRef.current = null;
             setCustomLevelName(lv0.name || "Level 1");
             highestLevelNotifiedRef.current = false;
+            darkIntroShownRef.current = false;
             setNewHighScore(false);
             startMusic();
             setScreen("game");
@@ -10651,7 +10663,8 @@ function CosmicDriftGame() {
         type: "block",
         blockType: nb,
         name: bi.name,
-        desc: bi.desc
+        desc: bi.desc,
+        label: nb === 17 ? "You've been noticed" : null
       }]);
     }
   }, []);
@@ -10726,6 +10739,7 @@ function CosmicDriftGame() {
         customLevelDataRef.current = null;
         setCustomLevelName(sl0.name || "Level 1");
         highestLevelNotifiedRef.current = false;
+        darkIntroShownRef.current = false;
         setNewHighScore(false);
       }
       return;
@@ -10765,6 +10779,7 @@ function CosmicDriftGame() {
     customLevelDataRef.current = null;
     customPlasmaRef.current = START_PLASMA;
     highestLevelNotifiedRef.current = false;
+    darkIntroShownRef.current = false;
     setNewHighScore(false);
   }, []);
   function playSignatureLevel(lvlNum) {
@@ -10858,6 +10873,7 @@ function CosmicDriftGame() {
         customLevelDataRef.current = null;
         setCustomLevelName(lv0.name || "Level 1");
         highestLevelNotifiedRef.current = false;
+        darkIntroShownRef.current = false;
         setNewHighScore(false);
         startMusic();
         setScreen("game");
@@ -10971,6 +10987,7 @@ function CosmicDriftGame() {
     };
     clearBoardState();
     highestLevelNotifiedRef.current = false;
+    darkIntroShownRef.current = false;
     setNewHighScore(false);
     startMusic();
     setScreen("game");
@@ -13144,13 +13161,113 @@ function CosmicDriftGame() {
       position: "fixed",
       inset: 0,
       zIndex: 350,
-      background: "rgba(5,5,15,0.85)",
+      background: introCard.type === "darklevel" ? "rgba(2,2,10,0.93)" : "rgba(5,5,15,0.85)",
       backdropFilter: "blur(4px)",
       display: "flex",
       alignItems: "center",
       justifyContent: "center"
     }
-  }, /*#__PURE__*/React.createElement(GsPanel, {
+  }, introCard.type === "darklevel" ? /*#__PURE__*/React.createElement(GsPanel, {
+    style: {
+      maxWidth: 270,
+      padding: "28px 28px",
+      textAlign: "center",
+      animation: "introFadeIn 0.4s ease-out",
+      border: "1px solid rgba(50,70,130,0.5)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 16,
+      display: "flex",
+      justifyContent: "center"
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "64",
+    height: "64",
+    viewBox: "0 0 64 64"
+  }, /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("radialGradient", {
+    id: "dkGlow",
+    cx: "50%",
+    cy: "50%",
+    r: "50%"
+  }, /*#__PURE__*/React.createElement("stop", {
+    offset: "0%",
+    stopColor: "#80ddff",
+    stopOpacity: "0.85"
+  }), /*#__PURE__*/React.createElement("stop", {
+    offset: "40%",
+    stopColor: "#3366cc",
+    stopOpacity: "0.3"
+  }), /*#__PURE__*/React.createElement("stop", {
+    offset: "100%",
+    stopColor: "#000010",
+    stopOpacity: "0"
+  }))), /*#__PURE__*/React.createElement("circle", {
+    cx: "32",
+    cy: "32",
+    r: "30",
+    fill: "#06060f",
+    stroke: "rgba(50,70,160,0.35)",
+    strokeWidth: "1.5"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "32",
+    cy: "32",
+    r: "22",
+    fill: "url(#dkGlow)"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "32",
+    cy: "32",
+    r: "5",
+    fill: "#80ddff",
+    opacity: "0.9"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "32",
+    cy: "32",
+    r: "2.5",
+    fill: "white"
+  }))), /*#__PURE__*/React.createElement(GsMono, {
+    size: 9,
+    ls: 2,
+    color: "rgba(90,130,200,0.6)",
+    style: {
+      display: "block",
+      marginBottom: 8
+    }
+  }, "ENTERING THE DARK ZONE"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "#90b8e0",
+      fontSize: 16,
+      fontWeight: 800,
+      marginBottom: 4,
+      fontFamily: "'Exo 2', sans-serif",
+      letterSpacing: 1
+    }
+  }, "Levels 101\u2013150"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "rgba(150,180,215,0.6)",
+      fontSize: 13,
+      lineHeight: 1.55,
+      marginBottom: 24
+    }
+  }, "The lights are out. Fire your plasma to illuminate the board."), /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      setIntroQueue(function (q) {
+        return q.slice(1);
+      });
+    },
+    style: {
+      display: "inline-block",
+      padding: "10px 36px",
+      borderRadius: 6,
+      background: GS.brushedSolid,
+      border: GS.pbl,
+      color: "#b0c8d8",
+      fontWeight: 700,
+      fontSize: 13,
+      cursor: "pointer",
+      boxShadow: GS.ps
+    }
+  }, "Got It")) : /*#__PURE__*/React.createElement(GsPanel, {
     style: {
       maxWidth: 260,
       padding: "28px 32px",
@@ -13220,7 +13337,7 @@ function CosmicDriftGame() {
       display: "block",
       marginBottom: 6
     }
-  }, introCard.type === "powerup" ? "NEW POWER-UP" : "NEW BLOCK"), /*#__PURE__*/React.createElement("div", {
+  }, introCard.label || (introCard.type === "powerup" ? "NEW POWER-UP" : "NEW BLOCK")), /*#__PURE__*/React.createElement("div", {
     style: {
       color: GS.blue,
       fontSize: 15,

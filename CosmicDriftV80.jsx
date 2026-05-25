@@ -1797,6 +1797,7 @@ export default function CosmicDriftGame() {
   var _bestLevel = useState(0), bestLevel = _bestLevel[0], setBestLevel = _bestLevel[1];
   var bestScoreRef = useRef(0), bestLevelRef = useRef(0);
   var highestLevelNotifiedRef = useRef(false);
+  var darkIntroShownRef = useRef(false);
   var _newHighScore = useState(false), newHighScore = _newHighScore[0], setNewHighScore = _newHighScore[1];
   var _newHighLevel = useState(false), newHighLevel = _newHighLevel[0], setNewHighLevel = _newHighLevel[1];
   var customGridRef = useRef(null);
@@ -1897,7 +1898,15 @@ export default function CosmicDriftGame() {
   useEffect(function () {
     var nowDark = level >= 101 && level <= 150 && screen === "game";
     _isDarkLevel = nowDark;
-    if (nowDark) { _startCvfxLoop(); }
+    if (nowDark) {
+      _startCvfxLoop();
+      if (!darkIntroShownRef.current) {
+        darkIntroShownRef.current = true;
+        setTimeout(function () {
+          setIntroQueue(function (q) { return q.concat([{ type: "darklevel" }]); });
+        }, 800);
+      }
+    }
   }, [level, screen]);
   // Keep the play-area rect current so _renderDarkness knows where to draw.
   useEffect(function () {
@@ -2253,7 +2262,7 @@ export default function CosmicDriftGame() {
             seenPowerUpsRef.current = { crossshot: true, drone: true, lightning: true, anglebounce: true, hammer: true };
             setCustomLevelMode(false); customLevelDataRef.current = null;
             setCustomLevelName(lv0.name || "Level 1");
-            highestLevelNotifiedRef.current = false; setNewHighScore(false);
+            highestLevelNotifiedRef.current = false; darkIntroShownRef.current = false; setNewHighScore(false);
             startMusic(); setScreen("game");
           }).catch(function() {});
         }).catch(function() {});
@@ -2838,10 +2847,10 @@ function logUfo(msg) {
   }
   function clearInventory() { setInvDrones(0); setInvLightnings(0); setInvCrossShots(0); setInvAngleBounces(0); setInvHammers(0); }
   var doRestart = useCallback(function () { setConfirmOpen(false); if (baseCoresRef.current + extraCoresRef.current <= 0) return; var cp = getHudPos("cores"); var pp = getHudPos("plasma"); var cid = addVfx({ type: "coreFly", startX: cp.x, startY: cp.y, endX: pp.x, endY: pp.y }); rmVfx(cid, 700); setTimeout(function () { loseCore(); if (customGridRef.current) { gridRef2.current = customGridRef.current.slice(); } else { gridRef2.current = generateGrid(levelRef.current); } shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); var rAmt = customGridRef.current ? customPlasmaRef.current : getLevelPlasma(levelRef.current); plasmaRef.current = rAmt; setPlasma(rAmt); var sc = customGridRef.current ? customShipRef.current : getLevelShipStart(levelRef.current); setShipCol(sc); shipColRef.current = sc; clearBoardState(); }, 600); }, [getHudPos, addVfx, rmVfx, loseCore]);
-  var nextLevel = useCallback(function () { clearCanvasVfx(); var nl; if (gameModeRef.current === "set") { var nextIdx = setModeIdxRef.current + 1; if (nextIdx >= setModeLevelsRef.current.length) { stopMusic(); setScreen("splash"); return; } setModeIdxRef.current = nextIdx; var setLv = setModeLevelsRef.current[nextIdx]; gridRef2.current = setLv.grid.slice(); customGridRef.current = setLv.grid.slice(); customShipRef.current = setLv.shipStart != null ? setLv.shipStart : 3; var setPlasmaAmt = setLv.startPlasma || START_PLASMA; customPlasmaRef.current = setPlasmaAmt; shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); plasmaRef.current = setPlasmaAmt; setPlasma(setPlasmaAmt); var setSc = customShipRef.current; setShipCol(setSc); shipColRef.current = setSc; var setNl = nextIdx + 1; setLevel(setNl); levelRef.current = setNl; clearBoardState(); baseCoresRef.current = 3; extraCoresRef.current = 0; setBaseCores(3); setExtraCores(0); clearInventory(); setCustomLevelName(setLv.name || ("Level " + setNl)); return; } else if (gameModeRef.current === "solve") { if (levelRef.current < 9) { nl = levelRef.current + 1; } else { nl = getNextSigLevel(levelRef.current); if (!nl) { stopMusic(); setScreen("splash"); return; } baseCoresRef.current = 3; extraCoresRef.current = 0; setBaseCores(3); setExtraCores(0); clearInventory(); } } else { nl = levelRef.current + 1; } gridRef2.current = generateGrid(nl); shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); var nlPlasma = getLevelPlasma(nl); plasmaRef.current = nlPlasma; setPlasma(nlPlasma); var sc = getLevelShipStart(nl); setShipCol(sc); shipColRef.current = sc; setLevel(nl); levelRef.current = nl; clearBoardState(); var mdKey = gameModeRef.current + "_" + difficultyRef.current; if (gameModeRef.current === "infinite" && !customLevelMode && difficultyRef.current !== "hard") { gainCore(); } if (gameModeRef.current === "infinite" && nl > bestLevelRef.current) { if (!highestLevelNotifiedRef.current && nl > 9) { highestLevelNotifiedRef.current = true; setNewHighLevel(true); setTimeout(function () { setNewHighLevel(false); }, 3000); } bestLevelRef.current = nl; setBestLevel(nl); try { window.storage.set("cosmic_drift_best_level_" + mdKey, String(nl)); } catch (e) {} } if (gameModeRef.current === "infinite" && !customLevelMode && scoreRef.current > bestScoreRef.current) { bestScoreRef.current = scoreRef.current; setBestScore(scoreRef.current); try { window.storage.set("cosmic_drift_best_score_" + mdKey, String(scoreRef.current)); } catch (e) {} } var nb = NEW_BLOCK_AT[nl]; if (nb && BLOCK_INTROS[nb] && nl > 9) { var bi = BLOCK_INTROS[nb]; setIntroQueue([{ type: "block", blockType: nb, name: bi.name, desc: bi.desc }]); } }, []);
+  var nextLevel = useCallback(function () { clearCanvasVfx(); var nl; if (gameModeRef.current === "set") { var nextIdx = setModeIdxRef.current + 1; if (nextIdx >= setModeLevelsRef.current.length) { stopMusic(); setScreen("splash"); return; } setModeIdxRef.current = nextIdx; var setLv = setModeLevelsRef.current[nextIdx]; gridRef2.current = setLv.grid.slice(); customGridRef.current = setLv.grid.slice(); customShipRef.current = setLv.shipStart != null ? setLv.shipStart : 3; var setPlasmaAmt = setLv.startPlasma || START_PLASMA; customPlasmaRef.current = setPlasmaAmt; shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); plasmaRef.current = setPlasmaAmt; setPlasma(setPlasmaAmt); var setSc = customShipRef.current; setShipCol(setSc); shipColRef.current = setSc; var setNl = nextIdx + 1; setLevel(setNl); levelRef.current = setNl; clearBoardState(); baseCoresRef.current = 3; extraCoresRef.current = 0; setBaseCores(3); setExtraCores(0); clearInventory(); setCustomLevelName(setLv.name || ("Level " + setNl)); return; } else if (gameModeRef.current === "solve") { if (levelRef.current < 9) { nl = levelRef.current + 1; } else { nl = getNextSigLevel(levelRef.current); if (!nl) { stopMusic(); setScreen("splash"); return; } baseCoresRef.current = 3; extraCoresRef.current = 0; setBaseCores(3); setExtraCores(0); clearInventory(); } } else { nl = levelRef.current + 1; } gridRef2.current = generateGrid(nl); shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); var nlPlasma = getLevelPlasma(nl); plasmaRef.current = nlPlasma; setPlasma(nlPlasma); var sc = getLevelShipStart(nl); setShipCol(sc); shipColRef.current = sc; setLevel(nl); levelRef.current = nl; clearBoardState(); var mdKey = gameModeRef.current + "_" + difficultyRef.current; if (gameModeRef.current === "infinite" && !customLevelMode && difficultyRef.current !== "hard") { gainCore(); } if (gameModeRef.current === "infinite" && nl > bestLevelRef.current) { if (!highestLevelNotifiedRef.current && nl > 9) { highestLevelNotifiedRef.current = true; setNewHighLevel(true); setTimeout(function () { setNewHighLevel(false); }, 3000); } bestLevelRef.current = nl; setBestLevel(nl); try { window.storage.set("cosmic_drift_best_level_" + mdKey, String(nl)); } catch (e) {} } if (gameModeRef.current === "infinite" && !customLevelMode && scoreRef.current > bestScoreRef.current) { bestScoreRef.current = scoreRef.current; setBestScore(scoreRef.current); try { window.storage.set("cosmic_drift_best_score_" + mdKey, String(scoreRef.current)); } catch (e) {} } var nb = NEW_BLOCK_AT[nl]; if (nb && BLOCK_INTROS[nb] && nl > 9) { var bi = BLOCK_INTROS[nb]; setIntroQueue([{ type: "block", blockType: nb, name: bi.name, desc: bi.desc, label: nb === 17 ? "You've been noticed" : null }]); } }, []);
   var replayLevel = useCallback(function () { clearCanvasVfx(); var lv = levelRef.current; gridRef2.current = generateGrid(lv); shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); var rp = getLevelPlasma(lv); plasmaRef.current = rp; setPlasma(rp); var sc = getLevelShipStart(lv); setShipCol(sc); shipColRef.current = sc; clearBoardState(); setGameState("playing"); }, []);
   var skipLevel = useCallback(function () { clearCanvasVfx(); var nl = levelRef.current + 1; gridRef2.current = generateGrid(nl); shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); var p = getLevelPlasma(nl); plasmaRef.current = p; setPlasma(p); var sc = getLevelShipStart(nl); setShipCol(sc); shipColRef.current = sc; setLevel(nl); levelRef.current = nl; clearBoardState(); setGameState("playing"); }, []);
-  var fullRestart = useCallback(function () { clearCanvasVfx(); if (gameModeRef.current === "set") { setModeIdxRef.current = 0; if (setModeLevelsRef.current.length > 0) { var sl0 = setModeLevelsRef.current[0]; baseCoresRef.current = 3; extraCoresRef.current = 0; setBaseCores(3); setExtraCores(0); scoreRef.current = 0; setScore(0); gridRef2.current = sl0.grid.slice(); customGridRef.current = sl0.grid.slice(); customShipRef.current = sl0.shipStart != null ? sl0.shipStart : 3; var sl0Plasma = sl0.startPlasma || START_PLASMA; customPlasmaRef.current = sl0Plasma; shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); plasmaRef.current = sl0Plasma; setPlasma(sl0Plasma); var sl0Sc = customShipRef.current; setShipCol(sl0Sc); shipColRef.current = sl0Sc; setLevel(1); levelRef.current = 1; clearInventory(); clearBoardState(); seenPowerUpsRef.current = { crossshot: true, drone: true, lightning: true, anglebounce: true, hammer: true }; setCustomLevelMode(false); customLevelDataRef.current = null; setCustomLevelName(sl0.name || "Level 1"); highestLevelNotifiedRef.current = false; setNewHighScore(false); } return; } var skipTuts = gameModeRef.current === "infinite" && npSavedChoiceRef.current === "skip"; var startLv = gameModeRef.current === "solve" ? getFirstSigLevel() : (skipTuts ? 10 : 1); baseCoresRef.current = 3; extraCoresRef.current = 0; setBaseCores(3); setExtraCores(0); scoreRef.current = 0; setScore(0); setLevel(startLv); levelRef.current = startLv; clearInventory(); gridRef2.current = generateGrid(startLv); shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); var sp = getLevelPlasma(startLv); plasmaRef.current = sp; setPlasma(sp); var sc = getLevelShipStart(startLv); setShipCol(sc); shipColRef.current = sc; clearBoardState(); seenPowerUpsRef.current = (gameModeRef.current === "solve" || skipTuts) ? { crossshot: true, drone: true, lightning: true, anglebounce: true, hammer: true } : { crossshot: true }; setCustomLevelMode(false); customGridRef.current = null; customLevelDataRef.current = null; customPlasmaRef.current = START_PLASMA; highestLevelNotifiedRef.current = false; setNewHighScore(false); }, []);
+  var fullRestart = useCallback(function () { clearCanvasVfx(); if (gameModeRef.current === "set") { setModeIdxRef.current = 0; if (setModeLevelsRef.current.length > 0) { var sl0 = setModeLevelsRef.current[0]; baseCoresRef.current = 3; extraCoresRef.current = 0; setBaseCores(3); setExtraCores(0); scoreRef.current = 0; setScore(0); gridRef2.current = sl0.grid.slice(); customGridRef.current = sl0.grid.slice(); customShipRef.current = sl0.shipStart != null ? sl0.shipStart : 3; var sl0Plasma = sl0.startPlasma || START_PLASMA; customPlasmaRef.current = sl0Plasma; shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); plasmaRef.current = sl0Plasma; setPlasma(sl0Plasma); var sl0Sc = customShipRef.current; setShipCol(sl0Sc); shipColRef.current = sl0Sc; setLevel(1); levelRef.current = 1; clearInventory(); clearBoardState(); seenPowerUpsRef.current = { crossshot: true, drone: true, lightning: true, anglebounce: true, hammer: true }; setCustomLevelMode(false); customLevelDataRef.current = null; setCustomLevelName(sl0.name || "Level 1"); highestLevelNotifiedRef.current = false; darkIntroShownRef.current = false; setNewHighScore(false); } return; } var skipTuts = gameModeRef.current === "infinite" && npSavedChoiceRef.current === "skip"; var startLv = gameModeRef.current === "solve" ? getFirstSigLevel() : (skipTuts ? 10 : 1); baseCoresRef.current = 3; extraCoresRef.current = 0; setBaseCores(3); setExtraCores(0); scoreRef.current = 0; setScore(0); setLevel(startLv); levelRef.current = startLv; clearInventory(); gridRef2.current = generateGrid(startLv); shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); var sp = getLevelPlasma(startLv); plasmaRef.current = sp; setPlasma(sp); var sc = getLevelShipStart(startLv); setShipCol(sc); shipColRef.current = sc; clearBoardState(); seenPowerUpsRef.current = (gameModeRef.current === "solve" || skipTuts) ? { crossshot: true, drone: true, lightning: true, anglebounce: true, hammer: true } : { crossshot: true }; setCustomLevelMode(false); customGridRef.current = null; customLevelDataRef.current = null; customPlasmaRef.current = START_PLASMA; highestLevelNotifiedRef.current = false; darkIntroShownRef.current = false; setNewHighScore(false); }, []);
   function playSignatureLevel(lvlNum) { var fl = FIXED_LEVELS[lvlNum]; if (!fl) return; setCustomLevelMode(false); customGridRef.current = null; customLevelDataRef.current = null; baseCoresRef.current = 3; extraCoresRef.current = 0; setBaseCores(3); setExtraCores(0); scoreRef.current = 0; setScore(0); setLevel(lvlNum); levelRef.current = lvlNum; gridRef2.current = fl.grid.slice(); shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); var lp = fl.plasma || START_PLASMA; plasmaRef.current = lp; setPlasma(lp); var sc = fl.ship != null ? fl.ship : 3; setShipCol(sc); shipColRef.current = sc; clearInventory(); clearBoardState(); seenPowerUpsRef.current = { crossshot: true, drone: true, lightning: true, anglebounce: true, hammer: true }; setSigLevelsOpen(false); startMusic(); setScreen("game"); startMusic(); }
   function startSetMode() {
     if (!activeSetInfo || !activeSetInfo.levelIds || !activeSetInfo.levelIds.length) return;
@@ -2873,7 +2882,7 @@ function logUfo(msg) {
         seenPowerUpsRef.current = { crossshot: true, drone: true, lightning: true, anglebounce: true, hammer: true };
         setCustomLevelMode(false); customLevelDataRef.current = null;
         setCustomLevelName(lv0.name || "Level 1");
-        highestLevelNotifiedRef.current = false; setNewHighScore(false);
+        highestLevelNotifiedRef.current = false; darkIntroShownRef.current = false; setNewHighScore(false);
         startMusic(); setScreen("game");
       }).catch(function() {});
     } catch(e) {}
@@ -2928,7 +2937,7 @@ function logUfo(msg) {
     setInvDrones(inv.drones || 0); setInvLightnings(inv.lightnings || 0); setInvCrossShots(inv.crossshots || 0);
     setInvAngleBounces(inv.anglebounces || 0); setInvHammers(inv.hammers || 0);
     seenPowerUpsRef.current = sd.seenPowerUps ? Object.assign({}, sd.seenPowerUps) : { crossshot: true };
-    clearBoardState(); highestLevelNotifiedRef.current = false; setNewHighScore(false);
+    clearBoardState(); highestLevelNotifiedRef.current = false; darkIntroShownRef.current = false; setNewHighScore(false);
     startMusic(); setScreen("game");
   }
 
@@ -3279,17 +3288,41 @@ function logUfo(msg) {
       <LegendOverlay open={legendOpen} onClose={function () { setLegendOpen(false); }} />
 
       {/* ═══ INTRO CARD OVERLAY ═══ */}
-      {introCard && <div style={{ position: "fixed", inset: 0, zIndex: 350, background: "rgba(5,5,15,0.85)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <GsPanel style={{ maxWidth: 260, padding: "28px 32px", textAlign: "center", animation: "introFadeIn 0.3s ease-out" }}>
-          <div style={{ marginBottom: 14, display: "flex", justifyContent: "center" }}>
-            {introCard.type === "block" && <div style={{ width: 56, height: 56 }}><BlockContent type={introCard.blockType} size={56} shieldLevel={introCard.blockType === 10 ? 2 : 0} /></div>}
-            {introCard.type === "powerup" && <div style={{ width: 48, height: 48, display: "flex", alignItems: "center", justifyContent: "center", background: GS.inset, borderRadius: 10, border: GS.ib, boxShadow: GS.is }}>{introCard.key === "drone" && <BDDroneIcon size={32} />}{introCard.key === "lightning" && <LightningIcon size={28} />}{introCard.key === "crossshot" && <BDCrossIcon size={28} />}{introCard.key === "anglebounce" && <SplitIcon size={28} />}{introCard.key === "hammer" && <svg width="28" height="28" viewBox="0 0 24 24"><rect x="10.5" y="10" width="3" height="12" rx="1" fill="#7a7a88" /><rect x="5" y="3" width="14" height="8" rx="2" fill="#5a5a68" stroke="#6a6a78" strokeWidth="1" /></svg>}</div>}
-          </div>
-          <GsMono size={10} ls={2} color={GS.blue + "aa"} style={{ display: "block", marginBottom: 6 }}>{introCard.type === "powerup" ? "NEW POWER-UP" : "NEW BLOCK"}</GsMono>
-          <div style={{ color: GS.blue, fontSize: 15, fontWeight: 700, marginBottom: 6, fontFamily: "'Exo 2', sans-serif", letterSpacing: 0.5 }}>{introCard.name}</div>
-          <div style={{ color: "rgba(180,200,220,0.65)", fontSize: 13, lineHeight: 1.5, marginBottom: 22 }}>{introCard.desc}</div>
-          <div onClick={function () { setIntroQueue(function (q) { return q.slice(1); }); }} style={{ display: "inline-block", padding: "10px 36px", borderRadius: 6, background: GS.brushedSolid, border: GS.pbl, color: "#b0c8d8", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: GS.ps }}>Got It</div>
-        </GsPanel>
+      {introCard && <div style={{ position: "fixed", inset: 0, zIndex: 350, background: introCard.type === "darklevel" ? "rgba(2,2,10,0.93)" : "rgba(5,5,15,0.85)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        {introCard.type === "darklevel" ? (
+          <GsPanel style={{ maxWidth: 270, padding: "28px 28px", textAlign: "center", animation: "introFadeIn 0.4s ease-out", border: "1px solid rgba(50,70,130,0.5)" }}>
+            <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>
+              <svg width="64" height="64" viewBox="0 0 64 64">
+                <defs>
+                  <radialGradient id="dkGlow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#80ddff" stopOpacity="0.85" />
+                    <stop offset="40%" stopColor="#3366cc" stopOpacity="0.3" />
+                    <stop offset="100%" stopColor="#000010" stopOpacity="0" />
+                  </radialGradient>
+                </defs>
+                <circle cx="32" cy="32" r="30" fill="#06060f" stroke="rgba(50,70,160,0.35)" strokeWidth="1.5" />
+                <circle cx="32" cy="32" r="22" fill="url(#dkGlow)" />
+                <circle cx="32" cy="32" r="5" fill="#80ddff" opacity="0.9" />
+                <circle cx="32" cy="32" r="2.5" fill="white" />
+              </svg>
+            </div>
+            <GsMono size={9} ls={2} color="rgba(90,130,200,0.6)" style={{ display: "block", marginBottom: 8 }}>ENTERING THE DARK ZONE</GsMono>
+            <div style={{ color: "#90b8e0", fontSize: 16, fontWeight: 800, marginBottom: 4, fontFamily: "'Exo 2', sans-serif", letterSpacing: 1 }}>Levels 101–150</div>
+            <div style={{ color: "rgba(150,180,215,0.6)", fontSize: 13, lineHeight: 1.55, marginBottom: 24 }}>The lights are out. Fire your plasma to illuminate the board.</div>
+            <div onClick={function () { setIntroQueue(function (q) { return q.slice(1); }); }} style={{ display: "inline-block", padding: "10px 36px", borderRadius: 6, background: GS.brushedSolid, border: GS.pbl, color: "#b0c8d8", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: GS.ps }}>Got It</div>
+          </GsPanel>
+        ) : (
+          <GsPanel style={{ maxWidth: 260, padding: "28px 32px", textAlign: "center", animation: "introFadeIn 0.3s ease-out" }}>
+            <div style={{ marginBottom: 14, display: "flex", justifyContent: "center" }}>
+              {introCard.type === "block" && <div style={{ width: 56, height: 56 }}><BlockContent type={introCard.blockType} size={56} shieldLevel={introCard.blockType === 10 ? 2 : 0} /></div>}
+              {introCard.type === "powerup" && <div style={{ width: 48, height: 48, display: "flex", alignItems: "center", justifyContent: "center", background: GS.inset, borderRadius: 10, border: GS.ib, boxShadow: GS.is }}>{introCard.key === "drone" && <BDDroneIcon size={32} />}{introCard.key === "lightning" && <LightningIcon size={28} />}{introCard.key === "crossshot" && <BDCrossIcon size={28} />}{introCard.key === "anglebounce" && <SplitIcon size={28} />}{introCard.key === "hammer" && <svg width="28" height="28" viewBox="0 0 24 24"><rect x="10.5" y="10" width="3" height="12" rx="1" fill="#7a7a88" /><rect x="5" y="3" width="14" height="8" rx="2" fill="#5a5a68" stroke="#6a6a78" strokeWidth="1" /></svg>}</div>}
+            </div>
+            <GsMono size={10} ls={2} color={GS.blue + "aa"} style={{ display: "block", marginBottom: 6 }}>{introCard.label || (introCard.type === "powerup" ? "NEW POWER-UP" : "NEW BLOCK")}</GsMono>
+            <div style={{ color: GS.blue, fontSize: 15, fontWeight: 700, marginBottom: 6, fontFamily: "'Exo 2', sans-serif", letterSpacing: 0.5 }}>{introCard.name}</div>
+            <div style={{ color: "rgba(180,200,220,0.65)", fontSize: 13, lineHeight: 1.5, marginBottom: 22 }}>{introCard.desc}</div>
+            <div onClick={function () { setIntroQueue(function (q) { return q.slice(1); }); }} style={{ display: "inline-block", padding: "10px 36px", borderRadius: 6, background: GS.brushedSolid, border: GS.pbl, color: "#b0c8d8", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: GS.ps }}>Got It</div>
+          </GsPanel>
+        )}
       </div>}
 
       {/* ═══ SPLASH SCREEN ═══ */}
