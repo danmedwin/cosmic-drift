@@ -7435,6 +7435,9 @@ function CosmicDriftGame() {
   var _cln = useState(""),
     customLevelName = _cln[0],
     setCustomLevelName = _cln[1];
+  var _cdk = useState(false),
+    customDark = _cdk[0],
+    setCustomDark = _cdk[1];
   var _gameMenu = useState(false),
     gameMenuOpen = _gameMenu[0],
     setGameMenuOpen = _gameMenu[1];
@@ -7717,7 +7720,9 @@ function CosmicDriftGame() {
   // ── Dark Level sync ──
   // Toggle darkness on/off as level and screen change.
   useEffect(function () {
-    var nowDark = level >= 91 && level <= 100 && screen === "game";
+    var isCustom = !!customLevelDataRef.current || gameModeRef.current === "set";
+    var rangeDark = !isCustom && level >= 91 && level <= 100;
+    var nowDark = screen === "game" && (customDark || rangeDark);
     _isDarkLevel = nowDark;
     if (nowDark) {
       _startCvfxLoop();
@@ -7732,7 +7737,7 @@ function CosmicDriftGame() {
         }, 800);
       }
     }
-  }, [level, screen]);
+  }, [level, screen, customDark]);
   // Keep the play-area rect current so _renderDarkness knows where to draw.
   useEffect(function () {
     function updateDarkRect() {
@@ -8334,6 +8339,7 @@ function CosmicDriftGame() {
             darkIntroShownRef.current = false;
             setNewHighScore(false);
             setShowVictoryCard(false);
+            setCustomDark(!!lv0.darkLevel);
             startMusic();
             setScreen("game");
           }).catch(function () {});
@@ -10615,6 +10621,7 @@ function CosmicDriftGame() {
       setExtraCores(0);
       clearInventory();
       setCustomLevelName(setLv.name || "Level " + setNl);
+      setCustomDark(!!setLv.darkLevel);
       return;
     } else if (gameModeRef.current === "solve") {
       nl = getNextSigLevel(levelRef.current);
@@ -10753,6 +10760,7 @@ function CosmicDriftGame() {
         darkIntroShownRef.current = false;
         setNewHighScore(false);
         setShowVictoryCard(false);
+        setCustomDark(!!sl0.darkLevel);
       }
       return;
     }
@@ -10794,6 +10802,7 @@ function CosmicDriftGame() {
     darkIntroShownRef.current = false;
     setNewHighScore(false);
     setShowVictoryCard(false);
+    setCustomDark(false);
   }, []);
   function playSignatureLevel(lvlNum) {
     var fl = FIXED_LEVELS[lvlNum];
@@ -10801,6 +10810,7 @@ function CosmicDriftGame() {
     setCustomLevelMode(false);
     customGridRef.current = null;
     customLevelDataRef.current = null;
+    setCustomDark(false);
     baseCoresRef.current = 3;
     extraCoresRef.current = 0;
     setBaseCores(3);
@@ -10889,6 +10899,7 @@ function CosmicDriftGame() {
         darkIntroShownRef.current = false;
         setNewHighScore(false);
         setShowVictoryCard(false);
+        setCustomDark(!!lv0.darkLevel);
         startMusic();
         setScreen("game");
       }).catch(function () {});
@@ -11089,6 +11100,8 @@ function CosmicDriftGame() {
     customGridRef.current = levelData.grid.slice();
     customShipRef.current = levelData.shipStart != null ? levelData.shipStart : 3;
     customLevelDataRef.current = levelData;
+    setCustomDark(!!levelData.darkLevel);
+    darkIntroShownRef.current = false;
     var customPlasma = levelData.startPlasma || START_PLASMA;
     customPlasmaRef.current = customPlasma;
     baseCoresRef.current = 3;

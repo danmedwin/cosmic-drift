@@ -1789,6 +1789,7 @@ export default function CosmicWorkshop() {
   var _eli = useState(null), editingLevelId = _eli[0], setEditingLevelId = _eli[1];
   var _bln = useState(""), builderLevelName = _bln[0], setBuilderLevelName = _bln[1];
   var _bdr = useState(false), builderDirty = _bdr[0], setBuilderDirty = _bdr[1];
+  var _bdl = useState(false), builderDarkLevel = _bdl[0], setBuilderDarkLevel = _bdl[1];
   var _bwarn = useState(null), builderWarn = _bwarn[0], setBuilderWarn = _bwarn[1];
   var _erase = useState(false), eraserActive = _erase[0], setEraserActive = _erase[1];
   var _bplasma = useState(START_PLASMA), builderPlasma = _bplasma[0], setBuilderPlasma = _bplasma[1];
@@ -2620,7 +2621,7 @@ export default function CosmicWorkshop() {
   }
 
   function copyLevel(lv) {
-    openBuilder({ grid: lv.grid.slice(), shipStart: lv.shipStart, startPlasma: lv.startPlasma, id: null, name: (lv.name || "Untitled") + " (copy)" });
+    openBuilder({ grid: lv.grid.slice(), shipStart: lv.shipStart, startPlasma: lv.startPlasma, darkLevel: !!(lv.darkLevel), id: null, name: (lv.name || "Untitled") + " (copy)" });
   }
 
   // ── Undo/redo plumbing ──
@@ -2675,6 +2676,7 @@ export default function CosmicWorkshop() {
     setBuilderShipStart(initial.shipStart);
     setBuilderLevelName(initial.name);
     setBuilderPlasma(initial.plasma);
+    setBuilderDarkLevel(levelData ? !!(levelData.darkLevel) : false);
     lbHistoryReset(initial);
     setSelectedBlockType(null);
     setEraserActive(false);
@@ -2790,7 +2792,7 @@ export default function CosmicWorkshop() {
     var levelId = id || genUUID();
     var now = Date.now();
     var nowStr = new Date().toISOString();
-    var entry = { id: levelId, name: name || "Untitled Level", grid: builderGrid.slice(), shipStart: builderShipStart, startPlasma: builderPlasma, created: now, modified: now, savedAt: nowStr };
+    var entry = { id: levelId, name: name || "Untitled Level", grid: builderGrid.slice(), shipStart: builderShipStart, startPlasma: builderPlasma, darkLevel: builderDarkLevel, created: now, modified: now, savedAt: nowStr };
     setSavedLevels(function(prev) {
       var levels = prev.slice();
       var found = false;
@@ -5496,7 +5498,7 @@ export default function CosmicWorkshop() {
           React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 33, fontWeight: 700, letterSpacing: 7, color: "#ede8ff", textTransform: "uppercase", textShadow: "0 0 22px rgba(160,100,255,0.55), 0 0 44px rgba(120,60,220,0.25)", lineHeight: 1.1 } }, "WORKSHOP"),
           React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", gap: 8 } },
             React.createElement("div", { style: { height: 1, width: 22, background: "rgba(160,100,255,0.25)" } }),
-            React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,170,255,0.32)" }, "SERVICE PANEL  ·  v5.1"),
+            React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,170,255,0.32)" }, "SERVICE PANEL  ·  v5.2"),
             React.createElement("div", { style: { height: 1, width: 22, background: "rgba(160,100,255,0.25)" } })
           ),
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginTop: 2 } },
@@ -6061,7 +6063,7 @@ export default function CosmicWorkshop() {
         ),
         React.createElement("div", { style: { marginBottom: 18, padding: "10px 14px", background: "rgba(255,255,255,0.03)", borderRadius: 8, border: "1px solid rgba(180,200,220,0.08)" } },
           React.createElement("div", { style: { fontSize: 9, color: "rgba(180,200,220,0.3)", letterSpacing: 2, marginBottom: 4 } }, "VERSION"),
-          React.createElement("div", { style: { fontSize: 15, fontWeight: 700, color: "rgba(180,200,220,0.55)", letterSpacing: 1 } }, "SERVICE PANEL  ·  v5.1")
+          React.createElement("div", { style: { fontSize: 15, fontWeight: 700, color: "rgba(180,200,220,0.55)", letterSpacing: 1 } }, "SERVICE PANEL  ·  v5.2")
         ),
         React.createElement("div", { onClick: function() { window.location.href = "mailto:cosmicdriftapp@gmail.com?subject=I%20found%20a%20bug!"; }, style: { width: "100%", padding: "11px 0", borderRadius: 8, background: "rgba(255,80,80,0.07)", border: "1px solid rgba(255,80,80,0.18)", color: "rgba(255,140,140,0.7)", fontSize: 12, fontWeight: 700, cursor: "pointer", textAlign: "center", letterSpacing: 1, boxSizing: "border-box" } }, "Report a Bug"),
         React.createElement("div", { onClick: function() { try { window.storage.delete("cosmic_drift_builder_tour"); } catch(e) {} builderTourSeenRef.current = false; setWsTutsReset(true); setTimeout(function() { setWsTutsReset(false); }, 2500); }, style: { width: "100%", padding: "11px 0", marginTop: 10, borderRadius: 8, background: wsTutsReset ? "rgba(80,200,120,0.12)" : "rgba(80,140,255,0.1)", border: wsTutsReset ? "1px solid rgba(80,200,120,0.3)" : "1px solid rgba(80,140,255,0.25)", color: wsTutsReset ? "rgba(130,220,150,0.9)" : "rgba(120,170,255,0.85)", fontSize: 12, fontWeight: 700, cursor: "pointer", textAlign: "center", letterSpacing: 1, boxSizing: "border-box" } }, wsTutsReset ? "Builder Tour Reset ✓" : "Reset Builder Tour")
@@ -6210,6 +6212,10 @@ export default function CosmicWorkshop() {
               React.createElement(PlasmaContainer, { current: builderPlasma, max: 20 }),
               React.createElement("div", { style: { color: "rgba(180,200,220,0.5)", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.5 } }, "Plasma")),
             React.createElement("div", { onClick: function() { var n = Math.min(20, builderPlasma + 1); setBuilderPlasma(n); setBuilderDirty(true); lbHistoryPush({ grid: builderGrid, shipStart: builderShipStart, name: builderLevelName, plasma: n }, "plasma"); }, style: { width: 28, height: 28, borderRadius: 4, background: PNL, border: PNLB, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#b0c8d8", fontSize: 16, fontWeight: 700 } }, "+"))),
+        React.createElement("div", { style: { display: "flex", justifyContent: "center", padding: "2px 10px 4px" } },
+          React.createElement("div", { onClick: function() { setBuilderDarkLevel(!builderDarkLevel); setBuilderDirty(true); }, style: { display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 14px", borderRadius: 12, cursor: "pointer", background: builderDarkLevel ? "rgba(50,15,90,0.7)" : "rgba(20,20,35,0.4)", border: builderDarkLevel ? "1px solid rgba(150,70,255,0.5)" : "1px solid rgba(80,80,100,0.2)", boxShadow: builderDarkLevel ? "0 0 8px rgba(100,30,180,0.3)" : "none" } },
+            React.createElement("svg", { width: 10, height: 10, viewBox: "0 0 24 24" }, React.createElement("path", { d: "M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z", fill: builderDarkLevel ? "#cc88ff" : "rgba(180,200,220,0.25)" })),
+            React.createElement("div", { style: { fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, color: builderDarkLevel ? "#cc88ff" : "rgba(180,200,220,0.25)" } }, "Dark Level"))),
         React.createElement("div", { style: { position: "relative" } },
           isCrate(selectedBlockType) && React.createElement("div", { style: { position: "absolute", bottom: "100%", left: 0, right: 0, zIndex: 3, background: "linear-gradient(180deg, #1a1a2e, #151528)", borderBottom: "2px solid rgba(212,168,67,0.3)", padding: "8px 8px 6px", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" } },
           React.createElement("div", { style: { color: "rgba(212,168,67,0.7)", fontSize: 9, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 6 } }, "Crate Reward"),
