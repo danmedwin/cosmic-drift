@@ -3559,7 +3559,7 @@ export default function CosmicWorkshop() {
         React.createElement("div", { style: { color: "#80ddff", fontSize: 15, fontWeight: 700, marginBottom: 8, fontFamily: "'Quicksand',sans-serif" } }, title),
         preview && React.createElement("div", { style: { display: "flex", justifyContent: "center", alignItems: "center", marginBottom: 10, padding: "10px 0", background: "rgba(0,0,0,0.25)", borderRadius: 8, border: "1px solid rgba(255,255,255,0.06)" } }, preview),
         React.createElement("div", { style: { color: "rgba(180,200,220,0.4)", fontSize: 11, marginBottom: 12 } }, "Paste an exported code:"),
-        React.createElement("textarea", { value: text, onChange: function(e) { setText(e.target.value); setError(""); }, placeholder: "Paste JSON here...", style: { width: "100%", height: 90, padding: 8, borderRadius: 6, background: SCRN, border: error ? "2px solid rgba(255,80,60,0.5)" : SCRNB, color: "#b0c8d8", fontSize: 16, fontFamily: "monospace", resize: "none", outline: "none", boxSizing: "border-box" } }),
+        React.createElement("textarea", { value: text, onChange: function(e) { setText(e.target.value); setError(""); }, onKeyDown: function(e) { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); onImport(); } if (e.key === "Escape") { e.preventDefault(); onClose(); } }, placeholder: "Paste JSON here...", style: { width: "100%", height: 90, padding: 8, borderRadius: 6, background: SCRN, border: error ? "2px solid rgba(255,80,60,0.5)" : SCRNB, color: "#b0c8d8", fontSize: 16, fontFamily: "monospace", resize: "none", outline: "none", boxSizing: "border-box" } }),
         error && React.createElement("div", { style: { color: "#ff8866", fontSize: 11, marginTop: 6, fontWeight: 600 } }, error),
         React.createElement("div", { style: { display: "flex", gap: 12, justifyContent: "center", marginTop: 12 } },
           React.createElement("div", { onClick: onClose, style: { padding: "8px 20px", borderRadius: 16, border: "1px solid rgba(120,80,255,0.3)", color: "#c8b8ff", fontSize: 12, fontWeight: 600, cursor: "pointer" } }, "Cancel"),
@@ -5349,6 +5349,39 @@ export default function CosmicWorkshop() {
   var plasmaSplitFlashSize = Math.round(plasmaFlashSize * 0.75);
   var plasmaIndicatorColor = plasmaEditDesign.glowColor || "#80ddff";
   var plasmaIndicatorGlow = "0 0 5px " + plasmaIndicatorColor + ", 0 0 12px " + plasmaIndicatorColor + "99";
+
+  // ── Global keyboard shortcuts (for local testing) ──
+  useEffect(function() {
+    function handleKbd(e) {
+      var key = e.key;
+      var tag = document.activeElement ? document.activeElement.tagName : "";
+      var isInput = tag === "INPUT" || tag === "TEXTAREA";
+      if (key === "Escape") {
+        if (showWsTesterMenu) { setShowWsTesterMenu(false); return; }
+        if (showWsGuide) { setShowWsGuide(false); return; }
+        if (showWsMenu) { setShowWsMenu(false); return; }
+        if (bdImportConfirm) { setBdImportConfirm(null); return; }
+        if (showImport) { setShowImport(false); setImportText(""); setImportError(""); return; }
+        if (bdShowImport) { setBdShowImport(false); setBdImportText(""); setBdImportError(""); return; }
+        if (vfxShowImport) { setVfxShowImport(false); setVfxImportText(""); setVfxImportError(""); return; }
+        if (ufoShowImport) { setUfoShowImport(false); setUfoImportText(""); setUfoImportError(""); return; }
+        if (shipShowImport) { setShipShowImport(false); setShipImportText(""); setShipImportError(""); return; }
+        if (plasmaShowImport) { setPlasmaShowImport(false); setPlasmaImportText(""); setPlasmaImportError(""); return; }
+        if (setsShowImport) { setSetsShowImport(false); setSetsImportText(""); setSetsImportError(""); return; }
+        if (showBackWarn) { setShowBackWarn(false); return; }
+        if (bdShowBackWarn) { setBdShowBackWarn(false); return; }
+        if (vfxShowBackWarn) { setVfxShowBackWarn(false); return; }
+        if (ufoShowBackWarn) { setUfoShowBackWarn(false); return; }
+        if (shipShowBackWarn) { setShipShowBackWarn(false); return; }
+        if (plasmaShowBackWarn) { setPlasmaShowBackWarn(false); return; }
+      }
+      if (key === "Enter" && !isInput) {
+        if (bdImportConfirm) { bdConfirmImport(); return; }
+      }
+    }
+    document.addEventListener("keydown", handleKbd);
+    return function() { document.removeEventListener("keydown", handleKbd); };
+  }, [showWsTesterMenu, showWsGuide, showWsMenu, bdImportConfirm, showImport, bdShowImport, vfxShowImport, ufoShowImport, shipShowImport, plasmaShowImport, setsShowImport, showBackWarn, bdShowBackWarn, vfxShowBackWarn, ufoShowBackWarn, shipShowBackWarn, plasmaShowBackWarn]);
 
   return React.createElement("div", { style: { position: "fixed", inset: 0, background: "#0b0c1a", fontFamily: "'Quicksand',sans-serif", overflow: "hidden" } },
     React.createElement("style", null, ANIM_CSS),
