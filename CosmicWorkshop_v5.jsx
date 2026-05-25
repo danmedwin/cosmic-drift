@@ -1654,6 +1654,7 @@ export default function CosmicWorkshop() {
   var _ufoSortMode = useState("date_new"), ufoSortMode = _ufoSortMode[0], setUfoSortMode = _ufoSortMode[1];
   var _shipSortMode = useState("date_new"), shipSortMode = _shipSortMode[0], setShipSortMode = _shipSortMode[1];
   var _plasmaSortMode = useState("date_new"), plasmaSortMode = _plasmaSortMode[0], setPlasmaSortMode = _plasmaSortMode[1];
+  var _setsSortMode = useState("date_new"), setsSortMode = _setsSortMode[0], setSetsSortMode = _setsSortMode[1];
   var _vfxEditDesign = useState(function() { return vfxDefaultDesign(null); }), vfxEditDesign = _vfxEditDesign[0], setVfxEditDesign = _vfxEditDesign[1];
   // Undo/redo (same pattern as BD: see bdHistoryPush comment for details).
   var vfxHistoryRef = useRef({ stack: [], idx: -1, lastKey: null, lastTime: 0 });
@@ -2087,6 +2088,16 @@ export default function CosmicWorkshop() {
       if (_in) found.push(_s.name || "Unnamed Set");
     }
     return found;
+  }
+  function setsGetType(setObj) {
+    var _k = 0; var _t = "Mixed";
+    if (setObj.levelIds && setObj.levelIds.length > 0) { _k++; _t = "Levels"; }
+    if (setObj.blockDesignIds && setObj.blockDesignIds.length > 0) { _k++; _t = "Blocks"; }
+    if (setObj.vfxDesignIds && setObj.vfxDesignIds.length > 0) { _k++; _t = "VFX"; }
+    if (setObj.ufoDesignId) { _k++; _t = "UFO"; }
+    if (setObj.shipDesignId) { _k++; _t = "Ship"; }
+    if (setObj.plasmaDesignId) { _k++; _t = "Plasma"; }
+    return _k === 1 ? _t : "Mixed";
   }
   function setsCreateNew() {
     setSetsEditSet({ id: "set_" + Date.now(), name: "", savedAt: new Date().toISOString() });
@@ -3633,6 +3644,9 @@ export default function CosmicWorkshop() {
         return React.createElement("div", { key: opt[0], onClick: function() { onSort(opt[0]); }, style: { padding: "3px 8px", borderRadius: 3, background: active ? "rgba(80,200,255,0.12)" : "transparent", border: active ? "1px solid rgba(80,200,255,0.3)" : "1px solid transparent", color: active ? "#80ddff" : "rgba(180,200,220,0.3)", fontSize: 9, fontWeight: 700, cursor: "pointer", letterSpacing: 0.5 } }, opt[1]);
       }));
   }
+  function renderTypeHeader(label, color) {
+    return React.createElement("div", { style: { color: color || "rgba(180,200,220,0.35)", fontSize: 9, fontWeight: 700, letterSpacing: 0.8, textTransform: "uppercase", padding: "10px 2px 4px", borderBottom: "1px solid rgba(255,255,255,0.06)", marginBottom: 4 } }, label);
+  }
   function renderSetsSelBar(moduleType, allIds) {
     if (!setsSelMode || setsSelMode.moduleType !== moduleType) return null;
     var _setName = setsEditSet ? (setsEditSet.name || "Unnamed Set") : "Set";
@@ -3770,6 +3784,13 @@ export default function CosmicWorkshop() {
         var shapes = ["circle", "blast", "torpedo"];
         var si = shapes.indexOf(a.shape), sj = shapes.indexOf(b.shape);
         if (si !== sj) return (si === -1 ? 99 : si) - (sj === -1 ? 99 : sj);
+        return (a.name || "").localeCompare(b.name || "");
+      }
+      if (mode === "set_type") {
+        var stOrder = { "Levels": 0, "Blocks": 1, "VFX": 2, "UFO": 3, "Ship": 4, "Plasma": 5, "Mixed": 6 };
+        var asto = stOrder[setsGetType(a)]; if (asto == null) asto = 6;
+        var bsto = stOrder[setsGetType(b)]; if (bsto == null) bsto = 6;
+        if (asto !== bsto) return asto - bsto;
         return (a.name || "").localeCompare(b.name || "");
       }
       if (mode === "date_old") return ((a[dateKey] ? new Date(a[dateKey]).getTime() : 0) || 0) - ((b[dateKey] ? new Date(b[dateKey]).getTime() : 0) || 0);
@@ -5670,16 +5691,17 @@ export default function CosmicWorkshop() {
                 React.createElement("div", { onClick: setsInitSaveCurrent, style: Object.assign({}, BTN_TOPBAR, { color: "#ffd060", border: "1px solid rgba(255,208,96,0.35)" }) }, "Save Current"),
                 React.createElement("div", { onClick: setsCreateNew, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg,#2a2000,#1a1400)", border: "1px solid rgba(255,208,96,0.4)", color: "#ffd060" }) }, "+ New"),
                 React.createElement("div", { onClick: function() { setSetsShowImport(true); setSetsImportText(""); setSetsImportError(""); }, style: BTN_TOPBAR }, "Import")) }),
+        !setsMergeMode && setsSaved.length > 1 && renderSortBar(setsSortMode, setSetsSortMode, [["set_type", "Type"]]),
         React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "6px 10px 20px" } },
           setsSaved.length === 0 && React.createElement("div", { style: { textAlign: "center", padding: 40 } },
             React.createElement("div", { style: { color: "rgba(255,208,96,0.3)", fontSize: 14, marginBottom: 8 } }, "No sets saved yet"),
             React.createElement("div", { style: { color: "rgba(180,200,220,0.2)", fontSize: 12 } }, "Tap Save Current to bundle your active designs, or + New to build from scratch.")),
-          setsSaved.map(function(setObj) {
+          (function() { var _ssa = sortItems(setsSaved, setsSortMode, "savedAt"); var _ssi = []; var _sslt = null; for (var _ssk = 0; _ssk < _ssa.length; _ssk++) { var setObj = _ssa[_ssk]; if (setsSortMode === "set_type") { var _sst = setsGetType(setObj); if (_sst !== _sslt) { _sslt = _sst; _ssi.push(renderTypeHeader(_sst, "#ffd060")); } }
             var _chips = setsGetModuleChips(setObj);
             var _isActive = setsActiveId === setObj.id;
             var _date = setObj.savedAt ? new Date(setObj.savedAt).toLocaleDateString() : "";
             var _mergeChecked = setsMergeIds.indexOf(setObj.id) !== -1;
-            return React.createElement("div", { key: setObj.id, style: Object.assign({}, CARD_STYLE, setsMergeMode && _mergeChecked ? { borderColor: "rgba(255,208,96,0.4)", background: "rgba(255,208,96,0.05)" } : {}), onClick: setsMergeMode ? function() { setSetsMergeIds(_mergeChecked ? setsMergeIds.filter(function(id) { return id !== setObj.id; }) : setsMergeIds.concat([setObj.id])); } : null },
+            _ssi.push(React.createElement("div", { key: setObj.id, style: Object.assign({}, CARD_STYLE, setsMergeMode && _mergeChecked ? { borderColor: "rgba(255,208,96,0.4)", background: "rgba(255,208,96,0.05)" } : {}), onClick: setsMergeMode ? function() { setSetsMergeIds(_mergeChecked ? setsMergeIds.filter(function(id) { return id !== setObj.id; }) : setsMergeIds.concat([setObj.id])); } : null },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 8 } },
                 setsMergeMode && React.createElement("div", { style: { width: 20, height: 20, borderRadius: 4, border: "2px solid " + (_mergeChecked ? "#ffd060" : "rgba(255,255,255,0.2)"), background: _mergeChecked ? "#ffd060" : "transparent", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" } },
                   _mergeChecked && React.createElement("svg", { width: 12, height: 12, viewBox: "0 0 12 12" }, React.createElement("path", { d: "M2 6 L5 9 L10 3", stroke: "#1a1400", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", fill: "none" }))),
@@ -5717,8 +5739,8 @@ export default function CosmicWorkshop() {
                 React.createElement("div", { style: { flex: 1 } }),
                 React.createElement("div", { onClick: function() { setSetsDeleteId(setObj.id); }, style: BTN_DELETE_ICON }, WsIconTrash())
               )
-            );
-          })
+            ));
+          } return _ssi; }())
         ),
         setsDeletingId && renderDeleteOverlay("Delete Set?", function() { setSetsDeleteId(null); }, function() { setsDeleteSet(setsDeletingId); }),
         setsExportId && renderExportOverlay("Export Set", setsExportText, setsCopied, function() { copyToClipboard(setsExportText, setSetsCopied); }, function() { setSetsExportId(null); }),
@@ -6179,12 +6201,12 @@ export default function CosmicWorkshop() {
           bdSavedTab === "custom" && bdSaved.length === 0 && React.createElement("div", { style: { textAlign: "center", padding: 40 } },
             React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 14, marginBottom: 8 } }, "No saved designs yet"),
             React.createElement("div", { style: { color: "rgba(180,200,220,0.2)", fontSize: 12 } }, "Create a new design or copy a Game Block to start.")),
-          bdSavedTab === "custom" && sortItems(bdSaved, bdSortMode, "modifiedAt").map(function(saved) {
+          bdSavedTab === "custom" && (function() { var _bds = sortItems(bdSaved, bdSortMode, "modifiedAt"); var _bdi = []; var _bdlt = null; for (var _bdk = 0; _bdk < _bds.length; _bdk++) { var saved = _bds[_bdk]; if (bdSortMode === "type") { var _bdbt = null; for (var _bdbti = 0; _bdbti < BD_BLOCK_TYPES.length; _bdbti++) { if (BD_BLOCK_TYPES[_bdbti].id === saved.assignedTo) { _bdbt = BD_BLOCK_TYPES[_bdbti]; break; } } var _bdt = _bdbt ? _bdbt.label : "Other"; if (_bdt !== _bdlt) { _bdlt = _bdt; _bdi.push(renderTypeHeader(_bdt, "#c8b8ff")); } }
             var bt = null; for (var bi = 0; bi < BD_BLOCK_TYPES.length; bi++) { if (BD_BLOCK_TYPES[bi].id === saved.assignedTo) { bt = BD_BLOCK_TYPES[bi]; break; } }
             var _dateRaw = saved.modifiedAt || saved.createdAt || saved.savedAt;
             var dateStr = _dateRaw ? new Date(_dateRaw).toLocaleDateString() : "";
             var _bdSel = setsSelMode && setsSelMode.selectedIds.indexOf(saved.id) !== -1;
-            return React.createElement("div", { key: saved.id, style: Object.assign({}, CARD_STYLE, setsSelMode ? { display: "flex", alignItems: "flex-start", gap: 8 } : {}) },
+            _bdi.push(React.createElement("div", { key: saved.id, style: Object.assign({}, CARD_STYLE, setsSelMode ? { display: "flex", alignItems: "flex-start", gap: 8 } : {}) },
               setsSelMode && React.createElement("div", { onClick: function() { setsToggleSel(saved, "assignedTo"); }, style: { width: 20, height: 20, borderRadius: 4, border: _bdSel ? "1.5px solid #ffd060" : "1.5px solid rgba(255,208,96,0.3)", background: _bdSel ? "#ffd060" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, marginTop: 2 } },
                 _bdSel && React.createElement("svg", { width: 12, height: 12, viewBox: "0 0 24 24", fill: "none", stroke: "#1a1400", strokeWidth: 3.2, strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("path", { d: "M5 12l5 5L20 7" }))),
               React.createElement("div", { style: { flex: 1 } },
@@ -6209,8 +6231,8 @@ export default function CosmicWorkshop() {
                     var _inSets = setsDesignInSets(saved.id);
                     if (_inSets.length > 0) { setSetsDeleteWarn({ setNames: _inSets, onConfirm: function() { setBdDeletingId(saved.id); setSetsDeleteWarn(null); } }); }
                     else { setBdDeletingId(saved.id); }
-                  }, style: BTN_DELETE_ICON }, WsIconTrash()))));
-          }),
+                  }, style: BTN_DELETE_ICON }, WsIconTrash())))));
+          } return _bdi; }()),
           // Game Blocks tab
           bdSavedTab === "factory" && BD_FACTORY_PRESETS.map(function(preset) {
             return React.createElement("div", { key: preset.id, style: Object.assign({}, CARD_STYLE, { display: "flex", alignItems: "center", gap: 10 }) },
@@ -6371,13 +6393,13 @@ export default function CosmicWorkshop() {
           vfxSavedTab === "custom" && vfxSaved.length === 0 && React.createElement("div", { style: { textAlign: "center", padding: 40 } },
             React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 14, marginBottom: 8 } }, "No saved effects yet"),
             React.createElement("div", { style: { color: "rgba(180,200,220,0.2)", fontSize: 12 } }, "Create a new effect or copy a Default to start.")),
-          vfxSavedTab === "custom" && sortItems(vfxSaved, vfxSortMode, "modifiedAt").map(function(saved) {
+          vfxSavedTab === "custom" && (function() { var _vfxs = sortItems(vfxSaved, vfxSortMode, "modifiedAt"); var _vfxi = []; var _vfxlt = null; for (var _vfxk = 0; _vfxk < _vfxs.length; _vfxk++) { var saved = _vfxs[_vfxk]; if (vfxSortMode === "effect") { var _vfxei = vfxTypeInfo(saved.effectType); var _vfxet = _vfxei ? _vfxei.label : "Other"; if (_vfxet !== _vfxlt) { _vfxlt = _vfxet; _vfxi.push(renderTypeHeader(_vfxet, "#ffb43c")); } }
             var etInfo = vfxTypeInfo(saved.effectType);
             var _dateRaw = saved.modifiedAt || saved.createdAt || saved.savedAt;
             var dateStr = _dateRaw ? new Date(_dateRaw).toLocaleDateString() : "";
             var isAct = vfxActiveMap[saved.effectType] === saved.id;
             var _vfxSel = setsSelMode && setsSelMode.selectedIds.indexOf(saved.id) !== -1;
-            return React.createElement("div", { key: saved.id, style: Object.assign({}, CARD_STYLE, setsSelMode ? { display: "flex", alignItems: "flex-start", gap: 8 } : {}) },
+            _vfxi.push(React.createElement("div", { key: saved.id, style: Object.assign({}, CARD_STYLE, setsSelMode ? { display: "flex", alignItems: "flex-start", gap: 8 } : {}) },
               setsSelMode && React.createElement("div", { onClick: function() { setsToggleSel(saved, "effectType"); }, style: { width: 20, height: 20, borderRadius: 4, border: _vfxSel ? "1.5px solid #ffd060" : "1.5px solid rgba(255,208,96,0.3)", background: _vfxSel ? "#ffd060" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, marginTop: 2 } },
                 _vfxSel && React.createElement("svg", { width: 12, height: 12, viewBox: "0 0 24 24", fill: "none", stroke: "#1a1400", strokeWidth: 3.2, strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("path", { d: "M5 12l5 5L20 7" }))),
               React.createElement("div", { style: { flex: 1 } },
@@ -6402,8 +6424,8 @@ export default function CosmicWorkshop() {
                     var _inSets = setsDesignInSets(saved.id);
                     if (_inSets.length > 0) { setSetsDeleteWarn({ setNames: _inSets, onConfirm: function() { setVfxDeletingId(saved.id); setSetsDeleteWarn(null); } }); }
                     else { setVfxDeletingId(saved.id); }
-                  }, style: BTN_DELETE_ICON }, WsIconTrash()))));
-          }),
+                  }, style: BTN_DELETE_ICON }, WsIconTrash())))));
+          } return _vfxi; }()),
           vfxSavedTab === "factory" && VFX_FACTORY_PRESETS.map(function(preset) {
             return React.createElement("div", { key: preset.id, style: Object.assign({}, CARD_STYLE, { display: "flex", alignItems: "center", gap: 10 }) },
               renderVfxIcon(preset),
@@ -6654,11 +6676,11 @@ export default function CosmicWorkshop() {
           shipSaved.length === 0 && React.createElement("div", { style: { textAlign: "center", padding: 40 } },
             React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 14, marginBottom: 8 } }, "No saved ship designs"),
             React.createElement("div", { style: { color: "rgba(180,200,220,0.2)", fontSize: 12 } }, "Tap + New to design your first ship.")),
-          sortItems(shipSaved, shipSortMode, "savedAt").map(function(design) {
+          (function() { var _shps = sortItems(shipSaved, shipSortMode, "savedAt"); var _shpi = []; var _shplt = null; for (var _shpk = 0; _shpk < _shps.length; _shpk++) { var design = _shps[_shpk]; if (shipSortMode === "hull") { var _shpt = SHIP_HULL_LABELS[design.hull] || design.hull || "Custom"; if (_shpt !== _shplt) { _shplt = _shpt; _shpi.push(renderTypeHeader(_shpt, "#ff8aaa")); } }
             var isActive = design.id === shipActiveId;
             var _shipSel = setsSelMode && setsSelMode.selectedIds.indexOf(design.id) !== -1;
             var _shipDateStr = design.savedAt ? new Date(design.savedAt).toLocaleDateString() : "";
-            return React.createElement("div", { key: design.id, style: Object.assign({}, CARD_STYLE, _shipSel ? { borderColor: "rgba(255,208,96,0.4)", background: "rgba(255,208,96,0.05)" } : {}) },
+            _shpi.push(React.createElement("div", { key: design.id, style: Object.assign({}, CARD_STYLE, _shipSel ? { borderColor: "rgba(255,208,96,0.4)", background: "rgba(255,208,96,0.05)" } : {}) },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, marginBottom: setsSelMode ? 0 : 10 } },
                 setsSelMode && React.createElement("div", { onClick: function() {
                   var _newIds = _shipSel ? [] : [design.id];
@@ -6705,8 +6727,8 @@ export default function CosmicWorkshop() {
                   var _inSets = setsDesignInSets(design.id);
                   if (_inSets.length > 0) { setSetsDeleteWarn({ setNames: _inSets, onConfirm: function() { setShipDeletingId(design.id); setSetsDeleteWarn(null); } }); }
                   else { setShipDeletingId(design.id); }
-                }, style: BTN_DELETE_ICON }, WsIconTrash())));
-          })),
+                }, style: BTN_DELETE_ICON }, WsIconTrash()))));
+          } return _shpi; }())),
         shipDeletingId && renderDeleteOverlay("Delete Ship Design?", function() { setShipDeletingId(null); }, function() { shipDeleteDesign(shipDeletingId); }),
         shipExportId && renderExportOverlay("Export Ship Design", shipExportText, shipCopied, function() { copyToClipboard(shipExportText, setShipCopied); }, function() { setShipExportId(null); }),
         shipShowImport && renderImportOverlay("Import Ship Design", shipImportText, setShipImportText, shipImportError, setShipImportError, shipHandleImport, function() { setShipShowImport(false); setShipImportText(""); setShipImportError(""); }, getShipImportPreview),
@@ -7308,11 +7330,11 @@ export default function CosmicWorkshop() {
           plasmaSaved.length === 0 && React.createElement("div", { style: { textAlign: "center", padding: 40 } },
             React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 14, marginBottom: 8 } }, "No saved plasma designs"),
             React.createElement("div", { style: { color: "rgba(180,200,220,0.2)", fontSize: 12 } }, "Tap + New to design your first plasma.")),
-          sortItems(plasmaSaved, plasmaSortMode, "savedAt").map(function(design) {
+          (function() { var _plss = sortItems(plasmaSaved, plasmaSortMode, "savedAt"); var _plsi = []; var _plslt = null; for (var _plsk = 0; _plsk < _plss.length; _plsk++) { var design = _plss[_plsk]; if (plasmaSortMode === "shape") { var _plst = PLASMA_SHAPE_LABELS[design.shape] || design.shape || "Ball"; if (_plst !== _plslt) { _plslt = _plst; _plsi.push(renderTypeHeader(_plst, "#50c8ff")); } }
             var isActive = design.id === plasmaActiveId;
             var _plasmaSel = setsSelMode && setsSelMode.selectedIds.indexOf(design.id) !== -1;
             var _plasmaDateStr = design.savedAt ? new Date(design.savedAt).toLocaleDateString() : "";
-            return React.createElement("div", { key: design.id, style: Object.assign({}, CARD_STYLE, _plasmaSel ? { borderColor: "rgba(255,208,96,0.4)", background: "rgba(255,208,96,0.05)" } : {}) },
+            _plsi.push(React.createElement("div", { key: design.id, style: Object.assign({}, CARD_STYLE, _plasmaSel ? { borderColor: "rgba(255,208,96,0.4)", background: "rgba(255,208,96,0.05)" } : {}) },
               React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 12, marginBottom: setsSelMode ? 0 : 10 } },
                 setsSelMode && React.createElement("div", { onClick: function() {
                   var _newIds = _plasmaSel ? [] : [design.id];
@@ -7342,8 +7364,8 @@ export default function CosmicWorkshop() {
                   var _inSets = setsDesignInSets(design.id);
                   if (_inSets.length > 0) { setSetsDeleteWarn({ setNames: _inSets, onConfirm: function() { setPlasmaDeletingId(design.id); setSetsDeleteWarn(null); } }); }
                   else { setPlasmaDeletingId(design.id); }
-                }, style: BTN_DELETE_ICON }, WsIconTrash())));
-          })),
+                }, style: BTN_DELETE_ICON }, WsIconTrash()))));
+          } return _plsi; }())),
         plasmaDeletingId && renderDeleteOverlay("Delete Plasma Design?",
           function() { setPlasmaDeletingId(null); },
           function() { plasmaDeleteDesign(plasmaDeletingId); }),
