@@ -1853,6 +1853,8 @@ export default function CosmicWorkshop() {
   var _setsImportPending = useState(null), setsImportPending = _setsImportPending[0], setSetsImportPending = _setsImportPending[1];
   var setsLevelDragRef = useRef(null);
   var _setsLevelInput = useState(null), setsLevelInput = _setsLevelInput[0], setSetsLevelInput = _setsLevelInput[1];
+  var lvDragRef = useRef(null);
+  var _lvNumInput = useState(null), lvNumInput = _lvNumInput[0], setLvNumInput = _lvNumInput[1];
   var _setsDeleteWarn = useState(null), setsDeleteWarn = _setsDeleteWarn[0], setSetsDeleteWarn = _setsDeleteWarn[1];
   var _setsSelectAllConflicts = useState(null), setsSelectAllConflicts = _setsSelectAllConflicts[0], setSetsSelectAllConflicts = _setsSelectAllConflicts[1];
   var _setsUnsavedWarn = useState(false), setsUnsavedWarn = _setsUnsavedWarn[0], setSetsUnsavedWarn = _setsUnsavedWarn[1];
@@ -2718,6 +2720,61 @@ export default function CosmicWorkshop() {
 
   function validateBuilderGrid(g) { var hasDestructible = false; for (var i = 0; i < g.length; i++) { if (g[i] > 0 && !WIN_EXEMPT[g[i]]) { hasDestructible = true; break; } } return hasDestructible; }
 
+  function updateLevelNum(lvId, valStr) {
+    var n = parseInt(valStr, 10);
+    setLvNumInput(null);
+    if (isNaN(n) || n < 1) return;
+    setSavedLevels(function(prev) {
+      var levels = prev.slice();
+      for (var i = 0; i < levels.length; i++) {
+        if (levels[i].id === lvId) { levels[i] = Object.assign({}, levels[i], { levelNum: n }); break; }
+      }
+      persistLevels(levels);
+      return levels;
+    });
+  }
+
+  function lvReorder(fromSortedIdx, toSortedIdx) {
+    setSavedLevels(function(prev) {
+      var sorted = sortItems(prev.slice(), "level_num", "modified");
+      var item = sorted.splice(fromSortedIdx, 1)[0];
+      sorted.splice(toSortedIdx, 0, item);
+      for (var i = 0; i < sorted.length; i++) { sorted[i] = Object.assign({}, sorted[i], { levelNum: i + 1 }); }
+      var updMap = {};
+      for (var j = 0; j < sorted.length; j++) { updMap[sorted[j].id] = sorted[j]; }
+      var result = [];
+      for (var k = 0; k < prev.length; k++) { result.push(updMap[prev[k].id] || prev[k]); }
+      persistLevels(result);
+      return result;
+    });
+  }
+
+  function lvDragStart(idx, e) {
+    if (e.preventDefault) e.preventDefault();
+    if (e.stopPropagation) e.stopPropagation();
+    lvDragRef.current = { idx: idx };
+    if (e.currentTarget.setPointerCapture && e.pointerId != null) {
+      try { e.currentTarget.setPointerCapture(e.pointerId); } catch(err) {}
+    }
+  }
+
+  function lvDragMove(e) {
+    var d = lvDragRef.current;
+    if (!d) return;
+    if (e.preventDefault) e.preventDefault();
+    var rows = document.querySelectorAll("[data-lv-row]");
+    var cy = e.clientY != null ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+    var targetIdx = d.idx;
+    for (var _li = 0; _li < rows.length; _li++) {
+      var r = rows[_li].getBoundingClientRect();
+      if (cy < r.top + r.height / 2) { targetIdx = parseInt(rows[_li].getAttribute("data-lv-idx"), 10); break; }
+      if (_li === rows.length - 1) targetIdx = parseInt(rows[_li].getAttribute("data-lv-idx"), 10);
+    }
+    if (!isNaN(targetIdx) && targetIdx !== d.idx) { lvReorder(d.idx, targetIdx); d.idx = targetIdx; }
+  }
+
+  function lvDragEnd(e) { lvDragRef.current = null; }
+
   function doSaveLevel(id, name) {
     if (savingRef.current) return;
     savingRef.current = true;
@@ -2728,8 +2785,13 @@ export default function CosmicWorkshop() {
     setSavedLevels(function(prev) {
       var levels = prev.slice();
       var found = false;
-      for (var i = 0; i < levels.length; i++) { if (levels[i].id === levelId) { entry.created = levels[i].created || now; levels[i] = entry; found = true; break; } }
-      if (!found) levels.push(entry);
+      for (var i = 0; i < levels.length; i++) { if (levels[i].id === levelId) { entry.created = levels[i].created || now; entry.levelNum = levels[i].levelNum; levels[i] = entry; found = true; break; } }
+      if (!found) {
+        var _maxLvNum = 0;
+        for (var _lni = 0; _lni < levels.length; _lni++) { if (levels[_lni].levelNum && levels[_lni].levelNum > _maxLvNum) _maxLvNum = levels[_lni].levelNum; }
+        entry.levelNum = _maxLvNum + 1;
+        levels.push(entry);
+      }
       persistLevels(levels);
       return levels;
     });
@@ -3791,6 +3853,12 @@ export default function CosmicWorkshop() {
         var asto = stOrder[setsGetType(a)]; if (asto == null) asto = 6;
         var bsto = stOrder[setsGetType(b)]; if (bsto == null) bsto = 6;
         if (asto !== bsto) return asto - bsto;
+        return (a.name || "").localeCompare(b.name || "");
+      }
+      if (mode === "level_num") {
+        var lna = a.levelNum != null ? a.levelNum : 9999;
+        var lnb = b.levelNum != null ? b.levelNum : 9999;
+        if (lna !== lnb) return lna - lnb;
         return (a.name || "").localeCompare(b.name || "");
       }
       if (mode === "date_old") return ((a[dateKey] ? new Date(a[dateKey]).getTime() : 0) || 0) - ((b[dateKey] ? new Date(b[dateKey]).getTime() : 0) || 0);
@@ -5419,7 +5487,7 @@ export default function CosmicWorkshop() {
           React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 33, fontWeight: 700, letterSpacing: 7, color: "#ede8ff", textTransform: "uppercase", textShadow: "0 0 22px rgba(160,100,255,0.55), 0 0 44px rgba(120,60,220,0.25)", lineHeight: 1.1 } }, "WORKSHOP"),
           React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", gap: 8 } },
             React.createElement("div", { style: { height: 1, width: 22, background: "rgba(160,100,255,0.25)" } }),
-            React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,170,255,0.32)" }, "SERVICE PANEL  ·  v5.0"),
+            React.createElement(WsMono, { size: 8, ls: 2, color: "rgba(200,170,255,0.32)" }, "SERVICE PANEL  ·  v5.1"),
             React.createElement("div", { style: { height: 1, width: 22, background: "rgba(160,100,255,0.25)" } })
           ),
           React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 10, marginTop: 2 } },
@@ -5980,7 +6048,7 @@ export default function CosmicWorkshop() {
         ),
         React.createElement("div", { style: { marginBottom: 18, padding: "10px 14px", background: "rgba(255,255,255,0.03)", borderRadius: 8, border: "1px solid rgba(180,200,220,0.08)" } },
           React.createElement("div", { style: { fontSize: 9, color: "rgba(180,200,220,0.3)", letterSpacing: 2, marginBottom: 4 } }, "VERSION"),
-          React.createElement("div", { style: { fontSize: 15, fontWeight: 700, color: "rgba(180,200,220,0.55)", letterSpacing: 1 } }, "SERVICE PANEL  ·  v5.0")
+          React.createElement("div", { style: { fontSize: 15, fontWeight: 700, color: "rgba(180,200,220,0.55)", letterSpacing: 1 } }, "SERVICE PANEL  ·  v5.1")
         ),
         React.createElement("div", { onClick: function() { window.location.href = "mailto:cosmicdriftapp@gmail.com?subject=I%20found%20a%20bug!"; }, style: { width: "100%", padding: "11px 0", borderRadius: 8, background: "rgba(255,80,80,0.07)", border: "1px solid rgba(255,80,80,0.18)", color: "rgba(255,140,140,0.7)", fontSize: 12, fontWeight: 700, cursor: "pointer", textAlign: "center", letterSpacing: 1, boxSizing: "border-box" } }, "Report a Bug"),
         React.createElement("div", { onClick: function() { try { window.storage.delete("cosmic_drift_builder_tour"); } catch(e) {} builderTourSeenRef.current = false; setWsTutsReset(true); setTimeout(function() { setWsTutsReset(false); }, 2500); }, style: { width: "100%", padding: "11px 0", marginTop: 10, borderRadius: 8, background: wsTutsReset ? "rgba(80,200,120,0.12)" : "rgba(80,140,255,0.1)", border: wsTutsReset ? "1px solid rgba(80,200,120,0.3)" : "1px solid rgba(80,140,255,0.25)", color: wsTutsReset ? "rgba(130,220,150,0.9)" : "rgba(120,170,255,0.85)", fontSize: 12, fontWeight: 700, cursor: "pointer", textAlign: "center", letterSpacing: 1, boxSizing: "border-box" } }, wsTutsReset ? "Builder Tour Reset ✓" : "Reset Builder Tour")
@@ -6031,17 +6099,25 @@ export default function CosmicWorkshop() {
             savedLevels.length > 0 && React.createElement("div", { onClick: exportAllLevels, style: Object.assign({}, BTN_TOPBAR, { color: "rgba(200,184,255,0.6)", fontSize: 8 }) }, "Exp All"),
             React.createElement("div", { onClick: function() { openBuilder(); }, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #1a3a4a, #0f2a38)", boxShadow: "0 0 8px rgba(80,200,255,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, "+ New")) }),
         renderSetsSelBar("level", savedLevels.map(function(lv) { return lv.id; })),
-        !setsSelMode && savedLevels.length > 1 && renderSortBar(sortMode, setSortMode),
-        React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "6px 10px 20px", position: "relative", zIndex: 1 } },
+        !setsSelMode && savedLevels.length > 1 && renderSortBar(sortMode, setSortMode, [["level_num", "Number"]]),
+        React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "6px 10px 20px", position: "relative", zIndex: 1 }, onPointerMove: lvDragMove, onPointerUp: lvDragEnd },
           levelsLoading && React.createElement("div", { style: { textAlign: "center", padding: 40, color: "rgba(180,200,220,0.4)", fontSize: 14 } }, "Loading..."),
           !levelsLoading && savedLevels.length === 0 && React.createElement("div", { style: { textAlign: "center", padding: 40 } },
             React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 14, marginBottom: 8 } }, "No saved levels yet"),
             React.createElement("div", { style: { color: "rgba(180,200,220,0.2)", fontSize: 12 } }, "Build a new level or tap Import to paste a level code.")),
-          !levelsLoading && sortItems(savedLevels, sortMode, "modified").map(function(lv) {
+          !levelsLoading && sortItems(savedLevels, sortMode, "modified").map(function(lv, sortedIdx) {
             var _lvDateObj = new Date(lv.savedAt);
             var dateStr = (lv.savedAt && !isNaN(_lvDateObj.getTime())) ? _lvDateObj.toLocaleDateString() : (lv.modified ? new Date(lv.modified).toLocaleDateString() : "");
             var _lvSel = setsSelMode && setsSelMode.selectedIds.indexOf(lv.id) !== -1;
-            return React.createElement("div", { key: lv.id, style: Object.assign({}, CARD_STYLE, setsSelMode ? { display: "flex", alignItems: "flex-start", gap: 8 } : {}) },
+            return React.createElement("div", { key: lv.id, "data-lv-row": "1", "data-lv-idx": sortedIdx, style: Object.assign({}, CARD_STYLE, (setsSelMode || sortMode === "level_num") ? { display: "flex", alignItems: "flex-start", gap: 8 } : {}) },
+              sortMode === "level_num" && !setsSelMode && React.createElement("div", { onPointerDown: function(e) { lvDragStart(sortedIdx, e); }, onPointerMove: lvDragMove, onPointerUp: lvDragEnd, style: { cursor: "grab", padding: "2px 4px", alignSelf: "stretch", display: "flex", alignItems: "center", touchAction: "none" } },
+                React.createElement("svg", { width: 10, height: 14, viewBox: "0 0 10 14", fill: "rgba(180,200,220,0.3)" },
+                  React.createElement("circle", { cx: 2.5, cy: 2.5, r: 1.5 }),
+                  React.createElement("circle", { cx: 7.5, cy: 2.5, r: 1.5 }),
+                  React.createElement("circle", { cx: 2.5, cy: 7, r: 1.5 }),
+                  React.createElement("circle", { cx: 7.5, cy: 7, r: 1.5 }),
+                  React.createElement("circle", { cx: 2.5, cy: 11.5, r: 1.5 }),
+                  React.createElement("circle", { cx: 7.5, cy: 11.5, r: 1.5 }))),
               setsSelMode && React.createElement("div", { onClick: function() { setsToggleSel(lv, null); }, style: { width: 20, height: 20, borderRadius: 4, border: _lvSel ? "1.5px solid #ffd060" : "1.5px solid rgba(255,208,96,0.3)", background: _lvSel ? "#ffd060" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, marginTop: 2 } },
                 _lvSel && React.createElement("svg", { width: 12, height: 12, viewBox: "0 0 24 24", fill: "none", stroke: "#1a1400", strokeWidth: 3.2, strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("path", { d: "M5 12l5 5L20 7" }))),
               React.createElement("div", { style: { flex: 1 } },
@@ -6051,6 +6127,9 @@ export default function CosmicWorkshop() {
                   React.createElement("div", { onMouseDown: function(e) { e.preventDefault(); }, onClick: function() { setRenamingId(null); }, style: { padding: "4px 8px", borderRadius: 4, background: "rgba(220,60,80,0.18)", border: "1px solid rgba(220,60,80,0.45)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } }, React.createElement("svg", { width: "14", height: "14", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M6 6L18 18 M18 6L6 18", fill: "none", stroke: "#ff8088", strokeWidth: "2.5", strokeLinecap: "round" }))))
                 : React.createElement("div", { style: { marginBottom: 8 } },
                   React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 5 } },
+                    !setsSelMode && (lvNumInput && lvNumInput.id === lv.id
+                      ? React.createElement("input", { type: "number", value: lvNumInput.val, autoFocus: true, onChange: function(e) { setLvNumInput({ id: lv.id, val: e.target.value }); }, onBlur: function(e) { updateLevelNum(lv.id, e.target.value); }, onKeyDown: function(e) { if (e.key === "Enter") { updateLevelNum(lv.id, e.target.value); } if (e.key === "Escape") { setLvNumInput(null); } }, style: { width: 36, fontSize: 16, textAlign: "center", background: SCRN, border: SCRNB, borderRadius: 3, color: "#80ddff", outline: "none", padding: "0 4px", fontFamily: "'Quicksand',sans-serif" } })
+                      : React.createElement("div", { onClick: function() { setLvNumInput({ id: lv.id, val: lv.levelNum != null ? String(lv.levelNum) : "" }); }, style: { fontSize: 10, color: "#80ddff", opacity: 0.7, background: "rgba(128,220,255,0.08)", border: "1px solid rgba(128,220,255,0.2)", borderRadius: 3, padding: "1px 5px", cursor: "pointer", fontWeight: 700, flexShrink: 0 } }, lv.levelNum != null ? "#" + lv.levelNum : "#–")),
                     React.createElement("div", { style: { color: "#b0c8d8", fontSize: 14, fontWeight: 700 } }, lv.name || "Untitled"),
                     !setsSelMode && React.createElement("div", { onClick: function() { setRenamingId(lv.id); setRenamingName(lv.name || ""); }, style: { width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 4, cursor: "pointer", color: "rgba(180,200,220,0.6)", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", flexShrink: 0 } }, WsIconPencil(11))),
                   React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 10 } }, dateStr)),
