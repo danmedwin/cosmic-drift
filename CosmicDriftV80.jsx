@@ -1895,7 +1895,7 @@ export default function CosmicDriftGame() {
   // ── Dark Level sync ──
   // Toggle darkness on/off as level and screen change.
   useEffect(function () {
-    var nowDark = level >= 101 && screen === "game";
+    var nowDark = level >= 101 && level <= 150 && screen === "game";
     _isDarkLevel = nowDark;
     if (nowDark) { _startCvfxLoop(); }
   }, [level, screen]);
