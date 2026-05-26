@@ -1166,6 +1166,9 @@ var USE_THE_FORCE_PLASMA = { shape: "blast", color: "#ff4488", colorMode: "radia
 var TIE_FIGHTS_PLASMA    = { shape: "blast", color: "#44ffaa", colorMode: "radial", colorOpacity: 1, glowColor: "#44ffaa", glowSize: 8, splitEnabled: true, splitDistance: 10, flashEnabled: true, flashColor: "#44ffaa", flashSize: 24, flashOpacity: 0.9, sourceOffsetX: 50, sourceOffsetY: 37, speed: 1, name: "Empire Green", id: "plasma_1779424414320", savedAt: "2026-05-22T22:32:28.874Z" };
 var USE_THE_FORCE_SET = { id: "set_1779512592664", name: "Use the Force", savedAt: "2026-05-23T05:03:47.522Z", shipDesignId: "ship_1779507928877", plasmaDesignId: "plasma_1779501546068" };
 var TIE_FIGHTS_SET    = { id: "set_1779512653579", name: "Tie Fights",     savedAt: "2026-05-23T05:07:04.177Z", shipDesignId: "ship_1779483721711", plasmaDesignId: "plasma_1779424414320" };
+var FIRE_PHOTO_TORPEDOS_SHIP = { id: "ship_1779762662231", name: "USS Driftwood", hull: "startrack", parts: JSON.parse('[{"type":"rect","name":"Pylon-Left","x":13.89,"y":27,"w":10,"h":1.6,"cr":0.6,"rot":-38,"color":"#2a2f3a","color2":"#9aa3b2","fillMode":"linear","gradAngle":270,"opacity":1},{"type":"rect","name":"Pylon-Right","x":25.81,"y":26.95,"w":10,"h":1.6,"cr":0.6,"rot":38,"color":"#2a2f3a","color2":"#9aa3b2","fillMode":"linear","gradAngle":255,"opacity":1},{"type":"rect","name":"Secondary-Hull","x":20.032038643533127,"y":26.516758675078865,"w":5.6,"h":13,"cr":2.6,"rot":0,"color":"#1a1e28","color2":"#b0b8c4","fillMode":"linear","gradAngle":0,"opacity":1},{"type":"rect","name":"Neck","x":20,"y":17.47,"w":2.6,"h":10,"cr":0.6,"rot":0,"color":"#3a4150","color2":"#cfd6df","fillMode":"linear","gradAngle":0,"opacity":1},{"type":"circle","name":"Saucer","x":19.69,"y":12.97,"w":22,"h":8,"rot":0,"color":"#2a2f3a","color2":"#dde3ec","fillMode":"radial","gradStop":0.75,"opacity":1,"groupId":"g1779514987121","gsx":1,"gsy":1,"gcx":19.69,"gcy":12.969999999999999,"groupName":"Saucer"},{"type":"circle","name":"Bridge","x":19.93,"y":11.01,"w":6.5,"h":3.5,"rot":0,"color":"#cfd6df","color2":"#3a4150","fillMode":"radial","opacity":1,"groupId":"g1779514987121","gsx":1,"gsy":1,"gcx":19.69,"gcy":12.969999999999999,"groupName":"Saucer"},{"type":"circle","name":"Bridge-Lamp","x":19.92,"y":10,"w":1.4,"h":1,"rot":0,"color":"#e9f6ff","color2":"#4a7a8e","fillMode":"radial","opacity":0.95,"glowEnabled":true,"glowIntensity":1,"groupId":"g1779514987121","gsx":1,"gsy":1,"gcx":19.69,"gcy":12.969999999999999,"groupName":"Saucer"},{"type":"rect","name":"Nacelle-Left","x":9,"y":25,"w":3,"h":20,"cr":1.5,"rot":0,"color":"#15181f","color2":"#6a7484","fillMode":"linear","gradAngle":0,"opacity":1},{"type":"rect","name":"Nacelle-Right","x":31,"y":25,"w":3,"h":20,"cr":1.5,"rot":0,"color":"#15181f","color2":"#6a7484","fillMode":"linear","gradAngle":180,"opacity":1},{"type":"rect","name":"Warp-Glow-Left","x":8.571339714225138,"y":27,"w":1.4,"h":14,"cr":0.7,"rot":0,"color":"#80ddff","color2":"#1a4a5e","fillMode":"linear","gradAngle":0,"opacity":0.9,"glowEnabled":true,"glowIntensity":1},{"type":"rect","name":"Warp-Glow-Right","x":31.779909828008247,"y":26.591876971608833,"w":1.4,"h":14,"cr":0.7,"rot":0,"color":"#80ddff","color2":"#1a4a5e","fillMode":"linear","gradAngle":180,"opacity":0.9,"glowEnabled":true,"glowIntensity":1},{"type":"circle","name":"Bussard-Left","x":9.054712145110411,"y":15.70920741324921,"w":2.6,"h":1.5,"rot":0,"color":"#ff7a50","color2":"#7a1d0e","fillMode":"radial","opacity":0.95,"glowEnabled":true,"glowColor":"#ff6040","glowIntensity":1,"bw":0.1},{"type":"circle","name":"Bussard-Right","x":30.802421135646682,"y":15.919666617409913,"w":2.6,"h":1.5,"rot":0,"color":"#ff7a50","color2":"#7a1d0e","fillMode":"radial","opacity":0.95,"glowEnabled":true,"glowColor":"#ff6040","glowIntensity":1,"bw":0.1}]'), savedAt: "2026-05-26T02:31:02.231Z" };
+var FIRE_PHOTO_TORPEDOS_PLASMA = { shape: "torpedo", color: "#ff4488", colorMode: "radial", colorOpacity: 1, glowColor: "#ff4488", glowSize: 24, splitEnabled: true, splitDistance: 16, flashEnabled: true, flashColor: "#ffffff", flashSize: 24, flashOpacity: 0.9, sourceOffsetX: 50, sourceOffsetY: 22, speed: 1, name: "Photons", id: "plasma_1779762781666", savedAt: "2026-05-26T02:33:01.666Z" };
+var FIRE_PHOTO_TORPEDOS_SET  = { id: "set_1779762866432",  name: "Fire Photo Torpedos", savedAt: "2026-05-26T02:42:18.313Z", shipDesignId: "ship_1779762662231", plasmaDesignId: "plasma_1779762781666" };
 
 // ── SVG Pattern renderer ──
 function PatternDef(props) {
@@ -1912,22 +1915,24 @@ export default function CosmicWorkshop() {
       }
     });
     shipLoadDesigns().then(function(designs) {
-      var migrated, _shipNeedsSave = false, _hasUtfShip = false, _hasTfShip = false;
+      var migrated, _shipNeedsSave = false, _hasUtfShip = false, _hasTfShip = false, _hasFptShip = false;
       if (designs && designs.length > 0) {
         migrated = designs.map(shipMigrateDesign);
         for (var _psi = 0; _psi < migrated.length; _psi++) {
-          if (migrated[_psi].id === USE_THE_FORCE_SHIP.id) _hasUtfShip = true;
-          if (migrated[_psi].id === TIE_FIGHTS_SHIP.id)    _hasTfShip  = true;
+          if (migrated[_psi].id === USE_THE_FORCE_SHIP.id)       _hasUtfShip = true;
+          if (migrated[_psi].id === TIE_FIGHTS_SHIP.id)          _hasTfShip  = true;
+          if (migrated[_psi].id === FIRE_PHOTO_TORPEDOS_SHIP.id) _hasFptShip = true;
         }
-        if (!_hasTfShip)  { migrated = [TIE_FIGHTS_SHIP].concat(migrated);    _shipNeedsSave = true; }
-        if (!_hasUtfShip) { migrated = [USE_THE_FORCE_SHIP].concat(migrated);  _shipNeedsSave = true; }
+        if (!_hasTfShip)  { migrated = [TIE_FIGHTS_SHIP].concat(migrated);           _shipNeedsSave = true; }
+        if (!_hasUtfShip) { migrated = [USE_THE_FORCE_SHIP].concat(migrated);         _shipNeedsSave = true; }
+        if (!_hasFptShip) { migrated = [FIRE_PHOTO_TORPEDOS_SHIP].concat(migrated);   _shipNeedsSave = true; }
         if (_shipNeedsSave) { shipSaveDesigns(migrated); }
         setShipSaved(migrated);
         shipLoadActiveId().then(function(id) { setShipActiveId(id); });
       } else {
         // First-time install: seed preset ships + "Default" from the arrow preset.
         var seed = { id: "ship_default", name: "Default", hull: "arrow", parts: shipHullPresetParts("arrow"), savedAt: new Date().toISOString() };
-        migrated = [USE_THE_FORCE_SHIP, TIE_FIGHTS_SHIP, seed];
+        migrated = [USE_THE_FORCE_SHIP, TIE_FIGHTS_SHIP, FIRE_PHOTO_TORPEDOS_SHIP, seed];
         setShipSaved(migrated);
         setShipActiveId(seed.id);
         shipSaveDesigns(migrated);
@@ -1935,21 +1940,23 @@ export default function CosmicWorkshop() {
       }
     });
     plasmaLoadDesigns().then(function(designs) {
-      var _plasmaList, _plasmaNeedsSave = false, _hasUtfPlasma = false, _hasTfPlasma = false;
+      var _plasmaList, _plasmaNeedsSave = false, _hasUtfPlasma = false, _hasTfPlasma = false, _hasFptPlasma = false;
       if (designs && designs.length > 0) {
         _plasmaList = designs;
         for (var _ppi = 0; _ppi < _plasmaList.length; _ppi++) {
-          if (_plasmaList[_ppi].id === USE_THE_FORCE_PLASMA.id) _hasUtfPlasma = true;
-          if (_plasmaList[_ppi].id === TIE_FIGHTS_PLASMA.id)    _hasTfPlasma  = true;
+          if (_plasmaList[_ppi].id === USE_THE_FORCE_PLASMA.id)       _hasUtfPlasma = true;
+          if (_plasmaList[_ppi].id === TIE_FIGHTS_PLASMA.id)          _hasTfPlasma  = true;
+          if (_plasmaList[_ppi].id === FIRE_PHOTO_TORPEDOS_PLASMA.id) _hasFptPlasma = true;
         }
-        if (!_hasTfPlasma)  { _plasmaList = [TIE_FIGHTS_PLASMA].concat(_plasmaList);    _plasmaNeedsSave = true; }
-        if (!_hasUtfPlasma) { _plasmaList = [USE_THE_FORCE_PLASMA].concat(_plasmaList);  _plasmaNeedsSave = true; }
+        if (!_hasTfPlasma)  { _plasmaList = [TIE_FIGHTS_PLASMA].concat(_plasmaList);          _plasmaNeedsSave = true; }
+        if (!_hasUtfPlasma) { _plasmaList = [USE_THE_FORCE_PLASMA].concat(_plasmaList);        _plasmaNeedsSave = true; }
+        if (!_hasFptPlasma) { _plasmaList = [FIRE_PHOTO_TORPEDOS_PLASMA].concat(_plasmaList);  _plasmaNeedsSave = true; }
         if (_plasmaNeedsSave) { plasmaSaveDesigns(_plasmaList); }
         setPlasmaSaved(_plasmaList);
         plasmaLoadActiveId().then(function(id) { setPlasmaActiveId(id); });
       } else {
         var seed = Object.assign({}, PLASMA_DEFAULT_DESIGN, { id: "plasma_default", name: "Default", savedAt: new Date().toISOString() });
-        _plasmaList = [USE_THE_FORCE_PLASMA, TIE_FIGHTS_PLASMA, seed];
+        _plasmaList = [USE_THE_FORCE_PLASMA, TIE_FIGHTS_PLASMA, FIRE_PHOTO_TORPEDOS_PLASMA, seed];
         setPlasmaSaved(_plasmaList);
         setPlasmaActiveId(seed.id);
         plasmaSaveDesigns(_plasmaList);
@@ -1958,17 +1965,19 @@ export default function CosmicWorkshop() {
     });
     try { window.storage.get("cosmic_drift_ship_size").then(function(r) { if (r && r.value) { var v = Number(r.value); if (v >= 34 && v <= 204) setPlasmaShipSize(v); } }).catch(function() {}); } catch(e) {}
     setsLoadAll().then(function(all) {
-      var _hasOsSet = false, _hasUtfSet = false, _hasTfSet = false;
+      var _hasOsSet = false, _hasUtfSet = false, _hasTfSet = false, _hasFptSet = false;
       for (var _ssi = 0; _ssi < all.length; _ssi++) {
-        if (all[_ssi].id === OPEN_SPACE_SET.id)      _hasOsSet  = true;
-        if (all[_ssi].id === USE_THE_FORCE_SET.id)   _hasUtfSet = true;
-        if (all[_ssi].id === TIE_FIGHTS_SET.id)      _hasTfSet  = true;
+        if (all[_ssi].id === OPEN_SPACE_SET.id)           _hasOsSet  = true;
+        if (all[_ssi].id === USE_THE_FORCE_SET.id)        _hasUtfSet = true;
+        if (all[_ssi].id === TIE_FIGHTS_SET.id)           _hasTfSet  = true;
+        if (all[_ssi].id === FIRE_PHOTO_TORPEDOS_SET.id)  _hasFptSet = true;
       }
       var _seededSets = all.slice();
       if (!_hasTfSet)  _seededSets = [TIE_FIGHTS_SET].concat(_seededSets);
       if (!_hasUtfSet) _seededSets = [USE_THE_FORCE_SET].concat(_seededSets);
+      if (!_hasFptSet) _seededSets = [FIRE_PHOTO_TORPEDOS_SET].concat(_seededSets);
       if (!_hasOsSet)  _seededSets = [OPEN_SPACE_SET].concat(_seededSets);
-      if (!_hasOsSet || !_hasUtfSet || !_hasTfSet) { setsSaveAll(_seededSets); }
+      if (!_hasOsSet || !_hasUtfSet || !_hasTfSet || !_hasFptSet) { setsSaveAll(_seededSets); }
       setSetsSaved(_seededSets);
       setsLoadActiveId().then(function(id) { setSetsActiveId(id || null); });
     });
