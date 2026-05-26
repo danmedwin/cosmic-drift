@@ -1694,6 +1694,8 @@ export default function CosmicWorkshop() {
   var _ufoExportId = useState(null), ufoExportId = _ufoExportId[0], setUfoExportId = _ufoExportId[1];
   var _ufoExportText = useState(""), ufoExportText = _ufoExportText[0], setUfoExportText = _ufoExportText[1];
   var _ufoCopied = useState(false), ufoCopied = _ufoCopied[0], setUfoCopied = _ufoCopied[1];
+  var _ufoShowExportAll = useState(false), ufoShowExportAll = _ufoShowExportAll[0], setUfoShowExportAll = _ufoShowExportAll[1];
+  var _ufoExportAllText = useState(""), ufoExportAllText = _ufoExportAllText[0], setUfoExportAllText = _ufoExportAllText[1];
   var ufoEditDirtyRef = useRef(false);
   // ══ HANGAR STATE ══
   var _shipSaved = useState([]), shipSaved = _shipSaved[0], setShipSaved = _shipSaved[1];
@@ -1713,6 +1715,8 @@ export default function CosmicWorkshop() {
   var _shipExportId = useState(null), shipExportId = _shipExportId[0], setShipExportId = _shipExportId[1];
   var _shipExportText = useState(""), shipExportText = _shipExportText[0], setShipExportText = _shipExportText[1];
   var _shipCopied = useState(false), shipCopied = _shipCopied[0], setShipCopied = _shipCopied[1];
+  var _shipShowExportAll = useState(false), shipShowExportAll = _shipShowExportAll[0], setShipShowExportAll = _shipShowExportAll[1];
+  var _shipExportAllText = useState(""), shipExportAllText = _shipExportAllText[0], setShipExportAllText = _shipExportAllText[1];
   var _shipShowImport = useState(false), shipShowImport = _shipShowImport[0], setShipShowImport = _shipShowImport[1];
   var _shipImportText = useState(""), shipImportText = _shipImportText[0], setShipImportText = _shipImportText[1];
   var _shipImportError = useState(""), shipImportError = _shipImportError[0], setShipImportError = _shipImportError[1];
@@ -1741,6 +1745,8 @@ export default function CosmicWorkshop() {
   var _plasmaExportId = useState(null), plasmaExportId = _plasmaExportId[0], setPlasmaExportId = _plasmaExportId[1];
   var _plasmaExportText = useState(""), plasmaExportText = _plasmaExportText[0], setPlasmaExportText = _plasmaExportText[1];
   var _plasmaCopied = useState(false), plasmaCopied = _plasmaCopied[0], setPlasmaCopied = _plasmaCopied[1];
+  var _plasmaShowExportAll = useState(false), plasmaShowExportAll = _plasmaShowExportAll[0], setPlasmaShowExportAll = _plasmaShowExportAll[1];
+  var _plasmaExportAllText = useState(""), plasmaExportAllText = _plasmaExportAllText[0], setPlasmaExportAllText = _plasmaExportAllText[1];
   var _plasmaShowImport = useState(false), plasmaShowImport = _plasmaShowImport[0], setPlasmaShowImport = _plasmaShowImport[1];
   var _plasmaImportText = useState(""), plasmaImportText = _plasmaImportText[0], setPlasmaImportText = _plasmaImportText[1];
   var _plasmaImportError = useState(""), plasmaImportError = _plasmaImportError[0], setPlasmaImportError = _plasmaImportError[1];
@@ -4002,6 +4008,12 @@ export default function CosmicWorkshop() {
     setUfoExportId(design.id);
     setUfoCopied(false);
   }
+  function ufoExportAllDesigns() {
+    var arr = ufoSaved.map(function(d) { var out = {}; Object.keys(d).forEach(function(k) { out[k] = d[k]; }); return out; });
+    setUfoExportAllText(JSON.stringify(arr));
+    setUfoShowExportAll(true);
+    setUfoCopied(false);
+  }
   function ufoHandleImport() {
     var text = ufoImportText.trim();
     if (!text) { setUfoImportError("Paste a UFO design code first"); return; }
@@ -4149,6 +4161,12 @@ export default function CosmicWorkshop() {
     var exp = {}; Object.keys(design).forEach(function(k) { exp[k] = design[k]; });
     setPlasmaExportText(JSON.stringify(exp, null, 2));
     setPlasmaExportId(design.id);
+    setPlasmaCopied(false);
+  }
+  function plasmaExportAllDesigns() {
+    var arr = plasmaSaved.map(function(d) { var out = {}; Object.keys(d).forEach(function(k) { out[k] = d[k]; }); return out; });
+    setPlasmaExportAllText(JSON.stringify(arr));
+    setPlasmaShowExportAll(true);
     setPlasmaCopied(false);
   }
   function plasmaHandleImport() {
@@ -5380,6 +5398,12 @@ export default function CosmicWorkshop() {
       shipSaveActiveId(null);
     }
     setShipDeletingId(null);
+  }
+  function shipExportAllDesigns() {
+    var arr = shipSaved.map(function(d) { var out = {}; Object.keys(d).forEach(function(k) { out[k] = d[k]; }); return out; });
+    setShipExportAllText(JSON.stringify(arr));
+    setShipShowExportAll(true);
+    setShipCopied(false);
   }
   function shipExportDesign(design) {
     var exp = Object.assign({}, design);
@@ -6654,6 +6678,7 @@ export default function CosmicWorkshop() {
           onBack: function() { if (setsSelMode) { setSetsSelMode(null); setScreen("sets"); setSetsView("editor"); } else { setScreen("splash"); setUfoView("list"); } }, backLabel: setsSelMode ? "Set" : "Workshop", title: "UFO Customizer", color: "#64dcb4",
           rightContent: !setsSelMode && React.createElement("div", { style: { display: "flex", gap: 4 } },
             React.createElement("div", { onClick: function() { setUfoShowImport(true); setUfoImportText(""); setUfoImportError(""); }, style: BTN_TOPBAR_PURPLE }, "Import"),
+            ufoSaved.length > 0 && React.createElement("div", { onClick: ufoExportAllDesigns, style: Object.assign({}, BTN_TOPBAR, { color: "rgba(100,220,180,0.6)", fontSize: 8 }) }, "Exp All"),
             React.createElement("div", { onClick: ufoOpenNew, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #1a3a30, #0f2a22)", boxShadow: "0 0 8px rgba(100,220,180,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, "+ New"))
         }),
         renderSetsSelBar("ufo", ufoSaved.map(function(d) { return d.id; })),
@@ -6700,6 +6725,7 @@ export default function CosmicWorkshop() {
           })),
         ufoDeletingId && renderDeleteOverlay("Delete UFO Design?", function() { setUfoDeletingId(null); }, function() { ufoDeleteDesign(ufoDeletingId); }),
         ufoExportId && renderExportOverlay("Export UFO Design", ufoExportText, ufoCopied, function() { copyToClipboard(ufoExportText, setUfoCopied); }, function() { setUfoExportId(null); }),
+        ufoShowExportAll && renderExportOverlay("Export All UFOs (" + ufoSaved.length + ")", ufoExportAllText, ufoCopied, function() { copyToClipboard(ufoExportAllText, setUfoCopied); }, function() { setUfoShowExportAll(false); }),
         ufoShowImport && renderImportOverlay("Import UFO Design", ufoImportText, setUfoImportText, ufoImportError, setUfoImportError, ufoHandleImport, function() { setUfoShowImport(false); setUfoImportText(""); setUfoImportError(""); }, getUfoImportPreview),
         renderSetsDeleteWarnOverlay()),
 
@@ -6780,6 +6806,7 @@ export default function CosmicWorkshop() {
           onBack: function() { if (setsSelMode) { setSetsSelMode(null); setScreen("sets"); setSetsView("editor"); } else { setScreen("splash"); } }, backLabel: setsSelMode ? "Set" : "Workshop", title: "Hangar", color: "#ff8aaa",
           rightContent: !setsSelMode && React.createElement("div", { style: { display: "flex", gap: 4 } },
             React.createElement("div", { onClick: function() { setShipShowImport(true); setShipImportText(""); setShipImportError(""); }, style: BTN_TOPBAR_PURPLE }, "Import"),
+            shipSaved.length > 0 && React.createElement("div", { onClick: shipExportAllDesigns, style: Object.assign({}, BTN_TOPBAR, { color: "rgba(255,138,170,0.6)", fontSize: 8 }) }, "Exp All"),
             React.createElement("div", { onClick: shipOpenNew, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #3a1030, #280820)", boxShadow: "0 0 8px rgba(255,138,170,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, "+ New"))
         }),
         renderSetsSelBar("ship", shipSaved.map(function(d) { return d.id; })),
@@ -6843,6 +6870,7 @@ export default function CosmicWorkshop() {
           } return _shpi; }())),
         shipDeletingId && renderDeleteOverlay("Delete Ship Design?", function() { setShipDeletingId(null); }, function() { shipDeleteDesign(shipDeletingId); }),
         shipExportId && renderExportOverlay("Export Ship Design", shipExportText, shipCopied, function() { copyToClipboard(shipExportText, setShipCopied); }, function() { setShipExportId(null); }),
+        shipShowExportAll && renderExportOverlay("Export All Ships (" + shipSaved.length + ")", shipExportAllText, shipCopied, function() { copyToClipboard(shipExportAllText, setShipCopied); }, function() { setShipShowExportAll(false); }),
         shipShowImport && renderImportOverlay("Import Ship Design", shipImportText, setShipImportText, shipImportError, setShipImportError, shipHandleImport, function() { setShipShowImport(false); setShipImportText(""); setShipImportError(""); }, getShipImportPreview),
         renderSetsDeleteWarnOverlay()),
 
@@ -7433,7 +7461,8 @@ export default function CosmicWorkshop() {
         React.createElement(WorkshopTopBar, {
           onBack: function() { if (setsSelMode) { setSetsSelMode(null); setScreen("sets"); setSetsView("editor"); } else { setScreen("splash"); setPlasmaView("list"); } }, backLabel: setsSelMode ? "Set" : "Workshop", title: "Plasma Lab", color: "#50c8ff",
           rightContent: !setsSelMode && React.createElement("div", { style: { display: "flex", gap: 4 } },
-            React.createElement("div", { onClick: function() { setPlasmaShowImport(true); setPlasmaImportText(""); setPlasmaImportError(""); }, style: BTN_TOPBAR }, "Import"),
+            React.createElement("div", { onClick: function() { setPlasmaShowImport(true); setPlasmaImportText(""); setPlasmaImportError(""); }, style: BTN_TOPBAR_PURPLE }, "Import"),
+            plasmaSaved.length > 0 && React.createElement("div", { onClick: plasmaExportAllDesigns, style: Object.assign({}, BTN_TOPBAR, { color: "rgba(80,200,255,0.6)", fontSize: 8 }) }, "Exp All"),
             React.createElement("div", { onClick: plasmaOpenNew, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #0a2040, #061828)", boxShadow: "0 0 8px rgba(80,200,255,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, "+ New"))
         }),
         renderSetsSelBar("plasma", plasmaSaved.map(function(d) { return d.id; })),
@@ -7482,6 +7511,7 @@ export default function CosmicWorkshop() {
           function() { setPlasmaDeletingId(null); },
           function() { plasmaDeleteDesign(plasmaDeletingId); }),
         plasmaExportId && renderExportOverlay("Export Plasma Design", plasmaExportText, plasmaCopied, function() { copyToClipboard(plasmaExportText, setPlasmaCopied); }, function() { setPlasmaExportId(null); }),
+        plasmaShowExportAll && renderExportOverlay("Export All Plasma (" + plasmaSaved.length + ")", plasmaExportAllText, plasmaCopied, function() { copyToClipboard(plasmaExportAllText, setPlasmaCopied); }, function() { setPlasmaShowExportAll(false); }),
         plasmaShowImport && renderImportOverlay("Import Plasma Design", plasmaImportText, setPlasmaImportText, plasmaImportError, setPlasmaImportError, plasmaHandleImport, function() { setPlasmaShowImport(false); setPlasmaImportText(""); setPlasmaImportError(""); }, getPlasmaImportPreview),
         renderSetsDeleteWarnOverlay()),
 
