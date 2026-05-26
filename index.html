@@ -2632,7 +2632,7 @@ function BDBlockPreview(props) {
   var hasCorners = CORNER_SHAPES[design.shape] && design.cornerRadius > 0;
   var cr = design.cornerRadius || 0;
   var glowStyle = {};
-  if (design.glowEnabled) {
+  if (design.glowEnabled && !props.removing) {
     glowStyle.filter = "drop-shadow(0 0 " + design.glowIntensity + "px " + design.glowColor + ")";
   }
   var fillOp = design.fillOpacity != null ? design.fillOpacity : 1;
@@ -4765,7 +4765,8 @@ function DesignBlock(props) {
     type = props.type,
     size = props.size,
     sl = props.shieldLevel || 0,
-    uid = props.uid;
+    uid = props.uid,
+    removing = props.removing;
   var inner;
   if (type >= 11 && type <= 16) {
     var badgeBox = Math.max(11, size * 0.34);
@@ -4781,7 +4782,8 @@ function DesignBlock(props) {
     }, /*#__PURE__*/React.createElement(BDBlockPreview, {
       design: design,
       size: size,
-      uid: uid
+      uid: uid,
+      removing: removing
     }), /*#__PURE__*/React.createElement("div", {
       style: {
         position: "absolute",
@@ -4802,13 +4804,15 @@ function DesignBlock(props) {
     inner = /*#__PURE__*/React.createElement(BDBlockPreview, {
       design: getDesignForPhase(design, 3 - sl),
       size: size,
-      uid: uid
+      uid: uid,
+      removing: removing
     });
   } else {
     inner = /*#__PURE__*/React.createElement(BDBlockPreview, {
       design: design,
       size: size,
-      uid: uid
+      uid: uid,
+      removing: removing
     });
   }
   if (type === 10 && sl > 0) {
@@ -4846,7 +4850,8 @@ function BlockContent(props) {
     type: type,
     size: size,
     shieldLevel: sl,
-    uid: props.uid
+    uid: props.uid,
+    removing: props.removing
   });
   if (type === 7) return /*#__PURE__*/React.createElement(DiamondPlateBlock, {
     size: size
@@ -6276,7 +6281,8 @@ function GameGrid(props) {
       size: blockSize,
       shieldLevel: sl,
       animPhase: grid[gi] === 17 ? ufoPhase : undefined,
-      uid: gi
+      uid: gi,
+      removing: removingBlocks.has(gi)
     }) : null));
   }
   return /*#__PURE__*/React.createElement("div", {
@@ -8821,7 +8827,13 @@ function CosmicDriftGame() {
     removingRef.current.add(idx);
     visualRemovingRef.current.add(idx);
     var blockEl = document.querySelector('[data-gi="' + idx + '"]');
-    if (blockEl) blockEl.style.animation = isBurnt ? "blockBurn 0.1s ease-out forwards" : "blockPop 0.25s ease-out forwards";
+    if (blockEl) {
+      var _bfDivs = blockEl.getElementsByTagName("div");
+      for (var _bfi = 0; _bfi < _bfDivs.length; _bfi++) {
+        if (_bfDivs[_bfi].style.filter) _bfDivs[_bfi].style.filter = "none";
+      }
+      blockEl.style.animation = isBurnt ? "blockBurn 0.1s ease-out forwards" : "blockPop 0.25s ease-out forwards";
+    }
     if (_shotTimingLog.length > 0 && !_shotTimingLog[0].popT) _shotTimingLog[0].popT = Date.now();
     if (type >= 2 && type <= 6 || type === 10) {
       playSound("specialBlock");
