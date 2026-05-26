@@ -6266,7 +6266,7 @@ function GameGrid(props) {
   var cells = [];
   for (var gi = 0; gi < grid.length; gi++) {
     var an = "none";
-    if (removingBlocks.has(gi) && burntBlocksRef.current.has(gi)) an = "blockBurn 0.1s ease-out forwards";else if (removingBlocks.has(gi)) an = "blockPop 0.25s ease-out forwards";else if (shakingBlocks.has(gi)) an = "blockShake 0.35s ease-in-out";
+    if (shakingBlocks.has(gi)) an = "blockShake 0.35s ease-in-out";
     var sl = grid[gi] === 10 ? shieldRef.current[gi] || 0 : 0;
     cells.push(/*#__PURE__*/React.createElement("div", {
       key: gi,
@@ -8839,6 +8839,18 @@ function CosmicDriftGame() {
     flushGrid();
     if (!isBurnt) {
       spawnPlasmaShatter(bx, by, pc);
+      var _bpEl = document.querySelector('[data-gi="' + idx + '"]');
+      var _bpSz = _bpEl ? _bpEl.offsetWidth : 48;
+      var _bpVid = addVfx({
+        type: "blockPopVfx",
+        x: bx,
+        y: by,
+        sz: _bpSz,
+        blockType: type
+      });
+      setTimeout(function () {
+        rmVfx(_bpVid);
+      }, 260);
     }
     var rmDelay = isBurnt ? 100 : 250;
     setTimeout(function () {
@@ -11584,6 +11596,23 @@ function CosmicDriftGame() {
         "--endY": v.endY - v.startY + "px"
       }
     });
+    if (v.type === "blockPopVfx") {
+      var _bpBg = (BLOCK_COLORS[v.blockType] || BLOCK_COLORS[1]).bg;
+      return /*#__PURE__*/React.createElement("div", {
+        key: v.id,
+        style: {
+          position: "absolute",
+          left: v.x - v.sz / 2,
+          top: v.y - v.sz / 2,
+          width: v.sz,
+          height: v.sz,
+          borderRadius: 6,
+          background: _bpBg,
+          animation: "blockPop 0.25s ease-out forwards",
+          pointerEvents: "none"
+        }
+      });
+    }
     if (v.type === "blockErupt") {
       var _beCol = BLOCK_COLORS[v.spawnType] || BLOCK_COLORS[1];
       return /*#__PURE__*/React.createElement("div", {
