@@ -5802,7 +5802,7 @@ export default function CosmicWorkshop() {
           setsSaved.length === 0 && React.createElement("div", { style: { textAlign: "center", padding: 40 } },
             React.createElement("div", { style: { color: "rgba(255,208,96,0.3)", fontSize: 14, marginBottom: 8 } }, "No sets saved yet"),
             React.createElement("div", { style: { color: "rgba(180,200,220,0.2)", fontSize: 12 } }, "Tap Save Current to bundle your active designs, or + New to build from scratch.")),
-          (function() { var _ssa = sortItems(setsSaved, setsSortMode, "savedAt"); var _ssi = []; var _sslt = null; for (var _ssk = 0; _ssk < _ssa.length; _ssk++) { var setObj = _ssa[_ssk]; if (setsSortMode === "set_type") { var _sst = setsGetType(setObj); if (_sst !== _sslt) { _sslt = _sst; _ssi.push(renderTypeHeader(_sst, "#ffd060")); } }
+          (function() { var _ssa = sortItems(setsSaved, setsSortMode, "savedAt"); var _ssi = []; var _sslt = null; for (var _ssk = 0; _ssk < _ssa.length; _ssk++) { (function(setObj) { if (setsSortMode === "set_type") { var _sst = setsGetType(setObj); if (_sst !== _sslt) { _sslt = _sst; _ssi.push(renderTypeHeader(_sst, "#ffd060")); } }
             var _chips = setsGetModuleChips(setObj);
             var _isActive = setsActiveId === setObj.id;
             var _date = setObj.savedAt ? new Date(setObj.savedAt).toLocaleDateString() : "";
@@ -5846,7 +5846,7 @@ export default function CosmicWorkshop() {
                 React.createElement("div", { onClick: function() { setSetsDeleteId(setObj.id); }, style: BTN_DELETE_ICON }, WsIconTrash())
               )
             ));
-          } return _ssi; }())
+          })(_ssa[_ssk]); } return _ssi; }())
         ),
         setsDeletingId && renderDeleteOverlay("Delete Set?", function() { setSetsDeleteId(null); }, function() { setsDeleteSet(setsDeletingId); }),
         setsExportId && renderExportOverlay("Export Set", setsExportText, setsCopied, function() { copyToClipboard(setsExportText, setSetsCopied); }, function() { setSetsExportId(null); }),
