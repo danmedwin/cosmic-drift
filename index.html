@@ -84,7 +84,7 @@ var COLS = 8,
   PLASMA_SPEED = 0.85,
   START_PLASMA = 10,
   BONUS_PTS = 2;
-var GAME_VERSION = "v80.9";
+var GAME_VERSION = "v80.10";
 var DIFFICULTY_CAPS = {
   easy: 5,
   regular: 3,
@@ -6275,7 +6275,8 @@ function GameGrid(props) {
         width: blockSize,
         height: blockSize,
         pointerEvents: "none",
-        animation: an
+        animation: an,
+        willChange: grid[gi] > 0 ? "opacity" : "auto"
       }
     }, grid[gi] > 0 ? /*#__PURE__*/React.createElement(BlockContent, {
       type: grid[gi],
@@ -11637,7 +11638,6 @@ function CosmicDriftGame() {
       });
     }
     if (v.type === "blockErupt") {
-      var _beCol = BLOCK_COLORS[v.spawnType] || BLOCK_COLORS[1];
       return /*#__PURE__*/React.createElement("div", {
         key: v.id,
         style: {
@@ -11646,15 +11646,16 @@ function CosmicDriftGame() {
           top: v.startY - 16,
           width: 32,
           height: 32,
-          borderRadius: 5,
-          background: _beCol.bg,
-          boxShadow: "0 0 10px " + _beCol.particle + "99",
           opacity: 0,
           animation: "blockErupt 0.5s ease-out forwards",
+          pointerEvents: "none",
           "--endX": v.endX - v.startX + "px",
           "--endY": v.endY - v.startY + "px"
         }
-      });
+      }, /*#__PURE__*/React.createElement(BlockContent, {
+        type: v.spawnType,
+        size: 32
+      }));
     }
     if (v.type === "bounceBall") return /*#__PURE__*/React.createElement("div", {
       key: v.id
