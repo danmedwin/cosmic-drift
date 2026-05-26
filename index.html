@@ -84,7 +84,7 @@ var COLS = 8,
   PLASMA_SPEED = 0.85,
   START_PLASMA = 10,
   BONUS_PTS = 2;
-var GAME_VERSION = "v80.3";
+var GAME_VERSION = "v80.4";
 var DIFFICULTY_CAPS = {
   easy: 5,
   regular: 3,
@@ -8835,6 +8835,8 @@ function CosmicDriftGame() {
     } else {
       playSound("crateOpen");
     }
+    var _cellEl = document.querySelector('[data-gi="' + idx + '"]');
+    if (_cellEl) _cellEl.style.opacity = '0';
     setRemovingBlocks(new Set(visualRemovingRef.current));
     flushGrid();
     if (!isBurnt) {
@@ -8860,6 +8862,8 @@ function CosmicDriftGame() {
       visualRemovingRef.current.delete(idx);
       burntBlocksRef.current.delete(idx);
       flushGrid();
+      var _resetEl = document.querySelector('[data-gi="' + idx + '"]');
+      if (_resetEl) _resetEl.style.opacity = '';
       advanceTutorial("blockDestroyed");
     }, rmDelay);
   }, [getBlockX, getBlockY, addVfx, rmVfx]);
