@@ -4839,6 +4839,7 @@ function BlockContent(props) {
     size = props.size,
     is = Math.max(18, size * 0.55),
     sl = props.shieldLevel || 0;
+  if (props.removing) return null;
   if (type === 17) return /*#__PURE__*/React.createElement(UFOBlockSvg, {
     size: size,
     animPhase: props.animPhase,
