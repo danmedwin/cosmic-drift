@@ -84,7 +84,7 @@ var COLS = 8,
   PLASMA_SPEED = 0.85,
   START_PLASMA = 10,
   BONUS_PTS = 2;
-var GAME_VERSION = "v80.5";
+var GAME_VERSION = "v80.6";
 var DIFFICULTY_CAPS = {
   easy: 5,
   regular: 3,
@@ -8857,8 +8857,17 @@ function CosmicDriftGame() {
         blockType: type
       });
       setTimeout(function () {
-        rmVfx(_bpVid);
-      }, 260);
+        var _bpDom = document.querySelector('[data-vfxid="' + _bpVid + '"]');
+        if (_bpDom) {
+          _bpDom.style.animation = 'none';
+          _bpDom.style.opacity = '0';
+          requestAnimationFrame(function () {
+            rmVfx(_bpVid);
+          });
+        } else {
+          rmVfx(_bpVid);
+        }
+      }, 240);
     }
     var rmDelay = isBurnt ? 100 : 250;
     setTimeout(function () {
@@ -11610,6 +11619,7 @@ function CosmicDriftGame() {
       var _bpBg = (BLOCK_COLORS[v.blockType] || BLOCK_COLORS[1]).bg;
       return /*#__PURE__*/React.createElement("div", {
         key: v.id,
+        "data-vfxid": v.id,
         style: {
           position: "absolute",
           left: v.x - v.sz / 2,
