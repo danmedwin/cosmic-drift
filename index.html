@@ -11592,22 +11592,25 @@ function CosmicDriftGame() {
         "--endY": v.endY - v.startY + "px"
       }
     });
-    if (v.type === "blockErupt") return /*#__PURE__*/React.createElement("div", {
-      key: v.id,
-      style: {
-        position: "absolute",
-        left: v.startX - 16,
-        top: v.startY - 16,
-        width: 32,
-        height: 32,
-        animation: "blockErupt 0.5s ease-out forwards",
-        "--endX": v.endX - v.startX + "px",
-        "--endY": v.endY - v.startY + "px"
-      }
-    }, /*#__PURE__*/React.createElement(BlockContent, {
-      type: v.spawnType,
-      size: 32
-    }));
+    if (v.type === "blockErupt") {
+      var _beCol = BLOCK_COLORS[v.spawnType] || BLOCK_COLORS[1];
+      return /*#__PURE__*/React.createElement("div", {
+        key: v.id,
+        style: {
+          position: "absolute",
+          left: v.startX - 16,
+          top: v.startY - 16,
+          width: 32,
+          height: 32,
+          borderRadius: 5,
+          background: _beCol.bg,
+          boxShadow: "0 0 10px " + _beCol.particle + "99",
+          animation: "blockErupt 0.5s ease-out forwards",
+          "--endX": v.endX - v.startX + "px",
+          "--endY": v.endY - v.startY + "px"
+        }
+      });
+    }
     if (v.type === "bounceBall") return /*#__PURE__*/React.createElement("div", {
       key: v.id
     }, /*#__PURE__*/React.createElement("style", null, v.kf), /*#__PURE__*/React.createElement("div", {
