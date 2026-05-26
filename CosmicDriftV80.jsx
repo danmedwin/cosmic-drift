@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect, memo } from "react";
 
 var COLS = 8, ROWS = 6, GAP = 5, BOARD_PAD = 10, PLASMA_SPEED = 0.85, START_PLASMA = 10, BONUS_PTS = 2;
-var GAME_VERSION = "v80.2";
+var GAME_VERSION = "v80.3";
 var DIFFICULTY_CAPS = { easy: 5, regular: 3, hard: 3 };
 var DIFF_COLORS = { easy: "#44cc44", regular: "#ccaa22", hard: "#cc4444" };
 var DIFF_LABELS = { easy: "EASY", regular: "REGULAR", hard: "HARD" };
@@ -3440,7 +3440,7 @@ function logUfo(msg) {
               {[[10,10,1,1],[310,10,-1,1],[10,310,1,-1],[310,310,-1,-1]].map(function(br, i) { var cx = br[0], cy = br[1], sx = br[2], sy = br[3]; return <g key={"br" + i} stroke="rgba(80,221,255,0.55)" strokeWidth="1.5" strokeLinecap="round"><line x1={cx} y1={cy} x2={cx + 14 * sx} y2={cy} /><line x1={cx} y1={cy} x2={cx} y2={cy + 14 * sy} /></g>; })}
               <g transform="translate(56, 82)">{splashBlocksRef.current.map(function(blk, i) { var pal = ["#80ddff","#c8b8ff","#ffb43c","#64dcb4","#e0457b","#7b5ea7"]; var px = pal[blk.p]; return <rect key={blk.active ? "a" + i : "p" + i} x={blk.c * 26} y={blk.r * 26} width={22} height={22} rx={3} fill={px} opacity="0.95" style={blk.active ? { filter: "drop-shadow(0 0 6px " + px + "aa)" } : { filter: "drop-shadow(0 0 6px " + px + "aa)", animation: "blockPop 0.5s ease-out forwards", transformBox: "fill-box", transformOrigin: "center" }} />; })}</g>
               <g style={{ transform: "translateX(" + splashShipXRef.current + "px)", transition: splashMovingRef.current ? ("transform " + splashMoveDurRef.current + "ms ease-in-out") : "none" }}><g transform="translate(160, 248)">{splashPlasmaRef.current && <circle key={splashPlasmaRef.current.key} cx={0} cy={-14} r="5" fill="#80ddff" style={{ filter: "drop-shadow(0 0 8px #80ddff)", animation: "splashPlasmaBall 0.65s ease-in forwards" }} />}<g transform="scale(0.32) translate(-50, -50)"><path d="M 50 6 L 86 78 L 64 68 L 50 88 L 36 68 L 14 78 Z" fill="url(#gsShipGrad)" stroke="#3a1a44" strokeWidth="3" strokeLinejoin="round" style={{ filter: "drop-shadow(0 0 10px #e9a8e0)" }} /></g></g></g>
-              <g fontFamily="'JetBrains Mono', monospace" fontSize="8" letterSpacing="1.5" fill="rgba(80,221,255,0.55)"><text x="22" y="26">{"P · " + splashPtsStr}</text><text x="248" y="26">{"SECT " + GAME_VERSION.toUpperCase()}</text><text x="22" y="293">HIGH SCORE</text><text x="22" y="307">{bestScore > 0 ? bestScore.toLocaleString() : "—"}</text><text x="246" y="293">BEST LEVEL</text><text x="246" y="307">{bestLevel > 0 ? "L·" + bestLevel : "—"}</text></g>
+              <g fontFamily="'JetBrains Mono', monospace" fontSize="8" letterSpacing="1.5" fill="rgba(80,221,255,0.55)"><text x="22" y="26">{"P · " + splashPtsStr}</text><text x="248" y="26">{GAME_VERSION.toUpperCase()}</text><text x="22" y="293">HIGH SCORE</text><text x="22" y="307">{bestScore > 0 ? bestScore.toLocaleString() : "—"}</text><text x="246" y="293">BEST LEVEL</text><text x="246" y="307">{bestLevel > 0 ? "L·" + bestLevel : "—"}</text></g>
             </svg>
           </div>
         </GsPanel>
