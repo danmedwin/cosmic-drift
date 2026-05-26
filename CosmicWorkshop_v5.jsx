@@ -6337,7 +6337,7 @@ export default function CosmicWorkshop() {
           bdSavedTab === "custom" && bdSaved.length === 0 && React.createElement("div", { style: { textAlign: "center", padding: 40 } },
             React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 14, marginBottom: 8 } }, "No saved designs yet"),
             React.createElement("div", { style: { color: "rgba(180,200,220,0.2)", fontSize: 12 } }, "Create a new design or copy a Game Block to start.")),
-          bdSavedTab === "custom" && (function() { var _bds = sortItems(bdSaved, bdSortMode, "modifiedAt"); var _bdi = []; var _bdlt = null; for (var _bdk = 0; _bdk < _bds.length; _bdk++) { var saved = _bds[_bdk]; if (bdSortMode === "type") { var _bdbt = null; for (var _bdbti = 0; _bdbti < BD_BLOCK_TYPES.length; _bdbti++) { if (BD_BLOCK_TYPES[_bdbti].id === saved.assignedTo) { _bdbt = BD_BLOCK_TYPES[_bdbti]; break; } } var _bdt = _bdbt ? _bdbt.label : "Other"; if (_bdt !== _bdlt) { _bdlt = _bdt; _bdi.push(renderTypeHeader(_bdt, "#c8b8ff")); } }
+          bdSavedTab === "custom" && (function() { var _bds = sortItems(bdSaved, bdSortMode, "modifiedAt"); var _bdi = []; var _bdlt = null; for (var _bdk = 0; _bdk < _bds.length; _bdk++) { (function(saved) { if (bdSortMode === "type") { var _bdbt = null; for (var _bdbti = 0; _bdbti < BD_BLOCK_TYPES.length; _bdbti++) { if (BD_BLOCK_TYPES[_bdbti].id === saved.assignedTo) { _bdbt = BD_BLOCK_TYPES[_bdbti]; break; } } var _bdt = _bdbt ? _bdbt.label : "Other"; if (_bdt !== _bdlt) { _bdlt = _bdt; _bdi.push(renderTypeHeader(_bdt, "#c8b8ff")); } }
             var bt = null; for (var bi = 0; bi < BD_BLOCK_TYPES.length; bi++) { if (BD_BLOCK_TYPES[bi].id === saved.assignedTo) { bt = BD_BLOCK_TYPES[bi]; break; } }
             var _dateRaw = saved.modifiedAt || saved.createdAt || saved.savedAt;
             var dateStr = _dateRaw ? new Date(_dateRaw).toLocaleDateString() : "";
@@ -6368,7 +6368,7 @@ export default function CosmicWorkshop() {
                     if (_inSets.length > 0) { setSetsDeleteWarn({ setNames: _inSets, onConfirm: function() { setBdDeletingId(saved.id); setSetsDeleteWarn(null); } }); }
                     else { setBdDeletingId(saved.id); }
                   }, style: BTN_DELETE_ICON }, WsIconTrash())))));
-          } return _bdi; }()),
+          })(_bds[_bdk]); } return _bdi; }()),
           // Game Blocks tab
           bdSavedTab === "factory" && BD_FACTORY_PRESETS.map(function(preset) {
             return React.createElement("div", { key: preset.id, style: Object.assign({}, CARD_STYLE, { display: "flex", alignItems: "center", gap: 10 }) },
@@ -6529,7 +6529,7 @@ export default function CosmicWorkshop() {
           vfxSavedTab === "custom" && vfxSaved.length === 0 && React.createElement("div", { style: { textAlign: "center", padding: 40 } },
             React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 14, marginBottom: 8 } }, "No saved effects yet"),
             React.createElement("div", { style: { color: "rgba(180,200,220,0.2)", fontSize: 12 } }, "Create a new effect or copy a Default to start.")),
-          vfxSavedTab === "custom" && (function() { var _vfxs = sortItems(vfxSaved, vfxSortMode, "modifiedAt"); var _vfxi = []; var _vfxlt = null; for (var _vfxk = 0; _vfxk < _vfxs.length; _vfxk++) { var saved = _vfxs[_vfxk]; if (vfxSortMode === "effect") { var _vfxei = vfxTypeInfo(saved.effectType); var _vfxet = _vfxei ? _vfxei.label : "Other"; if (_vfxet !== _vfxlt) { _vfxlt = _vfxet; _vfxi.push(renderTypeHeader(_vfxet, "#ffb43c")); } }
+          vfxSavedTab === "custom" && (function() { var _vfxs = sortItems(vfxSaved, vfxSortMode, "modifiedAt"); var _vfxi = []; var _vfxlt = null; for (var _vfxk = 0; _vfxk < _vfxs.length; _vfxk++) { (function(saved) { if (vfxSortMode === "effect") { var _vfxei = vfxTypeInfo(saved.effectType); var _vfxet = _vfxei ? _vfxei.label : "Other"; if (_vfxet !== _vfxlt) { _vfxlt = _vfxet; _vfxi.push(renderTypeHeader(_vfxet, "#ffb43c")); } }
             var etInfo = vfxTypeInfo(saved.effectType);
             var _dateRaw = saved.modifiedAt || saved.createdAt || saved.savedAt;
             var dateStr = _dateRaw ? new Date(_dateRaw).toLocaleDateString() : "";
@@ -6561,7 +6561,7 @@ export default function CosmicWorkshop() {
                     if (_inSets.length > 0) { setSetsDeleteWarn({ setNames: _inSets, onConfirm: function() { setVfxDeletingId(saved.id); setSetsDeleteWarn(null); } }); }
                     else { setVfxDeletingId(saved.id); }
                   }, style: BTN_DELETE_ICON }, WsIconTrash())))));
-          } return _vfxi; }()),
+          })(_vfxs[_vfxk]); } return _vfxi; }()),
           vfxSavedTab === "factory" && VFX_FACTORY_PRESETS.map(function(preset) {
             return React.createElement("div", { key: preset.id, style: Object.assign({}, CARD_STYLE, { display: "flex", alignItems: "center", gap: 10 }) },
               renderVfxIcon(preset),
@@ -6815,7 +6815,7 @@ export default function CosmicWorkshop() {
           shipSaved.length === 0 && React.createElement("div", { style: { textAlign: "center", padding: 40 } },
             React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 14, marginBottom: 8 } }, "No saved ship designs"),
             React.createElement("div", { style: { color: "rgba(180,200,220,0.2)", fontSize: 12 } }, "Tap + New to design your first ship.")),
-          (function() { var _shps = sortItems(shipSaved, shipSortMode, "savedAt"); var _shpi = []; var _shplt = null; for (var _shpk = 0; _shpk < _shps.length; _shpk++) { var design = _shps[_shpk]; if (shipSortMode === "hull") { var _shpt = SHIP_HULL_LABELS[design.hull] || design.hull || "Custom"; if (_shpt !== _shplt) { _shplt = _shpt; _shpi.push(renderTypeHeader(_shpt, "#ff8aaa")); } }
+          (function() { var _shps = sortItems(shipSaved, shipSortMode, "savedAt"); var _shpi = []; var _shplt = null; for (var _shpk = 0; _shpk < _shps.length; _shpk++) { (function(design) { if (shipSortMode === "hull") { var _shpt = SHIP_HULL_LABELS[design.hull] || design.hull || "Custom"; if (_shpt !== _shplt) { _shplt = _shpt; _shpi.push(renderTypeHeader(_shpt, "#ff8aaa")); } }
             var isActive = design.id === shipActiveId;
             var _shipSel = setsSelMode && setsSelMode.selectedIds.indexOf(design.id) !== -1;
             var _shipDateStr = design.savedAt ? new Date(design.savedAt).toLocaleDateString() : "";
@@ -6867,7 +6867,7 @@ export default function CosmicWorkshop() {
                   if (_inSets.length > 0) { setSetsDeleteWarn({ setNames: _inSets, onConfirm: function() { setShipDeletingId(design.id); setSetsDeleteWarn(null); } }); }
                   else { setShipDeletingId(design.id); }
                 }, style: BTN_DELETE_ICON }, WsIconTrash()))));
-          } return _shpi; }())),
+          })(_shps[_shpk]); } return _shpi; }())),
         shipDeletingId && renderDeleteOverlay("Delete Ship Design?", function() { setShipDeletingId(null); }, function() { shipDeleteDesign(shipDeletingId); }),
         shipExportId && renderExportOverlay("Export Ship Design", shipExportText, shipCopied, function() { copyToClipboard(shipExportText, setShipCopied); }, function() { setShipExportId(null); }),
         shipShowExportAll && renderExportOverlay("Export All Ships (" + shipSaved.length + ")", shipExportAllText, shipCopied, function() { copyToClipboard(shipExportAllText, setShipCopied); }, function() { setShipShowExportAll(false); }),
@@ -7471,7 +7471,7 @@ export default function CosmicWorkshop() {
           plasmaSaved.length === 0 && React.createElement("div", { style: { textAlign: "center", padding: 40 } },
             React.createElement("div", { style: { color: "rgba(180,200,220,0.3)", fontSize: 14, marginBottom: 8 } }, "No saved plasma designs"),
             React.createElement("div", { style: { color: "rgba(180,200,220,0.2)", fontSize: 12 } }, "Tap + New to design your first plasma.")),
-          (function() { var _plss = sortItems(plasmaSaved, plasmaSortMode, "savedAt"); var _plsi = []; var _plslt = null; for (var _plsk = 0; _plsk < _plss.length; _plsk++) { var design = _plss[_plsk]; if (plasmaSortMode === "shape") { var _plst = PLASMA_SHAPE_LABELS[design.shape] || design.shape || "Ball"; if (_plst !== _plslt) { _plslt = _plst; _plsi.push(renderTypeHeader(_plst, "#50c8ff")); } }
+          (function() { var _plss = sortItems(plasmaSaved, plasmaSortMode, "savedAt"); var _plsi = []; var _plslt = null; for (var _plsk = 0; _plsk < _plss.length; _plsk++) { (function(design) { if (plasmaSortMode === "shape") { var _plst = PLASMA_SHAPE_LABELS[design.shape] || design.shape || "Ball"; if (_plst !== _plslt) { _plslt = _plst; _plsi.push(renderTypeHeader(_plst, "#50c8ff")); } }
             var isActive = design.id === plasmaActiveId;
             var _plasmaSel = setsSelMode && setsSelMode.selectedIds.indexOf(design.id) !== -1;
             var _plasmaDateStr = design.savedAt ? new Date(design.savedAt).toLocaleDateString() : "";
@@ -7506,7 +7506,7 @@ export default function CosmicWorkshop() {
                   if (_inSets.length > 0) { setSetsDeleteWarn({ setNames: _inSets, onConfirm: function() { setPlasmaDeletingId(design.id); setSetsDeleteWarn(null); } }); }
                   else { setPlasmaDeletingId(design.id); }
                 }, style: BTN_DELETE_ICON }, WsIconTrash()))));
-          } return _plsi; }())),
+          })(_plss[_plsk]); } return _plsi; }())),
         plasmaDeletingId && renderDeleteOverlay("Delete Plasma Design?",
           function() { setPlasmaDeletingId(null); },
           function() { plasmaDeleteDesign(plasmaDeletingId); }),
