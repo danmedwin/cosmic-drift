@@ -84,7 +84,7 @@ var COLS = 8,
   PLASMA_SPEED = 0.85,
   START_PLASMA = 10,
   BONUS_PTS = 2;
-var GAME_VERSION = "v80";
+var GAME_VERSION = "v80.1";
 var DIFFICULTY_CAPS = {
   easy: 5,
   regular: 3,
@@ -8827,14 +8827,6 @@ function CosmicDriftGame() {
     var pc = isBurnt ? "#ff8830" : BLOCK_COLORS[type] ? BLOCK_COLORS[type].particle : "#c8b8ff";
     removingRef.current.add(idx);
     visualRemovingRef.current.add(idx);
-    var blockEl = document.querySelector('[data-gi="' + idx + '"]');
-    if (blockEl) {
-      var _bfDivs = blockEl.getElementsByTagName("div");
-      for (var _bfi = 0; _bfi < _bfDivs.length; _bfi++) {
-        if (_bfDivs[_bfi].style.filter) _bfDivs[_bfi].style.filter = "none";
-      }
-      blockEl.style.animation = isBurnt ? "blockBurn 0.1s ease-out forwards" : "blockPop 0.25s ease-out forwards";
-    }
     if (_shotTimingLog.length > 0 && !_shotTimingLog[0].popT) _shotTimingLog[0].popT = Date.now();
     if (type >= 2 && type <= 6 || type === 10) {
       playSound("specialBlock");
