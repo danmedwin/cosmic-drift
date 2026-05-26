@@ -3081,6 +3081,7 @@ function logUfo(msg) {
   // baseSlots/extraDisplay moved into HudPanelMemo
 
   var isIosSafari = (typeof navigator.standalone !== "undefined") && !navigator.standalone && /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var isAndroid = /android/i.test(navigator.userAgent) && !(window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
   var showLevelClear = gameState === "bonus";
   var showLost = gameState === "lost";
   var frameGlow = gameState === "recharging" || gameState === "needsRecharge";
@@ -3527,12 +3528,18 @@ function logUfo(msg) {
         </div>
         </div>
 
-        {/* iOS install prompt */}
-        {isIosSafari && !iosPromptDismissed && <div style={{ flexShrink: 0, marginTop: 6, background: "rgba(8,8,20,0.75)", border: "1px solid rgba(80,200,255,0.15)", borderRadius: 10, padding: "10px 12px 10px 10px", display: "flex", gap: 10, alignItems: "flex-start", zIndex: 1 }}>
-          <svg width="16" height="20" viewBox="0 0 16 20" style={{ flexShrink: 0, marginTop: 2 }}><path d="M8 1v11M5 4l3-3 3 3" fill="none" stroke="rgba(80,200,255,0.75)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /><path d="M2 9v9a1 1 0 001 1h10a1 1 0 001-1V9" fill="none" stroke="rgba(80,200,255,0.4)" strokeWidth="1.5" strokeLinecap="round" /></svg>
+        {/* Install prompt — iOS and Android */}
+        {(isIosSafari || isAndroid) && !iosPromptDismissed && <div style={{ flexShrink: 0, marginTop: 6, background: "rgba(8,8,20,0.75)", border: "1px solid rgba(80,200,255,0.15)", borderRadius: 10, padding: "10px 12px 10px 10px", display: "flex", gap: 10, alignItems: "flex-start", zIndex: 1 }}>
+          {isIosSafari
+            ? <svg width="16" height="20" viewBox="0 0 16 20" style={{ flexShrink: 0, marginTop: 2 }}><path d="M8 1v11M5 4l3-3 3 3" fill="none" stroke="rgba(80,200,255,0.75)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /><path d="M2 9v9a1 1 0 001 1h10a1 1 0 001-1V9" fill="none" stroke="rgba(80,200,255,0.4)" strokeWidth="1.5" strokeLinecap="round" /></svg>
+            : <svg width="16" height="20" viewBox="0 0 16 20" style={{ flexShrink: 0, marginTop: 2 }}><circle cx="8" cy="4" r="1.6" fill="rgba(80,200,255,0.75)" /><circle cx="8" cy="10" r="1.6" fill="rgba(80,200,255,0.75)" /><circle cx="8" cy="16" r="1.6" fill="rgba(80,200,255,0.75)" /></svg>
+          }
           <div style={{ flex: 1 }}>
             <div style={{ color: "rgba(180,200,220,0.8)", fontSize: 11, fontWeight: 700, letterSpacing: 0.3, marginBottom: 3 }}>Make this an app</div>
-            <div style={{ color: "rgba(160,180,200,0.5)", fontSize: 10, lineHeight: 1.55 }}>{"Tap "}<span style={{ color: "rgba(80,200,255,0.7)", fontWeight: 700 }}>Share</span>{" → "}<span style={{ color: "rgba(80,200,255,0.7)", fontWeight: 700 }}>Add to Home Screen</span>{" to play full-screen without the URL bar."}</div>
+            {isIosSafari
+              ? <div style={{ color: "rgba(160,180,200,0.5)", fontSize: 10, lineHeight: 1.55 }}>{"Tap "}<span style={{ color: "rgba(80,200,255,0.7)", fontWeight: 700 }}>Share</span>{" → "}<span style={{ color: "rgba(80,200,255,0.7)", fontWeight: 700 }}>Add to Home Screen</span>{" to play full-screen without the URL bar."}</div>
+              : <div style={{ color: "rgba(160,180,200,0.5)", fontSize: 10, lineHeight: 1.55 }}>{"Tap "}<span style={{ color: "rgba(80,200,255,0.7)", fontWeight: 700 }}>{"⋮"}</span>{" → "}<span style={{ color: "rgba(80,200,255,0.7)", fontWeight: 700 }}>Add to Home Screen</span>{" to play full-screen without the URL bar."}</div>
+            }
           </div>
           <div onClick={function() { setIosPromptDismissed(true); try { window.storage.set("cosmic_drift_ios_prompt_dismissed", "true"); } catch(e) {} }} style={{ color: "rgba(180,200,220,0.25)", fontSize: 20, fontWeight: 300, cursor: "pointer", lineHeight: 1, flexShrink: 0, paddingLeft: 2, marginTop: -2 }}>{"×"}</div>
         </div>}

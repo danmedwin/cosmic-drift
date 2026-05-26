@@ -11907,6 +11907,7 @@ function CosmicDriftGame() {
   // baseSlots/extraDisplay moved into HudPanelMemo
 
   var isIosSafari = typeof navigator.standalone !== "undefined" && !navigator.standalone && /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var isAndroid = /android/i.test(navigator.userAgent) && !(window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
   var showLevelClear = gameState === "bonus";
   var showLost = gameState === "lost";
   var frameGlow = gameState === "recharging" || gameState === "needsRecharge";
@@ -14657,7 +14658,7 @@ function CosmicDriftGame() {
       background: GS.green,
       boxShadow: "0 0 6px " + GS.green
     }
-  }))))), isIosSafari && !iosPromptDismissed && /*#__PURE__*/React.createElement("div", {
+  }))))), (isIosSafari || isAndroid) && !iosPromptDismissed && /*#__PURE__*/React.createElement("div", {
     style: {
       flexShrink: 0,
       marginTop: 6,
@@ -14670,7 +14671,7 @@ function CosmicDriftGame() {
       alignItems: "flex-start",
       zIndex: 1
     }
-  }, /*#__PURE__*/React.createElement("svg", {
+  }, isIosSafari ? /*#__PURE__*/React.createElement("svg", {
     width: "16",
     height: "20",
     viewBox: "0 0 16 20",
@@ -14691,6 +14692,29 @@ function CosmicDriftGame() {
     stroke: "rgba(80,200,255,0.4)",
     strokeWidth: "1.5",
     strokeLinecap: "round"
+  })) : /*#__PURE__*/React.createElement("svg", {
+    width: "16",
+    height: "20",
+    viewBox: "0 0 16 20",
+    style: {
+      flexShrink: 0,
+      marginTop: 2
+    }
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "8",
+    cy: "4",
+    r: "1.6",
+    fill: "rgba(80,200,255,0.75)"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "8",
+    cy: "10",
+    r: "1.6",
+    fill: "rgba(80,200,255,0.75)"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "8",
+    cy: "16",
+    r: "1.6",
+    fill: "rgba(80,200,255,0.75)"
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1
@@ -14703,7 +14727,7 @@ function CosmicDriftGame() {
       letterSpacing: 0.3,
       marginBottom: 3
     }
-  }, "Make this an app"), /*#__PURE__*/React.createElement("div", {
+  }, "Make this an app"), isIosSafari ? /*#__PURE__*/React.createElement("div", {
     style: {
       color: "rgba(160,180,200,0.5)",
       fontSize: 10,
@@ -14715,6 +14739,22 @@ function CosmicDriftGame() {
       fontWeight: 700
     }
   }, "Share"), " → ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "rgba(80,200,255,0.7)",
+      fontWeight: 700
+    }
+  }, "Add to Home Screen"), " to play full-screen without the URL bar.") : /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "rgba(160,180,200,0.5)",
+      fontSize: 10,
+      lineHeight: 1.55
+    }
+  }, "Tap ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "rgba(80,200,255,0.7)",
+      fontWeight: 700
+    }
+  }, "⋮"), " → ", /*#__PURE__*/React.createElement("span", {
     style: {
       color: "rgba(80,200,255,0.7)",
       fontWeight: 700
