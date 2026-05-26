@@ -7414,6 +7414,9 @@ function CosmicDriftGame() {
   var _tutsReset = useState(false),
     tutsReset = _tutsReset[0],
     setTutsReset = _tutsReset[1];
+  var _eraseConfirm = useState(false),
+    eraseConfirm = _eraseConfirm[0],
+    setEraseConfirm = _eraseConfirm[1];
   var _ufoDbg = useState(null),
     ufoDebugText = _ufoDbg[0],
     setUfoDebugText = _ufoDbg[1];
@@ -17015,7 +17018,93 @@ function CosmicDriftGame() {
       letterSpacing: 1,
       boxSizing: "border-box"
     }
-  }, tutsReset ? "Tutorials Reset ✓ - new-player popup + builder walkthrough will show again" : "Reset Tutorials"), _shotTimingLog.length > 0 && /*#__PURE__*/React.createElement("div", {
+  }, tutsReset ? "Tutorials Reset ✓ - new-player popup + builder walkthrough will show again" : "Reset Tutorials"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 10
+    }
+  }, !eraseConfirm ? /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      setEraseConfirm(true);
+    },
+    style: {
+      width: "100%",
+      padding: "11px 0",
+      borderRadius: 8,
+      background: "rgba(180,40,40,0.08)",
+      border: "1px solid rgba(200,60,60,0.2)",
+      color: "rgba(255,120,120,0.55)",
+      fontSize: 12,
+      fontWeight: 700,
+      cursor: "pointer",
+      textAlign: "center",
+      letterSpacing: 1,
+      boxSizing: "border-box"
+    }
+  }, "Erase All Data") : /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "rgba(180,20,20,0.12)",
+      border: "1px solid rgba(220,60,60,0.28)",
+      borderRadius: 8,
+      padding: "12px 14px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "rgba(255,160,140,0.8)",
+      fontSize: 11,
+      textAlign: "center",
+      marginBottom: 10,
+      lineHeight: 1.5
+    }
+  }, "Wipes all levels, designs, scores, and settings. Cannot be undone."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      setEraseConfirm(false);
+    },
+    style: {
+      flex: 1,
+      padding: "9px 0",
+      borderRadius: 6,
+      background: "rgba(255,255,255,0.05)",
+      border: "1px solid rgba(180,200,220,0.15)",
+      color: "rgba(180,200,220,0.55)",
+      fontSize: 12,
+      fontWeight: 700,
+      cursor: "pointer",
+      textAlign: "center"
+    }
+  }, "Cancel"), /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      try {
+        var ks = Object.keys(localStorage);
+        for (var ki = 0; ki < ks.length; ki++) {
+          if (ks[ki].indexOf("cd_") === 0) localStorage.removeItem(ks[ki]);
+        }
+      } catch (e) {}
+      try {
+        sessionStorage.removeItem("cd_transition_from");
+      } catch (e2) {}
+      try {
+        sessionStorage.removeItem("cd_open_section");
+      } catch (e3) {}
+      window.location.reload();
+    },
+    style: {
+      flex: 1,
+      padding: "9px 0",
+      borderRadius: 6,
+      background: "rgba(200,30,30,0.25)",
+      border: "1px solid rgba(255,80,80,0.4)",
+      color: "rgba(255,140,140,0.9)",
+      fontSize: 12,
+      fontWeight: 700,
+      cursor: "pointer",
+      textAlign: "center"
+    }
+  }, "Yes, Erase Everything")))), _shotTimingLog.length > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 14
     }

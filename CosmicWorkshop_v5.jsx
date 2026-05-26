@@ -1796,6 +1796,7 @@ export default function CosmicWorkshop() {
   var _wsGuide = useState(false), showWsGuide = _wsGuide[0], setShowWsGuide = _wsGuide[1];
   var _wsTester = useState(false), showWsTesterMenu = _wsTester[0], setShowWsTesterMenu = _wsTester[1];
   var _wsTutsReset = useState(false), wsTutsReset = _wsTutsReset[0], setWsTutsReset = _wsTutsReset[1];
+  var _wsEraseConfirm = useState(false), wsEraseConfirm = _wsEraseConfirm[0], setWsEraseConfirm = _wsEraseConfirm[1];
   var _wsMenu = useState(false), showWsMenu = _wsMenu[0], setShowWsMenu = _wsMenu[1];
   var builderDragRef = useRef(null);
   var builderTouchUsedRef = useRef(false);
@@ -6068,7 +6069,18 @@ export default function CosmicWorkshop() {
           React.createElement("div", { style: { fontSize: 15, fontWeight: 700, color: "rgba(180,200,220,0.55)", letterSpacing: 1 } }, "SERVICE PANEL  ·  v5.2")
         ),
         React.createElement("div", { onClick: function() { window.location.href = "mailto:cosmicdriftapp@gmail.com?subject=I%20found%20a%20bug!"; }, style: { width: "100%", padding: "11px 0", borderRadius: 8, background: "rgba(255,80,80,0.07)", border: "1px solid rgba(255,80,80,0.18)", color: "rgba(255,140,140,0.7)", fontSize: 12, fontWeight: 700, cursor: "pointer", textAlign: "center", letterSpacing: 1, boxSizing: "border-box" } }, "Report a Bug"),
-        React.createElement("div", { onClick: function() { try { window.storage.delete("cosmic_drift_builder_tour"); } catch(e) {} builderTourSeenRef.current = false; setWsTutsReset(true); setTimeout(function() { setWsTutsReset(false); }, 2500); }, style: { width: "100%", padding: "11px 0", marginTop: 10, borderRadius: 8, background: wsTutsReset ? "rgba(80,200,120,0.12)" : "rgba(80,140,255,0.1)", border: wsTutsReset ? "1px solid rgba(80,200,120,0.3)" : "1px solid rgba(80,140,255,0.25)", color: wsTutsReset ? "rgba(130,220,150,0.9)" : "rgba(120,170,255,0.85)", fontSize: 12, fontWeight: 700, cursor: "pointer", textAlign: "center", letterSpacing: 1, boxSizing: "border-box" } }, wsTutsReset ? "Builder Tour Reset ✓" : "Reset Builder Tour")
+        React.createElement("div", { onClick: function() { try { window.storage.delete("cosmic_drift_builder_tour"); } catch(e) {} builderTourSeenRef.current = false; setWsTutsReset(true); setTimeout(function() { setWsTutsReset(false); }, 2500); }, style: { width: "100%", padding: "11px 0", marginTop: 10, borderRadius: 8, background: wsTutsReset ? "rgba(80,200,120,0.12)" : "rgba(80,140,255,0.1)", border: wsTutsReset ? "1px solid rgba(80,200,120,0.3)" : "1px solid rgba(80,140,255,0.25)", color: wsTutsReset ? "rgba(130,220,150,0.9)" : "rgba(120,170,255,0.85)", fontSize: 12, fontWeight: 700, cursor: "pointer", textAlign: "center", letterSpacing: 1, boxSizing: "border-box" } }, wsTutsReset ? "Builder Tour Reset ✓" : "Reset Builder Tour"),
+        React.createElement("div", { style: { marginTop: 10 } },
+          !wsEraseConfirm
+            ? React.createElement("div", { onClick: function() { setWsEraseConfirm(true); }, style: { width: "100%", padding: "11px 0", borderRadius: 8, background: "rgba(180,40,40,0.08)", border: "1px solid rgba(200,60,60,0.2)", color: "rgba(255,120,120,0.55)", fontSize: 12, fontWeight: 700, cursor: "pointer", textAlign: "center", letterSpacing: 1, boxSizing: "border-box" } }, "Erase All Data")
+            : React.createElement("div", { style: { background: "rgba(180,20,20,0.12)", border: "1px solid rgba(220,60,60,0.28)", borderRadius: 8, padding: "12px 14px" } },
+                React.createElement("div", { style: { color: "rgba(255,160,140,0.8)", fontSize: 11, textAlign: "center", marginBottom: 10, lineHeight: 1.5 } }, "Wipes all levels, designs, scores, and settings. Cannot be undone."),
+                React.createElement("div", { style: { display: "flex", gap: 8 } },
+                  React.createElement("div", { onClick: function() { setWsEraseConfirm(false); }, style: { flex: 1, padding: "9px 0", borderRadius: 6, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(180,200,220,0.15)", color: "rgba(180,200,220,0.55)", fontSize: 12, fontWeight: 700, cursor: "pointer", textAlign: "center" } }, "Cancel"),
+                  React.createElement("div", { onClick: function() { try { var ks = Object.keys(localStorage); for (var ki = 0; ki < ks.length; ki++) { if (ks[ki].indexOf("cd_") === 0) localStorage.removeItem(ks[ki]); } } catch(e) {} try { sessionStorage.removeItem("cd_transition_from"); } catch(e2) {} try { sessionStorage.removeItem("cd_open_section"); } catch(e3) {} window.location.reload(); }, style: { flex: 1, padding: "9px 0", borderRadius: 6, background: "rgba(200,30,30,0.25)", border: "1px solid rgba(255,80,80,0.4)", color: "rgba(255,140,140,0.9)", fontSize: 12, fontWeight: 700, cursor: "pointer", textAlign: "center" } }, "Yes, Erase Everything")
+                )
+              )
+        )
       )
     ),
 
