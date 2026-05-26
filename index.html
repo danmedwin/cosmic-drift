@@ -84,7 +84,7 @@ var COLS = 8,
   PLASMA_SPEED = 0.85,
   START_PLASMA = 10,
   BONUS_PTS = 2;
-var GAME_VERSION = "v80.1";
+var GAME_VERSION = "v80.2";
 var DIFFICULTY_CAPS = {
   easy: 5,
   regular: 3,
@@ -11608,6 +11608,7 @@ function CosmicDriftGame() {
           height: v.sz,
           borderRadius: 6,
           background: _bpBg,
+          opacity: 0,
           animation: "blockPop 0.25s ease-out forwards",
           pointerEvents: "none"
         }
@@ -11626,6 +11627,7 @@ function CosmicDriftGame() {
           borderRadius: 5,
           background: _beCol.bg,
           boxShadow: "0 0 10px " + _beCol.particle + "99",
+          opacity: 0,
           animation: "blockErupt 0.5s ease-out forwards",
           "--endX": v.endX - v.startX + "px",
           "--endY": v.endY - v.startY + "px"
