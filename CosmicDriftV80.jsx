@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect, memo } from "react";
 
 var COLS = 8, ROWS = 6, GAP = 5, BOARD_PAD = 10, PLASMA_SPEED = 0.85, START_PLASMA = 10, BONUS_PTS = 2;
-var GAME_VERSION = "v80.6";
+var GAME_VERSION = "v80.7";
 var DIFFICULTY_CAPS = { easy: 5, regular: 3, hard: 3 };
 var DIFF_COLORS = { easy: "#44cc44", regular: "#ccaa22", hard: "#cc4444" };
 var DIFF_LABELS = { easy: "EASY", regular: "REGULAR", hard: "HARD" };
@@ -1476,7 +1476,7 @@ function GameGrid(props) {
     var sl = grid[gi] === 10 ? (shieldRef.current[gi] || 0) : 0;
     cells.push(<div key={gi} data-gi={gi} style={{ width: blockSize, height: blockSize, pointerEvents: "none", animation: an }}>{grid[gi] > 0 ? <BlockContent type={grid[gi]} size={blockSize} shieldLevel={sl} animPhase={grid[gi] === 17 ? ufoPhase : undefined} uid={gi} removing={removingBlocks.has(gi)} /> : null}</div>);
   }
-  return <div style={{ display: "grid", gridTemplateColumns: "repeat(" + COLS + "," + blockSize + "px)", gap: GAP + "px", position: "relative" }}>{cells}</div>;
+  return <div style={{ display: "grid", gridTemplateColumns: "repeat(" + COLS + "," + blockSize + "px)", gap: GAP + "px", position: "relative", transform: "translateZ(0)", willChange: "transform" }}>{cells}</div>;
 }
 var GameGridMemo = memo(GameGrid);
 

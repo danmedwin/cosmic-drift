@@ -84,7 +84,7 @@ var COLS = 8,
   PLASMA_SPEED = 0.85,
   START_PLASMA = 10,
   BONUS_PTS = 2;
-var GAME_VERSION = "v80.6";
+var GAME_VERSION = "v80.7";
 var DIFFICULTY_CAPS = {
   easy: 5,
   regular: 3,
@@ -6291,7 +6291,9 @@ function GameGrid(props) {
       display: "grid",
       gridTemplateColumns: "repeat(" + COLS + "," + blockSize + "px)",
       gap: GAP + "px",
-      position: "relative"
+      position: "relative",
+      transform: "translateZ(0)",
+      willChange: "transform"
     }
   }, cells);
 }
