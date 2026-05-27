@@ -84,7 +84,7 @@ var COLS = 8,
   PLASMA_SPEED = 0.85,
   START_PLASMA = 10,
   BONUS_PTS = 2;
-var GAME_VERSION = "v80.10";
+var GAME_VERSION = "v80.11";
 var DIFFICULTY_CAPS = {
   easy: 5,
   regular: 3,
@@ -7385,6 +7385,9 @@ function CosmicDriftGame() {
   var _victoryCard = useState(false),
     showVictoryCard = _victoryCard[0],
     setShowVictoryCard = _victoryCard[1];
+  var _l100c = useState(false),
+    showLevel100Card = _l100c[0],
+    setShowLevel100Card = _l100c[1];
   var _smenu = useState(false),
     splashMenuOpen = _smenu[0],
     setSplashMenuOpen = _smenu[1];
@@ -7475,6 +7478,7 @@ function CosmicDriftGame() {
     bestLevelRef = useRef(0);
   var highestLevelNotifiedRef = useRef(false);
   var darkIntroShownRef = useRef(false);
+  var level100CardShownRef = useRef(false);
   var _newHighScore = useState(false),
     newHighScore = _newHighScore[0],
     setNewHighScore = _newHighScore[1];
@@ -8357,8 +8361,10 @@ function CosmicDriftGame() {
             setCustomLevelName(lv0.name || "Level 1");
             highestLevelNotifiedRef.current = false;
             darkIntroShownRef.current = false;
+            level100CardShownRef.current = false;
             setNewHighScore(false);
             setShowVictoryCard(false);
+            setShowLevel100Card(false);
             setCustomDark(!!lv0.darkLevel);
             startMusic();
             setScreen("game");
@@ -10685,6 +10691,26 @@ function CosmicDriftGame() {
       clearInventory();
     } else {
       nl = levelRef.current + 1;
+      if (levelRef.current === 100 && gameModeRef.current === "infinite" && !customLevelMode && !level100CardShownRef.current) {
+        level100CardShownRef.current = true;
+        var mdKey100 = "infinite_" + difficultyRef.current;
+        if (101 > bestLevelRef.current) {
+          bestLevelRef.current = 101;
+          setBestLevel(101);
+          try {
+            window.storage.set("cosmic_drift_best_level_" + mdKey100, "101");
+          } catch (e100) {}
+        }
+        if (scoreRef.current > bestScoreRef.current) {
+          bestScoreRef.current = scoreRef.current;
+          setBestScore(scoreRef.current);
+          try {
+            window.storage.set("cosmic_drift_best_score_" + mdKey100, String(scoreRef.current));
+          } catch (e100b) {}
+        }
+        setShowLevel100Card(true);
+        return;
+      }
     }
     gridRef2.current = generateGrid(nl);
     shieldRef.current = initShields(gridRef2.current);
@@ -10807,8 +10833,10 @@ function CosmicDriftGame() {
         setCustomLevelName(sl0.name || "Level 1");
         highestLevelNotifiedRef.current = false;
         darkIntroShownRef.current = false;
+        level100CardShownRef.current = false;
         setNewHighScore(false);
         setShowVictoryCard(false);
+        setShowLevel100Card(false);
         setCustomDark(!!sl0.darkLevel);
       }
       return;
@@ -10849,8 +10877,10 @@ function CosmicDriftGame() {
     customPlasmaRef.current = START_PLASMA;
     highestLevelNotifiedRef.current = false;
     darkIntroShownRef.current = false;
+    level100CardShownRef.current = false;
     setNewHighScore(false);
     setShowVictoryCard(false);
+    setShowLevel100Card(false);
     setCustomDark(false);
   }, []);
   function playSignatureLevel(lvlNum) {
@@ -10946,8 +10976,10 @@ function CosmicDriftGame() {
         setCustomLevelName(lv0.name || "Level 1");
         highestLevelNotifiedRef.current = false;
         darkIntroShownRef.current = false;
+        level100CardShownRef.current = false;
         setNewHighScore(false);
         setShowVictoryCard(false);
+        setShowLevel100Card(false);
         setCustomDark(!!lv0.darkLevel);
         startMusic();
         setScreen("game");
@@ -11062,8 +11094,10 @@ function CosmicDriftGame() {
     clearBoardState();
     highestLevelNotifiedRef.current = false;
     darkIntroShownRef.current = false;
+    level100CardShownRef.current = false;
     setNewHighScore(false);
     setShowVictoryCard(false);
+    setShowLevel100Card(false);
     startMusic();
     setScreen("game");
   }
@@ -12067,6 +12101,9 @@ function CosmicDriftGame() {
         if (showVictoryCard) {
           return;
         } // victory card requires explicit choice
+        if (showLevel100Card) {
+          return;
+        }
         if (showTesterMenu) {
           setShowTesterMenu(false);
           return;
@@ -16807,6 +16844,7 @@ function CosmicDriftGame() {
   }, /*#__PURE__*/React.createElement("div", {
     onClick: function () {
       setShowVictoryCard(false);
+      level100CardShownRef.current = true;
       gameModeRef.current = "infinite";
       setGameMode("infinite");
       nextLevel();
@@ -16857,7 +16895,171 @@ function CosmicDriftGame() {
       marginTop: 3,
       letterSpacing: 0
     }
-  }, "Build levels \xB7 design your ship \xB7 more"))))), showTesterMenu && /*#__PURE__*/React.createElement("div", {
+  }, "Build levels \xB7 design your ship \xB7 more"))))), showLevel100Card && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      inset: 0,
+      zIndex: 380,
+      background: "radial-gradient(ellipse 80% 60% at 50% 40%, #081208 0%, #050a05 100%)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 24
+    }
+  }, /*#__PURE__*/React.createElement(GsPanel, {
+    style: {
+      maxWidth: 300,
+      padding: "32px 28px",
+      textAlign: "center",
+      animation: "introFadeIn 0.4s ease-out",
+      border: "1px solid rgba(80,255,174,0.25)",
+      background: "linear-gradient(180deg, #0c1c10 0%, #070e08 100%)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 20,
+      display: "flex",
+      justifyContent: "center"
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "72",
+    height: "72",
+    viewBox: "0 0 72 72"
+  }, /*#__PURE__*/React.createElement("defs", null, /*#__PURE__*/React.createElement("radialGradient", {
+    id: "l100Glow",
+    cx: "50%",
+    cy: "50%",
+    r: "50%"
+  }, /*#__PURE__*/React.createElement("stop", {
+    offset: "0%",
+    stopColor: "#50ffae",
+    stopOpacity: "0.9"
+  }), /*#__PURE__*/React.createElement("stop", {
+    offset: "40%",
+    stopColor: "#20c060",
+    stopOpacity: "0.35"
+  }), /*#__PURE__*/React.createElement("stop", {
+    offset: "100%",
+    stopColor: "#050a05",
+    stopOpacity: "0"
+  }))), /*#__PURE__*/React.createElement("circle", {
+    cx: "36",
+    cy: "36",
+    r: "34",
+    fill: "#080f08",
+    stroke: "rgba(80,255,174,0.3)",
+    strokeWidth: "1.5"
+  }), /*#__PURE__*/React.createElement("circle", {
+    cx: "36",
+    cy: "36",
+    r: "26",
+    fill: "url(#l100Glow)"
+  }), /*#__PURE__*/React.createElement("text", {
+    x: "36",
+    y: "30",
+    textAnchor: "middle",
+    fontSize: "16",
+    fill: "#50ffae",
+    fontWeight: "800",
+    fontFamily: "'Exo 2', sans-serif",
+    letterSpacing: "1"
+  }, "LEVEL"), /*#__PURE__*/React.createElement("text", {
+    x: "36",
+    y: "52",
+    textAnchor: "middle",
+    fontSize: "24",
+    fill: "#50ffae",
+    fontWeight: "900",
+    fontFamily: "'Exo 2', sans-serif"
+  }, "100"))), /*#__PURE__*/React.createElement(GsMono, {
+    size: 9,
+    ls: 2,
+    color: "rgba(80,255,174,0.55)",
+    style: {
+      display: "block",
+      marginBottom: 10
+    }
+  }, "DARK ZONE CLEARED"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "#50ffae",
+      fontSize: 18,
+      fontWeight: 800,
+      marginBottom: 8,
+      fontFamily: "'Exo 2', sans-serif",
+      letterSpacing: 0.5
+    }
+  }, "You conquered Level 100!"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "rgba(200,220,210,0.6)",
+      fontSize: 13,
+      lineHeight: 1.6,
+      marginBottom: 6
+    }
+  }, "An incredible run. The galaxy is yours \u2014 keep going, or put your mark on the game in the Workshop."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "rgba(80,255,174,0.5)",
+      fontSize: 13,
+      fontWeight: 700,
+      marginBottom: 24
+    }
+  }, score.toLocaleString(), " pts"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      setShowLevel100Card(false);
+      nextLevel();
+    },
+    style: {
+      padding: "12px 0",
+      borderRadius: 8,
+      background: "linear-gradient(135deg, #1a3050, #0e2040)",
+      border: "2px solid rgba(80,200,255,0.4)",
+      color: "#80ddff",
+      fontSize: 13,
+      fontWeight: 700,
+      cursor: "pointer",
+      letterSpacing: 0.5
+    }
+  }, "Keep Playing", /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "rgba(120,180,220,0.45)",
+      fontSize: 10,
+      fontWeight: 600,
+      marginTop: 3,
+      letterSpacing: 0
+    }
+  }, "Level 101 and beyond")), /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      setShowLevel100Card(false);
+      try {
+        sessionStorage.setItem("cd_transition_from", "game");
+      } catch (e2) {}
+      window.location.href = "workshop.html";
+    },
+    style: {
+      padding: "12px 0",
+      borderRadius: 8,
+      background: "linear-gradient(135deg, #2a1a40, #1a0e30)",
+      border: "2px solid rgba(160,100,255,0.35)",
+      color: "#c8b8ff",
+      fontSize: 13,
+      fontWeight: 700,
+      cursor: "pointer",
+      letterSpacing: 0.5
+    }
+  }, "Open Workshop", /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "rgba(160,130,220,0.45)",
+      fontSize: 10,
+      fontWeight: 600,
+      marginTop: 3,
+      letterSpacing: 0
+    }
+  }, "Design your ship \xB7 build levels \xB7 customize effects"))))), showTesterMenu && /*#__PURE__*/React.createElement("div", {
     onClick: function () {
       setShowTesterMenu(false);
     },
