@@ -54,8 +54,11 @@ var SCRN = "linear-gradient(180deg, #0a0a14 0%, #12121e 100%)";
 var SCRNB = "2px solid #3a3a45";
 var SCRNS = "inset 0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.05)";
 
+// Build-time flag (set by build.js): shows the For Testers menu and Erase All Data. Off in store builds.
+var DEV_MENU = (typeof window !== "undefined" && window.CD_DEV_MENU === true);
+
 // ── Animation CSS (subset needed for Workshop) ──
-var ANIM_CSS = "@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&family=Exo+2:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');\n@keyframes starDrift{0%{transform:translateY(-50%)}100%{transform:translateY(0)}}\n@keyframes introFadeIn{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}\n@keyframes pulse{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}\n@keyframes ufoWarpOut{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}\n@keyframes ufoWarpIn{0%{transform:scale(0.05);opacity:0}60%{transform:scale(1.08);opacity:0.9}100%{transform:scale(1);opacity:1}}\n@keyframes ufoLightSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}\n@keyframes splashFloat{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}\n@keyframes splashGlow{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}@keyframes cdSplashEnterFromGame{0%{transform:scale(0.95);filter:brightness(0.5)}100%{transform:scale(1);filter:brightness(1)}}@keyframes cdSplashExitShrink{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(0.93);filter:brightness(0.55)}100%{transform:scale(0.93);filter:brightness(0.55)}}\n* { box-sizing: border-box; }\ninput[type=range] { -webkit-appearance: none; appearance: none; background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; outline: none; }\ninput[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }\ninput[type=range]::-moz-range-thumb { width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }@keyframes vfxOozeDrip{0%{transform:scaleY(0);opacity:0}100%{transform:scaleY(1);opacity:0.85}}@keyframes vfxOozeWave{0%{transform:translateY(0)}100%{transform:translateY(50%)}}@keyframes vfxBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxRing{0%{transform:scale(0.1);opacity:1}100%{transform:scale(2.2);opacity:0}}@keyframes vfxFlash{0%{transform:scale(0.2);opacity:1}100%{transform:scale(1.8);opacity:0}}@keyframes vfxPop{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(1.2);filter:brightness(1.8)}100%{transform:scale(0);opacity:0}}@keyframes vfxBubble{0%{transform:translateY(0) scale(0.5);opacity:0}15%{opacity:0.55}85%{opacity:0.55}100%{transform:translateY(88px) scale(1);opacity:0}}@keyframes vfxSpark{0%{transform:translate(0,0) scale(1);opacity:1}35%{transform:translate(calc(var(--sx)*0.45),calc(var(--sy)*0.25 - 7px));opacity:0.9}100%{transform:translate(var(--sx),var(--sy)) scale(0.3);opacity:0}}@keyframes vfxBurnBlock{0%{opacity:1;filter:brightness(1)}10%{opacity:1;filter:brightness(2.3)}55%{opacity:0;filter:brightness(1)}100%{opacity:0;filter:brightness(1)}}@keyframes vfxShatter{0%{transform:translate(0,0) scale(1);opacity:0}15%{opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxDroneShard{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0.2);opacity:0}}@keyframes plasmaZip{0%{transform:translate(0,0) scale(1);opacity:1}80%{opacity:1}100%{transform:translate(var(--endX),var(--endY)) scale(0.5);opacity:0}}@keyframes plasmaFlash{0%{transform:scale(0.5);opacity:1}16%{transform:scale(1.5);opacity:0}100%{transform:scale(1.5);opacity:0}}@keyframes vfxLightningBolt{0%{opacity:0;filter:brightness(1)}8%{opacity:1;filter:brightness(2.5)}50%{opacity:0.7;filter:brightness(1.3)}70%{opacity:0;filter:brightness(1)}100%{opacity:0}}";
+var ANIM_CSS = "@keyframes starDrift{0%{transform:translateY(-50%)}100%{transform:translateY(0)}}\n@keyframes introFadeIn{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}\n@keyframes pulse{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}\n@keyframes ufoWarpOut{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}\n@keyframes ufoWarpIn{0%{transform:scale(0.05);opacity:0}60%{transform:scale(1.08);opacity:0.9}100%{transform:scale(1);opacity:1}}\n@keyframes ufoLightSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}\n@keyframes splashFloat{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}\n@keyframes splashGlow{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}@keyframes cdSplashEnterFromGame{0%{transform:scale(0.95);filter:brightness(0.5)}100%{transform:scale(1);filter:brightness(1)}}@keyframes cdSplashExitShrink{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(0.93);filter:brightness(0.55)}100%{transform:scale(0.93);filter:brightness(0.55)}}\n* { box-sizing: border-box; }\ninput[type=range] { -webkit-appearance: none; appearance: none; background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; outline: none; }\ninput[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }\ninput[type=range]::-moz-range-thumb { width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }@keyframes vfxOozeDrip{0%{transform:scaleY(0);opacity:0}100%{transform:scaleY(1);opacity:0.85}}@keyframes vfxOozeWave{0%{transform:translateY(0)}100%{transform:translateY(50%)}}@keyframes vfxBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxRing{0%{transform:scale(0.1);opacity:1}100%{transform:scale(2.2);opacity:0}}@keyframes vfxFlash{0%{transform:scale(0.2);opacity:1}100%{transform:scale(1.8);opacity:0}}@keyframes vfxPop{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(1.2);filter:brightness(1.8)}100%{transform:scale(0);opacity:0}}@keyframes vfxBubble{0%{transform:translateY(0) scale(0.5);opacity:0}15%{opacity:0.55}85%{opacity:0.55}100%{transform:translateY(88px) scale(1);opacity:0}}@keyframes vfxSpark{0%{transform:translate(0,0) scale(1);opacity:1}35%{transform:translate(calc(var(--sx)*0.45),calc(var(--sy)*0.25 - 7px));opacity:0.9}100%{transform:translate(var(--sx),var(--sy)) scale(0.3);opacity:0}}@keyframes vfxBurnBlock{0%{opacity:1;filter:brightness(1)}10%{opacity:1;filter:brightness(2.3)}55%{opacity:0;filter:brightness(1)}100%{opacity:0;filter:brightness(1)}}@keyframes vfxShatter{0%{transform:translate(0,0) scale(1);opacity:0}15%{opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxDroneShard{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0.2);opacity:0}}@keyframes plasmaZip{0%{transform:translate(0,0) scale(1);opacity:1}80%{opacity:1}100%{transform:translate(var(--endX),var(--endY)) scale(0.5);opacity:0}}@keyframes plasmaFlash{0%{transform:scale(0.5);opacity:1}16%{transform:scale(1.5);opacity:0}100%{transform:scale(1.5);opacity:0}}@keyframes vfxLightningBolt{0%{opacity:0;filter:brightness(1)}8%{opacity:1;filter:brightness(2.5)}50%{opacity:0.7;filter:brightness(1.3)}70%{opacity:0;filter:brightness(1)}100%{opacity:0}}";
 
 // ═══════════════════════════════════════════════════════════════
 // SHARED VISUAL COMPONENTS
@@ -1804,6 +1807,7 @@ export default function CosmicWorkshop() {
   var _bplasma = useState(START_PLASMA), builderPlasma = _bplasma[0], setBuilderPlasma = _bplasma[1];
   var _wsGuide = useState(false), showWsGuide = _wsGuide[0], setShowWsGuide = _wsGuide[1];
   var _wsTester = useState(false), showWsTesterMenu = _wsTester[0], setShowWsTesterMenu = _wsTester[1];
+  var _wsCredits = useState(false), showWsCredits = _wsCredits[0], setShowWsCredits = _wsCredits[1];
   var _wsTutsReset = useState(false), wsTutsReset = _wsTutsReset[0], setWsTutsReset = _wsTutsReset[1];
   var _wsEraseConfirm = useState(false), wsEraseConfirm = _wsEraseConfirm[0], setWsEraseConfirm = _wsEraseConfirm[1];
   var _wsMenu = useState(false), showWsMenu = _wsMenu[0], setShowWsMenu = _wsMenu[1];
@@ -5493,6 +5497,7 @@ export default function CosmicWorkshop() {
       var tag = document.activeElement ? document.activeElement.tagName : "";
       var isInput = tag === "INPUT" || tag === "TEXTAREA";
       if (key === "Escape") {
+        if (showWsCredits) { setShowWsCredits(false); return; }
         if (showWsTesterMenu) { setShowWsTesterMenu(false); return; }
         if (showWsGuide) { setShowWsGuide(false); return; }
         if (showWsMenu) { setShowWsMenu(false); return; }
@@ -5517,7 +5522,7 @@ export default function CosmicWorkshop() {
     }
     document.addEventListener("keydown", handleKbd);
     return function() { document.removeEventListener("keydown", handleKbd); };
-  }, [showWsTesterMenu, showWsGuide, showWsMenu, bdImportConfirm, showImport, bdShowImport, vfxShowImport, ufoShowImport, shipShowImport, plasmaShowImport, setsShowImport, showBackWarn, bdShowBackWarn, vfxShowBackWarn, ufoShowBackWarn, shipShowBackWarn, plasmaShowBackWarn]);
+  }, [showWsCredits, showWsTesterMenu, showWsGuide, showWsMenu, bdImportConfirm, showImport, bdShowImport, vfxShowImport, ufoShowImport, shipShowImport, plasmaShowImport, setsShowImport, showBackWarn, bdShowBackWarn, vfxShowBackWarn, ufoShowBackWarn, shipShowBackWarn, plasmaShowBackWarn]);
 
   return React.createElement("div", { style: { position: "fixed", inset: 0, background: "#0b0c1a", fontFamily: "'Quicksand',sans-serif", overflow: "hidden" } },
     React.createElement("style", null, ANIM_CSS),
@@ -6090,8 +6095,25 @@ export default function CosmicWorkshop() {
       )
     ),
 
+    // ═══ CREDITS OVERLAY ═══
+    showWsCredits && React.createElement("div", { onClick: function() { setShowWsCredits(false); }, style: { position: "fixed", inset: 0, zIndex: 60, background: "rgba(0,0,0,0.72)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 } },
+      React.createElement(WsPanel, { onClick: function(e) { e.stopPropagation(); }, style: { width: 300, maxWidth: "90vw", padding: 0, overflow: "hidden" } },
+        React.createElement("div", { style: { padding: "12px 14px 10px", borderBottom: "1px solid rgba(160,100,255,0.15)", display: "flex", alignItems: "center", justifyContent: "space-between" } },
+          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8 } },
+            React.createElement(WsLED, { color: WS.green, size: 5 }),
+            React.createElement(WsMono, { size: 10, ls: 2, color: "rgba(220,200,255,0.9)" }, "CREDITS")
+          ),
+          React.createElement("div", { onClick: function() { setShowWsCredits(false); }, style: { width: 22, height: 22, borderRadius: 5, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(160,100,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "rgba(200,170,255,0.5)", fontSize: 14, lineHeight: 1 } }, "\u2715")
+        ),
+        React.createElement("div", { style: { padding: "16px 18px 18px", display: "flex", flexDirection: "column", gap: 12, fontFamily: "'Quicksand',sans-serif", textAlign: "center" } },
+          React.createElement("div", { style: { color: "rgba(220,210,240,0.9)", fontSize: 13, fontWeight: 700, lineHeight: 1.5 } }, "Designed by Dan Medwin. Built with Claude."),
+          React.createElement("div", { style: { color: "rgba(200,190,220,0.65)", fontSize: 11.5, lineHeight: 1.55, overflowWrap: "anywhere" } }, "Space Fighter Loop by Kevin MacLeod (incompetech.com), licensed under Creative Commons: By Attribution 4.0, creativecommons.org/licenses/by/4.0/")
+        )
+      )
+    ),
+
     // ═══ FOR TESTERS PANEL ═══
-    showWsTesterMenu && React.createElement("div", { onClick: function() { setShowWsTesterMenu(false); }, style: { position: "fixed", inset: 0, zIndex: 450, display: "flex", alignItems: "flex-end", justifyContent: "center", background: "rgba(5,5,15,0.75)", backdropFilter: "blur(5px)", paddingBottom: 0 } },
+    DEV_MENU && showWsTesterMenu && React.createElement("div", { onClick: function() { setShowWsTesterMenu(false); }, style: { position: "fixed", inset: 0, zIndex: 450, display: "flex", alignItems: "flex-end", justifyContent: "center", background: "rgba(5,5,15,0.75)", backdropFilter: "blur(5px)", paddingBottom: 0 } },
       React.createElement("div", { onClick: function(e) { e.stopPropagation(); }, style: { width: "100%", maxWidth: 420, background: "linear-gradient(180deg,#0d1022,#080d1a)", borderTop: "1px solid rgba(80,120,200,0.25)", borderRadius: "16px 16px 0 0", padding: "20px 22px 36px", fontFamily: "'Quicksand',sans-serif" } },
         React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 } },
           React.createElement("div", { style: { fontSize: 11, fontWeight: 700, color: "rgba(180,200,220,0.5)", letterSpacing: 3 } }, "FOR TESTERS"),
@@ -6131,7 +6153,13 @@ export default function CosmicWorkshop() {
           ),
           "Workshop Guide"
         ),
-        React.createElement("div", { onClick: function() { setShowWsMenu(false); setShowWsTesterMenu(true); }, style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(100,180,255,0.6)", fontSize: 12, fontWeight: 600 } },
+        React.createElement("div", { onClick: function() { setShowWsMenu(false); setShowWsCredits(true); }, style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 } },
+          React.createElement("svg", { width: "16", height: "16", viewBox: "0 0 24 24" },
+            React.createElement("path", { d: "M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z", fill: "rgba(200,170,255,0.6)" })
+          ),
+          "Credits"
+        ),
+        DEV_MENU && React.createElement("div", { onClick: function() { setShowWsMenu(false); setShowWsTesterMenu(true); }, style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(100,180,255,0.6)", fontSize: 12, fontWeight: 600 } },
           React.createElement("svg", { width: "16", height: "16", viewBox: "0 0 24 24" },
             React.createElement("path", { d: "M12 2a10 10 0 100 20A10 10 0 0012 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z", fill: "rgba(100,180,255,0.5)" })
           ),
