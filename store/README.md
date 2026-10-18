@@ -52,7 +52,7 @@ scales the rest.
 | Device slot in ASC | Size | Files |
 |---|---|---|
 | iPhone 6.9" Display | 1320 x 2868 | `iphone-01` to `iphone-08` |
-| iPad 13" Display | 2064 x 2752 | `ipad-01` to `ipad-08` (see status in the hand-over note if this folder is empty) |
+| iPad 13" Display | 2064 x 2752 | `ipad-01` to `ipad-08` |
 
 The first three show in search results, so the order is: chain reaction,
 Workshop, Level Builder, then Block Designer, Hangar, Level Clear, title
@@ -70,6 +70,14 @@ screen in the carousel.
   screenshots avoid them (the Hangar shot uses the neutral "Artie-2" rocket and
   shows the parts list, not the model grid). Consider renaming or removing
   those models before submission.
+- **The iPad layout is a phone-width column.** During gameplay on the iPad the
+  board is a narrow strip centered on a wide empty screen, so the ship and
+  blocks look small in the iPad screenshots, and the Workshop screens leave a
+  large empty area below the module list. Fixing that means changing the game
+  layout for wide screens, which this phase did not touch.
+- The Simulator draws a stray grey arc in the bottom-right corner of iPad
+  captures. `frame_screenshots.py` paints it out of the framed versions; the
+  raw files keep it.
 - The paywall and Workshop screenshots were captured on a fresh Simulator
   install with the Pass bought through the local StoreKit test file, so the
   Workshop splash shows the sample content that ships in the app (First Contact

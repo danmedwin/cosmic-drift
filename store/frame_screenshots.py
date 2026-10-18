@@ -30,7 +30,7 @@ ACCENT = (128, 221, 255)     # #80ddff, the game's cyan
 # screen corner radius as a fraction of the screenshot width, caption px
 DEVICES = {
     "iphone": dict(size=(1320, 2868), top=330, bottom=150, side=120, corner=0.115, font=124),
-    "ipad": dict(size=(2064, 2752), top=300, bottom=130, side=140, corner=0.030, font=150),
+    "ipad": dict(size=(2064, 2752), top=300, bottom=130, side=140, corner=0.030, font=150, patch_corner=True),
 }
 
 # file stem (after the device prefix) -> caption
@@ -75,6 +75,12 @@ def rounded_mask(size, radius):
 def compose(raw_path, out_path, caption, cfg, ttf):
     W, H = cfg["size"]
     raw = Image.open(raw_path).convert("RGB")
+    if cfg.get("patch_corner"):
+        # The iPad Simulator draws a grey arc in the bottom-right corner of its
+        # screenshots. Paint it out with the colour just beside it.
+        w, h = raw.size
+        c = raw.getpixel((w - 200, h - 30))
+        ImageDraw.Draw(raw).rectangle((w - 90, h - 62, w, h), fill=c)
     canvas = Image.new("RGB", (W, H), NAVY)
 
     # soft cyan glow behind the device so the dark UI reads on the dark ground
