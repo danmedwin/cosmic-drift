@@ -3591,10 +3591,11 @@ export default function CosmicWorkshop() {
     return React.createElement("div", { style: OVERLAY_BG },
       React.createElement("div", { style: Object.assign({}, OVERLAY_BOX, { border: "1px solid rgba(200,184,255,0.3)", maxWidth: 340, width: "90%" }) },
         React.createElement("div", { style: { color: "#c8b8ff", fontSize: 15, fontWeight: 700, marginBottom: 8, fontFamily: "'Quicksand',sans-serif" } }, title),
-        React.createElement("div", { style: { color: "rgba(200,184,255,0.4)", fontSize: 11, marginBottom: 12 } }, "Copy this code to share:"),
+        React.createElement("div", { style: { color: "rgba(200,184,255,0.4)", fontSize: 11, marginBottom: 12 } }, (window.CDNative && window.CDNative.canShare) ? "Share or copy this code:" : "Copy this code to share:"),
         React.createElement("textarea", { readOnly: true, value: text, style: { width: "100%", height: 80, padding: 8, borderRadius: 6, background: SCRN, border: SCRNB, color: "#80ddff", fontSize: 16, fontFamily: "monospace", resize: "none", outline: "none", boxSizing: "border-box" }, onClick: function(e) { e.target.select(); } }),
         React.createElement("div", { style: { display: "flex", gap: 12, justifyContent: "center", marginTop: 12 } },
           React.createElement("div", { onClick: onClose, style: { padding: "8px 20px", borderRadius: 16, border: "1px solid rgba(120,80,255,0.3)", color: "#c8b8ff", fontSize: 12, fontWeight: 600, cursor: "pointer" } }, "Close"),
+          (window.CDNative && window.CDNative.canShare) ? React.createElement("div", { onClick: function() { window.CDNative.share(title, text); }, style: { padding: "8px 20px", borderRadius: 16, border: "1px solid rgba(200,184,255,0.5)", color: "#c8b8ff", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, "Share") : null,
           React.createElement("div", { onClick: onCopy, style: { padding: "8px 20px", borderRadius: 16, background: isCopied ? "rgba(80,200,100,0.3)" : "linear-gradient(135deg,#7b5ea7,#9f7fd0)", border: isCopied ? "1px solid rgba(80,200,100,0.5)" : "none", color: isCopied ? "#80dd90" : "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" } }, isCopied ? "Copied!" : "Copy"))));
   }
 
@@ -6132,7 +6133,7 @@ export default function CosmicWorkshop() {
                 React.createElement("div", { style: { color: "rgba(255,160,140,0.8)", fontSize: 11, textAlign: "center", marginBottom: 10, lineHeight: 1.5 } }, "Wipes all levels, designs, scores, and settings. Cannot be undone."),
                 React.createElement("div", { style: { display: "flex", gap: 8 } },
                   React.createElement("div", { onClick: function() { setWsEraseConfirm(false); }, style: { flex: 1, padding: "9px 0", borderRadius: 6, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(180,200,220,0.15)", color: "rgba(180,200,220,0.55)", fontSize: 12, fontWeight: 700, cursor: "pointer", textAlign: "center" } }, "Cancel"),
-                  React.createElement("div", { onClick: function() { try { var ks = Object.keys(localStorage); for (var ki = 0; ki < ks.length; ki++) { if (ks[ki].indexOf("cd_") === 0) localStorage.removeItem(ks[ki]); } } catch(e) {} try { sessionStorage.removeItem("cd_transition_from"); } catch(e2) {} try { sessionStorage.removeItem("cd_open_section"); } catch(e3) {} window.location.reload(); }, style: { flex: 1, padding: "9px 0", borderRadius: 6, background: "rgba(200,30,30,0.25)", border: "1px solid rgba(255,80,80,0.4)", color: "rgba(255,140,140,0.9)", fontSize: 12, fontWeight: 700, cursor: "pointer", textAlign: "center" } }, "Yes, Erase Everything")
+                  React.createElement("div", { onClick: function() { try { var ks = Object.keys(localStorage); for (var ki = 0; ki < ks.length; ki++) { if (ks[ki].indexOf("cd_") === 0) localStorage.removeItem(ks[ki]); } } catch(e) {} if (window.CDNative) window.CDNative.prefsClear(); try { sessionStorage.removeItem("cd_transition_from"); } catch(e2) {} try { sessionStorage.removeItem("cd_open_section"); } catch(e3) {} window.location.reload(); }, style: { flex: 1, padding: "9px 0", borderRadius: 6, background: "rgba(200,30,30,0.25)", border: "1px solid rgba(255,80,80,0.4)", color: "rgba(255,140,140,0.9)", fontSize: 12, fontWeight: 700, cursor: "pointer", textAlign: "center" } }, "Yes, Erase Everything")
                 )
               )
         )

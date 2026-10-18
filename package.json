@@ -6,10 +6,25 @@
   "scripts": {
     "build:game": "node build.js CosmicDriftV80.jsx index.html \"Cosmic Drift\"",
     "build:workshop": "node build.js CosmicWorkshop_v5.jsx workshop.html \"Cosmic Workshop\"",
-    "build": "npm run build:game && npm run build:workshop"
+    "build": "npm run build:game && npm run build:workshop",
+    "www": "node www-sync.js",
+    "ios:sync": "npm run build && node www-sync.js && npx cap sync ios",
+    "ios:open": "npx cap open ios",
+    "ios:assets": "npx capacitor-assets generate --ios --iconBackgroundColor '#0b0c1a' --splashBackgroundColor '#0b0c1a' --splashBackgroundColorDark '#0b0c1a'"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
-    "@babel/preset-react": "^7.26.3"
+    "@babel/preset-react": "^7.26.3",
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.5.3"
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/ios": "^8.5.3",
+    "@capacitor/preferences": "^8.0.1",
+    "@capacitor/share": "^8.0.3",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.4"
   }
 }

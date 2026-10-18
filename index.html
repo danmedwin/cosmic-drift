@@ -18,6 +18,8 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: 100%; height: 100%; overflow: hidden; background: #0b0c1a; }
   #root { width: 100%; height: 100%; }
+  body.cd-native { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+  body.cd-native input, body.cd-native textarea { -webkit-user-select: text; user-select: text; }
   #loading-screen {
     position: fixed; inset: 0; background: #0b0c1a; display: flex;
     flex-direction: column; align-items: center; justify-content: center;
@@ -31,43 +33,126 @@
     border-radius: 2px; animation: loadSlide 1.2s ease-in-out infinite; }
   @keyframes loadSlide { 0% { transform: translateX(-100%); } 100% { transform: translateX(400%); } }
 </style>
+<script src="vendor/capacitor.js"></script>
 <script src="vendor/react.production.min.js"></script>
 <script src="vendor/react-dom.production.min.js"></script>
 </head>
 <body>
+<script>if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) document.body.className = "cd-native";</script>
 <div id="loading-screen"><div class="title">Cosmic Drift</div><div class="bar-track"><div class="bar-fill"></div></div></div>
 <div id="root"></div>
 <script>
 // Build-time flag: shows the For Testers menu (incl. Erase All Data). Off in store builds.
 window.CD_DEV_MENU = false;
 
-// Storage shim: wraps localStorage with cd_ prefix
-window.storage = {
-  get: function(key) {
-    try { var val = localStorage.getItem("cd_" + key);
-      return Promise.resolve(val != null ? { key: key, value: val } : null);
-    } catch(e) { return Promise.resolve(null); }
-  },
-  set: function(key, value) {
-    try { localStorage.setItem("cd_" + key, value);
-      return Promise.resolve({ key: key, value: value });
-    } catch(e) { return Promise.resolve(null); }
-  },
-  delete: function(key) {
-    try { localStorage.removeItem("cd_" + key);
-      return Promise.resolve({ key: key, deleted: true });
-    } catch(e) { return Promise.resolve(null); }
-  },
-  list: function(prefix) {
-    try { var keys = []; var pfx = "cd_" + (prefix || "");
-      for (var i = 0; i < localStorage.length; i++) {
-        var k = localStorage.key(i);
-        if (k.indexOf(pfx) === 0) keys.push(k.substring(3));
-      }
-      return Promise.resolve({ keys: keys });
-    } catch(e) { return Promise.resolve({ keys: [] }); }
+// ── Native bridge (Capacitor). Every call is feature-detected; in a browser CDNative.isNative is false and all methods are no-ops. ──
+window.CDNative = (function () {
+  var cap = window.Capacitor;
+  var isNative = !!(cap && cap.isNativePlatform && cap.isNativePlatform());
+  var cache = {};
+  function plugin(name) { try { if (!isNative || !cap.isPluginAvailable(name)) return null; if (!cache[name]) cache[name] = cap.Plugins[name] || cap.registerPlugin(name); return cache[name]; } catch (e) { return null; } }
+  var LB_PREFIX = "com.medwin.cosmicdrift.lb.";
+  var lastPop = 0;
+  var api = {
+    isNative: isNative,
+    hasGameCenter: !!plugin("GameCenter"),
+    canShare: !!plugin("Share"),
+    haptic: function (kind) {
+      var h = plugin("Haptics"); if (!h) return;
+      try {
+        if (kind === "pop") { var now = Date.now(); if (now - lastPop < 40) return; lastPop = now; h.impact({ style: "MEDIUM" }); }
+        else if (kind === "success") { h.notification({ type: "SUCCESS" }); }
+        else if (kind === "warning") { h.notification({ type: "WARNING" }); }
+        else { h.impact({ style: "LIGHT" }); }
+      } catch (e) {}
+    },
+    share: function (title, text) {
+      var sh = plugin("Share"); if (!sh) return Promise.resolve(false);
+      return sh.share({ title: title, text: text, dialogTitle: title }).then(function () { return true; }).catch(function () { return false; });
+    },
+    leaderboardId: function (modeDiffKey) { return LB_PREFIX + String(modeDiffKey).replace("_", "."); },
+    submitScore: function (modeDiffKey, score) {
+      var gc = plugin("GameCenter"); if (!gc) return;
+      try { gc.submitScore({ leaderboardId: api.leaderboardId(modeDiffKey), score: Math.round(Number(score) || 0) }).catch(function () {}); } catch (e) {}
+    },
+    showLeaderboard: function (modeDiffKey) {
+      var gc = plugin("GameCenter"); if (!gc) return Promise.resolve(false);
+      var opts = modeDiffKey ? { leaderboardId: api.leaderboardId(modeDiffKey) } : {};
+      return gc.showLeaderboard(opts).then(function (r) { return !!(r && r.shown); }).catch(function () { return false; });
+    },
+    prefsClear: function () { var p = plugin("Preferences"); if (p) { try { p.clear(); } catch (e) {} } },
+    ready: function () {
+      var sb = plugin("StatusBar"); if (sb) { try { sb.setStyle({ style: "DARK" }); } catch (e) {} }
+      var ss = plugin("SplashScreen"); if (ss) { try { ss.hide({ fadeOutDuration: 250 }); } catch (e) {} }
+    }
+  };
+  return api;
+})();
+
+// Storage shim: wraps localStorage with cd_ prefix.
+// On iOS every cd_* key is mirrored into Capacitor Preferences (UserDefaults), which WKWebView
+// never evicts; at page load any key missing from localStorage is restored from there first.
+window.storage = (function () {
+  var prefs = (function () { try { var c = window.Capacitor; if (!window.CDNative.isNative || !c.isPluginAvailable("Preferences")) return null; return c.Plugins.Preferences || c.registerPlugin("Preferences"); } catch (e) { return null; } })();
+  var ready = Promise.resolve();
+  if (prefs) {
+    ready = prefs.keys().then(function (r) {
+      var keys = (r && r.keys) || [];
+      var restores = [];
+      keys.forEach(function (k) {
+        if (k.indexOf("cd_") !== 0) return;
+        var local = null; try { local = localStorage.getItem(k); } catch (e) {}
+        if (local != null) return;
+        restores.push(prefs.get({ key: k }).then(function (g) { if (g && g.value != null) { try { localStorage.setItem(k, g.value); } catch (e) {} } }));
+      });
+      return Promise.all(restores).then(function () {
+        // Upload anything localStorage has that Preferences lacks: data from before mirroring existed, and keys the
+        // Workshop iframe on the game splash seeds (iframes have no native bridge, so they cannot mirror themselves).
+        var ups = [];
+        try { for (var i = 0; i < localStorage.length; i++) { var k2 = localStorage.key(i); if (k2.indexOf("cd_") === 0 && keys.indexOf(k2) < 0) ups.push(prefs.set({ key: k2, value: localStorage.getItem(k2) })); } } catch (e) {}
+        return Promise.all(ups);
+      });
+    }).catch(function () {});
+    // Writes made by another document of this origin (the Workshop iframe) arrive as storage events: mirror those too.
+    window.addEventListener("storage", function (ev) {
+      if (!ev || !ev.key || ev.key.indexOf("cd_") !== 0) return;
+      try { if (ev.newValue == null) prefs.remove({ key: ev.key }).catch(function () {}); else prefs.set({ key: ev.key, value: ev.newValue }).catch(function () {}); } catch (e) {}
+    });
   }
-};
+  function mirrorSet(k, v) { if (prefs) { try { prefs.set({ key: k, value: v }).catch(function () {}); } catch (e) {} } }
+  function mirrorDel(k) { if (prefs) { try { prefs.remove({ key: k }).catch(function () {}); } catch (e) {} } }
+  return {
+    ready: ready,
+    get: function(key) {
+      return ready.then(function () {
+        try { var val = localStorage.getItem("cd_" + key);
+          return val != null ? { key: key, value: val } : null;
+        } catch(e) { return null; }
+      });
+    },
+    set: function(key, value) {
+      try { localStorage.setItem("cd_" + key, value); mirrorSet("cd_" + key, value);
+        return Promise.resolve({ key: key, value: value });
+      } catch(e) { return Promise.resolve(null); }
+    },
+    delete: function(key) {
+      try { localStorage.removeItem("cd_" + key); mirrorDel("cd_" + key);
+        return Promise.resolve({ key: key, deleted: true });
+      } catch(e) { return Promise.resolve(null); }
+    },
+    list: function(prefix) {
+      return ready.then(function () {
+        try { var keys = []; var pfx = "cd_" + (prefix || "");
+          for (var i = 0; i < localStorage.length; i++) {
+            var k = localStorage.key(i);
+            if (k.indexOf(pfx) === 0) keys.push(k.substring(3));
+          }
+          return { keys: keys };
+        } catch(e) { return { keys: [] }; }
+      });
+    }
+  };
+})();
 
 var useState = React.useState, useRef = React.useRef, useCallback = React.useCallback, useEffect = React.useEffect, memo = React.memo;
 
@@ -291,6 +376,24 @@ function resumeMusic() {
   } else if (!_musicMuteRef.current && !_musicSource && _musicBuffer) {
     _playMusicNow();
   }
+}
+// Background / foreground: silence the loop while the page is hidden (app switcher, lock screen), bring it back only if it was playing.
+var _musicWasPlaying = false;
+if (typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) {
+      _musicWasPlaying = !!_musicSource && !_musicMuteRef.current;
+      pauseMusic();
+    } else {
+      if (_audioCtx) {
+        try {
+          _audioCtx.resume();
+        } catch (e) {}
+      }
+      if (_musicWasPlaying) resumeMusic();
+      _musicWasPlaying = false;
+    }
+  });
 }
 var _SOUNDS = {
   plasmaFire: function () {
@@ -7600,6 +7703,9 @@ function CosmicDriftGame() {
   var _showSetMsg = useState(false),
     showSetModeMsg = _showSetMsg[0],
     setShowSetModeMsg = _showSetMsg[1];
+  var _gcMsg = useState(false),
+    gcMsg = _gcMsg[0],
+    setGcMsg = _gcMsg[1];
   var savesMapRef = useRef({});
   var setModeLevelsRef = useRef([]);
   var setModeIdxRef = useRef(0);
@@ -8727,6 +8833,7 @@ function CosmicDriftGame() {
           plasma: plasmaRef.current
         });
         playSound("levelClear");
+        if (window.CDNative) window.CDNative.haptic("success");
         setGameState("bonus");
       }, 400);
       return function () {
@@ -8911,9 +9018,11 @@ function CosmicDriftGame() {
       setBestScore(score);
       setNewHighScore(true);
       playSound("highScore");
+      if (window.CDNative) window.CDNative.haptic("success");
       try {
         window.storage.set("cosmic_drift_best_score_" + modeDiffKey, String(score));
       } catch (e) {}
+      if (window.CDNative) window.CDNative.submitScore(modeDiffKey, score);
     }
     if (levelRef.current > bestLevelRef.current) {
       bestLevelRef.current = levelRef.current;
@@ -8941,6 +9050,7 @@ function CosmicDriftGame() {
     } else {
       playSound("crateOpen");
     }
+    if (window.CDNative) window.CDNative.haptic("pop");
     var _cellEl = document.querySelector('[data-gi="' + idx + '"]');
     if (_cellEl) {
       _cellEl.style.opacity = '0';
@@ -10204,6 +10314,7 @@ function CosmicDriftGame() {
   var fire = useCallback(function (fromCol) {
     if (gameState !== "playing" || plasmaRef.current <= 0) return;
     playSound("plasmaFire");
+    if (window.CDNative) window.CDNative.haptic("fire");
     firingRef.current = true;
     if (shipSvgRef.current) shipSvgRef.current.style.animation = "shipPulse 0.2s ease-out";
     setTimeout(function () {
@@ -10804,6 +10915,7 @@ function CosmicDriftGame() {
           try {
             window.storage.set("cosmic_drift_best_score_" + mdKey100, String(scoreRef.current));
           } catch (e100b) {}
+          if (window.CDNative) window.CDNative.submitScore(mdKey100, scoreRef.current);
         }
         setShowLevel100Card(true);
         return;
@@ -10845,6 +10957,7 @@ function CosmicDriftGame() {
       try {
         window.storage.set("cosmic_drift_best_score_" + mdKey, String(scoreRef.current));
       } catch (e) {}
+      if (window.CDNative) window.CDNative.submitScore(mdKey, scoreRef.current);
     }
     var nb = NEW_BLOCK_AT[nl];
     if (nb && BLOCK_INTROS[nb] && nl > 9) {
@@ -12102,7 +12215,7 @@ function CosmicDriftGame() {
   var projCSS = "";
   // baseSlots/extraDisplay moved into HudPanelMemo
 
-  var isIosSafari = typeof navigator.standalone !== "undefined" && !navigator.standalone && /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var isIosSafari = !(window.CDNative && window.CDNative.isNative) && typeof navigator.standalone !== "undefined" && !navigator.standalone && /iphone|ipad|ipod/i.test(navigator.userAgent);
   var isAndroid = /android/i.test(navigator.userAgent) && !(window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
   var showLevelClear = gameState === "bonus";
   var showLost = gameState === "lost";
@@ -13002,6 +13115,7 @@ function CosmicDriftGame() {
         try {
           window.storage.set("cosmic_drift_best_score_" + mdKey, String(scoreRef.current));
         } catch (e3) {}
+        if (window.CDNative) window.CDNative.submitScore(mdKey, scoreRef.current);
       }
       if (gameModeRef.current === "infinite" && levelRef.current > bestLevelRef.current) {
         bestLevelRef.current = levelRef.current;
@@ -14869,7 +14983,81 @@ function CosmicDriftGame() {
       background: GS.green,
       boxShadow: "0 0 6px " + GS.green
     }
-  }))))), (isIosSafari || isAndroid) && !iosPromptDismissed && /*#__PURE__*/React.createElement("div", {
+  })))), window.CDNative && window.CDNative.hasGameCenter && /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      window.CDNative.showLeaderboard(gameModeRef.current + "_" + difficultyRef.current).then(function (shown) {
+        if (!shown) {
+          setGcMsg(true);
+          setTimeout(function () {
+            setGcMsg(false);
+          }, 2600);
+        }
+      });
+    },
+    style: {
+      position: "relative",
+      marginTop: 6,
+      height: 40,
+      borderRadius: 10,
+      background: GS.brushedSolid,
+      border: GS.pbl,
+      boxShadow: GS.ps,
+      padding: "0 14px",
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      overflow: "hidden",
+      cursor: "pointer",
+      flexShrink: 0,
+      zIndex: 1
+    }
+  }, /*#__PURE__*/React.createElement(GsRivet, {
+    pos: {
+      top: 4,
+      left: 5
+    },
+    size: 4
+  }), /*#__PURE__*/React.createElement(GsRivet, {
+    pos: {
+      top: 4,
+      right: 5
+    },
+    size: 4
+  }), /*#__PURE__*/React.createElement("svg", {
+    width: "16",
+    height: "16",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "#ffb43c",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    style: {
+      marginLeft: 8,
+      filter: "drop-shadow(0 0 4px rgba(255,180,60,0.5))"
+    }
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3"
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'Exo 2', sans-serif",
+      fontSize: 12,
+      fontWeight: 700,
+      letterSpacing: 2.5,
+      color: "#dfe9f3",
+      textShadow: "0 0 10px rgba(255,180,60,0.35), 0 -1px 0 rgba(0,0,0,0.5)"
+    }
+  }, "LEADERBOARDS"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }), /*#__PURE__*/React.createElement(GsMono, {
+    size: 8,
+    ls: 1.5,
+    color: gcMsg ? "rgba(255,208,96,0.9)" : "rgba(255,180,60,0.6)"
+  }, gcMsg ? "SIGN IN VIA SETTINGS" : "GAME CENTER"))), (isIosSafari || isAndroid) && !iosPromptDismissed && /*#__PURE__*/React.createElement("div", {
     style: {
       flexShrink: 0,
       marginTop: 6,
@@ -17459,6 +17647,7 @@ function CosmicDriftGame() {
           if (ks[ki].indexOf("cd_") === 0) localStorage.removeItem(ks[ki]);
         }
       } catch (e) {}
+      if (window.CDNative) window.CDNative.prefsClear();
       try {
         sessionStorage.removeItem("cd_transition_from");
       } catch (e2) {}
@@ -17505,6 +17694,7 @@ function CosmicDriftGame() {
 var root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(React.createElement(CosmicDriftGame));
 var ls = document.getElementById("loading-screen"); if (ls) ls.remove();
+if (window.CDNative) window.CDNative.ready();
 </script>
 </body>
 </html>
