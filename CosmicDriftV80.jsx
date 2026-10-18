@@ -4,6 +4,33 @@ var COLS = 8, ROWS = 6, GAP = 5, BOARD_PAD = 10, PLASMA_SPEED = 0.85, START_PLAS
 var GAME_VERSION = "v80.11";
 // Build-time flag (set by build.js): shows the For Testers menu and Erase All Data. Off in store builds.
 var DEV_MENU = (typeof window !== "undefined" && window.CD_DEV_MENU === true);
+
+// ── Workshop Pass (one-time purchase, see IAP.md). window.cdEntitlement is defined in build.js; on the plain
+// web build there is no store and everything is unlocked. In the game the pass gates Set mode and Solve
+// levels above FREE_SOLVE_MAX. Infinite mode, Solve 15 to 50, My Levels and shared levels are always free.
+var FREE_SOLVE_MAX = 50;
+var PASS_FEATURES = [
+  "Unlimited saved levels in the Level Builder",
+  "Block Designer, VFX Studio and UFO Customizer",
+  "Hangar and Plasma Lab",
+  "Sets in the Workshop and Set mode here",
+  "Solve levels 55 to 100"
+];
+var APPLE_EULA_URL = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/";
+function cdUnlocked() { return !(window.cdEntitlement && !window.cdEntitlement.unlocked()); }
+function useEntitlement() {
+  var _e = useState(function() { return window.cdEntitlement ? Object.assign({}, window.cdEntitlement.get()) : { native: false, unlocked: true, known: true, product: null }; });
+  var ent = _e[0], setEnt = _e[1];
+  useEffect(function() {
+    if (!window.cdEntitlement) return;
+    return window.cdEntitlement.subscribe(function(st) { setEnt(Object.assign({}, st)); });
+  }, []);
+  return ent;
+}
+function LockGlyph(props) {
+  var sz = props.size || 11, c = props.color || "currentColor";
+  return <svg width={sz} height={sz} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={props.style}><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></svg>;
+}
 var DIFFICULTY_CAPS = { easy: 5, regular: 3, hard: 3 };
 var DIFF_COLORS = { easy: "#44cc44", regular: "#ccaa22", hard: "#cc4444" };
 var DIFF_LABELS = { easy: "EASY", regular: "REGULAR", hard: "HARD" };
@@ -471,6 +498,8 @@ function getLevelName(lv) { if (TRAINING_NAMES[lv]) return TRAINING_NAMES[lv]; i
 function getLevelPlasma(lv) { if (FIXED_LEVELS[lv]) return FIXED_LEVELS[lv].plasma; return START_PLASMA; }
 var SIG_KEYS = Object.keys(FIXED_LEVELS).map(Number).filter(function (k) { return k >= 15; }).sort(function (a, b) { return a - b; });
 function getNextSigLevel(current) { for (var i = 0; i < SIG_KEYS.length; i++) { if (SIG_KEYS[i] > current) return SIG_KEYS[i]; } return null; }
+// True when the Solve level after `current` sits above the free range and the Workshop Pass is not owned.
+function solveNextLocked(current) { var n = getNextSigLevel(current); return !!(n && n > FREE_SOLVE_MAX && !cdUnlocked()); }
 function getFirstSigLevel() { return SIG_KEYS[0]; }
 
 function generateGrid(lvl) { var lv = lvl || 1; if (FIXED_LEVELS[lv]) return FIXED_LEVELS[lv].grid.slice(); if (lv <= 3) return generateTutorialGrid(lv); var grid = new Array(COLS * ROWS).fill(0); var placed = []; var at = 0;
@@ -1202,6 +1231,85 @@ function LegendOverlay(props) {
 }
 function ConfirmOverlay(props) { if (!props.open) return null; return <div style={{ position: "fixed", inset: 0, zIndex: 250, background: "rgba(5,5,20,0.7)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center" }}><GsPanel style={{ maxWidth: 300, padding: "20px 24px", textAlign: "center" }}><GsMono size={12} ls={1} style={{ display: "block", marginBottom: 6 }}>RETRY LEVEL?</GsMono><GsMono size={10} color={GS.green + "66"} style={{ display: "block", marginBottom: 18 }}>USES 1 REACTOR CORE</GsMono><div style={{ display: "flex", gap: 12, justifyContent: "center" }}><div onClick={props.onCancel} style={{ padding: "8px 20px", borderRadius: 6, background: GS.brushedSolid, border: GS.pbl, color: "#b0c8d8", fontSize: 12, fontWeight: 600, cursor: "pointer", boxShadow: GS.ps }}>Cancel</div><div onClick={props.onConfirm} style={{ padding: "8px 20px", borderRadius: 6, background: "linear-gradient(135deg,#6a4a9a,#8a60c0)", border: "1px solid rgba(160,120,255,0.4)", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", boxShadow: "0 2px 8px rgba(120,80,255,0.3)" }}>Retry</div></div></GsPanel></div>; }
 
+// Workshop Pass paywall: what the pass includes, live price, Buy, Restore, privacy policy and terms.
+// Never shown during play; only from the splash (Set tab, Solve picker) and the level-clear card's return path.
+function PassOverlay(props) {
+  var ent = props.ent;
+  var _busy = useState(false), busy = _busy[0], setBusy = _busy[1];
+  var _st = useState(null), status = _st[0], setStatus = _st[1];
+  var _priv = useState(false), showPrivacy = _priv[0], setShowPrivacy = _priv[1];
+  useEffect(function() { if (!props.open) { setStatus(null); setShowPrivacy(false); } }, [props.open]);
+  if (!props.open) return null;
+  var price = ent.product ? ent.product.displayPrice : null;
+  var V = "#c8b8ff", VD = "rgba(200,184,255,0.5)";
+  function buy() {
+    if (busy || !window.cdEntitlement) return;
+    setBusy(true); setStatus(null);
+    window.cdEntitlement.purchase().then(function(r) {
+      setBusy(false);
+      if (r && r.entitled) { setStatus({ kind: "ok", text: "Thank you. Everything is unlocked." }); return; }
+      var st = r ? r.state : "failed";
+      if (st === "cancelled") { setStatus(null); return; }
+      if (st === "pending") setStatus({ kind: "info", text: "Purchase pending approval. It unlocks the moment it goes through." });
+      else if (st === "unavailable") setStatus({ kind: "error", text: "The App Store did not return the Workshop Pass. Check your connection and try again." });
+      else setStatus({ kind: "error", text: "The purchase did not complete." + (r && r.error ? " " + r.error : "") });
+    });
+  }
+  function restore() {
+    if (busy || !window.cdEntitlement) return;
+    setBusy(true); setStatus(null);
+    window.cdEntitlement.restore().then(function(r) {
+      setBusy(false);
+      if (r && r.entitled) setStatus({ kind: "ok", text: "Restored. Everything is unlocked." });
+      else setStatus({ kind: "info", text: "No Workshop Pass found for this Apple Account." });
+    });
+  }
+  return <div onClick={props.onClose} style={{ position: "fixed", inset: 0, zIndex: 510, background: "rgba(5,5,15,0.85)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 12, overflowY: "auto" }}>
+    <GsPanel style={{ width: 330, maxWidth: "94vw", padding: 0, overflow: "hidden" }}>
+      <div onClick={function (e) { e.stopPropagation(); }}>
+        <div style={{ padding: "12px 14px 10px", borderBottom: "1px solid rgba(80,100,140,0.25)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}><GsLED color={ent.unlocked ? GS.green : "#b060ff"} size={5} /><GsMono size={10} ls={2} color="rgba(220,200,255,0.9)">Workshop Pass</GsMono></div>
+          <div onClick={props.onClose} style={{ width: 22, height: 22, borderRadius: 5, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(160,100,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "rgba(200,184,255,0.6)", fontSize: 14, lineHeight: 1 }}>✕</div>
+        </div>
+        {ent.unlocked ? <div style={{ padding: "18px 18px 20px", display: "flex", flexDirection: "column", gap: 12, alignItems: "center", textAlign: "center", fontFamily: "'Quicksand',sans-serif" }}>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke={GS.green} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ filter: "drop-shadow(0 0 8px rgba(80,255,174,0.5))" }}><circle cx="12" cy="12" r="9" /><path d="M8 12.5l2.5 2.5L16 9.5" /></svg>
+          <div style={{ fontFamily: "'Exo 2', sans-serif", fontSize: 18, fontWeight: 700, color: "#dfe9f3", letterSpacing: 0.5 }}>Unlocked</div>
+          <div style={{ color: "rgba(180,200,220,0.7)", fontSize: 12, lineHeight: 1.55 }}>{status && status.text ? status.text : "Set mode, Solve levels 55 to 100 and every Workshop module are yours."}</div>
+          <div onClick={props.onClose} style={{ marginTop: 4, padding: "10px 28px", borderRadius: 6, background: "linear-gradient(180deg, #2c8a4a 0%, #1a5a32 100%)", border: "1px solid #50ffae", color: "#ffffff", fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", cursor: "pointer" }}>Continue</div>
+        </div> : <div style={{ padding: "16px 18px 14px", display: "flex", flexDirection: "column", gap: 12, fontFamily: "'Quicksand',sans-serif" }}>
+          {props.reason && <div style={{ color: "rgba(255,208,96,0.85)", fontSize: 11.5, lineHeight: 1.5, textAlign: "center", padding: "8px 10px", borderRadius: 6, background: "rgba(255,208,96,0.06)", border: "1px solid rgba(255,208,96,0.18)" }}>{props.reason}</div>}
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontFamily: "'Exo 2', sans-serif", fontSize: 19, fontWeight: 700, color: "#dfe9f3", letterSpacing: 0.4, lineHeight: 1.2 }}>Unlock the full Workshop</div>
+            <div style={{ color: "rgba(180,200,220,0.6)", fontSize: 11.5, marginTop: 4 }}>One purchase. No subscription. Yours on every device signed in to your Apple Account.</div>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, padding: "10px 12px", borderRadius: 8, background: GS.inset, border: GS.ib, boxShadow: GS.is }}>
+            {PASS_FEATURES.map(function(f, i) { return <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8, color: "rgba(200,220,240,0.88)", fontSize: 12, lineHeight: 1.4 }}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={V} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}><path d="M5 12.5l4.5 4.5L19 7" /></svg>{f}</div>; })}
+          </div>
+          <div onClick={buy} style={{ padding: "12px 0", borderRadius: 6, textAlign: "center", background: busy ? "rgba(60,40,90,0.5)" : "linear-gradient(180deg, #3a2060 0%, #261040 100%)", border: "2px solid rgba(160,100,255,0.55)", color: "#ede8ff", fontSize: 13, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", cursor: busy ? "default" : "pointer", boxShadow: "0 0 14px rgba(160,100,255,0.25), inset 0 1px 0 rgba(255,255,255,0.1)", opacity: busy ? 0.7 : 1 }}>{busy ? "Contacting the App Store…" : ("Unlock" + (price ? "  ·  " + price : (ent.native ? "" : "  ·  $4.99")))}</div>
+          <div onClick={restore} style={{ padding: "9px 0", borderRadius: 6, textAlign: "center", background: PNL, border: PNLB, color: "rgba(200,210,220,0.8)", fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", cursor: busy ? "default" : "pointer", opacity: busy ? 0.6 : 1 }}>Restore Purchases</div>
+          {status && <div style={{ textAlign: "center", fontSize: 11, lineHeight: 1.5, color: status.kind === "error" ? "#ff8866" : (status.kind === "ok" ? "#80dd90" : "rgba(200,210,220,0.75)") }}>{status.text}</div>}
+          <div style={{ color: "rgba(180,200,220,0.4)", fontSize: 10, lineHeight: 1.5, textAlign: "center" }}>Payment is charged to your Apple Account when you confirm. Bought it already? Restore Purchases brings it back on any device.</div>
+          <div style={{ display: "flex", justifyContent: "center", gap: 14, fontSize: 10, letterSpacing: 0.5 }}>
+            <span onClick={function() { setShowPrivacy(true); }} style={{ color: VD, cursor: "pointer", textDecoration: "underline" }}>Privacy Policy</span>
+            <a href={APPLE_EULA_URL} target="_blank" rel="noopener" style={{ color: VD, textDecoration: "underline" }}>Terms of Use</a>
+          </div>
+        </div>}
+      </div>
+    </GsPanel>
+    {showPrivacy && <div onClick={function(e) { e.stopPropagation(); setShowPrivacy(false); }} style={{ position: "fixed", inset: 0, zIndex: 530, background: "rgba(0,0,0,0.78)", display: "flex", alignItems: "center", justifyContent: "center", padding: 12 }}>
+      <GsPanel style={{ width: 420, maxWidth: "96vw", height: "80vh", padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+        <div onClick={function(e) { e.stopPropagation(); }} style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+          <div style={{ padding: "10px 14px", borderBottom: "1px solid rgba(80,100,140,0.25)", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+            <GsMono size={10} ls={2} color="rgba(220,200,255,0.9)">Privacy Policy</GsMono>
+            <div onClick={function() { setShowPrivacy(false); }} style={{ width: 22, height: 22, borderRadius: 5, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(160,100,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "rgba(200,184,255,0.6)", fontSize: 14, lineHeight: 1 }}>✕</div>
+          </div>
+          <iframe src="privacy.html" title="Privacy Policy" style={{ flex: 1, width: "100%", border: "none", background: "#0b0c1a" }} />
+        </div>
+      </GsPanel>
+    </div>}
+  </div>;
+}
+
 function CreditsOverlay(props) {
   if (!props.open) return null;
   return <div onClick={props.onClose} style={{ position: "fixed", inset: 0, zIndex: 510, background: "rgba(5,5,15,0.85)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
@@ -1787,6 +1895,9 @@ export default function CosmicDriftGame() {
   var myLevelsQueueRef = useRef(null);
   var _sortMode = useState(function() { try { return localStorage.getItem("cosmic-drift-levels-sort") || "date_new"; } catch(e) { return "date_new"; } }), sortMode = _sortMode[0], setSortMode = _sortMode[1];
   var _sigOpen = useState(false), sigLevelsOpen = _sigOpen[0], setSigLevelsOpen = _sigOpen[1];
+  // Workshop Pass entitlement + paywall ({ reason } or null). See PassOverlay.
+  var ent = useEntitlement();
+  var _paywall = useState(null), paywall = _paywall[0], setPaywall = _paywall[1];
   var _npPopup = useState(false), showNewPlayerPopup = _npPopup[0], setShowNewPlayerPopup = _npPopup[1];
   var _npDontShow = useState(true), npDontShow = _npDontShow[0], setNpDontShow = _npDontShow[1];
   var _devJump = useState(false), devJumpOpen = _devJump[0], setDevJumpOpen = _devJump[1];
@@ -2255,6 +2366,7 @@ export default function CosmicDriftGame() {
     try {
       var playSetParam = new URLSearchParams(window.location.search).get("playset");
       if (!playSetParam) return;
+      if (!cdUnlocked()) return; // Set mode is part of the Workshop Pass
       if (window.history && window.history.replaceState) {
         window.history.replaceState({}, "", window.location.pathname);
       }
@@ -2883,7 +2995,7 @@ function logUfo(msg) {
   }
   function clearInventory() { setInvDrones(0); setInvLightnings(0); setInvCrossShots(0); setInvAngleBounces(0); setInvHammers(0); }
   var doRestart = useCallback(function () { setConfirmOpen(false); if (baseCoresRef.current + extraCoresRef.current <= 0) return; var cp = getHudPos("cores"); var pp = getHudPos("plasma"); var cid = addVfx({ type: "coreFly", startX: cp.x, startY: cp.y, endX: pp.x, endY: pp.y }); rmVfx(cid, 700); setTimeout(function () { loseCore(); if (customGridRef.current) { gridRef2.current = customGridRef.current.slice(); } else { gridRef2.current = generateGrid(levelRef.current); } shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); var rAmt = customGridRef.current ? customPlasmaRef.current : getLevelPlasma(levelRef.current); plasmaRef.current = rAmt; setPlasma(rAmt); var sc = customGridRef.current ? customShipRef.current : getLevelShipStart(levelRef.current); setShipCol(sc); shipColRef.current = sc; clearBoardState(); }, 600); }, [getHudPos, addVfx, rmVfx, loseCore]);
-  var nextLevel = useCallback(function () { clearCanvasVfx(); var nl; if (gameModeRef.current === "set") { var nextIdx = setModeIdxRef.current + 1; if (nextIdx >= setModeLevelsRef.current.length) { stopMusic(); setScreen("splash"); return; } setModeIdxRef.current = nextIdx; var setLv = setModeLevelsRef.current[nextIdx]; gridRef2.current = setLv.grid.slice(); customGridRef.current = setLv.grid.slice(); customShipRef.current = setLv.shipStart != null ? setLv.shipStart : 3; var setPlasmaAmt = setLv.startPlasma || START_PLASMA; customPlasmaRef.current = setPlasmaAmt; shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); plasmaRef.current = setPlasmaAmt; setPlasma(setPlasmaAmt); var setSc = customShipRef.current; setShipCol(setSc); shipColRef.current = setSc; var setNl = nextIdx + 1; setLevel(setNl); levelRef.current = setNl; clearBoardState(); baseCoresRef.current = 3; extraCoresRef.current = 0; setBaseCores(3); setExtraCores(0); clearInventory(); setCustomLevelName(setLv.name || ("Level " + setNl)); setCustomDark(!!(setLv.darkLevel)); return; } else if (gameModeRef.current === "solve") { nl = getNextSigLevel(levelRef.current); if (!nl) { setShowVictoryCard(true); return; } baseCoresRef.current = 3; extraCoresRef.current = 0; setBaseCores(3); setExtraCores(0); clearInventory(); } else { nl = levelRef.current + 1; if (levelRef.current === 100 && gameModeRef.current === "infinite" && !customLevelMode && !level100CardShownRef.current) { level100CardShownRef.current = true; var mdKey100 = "infinite_" + difficultyRef.current; if (101 > bestLevelRef.current) { bestLevelRef.current = 101; setBestLevel(101); try { window.storage.set("cosmic_drift_best_level_" + mdKey100, "101"); } catch(e100) {} } if (scoreRef.current > bestScoreRef.current) { bestScoreRef.current = scoreRef.current; setBestScore(scoreRef.current); try { window.storage.set("cosmic_drift_best_score_" + mdKey100, String(scoreRef.current)); } catch(e100b) {} if (window.CDNative) window.CDNative.submitScore(mdKey100, scoreRef.current); } setShowLevel100Card(true); return; } } gridRef2.current = generateGrid(nl); shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); var nlPlasma = getLevelPlasma(nl); plasmaRef.current = nlPlasma; setPlasma(nlPlasma); var sc = getLevelShipStart(nl); setShipCol(sc); shipColRef.current = sc; setLevel(nl); levelRef.current = nl; clearBoardState(); var mdKey = gameModeRef.current + "_" + difficultyRef.current; if (gameModeRef.current === "infinite" && !customLevelMode && difficultyRef.current !== "hard") { gainCore(); } if (gameModeRef.current === "infinite" && nl > bestLevelRef.current) { if (!highestLevelNotifiedRef.current && nl > 9) { highestLevelNotifiedRef.current = true; setNewHighLevel(true); setTimeout(function () { setNewHighLevel(false); }, 3000); } bestLevelRef.current = nl; setBestLevel(nl); try { window.storage.set("cosmic_drift_best_level_" + mdKey, String(nl)); } catch (e) {} } if (gameModeRef.current === "infinite" && !customLevelMode && scoreRef.current > bestScoreRef.current) { bestScoreRef.current = scoreRef.current; setBestScore(scoreRef.current); try { window.storage.set("cosmic_drift_best_score_" + mdKey, String(scoreRef.current)); } catch (e) {} if (window.CDNative) window.CDNative.submitScore(mdKey, scoreRef.current); } var nb = NEW_BLOCK_AT[nl]; if (nb && BLOCK_INTROS[nb] && nl > 9) { var bi = BLOCK_INTROS[nb]; setIntroQueue([{ type: "block", blockType: nb, name: bi.name, desc: bi.desc, label: nb === 17 ? "You've been noticed" : null }]); } }, []);
+  var nextLevel = useCallback(function () { clearCanvasVfx(); var nl; if (gameModeRef.current === "set") { var nextIdx = setModeIdxRef.current + 1; if (nextIdx >= setModeLevelsRef.current.length) { stopMusic(); setScreen("splash"); return; } setModeIdxRef.current = nextIdx; var setLv = setModeLevelsRef.current[nextIdx]; gridRef2.current = setLv.grid.slice(); customGridRef.current = setLv.grid.slice(); customShipRef.current = setLv.shipStart != null ? setLv.shipStart : 3; var setPlasmaAmt = setLv.startPlasma || START_PLASMA; customPlasmaRef.current = setPlasmaAmt; shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); plasmaRef.current = setPlasmaAmt; setPlasma(setPlasmaAmt); var setSc = customShipRef.current; setShipCol(setSc); shipColRef.current = setSc; var setNl = nextIdx + 1; setLevel(setNl); levelRef.current = setNl; clearBoardState(); baseCoresRef.current = 3; extraCoresRef.current = 0; setBaseCores(3); setExtraCores(0); clearInventory(); setCustomLevelName(setLv.name || ("Level " + setNl)); setCustomDark(!!(setLv.darkLevel)); return; } else if (gameModeRef.current === "solve") { nl = getNextSigLevel(levelRef.current); if (!nl) { setShowVictoryCard(true); return; } if (nl > FREE_SOLVE_MAX && !cdUnlocked()) { stopMusic(); setScreen("splash"); setSigLevelsOpen(true); return; } baseCoresRef.current = 3; extraCoresRef.current = 0; setBaseCores(3); setExtraCores(0); clearInventory(); } else { nl = levelRef.current + 1; if (levelRef.current === 100 && gameModeRef.current === "infinite" && !customLevelMode && !level100CardShownRef.current) { level100CardShownRef.current = true; var mdKey100 = "infinite_" + difficultyRef.current; if (101 > bestLevelRef.current) { bestLevelRef.current = 101; setBestLevel(101); try { window.storage.set("cosmic_drift_best_level_" + mdKey100, "101"); } catch(e100) {} } if (scoreRef.current > bestScoreRef.current) { bestScoreRef.current = scoreRef.current; setBestScore(scoreRef.current); try { window.storage.set("cosmic_drift_best_score_" + mdKey100, String(scoreRef.current)); } catch(e100b) {} if (window.CDNative) window.CDNative.submitScore(mdKey100, scoreRef.current); } setShowLevel100Card(true); return; } } gridRef2.current = generateGrid(nl); shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); var nlPlasma = getLevelPlasma(nl); plasmaRef.current = nlPlasma; setPlasma(nlPlasma); var sc = getLevelShipStart(nl); setShipCol(sc); shipColRef.current = sc; setLevel(nl); levelRef.current = nl; clearBoardState(); var mdKey = gameModeRef.current + "_" + difficultyRef.current; if (gameModeRef.current === "infinite" && !customLevelMode && difficultyRef.current !== "hard") { gainCore(); } if (gameModeRef.current === "infinite" && nl > bestLevelRef.current) { if (!highestLevelNotifiedRef.current && nl > 9) { highestLevelNotifiedRef.current = true; setNewHighLevel(true); setTimeout(function () { setNewHighLevel(false); }, 3000); } bestLevelRef.current = nl; setBestLevel(nl); try { window.storage.set("cosmic_drift_best_level_" + mdKey, String(nl)); } catch (e) {} } if (gameModeRef.current === "infinite" && !customLevelMode && scoreRef.current > bestScoreRef.current) { bestScoreRef.current = scoreRef.current; setBestScore(scoreRef.current); try { window.storage.set("cosmic_drift_best_score_" + mdKey, String(scoreRef.current)); } catch (e) {} if (window.CDNative) window.CDNative.submitScore(mdKey, scoreRef.current); } var nb = NEW_BLOCK_AT[nl]; if (nb && BLOCK_INTROS[nb] && nl > 9) { var bi = BLOCK_INTROS[nb]; setIntroQueue([{ type: "block", blockType: nb, name: bi.name, desc: bi.desc, label: nb === 17 ? "You've been noticed" : null }]); } }, []);
   var replayLevel = useCallback(function () { clearCanvasVfx(); var lv = levelRef.current; gridRef2.current = generateGrid(lv); shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); var rp = getLevelPlasma(lv); plasmaRef.current = rp; setPlasma(rp); var sc = getLevelShipStart(lv); setShipCol(sc); shipColRef.current = sc; clearBoardState(); setGameState("playing"); }, []);
   var skipLevel = useCallback(function () { clearCanvasVfx(); var nl = levelRef.current + 1; gridRef2.current = generateGrid(nl); shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); var p = getLevelPlasma(nl); plasmaRef.current = p; setPlasma(p); var sc = getLevelShipStart(nl); setShipCol(sc); shipColRef.current = sc; setLevel(nl); levelRef.current = nl; clearBoardState(); setGameState("playing"); }, []);
   var fullRestart = useCallback(function () { clearCanvasVfx(); if (gameModeRef.current === "set") { setModeIdxRef.current = 0; if (setModeLevelsRef.current.length > 0) { var sl0 = setModeLevelsRef.current[0]; baseCoresRef.current = 3; extraCoresRef.current = 0; setBaseCores(3); setExtraCores(0); scoreRef.current = 0; setScore(0); gridRef2.current = sl0.grid.slice(); customGridRef.current = sl0.grid.slice(); customShipRef.current = sl0.shipStart != null ? sl0.shipStart : 3; var sl0Plasma = sl0.startPlasma || START_PLASMA; customPlasmaRef.current = sl0Plasma; shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); plasmaRef.current = sl0Plasma; setPlasma(sl0Plasma); var sl0Sc = customShipRef.current; setShipCol(sl0Sc); shipColRef.current = sl0Sc; setLevel(1); levelRef.current = 1; clearInventory(); clearBoardState(); seenPowerUpsRef.current = { crossshot: true, drone: true, lightning: true, anglebounce: true, hammer: true }; setCustomLevelMode(false); customLevelDataRef.current = null; setCustomLevelName(sl0.name || "Level 1"); highestLevelNotifiedRef.current = false; darkIntroShownRef.current = false; level100CardShownRef.current = false; setNewHighScore(false); setShowVictoryCard(false); setShowLevel100Card(false); setCustomDark(!!(sl0.darkLevel)); } return; } var skipTuts = gameModeRef.current === "infinite" && npSavedChoiceRef.current === "skip"; var startLv = gameModeRef.current === "solve" ? getFirstSigLevel() : (skipTuts ? 10 : 1); baseCoresRef.current = 3; extraCoresRef.current = 0; setBaseCores(3); setExtraCores(0); scoreRef.current = 0; setScore(0); setLevel(startLv); levelRef.current = startLv; clearInventory(); gridRef2.current = generateGrid(startLv); shieldRef.current = initShields(gridRef2.current); setGrid(gridRef2.current.slice()); var sp = getLevelPlasma(startLv); plasmaRef.current = sp; setPlasma(sp); var sc = getLevelShipStart(startLv); setShipCol(sc); shipColRef.current = sc; clearBoardState(); seenPowerUpsRef.current = (gameModeRef.current === "solve" || skipTuts) ? { crossshot: true, drone: true, lightning: true, anglebounce: true, hammer: true } : { crossshot: true }; setCustomLevelMode(false); customGridRef.current = null; customLevelDataRef.current = null; customPlasmaRef.current = START_PLASMA; highestLevelNotifiedRef.current = false; darkIntroShownRef.current = false; level100CardShownRef.current = false; setNewHighScore(false); setShowVictoryCard(false); setShowLevel100Card(false); setCustomDark(false); }, []);
@@ -3162,6 +3274,7 @@ function logUfo(msg) {
         if (introCard) { setIntroQueue(function(q) { return q.slice(1); }); return; }
         if (splashMenuOpen) { setSplashMenuOpen(false); return; }
         if (gameMenuOpen) { setGameMenuOpen(false); return; }
+        if (paywall) { setPaywall(null); return; }
         if (sigLevelsOpen) { setSigLevelsOpen(false); return; }
       }
       if (key === "Enter" && !isInput) {
@@ -3184,7 +3297,7 @@ function logUfo(msg) {
     }
     document.addEventListener("keydown", handleKbd);
     return function() { document.removeEventListener("keydown", handleKbd); };
-  }, [creditsOpen, showTesterMenu, confirmOpen, showExitConfirm, showLevelClearExit, introCard, splashMenuOpen, gameMenuOpen, sigLevelsOpen, doRestart, customLevelMode]);
+  }, [creditsOpen, showTesterMenu, confirmOpen, showExitConfirm, showLevelClearExit, introCard, splashMenuOpen, gameMenuOpen, sigLevelsOpen, paywall, doRestart, customLevelMode]);
 
   // Target block position for level 3 hint (center of plus at row 1, col 6)
   var hintLeft = BOARD_PAD + 6 * (blockSize + GAP) - 3;
@@ -3276,10 +3389,11 @@ function logUfo(msg) {
           <div style={{ fontSize: 18, fontWeight: 700, color: "#d8eaf6", fontFamily: "'JetBrains Mono', monospace" }}>{score.toLocaleString()}</div>
         </div>
       </div>
-      {bonusDone && !customLevelMode && <div onClick={nextLevel} style={{ position: "relative", width: "100%", padding: "12px 0", borderRadius: 8, background: "linear-gradient(180deg, #3da85e 0%, #2a7842 100%)", border: "1px solid " + GS.green + "55", color: "#ffffff", fontWeight: 800, fontSize: 14, cursor: "pointer", boxShadow: "0 2px 14px rgba(80,255,174,0.18), inset 0 1px 0 rgba(255,255,255,0.15)", textAlign: "center", letterSpacing: 2, marginBottom: 8, boxSizing: "border-box", textTransform: "uppercase" }}>{(gameModeRef.current === "solve" && !getNextSigLevel(level)) || (gameModeRef.current === "set" && setModeIdxRef.current + 1 >= setModeLevelsRef.current.length) ? "Back to Menu" : "Next Level"}</div>}
+      {bonusDone && !customLevelMode && <div onClick={nextLevel} style={{ position: "relative", width: "100%", padding: "12px 0", borderRadius: 8, background: "linear-gradient(180deg, #3da85e 0%, #2a7842 100%)", border: "1px solid " + GS.green + "55", color: "#ffffff", fontWeight: 800, fontSize: 14, cursor: "pointer", boxShadow: "0 2px 14px rgba(80,255,174,0.18), inset 0 1px 0 rgba(255,255,255,0.15)", textAlign: "center", letterSpacing: 2, marginBottom: 8, boxSizing: "border-box", textTransform: "uppercase" }}>{(gameModeRef.current === "solve" && (!getNextSigLevel(level) || solveNextLocked(level))) || (gameModeRef.current === "set" && setModeIdxRef.current + 1 >= setModeLevelsRef.current.length) ? "Back to Menu" : "Next Level"}</div>}
       {bonusDone && customLevelMode && <div onClick={myLevelsQueueRef.current && myLevelsQueueRef.current.idx + 1 < myLevelsQueueRef.current.levels.length ? function() { var q = myLevelsQueueRef.current; var ni = q.idx + 1; myLevelsQueueRef.current = { levels: q.levels, idx: ni }; playCustomLevel(q.levels[ni]); } : backToMyLevels} style={{ position: "relative", width: "100%", padding: "12px 0", borderRadius: 8, background: "linear-gradient(180deg, #3da85e 0%, #2a7842 100%)", border: "1px solid " + GS.green + "55", color: "#ffffff", fontWeight: 800, fontSize: 14, cursor: "pointer", boxShadow: "0 2px 14px rgba(80,255,174,0.18), inset 0 1px 0 rgba(255,255,255,0.15)", textAlign: "center", letterSpacing: 2, marginBottom: 8, boxSizing: "border-box", textTransform: "uppercase" }}>{myLevelsQueueRef.current && myLevelsQueueRef.current.idx + 1 < myLevelsQueueRef.current.levels.length ? "Next Level" : "Exit to My Levels"}</div>}
       {bonusDone && customLevelMode && myLevelsQueueRef.current && myLevelsQueueRef.current.idx + 1 < myLevelsQueueRef.current.levels.length && <div style={{ color: "rgba(200,220,240,0.35)", fontSize: 9, fontWeight: 600, textAlign: "center", marginBottom: 8, letterSpacing: 1 }}>Next: {(myLevelsQueueRef.current.levels[myLevelsQueueRef.current.idx + 1].name) || "Untitled"}</div>}
-      {bonusDone && gameModeRef.current === "solve" && getNextSigLevel(level) && <div style={{ color: "rgba(200,220,240,0.35)", fontSize: 9, fontWeight: 600, textAlign: "center", marginBottom: 8, letterSpacing: 1 }}>Next: {FIXED_LEVELS[getNextSigLevel(level)].name}</div>}
+      {bonusDone && gameModeRef.current === "solve" && getNextSigLevel(level) && !solveNextLocked(level) && <div style={{ color: "rgba(200,220,240,0.35)", fontSize: 9, fontWeight: 600, textAlign: "center", marginBottom: 8, letterSpacing: 1 }}>Next: {FIXED_LEVELS[getNextSigLevel(level)].name}</div>}
+      {bonusDone && gameModeRef.current === "solve" && solveNextLocked(level) && <div style={{ color: "rgba(200,184,255,0.55)", fontSize: 9, fontWeight: 600, textAlign: "center", marginBottom: 8, letterSpacing: 1 }}>{"Levels " + (FREE_SOLVE_MAX + 5) + " to 100 come with the Workshop Pass"}</div>}
       {bonusDone && gameModeRef.current === "set" && setModeIdxRef.current + 1 < setModeLevelsRef.current.length && <div style={{ color: "rgba(200,220,240,0.35)", fontSize: 9, fontWeight: 600, textAlign: "center", marginBottom: 8, letterSpacing: 1 }}>Next: {setModeLevelsRef.current[setModeIdxRef.current + 1].name}</div>}
       {bonusDone && <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
         <div style={{ display: "flex", gap: 6 }}>
@@ -3376,6 +3490,7 @@ function logUfo(msg) {
       </div>}
       <LegendOverlay open={legendOpen} onClose={function () { setLegendOpen(false); }} onCredits={function () { setCreditsOpen(true); }} />
       <CreditsOverlay open={creditsOpen} onClose={function () { setCreditsOpen(false); }} />
+      <PassOverlay open={!!paywall} reason={paywall ? paywall.reason : null} ent={ent} onClose={function () { setPaywall(null); }} />
 
       {/* ═══ INTRO CARD OVERLAY ═══ */}
       {introCard && <div style={{ position: "fixed", inset: 0, zIndex: 350, background: introCard.type === "darklevel" ? "rgba(2,2,10,0.93)" : "rgba(5,5,15,0.85)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -3492,7 +3607,7 @@ function logUfo(msg) {
         <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", gap: 4 }}>
         {/* Digital readout strip — always present; shows set message or active set name */}
         <div style={{ height: 22, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 16px" }}>
-          {showSetModeMsg ? <GsMono size={9} ls={0.5} color="rgba(255,208,96,0.85)">{"Load a set with levels in the Workshop."}</GsMono> : (gameMode === "set" && activeSetInfo && activeSetInfo.name ? <GsMono size={9} ls={0.5} color="rgba(255,208,96,0.7)">{activeSetInfo.name}</GsMono> : null)}
+          {showSetModeMsg ? <GsMono size={9} ls={0.5} color="rgba(255,208,96,0.85)">{"Load a set with levels in the Workshop."}</GsMono> : (gameMode === "set" && activeSetInfo && activeSetInfo.name ? <GsMono size={9} ls={0.5} color="rgba(255,208,96,0.7)">{activeSetInfo.name}</GsMono> : (gameMode === "solve" ? <GsMono size={8} ls={0.5} color="rgba(200,184,255,0.5)">{ent.unlocked ? "Tap Solve again to pick a level" : ("Levels 15 to " + FREE_SOLVE_MAX + " free  ·  tap Solve again to pick")}</GsMono> : null))}
         </div>
         {/* Mode / Difficulty / Play — unified panel */}
         <GsPanel style={{ padding: "10px", display: "flex", flexDirection: "column", gap: 8, flexShrink: 0, position: "relative", zIndex: 1 }}>
@@ -3508,8 +3623,8 @@ function logUfo(msg) {
               </div>
               <div style={{ background: GS.inset, border: GS.ib, borderRadius: 6, boxShadow: GS.is, padding: 3, display: "flex", gap: 3 }}>
                 <div onClick={function() { gameModeRef.current = "infinite"; setGameMode("infinite"); }} style={{ flex: 1, padding: "5px 0", textAlign: "center", fontFamily: "'Exo 2', sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: 1, cursor: "pointer", color: gameMode === "infinite" ? "#0a0c12" : "rgba(200,220,240,0.55)", background: gameMode === "infinite" ? "linear-gradient(180deg, " + GS.blue + " 0%, " + GS.blue + "cc 100%)" : "transparent", boxShadow: gameMode === "infinite" ? "inset 0 1px 0 rgba(255,255,255,0.3), 0 0 10px " + GS.blue + "66" : "none", textTransform: "uppercase", borderRadius: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}><span style={{ fontSize: 15, lineHeight: 1 }}>{"∞"}</span><span>INFINITE</span></div>
-                <div onClick={function() { gameModeRef.current = "solve"; setGameMode("solve"); }} style={{ flex: 1, padding: "5px 0", textAlign: "center", fontFamily: "'Exo 2', sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: 1, cursor: "pointer", color: gameMode === "solve" ? "#0a0c12" : "rgba(200,220,240,0.55)", background: gameMode === "solve" ? "linear-gradient(180deg, #c8b8ff 0%, #c8b8ffcc 100%)" : "transparent", boxShadow: gameMode === "solve" ? "inset 0 1px 0 rgba(255,255,255,0.3), 0 0 10px #c8b8ff66" : "none", textTransform: "uppercase", borderRadius: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}><svg width="15" height="15" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="none" stroke={gameMode === "solve" ? "#0a0c12" : "#c8b8ff"} strokeWidth="2.2" /><line x1="12" y1="2" x2="12" y2="7" stroke={gameMode === "solve" ? "#0a0c12" : "#c8b8ff"} strokeWidth="2.2" strokeLinecap="round" /><line x1="12" y1="17" x2="12" y2="22" stroke={gameMode === "solve" ? "#0a0c12" : "#c8b8ff"} strokeWidth="2.2" strokeLinecap="round" /><line x1="2" y1="12" x2="7" y2="12" stroke={gameMode === "solve" ? "#0a0c12" : "#c8b8ff"} strokeWidth="2.2" strokeLinecap="round" /><line x1="17" y1="12" x2="22" y2="12" stroke={gameMode === "solve" ? "#0a0c12" : "#c8b8ff"} strokeWidth="2.2" strokeLinecap="round" /></svg><span>SOLVE</span></div>
-                <div onClick={function() { if (!setHasLevels) { setShowSetModeMsg(true); setTimeout(function() { setShowSetModeMsg(false); }, 2200); return; } gameModeRef.current = "set"; setGameMode("set"); }} style={{ flex: 1, padding: "5px 0", textAlign: "center", fontFamily: "'Exo 2', sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: 1, cursor: "pointer", color: gameMode === "set" ? "#0a0c12" : "rgba(200,220,240,0.55)", background: gameMode === "set" ? "linear-gradient(180deg, #ffd060 0%, #ffd060cc 100%)" : "transparent", boxShadow: gameMode === "set" ? "inset 0 1px 0 rgba(255,255,255,0.3), 0 0 10px #ffd06066" : "none", textTransform: "uppercase", borderRadius: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, opacity: setHasLevels ? 1 : 0.4 }}><svg width="15" height="15" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="4" rx="1.5" fill="none" stroke={gameMode === "set" ? "#0a0c12" : "#ffd060"} strokeWidth="1.5" /><rect x="3" y="10" width="18" height="4" rx="1.5" fill={gameMode === "set" ? "#0a0c12" : "#ffd060"} opacity={gameMode === "set" ? "1" : "0.5"} /><rect x="3" y="15" width="18" height="4" rx="1.5" fill={gameMode === "set" ? "#0a0c12" : "#ffd060"} opacity={gameMode === "set" ? "1" : "0.25"} /></svg><span>SET</span></div>
+                <div onClick={function() { if (gameModeRef.current === "solve") { setSigLevelsOpen(true); return; } gameModeRef.current = "solve"; setGameMode("solve"); }} style={{ flex: 1, padding: "5px 0", textAlign: "center", fontFamily: "'Exo 2', sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: 1, cursor: "pointer", color: gameMode === "solve" ? "#0a0c12" : "rgba(200,220,240,0.55)", background: gameMode === "solve" ? "linear-gradient(180deg, #c8b8ff 0%, #c8b8ffcc 100%)" : "transparent", boxShadow: gameMode === "solve" ? "inset 0 1px 0 rgba(255,255,255,0.3), 0 0 10px #c8b8ff66" : "none", textTransform: "uppercase", borderRadius: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}><svg width="15" height="15" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="none" stroke={gameMode === "solve" ? "#0a0c12" : "#c8b8ff"} strokeWidth="2.2" /><line x1="12" y1="2" x2="12" y2="7" stroke={gameMode === "solve" ? "#0a0c12" : "#c8b8ff"} strokeWidth="2.2" strokeLinecap="round" /><line x1="12" y1="17" x2="12" y2="22" stroke={gameMode === "solve" ? "#0a0c12" : "#c8b8ff"} strokeWidth="2.2" strokeLinecap="round" /><line x1="2" y1="12" x2="7" y2="12" stroke={gameMode === "solve" ? "#0a0c12" : "#c8b8ff"} strokeWidth="2.2" strokeLinecap="round" /><line x1="17" y1="12" x2="22" y2="12" stroke={gameMode === "solve" ? "#0a0c12" : "#c8b8ff"} strokeWidth="2.2" strokeLinecap="round" /></svg><span>SOLVE</span></div>
+                <div onClick={function() { if (!ent.unlocked) { setPaywall({ reason: "Set mode plays the level sets you build in the Workshop. It comes with the Workshop Pass." }); return; } if (!setHasLevels) { setShowSetModeMsg(true); setTimeout(function() { setShowSetModeMsg(false); }, 2200); return; } gameModeRef.current = "set"; setGameMode("set"); }} style={{ flex: 1, padding: "5px 0", textAlign: "center", fontFamily: "'Exo 2', sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: 1, cursor: "pointer", color: gameMode === "set" ? "#0a0c12" : "rgba(200,220,240,0.55)", background: gameMode === "set" ? "linear-gradient(180deg, #ffd060 0%, #ffd060cc 100%)" : "transparent", boxShadow: gameMode === "set" ? "inset 0 1px 0 rgba(255,255,255,0.3), 0 0 10px #ffd06066" : "none", textTransform: "uppercase", borderRadius: 4, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, opacity: (setHasLevels || !ent.unlocked) ? 1 : 0.4, position: "relative" }}>{!ent.unlocked && <LockGlyph size={9} color="#ffd060" style={{ position: "absolute", top: 3, right: 5 }} />}<svg width="15" height="15" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="4" rx="1.5" fill="none" stroke={gameMode === "set" ? "#0a0c12" : "#ffd060"} strokeWidth="1.5" /><rect x="3" y="10" width="18" height="4" rx="1.5" fill={gameMode === "set" ? "#0a0c12" : "#ffd060"} opacity={gameMode === "set" ? "1" : "0.5"} /><rect x="3" y="15" width="18" height="4" rx="1.5" fill={gameMode === "set" ? "#0a0c12" : "#ffd060"} opacity={gameMode === "set" ? "1" : "0.25"} /></svg><span>SET</span></div>
               </div>
             </div>
             <div>
@@ -3620,12 +3735,13 @@ function logUfo(msg) {
 
         {/* Signature Levels popup */}
         {sigLevelsOpen && <div onClick={function() { setSigLevelsOpen(false); }} style={{ position: "absolute", inset: 0, zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(5,5,15,0.7)", backdropFilter: "blur(4px)" }}>
-          <div onClick={function(e) { e.stopPropagation(); }} style={{ background: "rgba(25,25,40,0.95)", border: "1px solid rgba(80,200,255,0.2)", borderRadius: 10, padding: "16px 0 8px", width: 220, boxShadow: "0 8px 32px rgba(0,0,0,0.6)" }}>
+          <div onClick={function(e) { e.stopPropagation(); }} style={{ background: "rgba(25,25,40,0.95)", border: "1px solid rgba(80,200,255,0.2)", borderRadius: 10, padding: "16px 0 8px", width: 240, maxHeight: "80%", overflowY: "auto", boxShadow: "0 8px 32px rgba(0,0,0,0.6)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0 16px 12px", borderBottom: "1px solid rgba(60,60,80,0.4)" }}>
               <span style={{ color: "#b0c8d8", fontSize: 12, fontWeight: 700, letterSpacing: 1.5, textTransform: "uppercase" }}>Solve Levels</span>
               <div onClick={function() { setSigLevelsOpen(false); }} style={{ color: "rgba(180,200,220,0.4)", fontSize: 16, fontWeight: 700, cursor: "pointer", padding: "0 2px" }}>{"✕"}</div>
             </div>
-            {SIG_KEYS.map(function(k) { var fl = FIXED_LEVELS[k]; return <div key={k} onClick={function() { playSignatureLevel(k); }} style={{ padding: "12px 16px", cursor: "pointer", borderBottom: "1px solid rgba(60,60,80,0.25)", display: "flex", justifyContent: "space-between", alignItems: "center" }}><span style={{ color: "#b0c8d8", fontSize: 13, fontWeight: 700 }}>{fl.name}</span><span style={{ color: "rgba(180,200,220,0.3)", fontSize: 10 }}>Lvl {k}</span></div>; })}
+            {SIG_KEYS.map(function(k) { var fl = FIXED_LEVELS[k]; var locked = k > FREE_SOLVE_MAX && !ent.unlocked; return <div key={k} onClick={locked ? function() { setPaywall({ reason: "Solve levels " + (FREE_SOLVE_MAX + 5) + " to 100 come with the Workshop Pass. Levels 15 to " + FREE_SOLVE_MAX + " are free." }); } : function() { playSignatureLevel(k); }} style={{ padding: "12px 16px", cursor: "pointer", borderBottom: "1px solid rgba(60,60,80,0.25)", display: "flex", justifyContent: "space-between", alignItems: "center", opacity: locked ? 0.6 : 1 }}><span style={{ color: locked ? "rgba(200,184,255,0.8)" : "#b0c8d8", fontSize: 13, fontWeight: 700, display: "flex", alignItems: "center", gap: 7 }}>{locked && <LockGlyph size={11} color="#c8b8ff" />}{fl.name}</span><span style={{ color: "rgba(180,200,220,0.3)", fontSize: 10 }}>Lvl {k}</span></div>; })}
+            {!ent.unlocked && <div onClick={function() { setPaywall({ reason: "Solve levels " + (FREE_SOLVE_MAX + 5) + " to 100 come with the Workshop Pass. Levels 15 to " + FREE_SOLVE_MAX + " are free." }); }} style={{ margin: "8px 12px 2px", padding: "8px 10px", borderRadius: 6, background: "rgba(160,100,255,0.08)", border: "1px solid rgba(160,100,255,0.3)", color: "#c8b8ff", fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", textAlign: "center", cursor: "pointer" }}>{"Unlock " + (FREE_SOLVE_MAX + 5) + " to 100 with the Pass"}</div>}
           </div>
         </div>}
 

@@ -2,7 +2,7 @@ import UIKit
 import Capacitor
 
 // Hosts the Capacitor web view. Two jobs:
-// 1. Register the app's own plugins (Game Center).
+// 1. Register the app's own plugins (Game Center, Workshop Pass purchase).
 // 2. Keep the web view inside the safe area so the HUD, splash and Workshop top bars never sit under
 //    the notch or the home indicator. Capacitor makes the web view the controller's root view, so we
 //    swap in a navy container (#0b0c1a, the colour both pages already use) and pin the web view to the
@@ -12,6 +12,7 @@ class CDViewController: CAPBridgeViewController {
 
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(GameCenterPlugin())
+        bridge?.registerPluginInstance(WorkshopPassPlugin())
     }
 
     override open func viewDidLoad() {

@@ -89,6 +89,65 @@ window.CDNative = (function () {
   return api;
 })();
 
+// ── Workshop Pass entitlement. One object both pages read. Backed by the WorkshopPass StoreKit plugin in the iOS app;
+// on the plain web build (no store) everything is unlocked. The last known answer is cached in localStorage
+// (cd_workshop_pass, mirrored to Preferences like every cd_ key) so a paying player never sees a locked flash on launch.
+// Test seam for the web build: localStorage.setItem("cd_dev_lock", "1") simulates a locked install with a fake $4.99 store.
+window.cdEntitlement = (function () {
+  var cap = window.Capacitor;
+  var store = null;
+  try { if (window.CDNative.isNative && cap.isPluginAvailable("WorkshopPass")) store = cap.Plugins.WorkshopPass || cap.registerPlugin("WorkshopPass"); } catch (e) { store = null; }
+  var CACHE_KEY = "cd_workshop_pass";
+  var devLock = false; try { devLock = !store && localStorage.getItem("cd_dev_lock") === "1"; } catch (e) {}
+  if (devLock) {
+    store = {
+      isEntitled: function () { var v = null; try { v = localStorage.getItem("cd_dev_lock_owned"); } catch (e) {} return Promise.resolve({ entitled: v === "1" }); },
+      getProduct: function () { return Promise.resolve({ available: true, id: "dev", displayPrice: "$4.99", displayName: "Workshop Pass", description: "" }); },
+      purchase: function () { try { localStorage.setItem("cd_dev_lock_owned", "1"); } catch (e) {} return Promise.resolve({ entitled: true, state: "purchased" }); },
+      restore: function () { return store.isEntitled(); },
+      addListener: function () {}
+    };
+  }
+  var cached = null; try { cached = localStorage.getItem(CACHE_KEY); } catch (e) {}
+  var state = { native: !!store, unlocked: store ? cached === "1" : true, known: !store || cached != null, product: null };
+  var listeners = [];
+  function emit() { for (var i = 0; i < listeners.length; i++) { try { listeners[i](state); } catch (e) {} } }
+  function setUnlocked(v) {
+    var u = !!v; var changed = (u !== state.unlocked) || !state.known;
+    state.unlocked = u; state.known = true;
+    try { localStorage.setItem(CACHE_KEY, u ? "1" : "0"); } catch (e) {}
+    if (changed) emit();
+  }
+  var productPromise = null;
+  var api = {
+    isNative: !!store,
+    get: function () { return state; },
+    unlocked: function () { return state.unlocked; },
+    subscribe: function (fn) { listeners.push(fn); return function () { var i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1); }; },
+    refresh: function () { if (!store) return Promise.resolve(true); return store.isEntitled().then(function (r) { setUnlocked(r && r.entitled); return state.unlocked; }).catch(function () { return state.unlocked; }); },
+    getProduct: function () {
+      if (!store) return Promise.resolve(null);
+      if (state.product) return Promise.resolve(state.product);
+      if (!productPromise) productPromise = store.getProduct().then(function (r) { productPromise = null; if (r && r.available) { state.product = r; emit(); return r; } return null; }).catch(function () { productPromise = null; return null; });
+      return productPromise;
+    },
+    purchase: function () {
+      if (!store) return Promise.resolve({ entitled: true, state: "web" });
+      return store.purchase().then(function (r) { if (r && r.entitled) setUnlocked(true); return r || { entitled: false, state: "failed" }; }).catch(function (e) { return { entitled: false, state: "failed", error: String((e && e.message) || e) }; });
+    },
+    restore: function () {
+      if (!store) return Promise.resolve({ entitled: true });
+      return store.restore().then(function (r) { setUnlocked(r && r.entitled); return r || { entitled: false }; }).catch(function (e) { return { entitled: state.unlocked, error: String((e && e.message) || e) }; });
+    }
+  };
+  if (store) {
+    try { store.addListener("entitlementChanged", function (ev) { setUnlocked(ev && ev.entitled); }); } catch (e) {}
+    api.refresh();
+    api.getProduct();
+  }
+  return api;
+})();
+
 // Storage shim: wraps localStorage with cd_ prefix.
 // On iOS every cd_* key is mirrored into Capacitor Preferences (UserDefaults), which WKWebView
 // never evicts; at page load any key missing from localStorage is restored from there first.
@@ -168,6 +227,58 @@ var COLS = 8,
 var GAME_VERSION = "v80.11";
 // Build-time flag (set by build.js): shows the For Testers menu and Erase All Data. Off in store builds.
 var DEV_MENU = typeof window !== "undefined" && window.CD_DEV_MENU === true;
+
+// ── Workshop Pass (one-time purchase, see IAP.md). window.cdEntitlement is defined in build.js; on the plain
+// web build there is no store and everything is unlocked. In the game the pass gates Set mode and Solve
+// levels above FREE_SOLVE_MAX. Infinite mode, Solve 15 to 50, My Levels and shared levels are always free.
+var FREE_SOLVE_MAX = 50;
+var PASS_FEATURES = ["Unlimited saved levels in the Level Builder", "Block Designer, VFX Studio and UFO Customizer", "Hangar and Plasma Lab", "Sets in the Workshop and Set mode here", "Solve levels 55 to 100"];
+var APPLE_EULA_URL = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/";
+function cdUnlocked() {
+  return !(window.cdEntitlement && !window.cdEntitlement.unlocked());
+}
+function useEntitlement() {
+  var _e = useState(function () {
+    return window.cdEntitlement ? Object.assign({}, window.cdEntitlement.get()) : {
+      native: false,
+      unlocked: true,
+      known: true,
+      product: null
+    };
+  });
+  var ent = _e[0],
+    setEnt = _e[1];
+  useEffect(function () {
+    if (!window.cdEntitlement) return;
+    return window.cdEntitlement.subscribe(function (st) {
+      setEnt(Object.assign({}, st));
+    });
+  }, []);
+  return ent;
+}
+function LockGlyph(props) {
+  var sz = props.size || 11,
+    c = props.color || "currentColor";
+  return /*#__PURE__*/React.createElement("svg", {
+    width: sz,
+    height: sz,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: c,
+    strokeWidth: "2.2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    style: props.style
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "4",
+    y: "11",
+    width: "16",
+    height: "10",
+    rx: "2"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M8 11V7a4 4 0 0 1 8 0v4"
+  }));
+}
 var DIFFICULTY_CAPS = {
   easy: 5,
   regular: 3,
@@ -1368,6 +1479,11 @@ function getNextSigLevel(current) {
     if (SIG_KEYS[i] > current) return SIG_KEYS[i];
   }
   return null;
+}
+// True when the Solve level after `current` sits above the free range and the Workshop Pass is not owned.
+function solveNextLocked(current) {
+  var n = getNextSigLevel(current);
+  return !!(n && n > FREE_SOLVE_MAX && !cdUnlocked());
 }
 function getFirstSigLevel() {
   return SIG_KEYS[0];
@@ -5902,6 +6018,418 @@ function ConfirmOverlay(props) {
     }
   }, "Retry"))));
 }
+
+// Workshop Pass paywall: what the pass includes, live price, Buy, Restore, privacy policy and terms.
+// Never shown during play; only from the splash (Set tab, Solve picker) and the level-clear card's return path.
+function PassOverlay(props) {
+  var ent = props.ent;
+  var _busy = useState(false),
+    busy = _busy[0],
+    setBusy = _busy[1];
+  var _st = useState(null),
+    status = _st[0],
+    setStatus = _st[1];
+  var _priv = useState(false),
+    showPrivacy = _priv[0],
+    setShowPrivacy = _priv[1];
+  useEffect(function () {
+    if (!props.open) {
+      setStatus(null);
+      setShowPrivacy(false);
+    }
+  }, [props.open]);
+  if (!props.open) return null;
+  var price = ent.product ? ent.product.displayPrice : null;
+  var V = "#c8b8ff",
+    VD = "rgba(200,184,255,0.5)";
+  function buy() {
+    if (busy || !window.cdEntitlement) return;
+    setBusy(true);
+    setStatus(null);
+    window.cdEntitlement.purchase().then(function (r) {
+      setBusy(false);
+      if (r && r.entitled) {
+        setStatus({
+          kind: "ok",
+          text: "Thank you. Everything is unlocked."
+        });
+        return;
+      }
+      var st = r ? r.state : "failed";
+      if (st === "cancelled") {
+        setStatus(null);
+        return;
+      }
+      if (st === "pending") setStatus({
+        kind: "info",
+        text: "Purchase pending approval. It unlocks the moment it goes through."
+      });else if (st === "unavailable") setStatus({
+        kind: "error",
+        text: "The App Store did not return the Workshop Pass. Check your connection and try again."
+      });else setStatus({
+        kind: "error",
+        text: "The purchase did not complete." + (r && r.error ? " " + r.error : "")
+      });
+    });
+  }
+  function restore() {
+    if (busy || !window.cdEntitlement) return;
+    setBusy(true);
+    setStatus(null);
+    window.cdEntitlement.restore().then(function (r) {
+      setBusy(false);
+      if (r && r.entitled) setStatus({
+        kind: "ok",
+        text: "Restored. Everything is unlocked."
+      });else setStatus({
+        kind: "info",
+        text: "No Workshop Pass found for this Apple Account."
+      });
+    });
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    onClick: props.onClose,
+    style: {
+      position: "fixed",
+      inset: 0,
+      zIndex: 510,
+      background: "rgba(5,5,15,0.85)",
+      backdropFilter: "blur(4px)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 12,
+      overflowY: "auto"
+    }
+  }, /*#__PURE__*/React.createElement(GsPanel, {
+    style: {
+      width: 330,
+      maxWidth: "94vw",
+      padding: 0,
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    onClick: function (e) {
+      e.stopPropagation();
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "12px 14px 10px",
+      borderBottom: "1px solid rgba(80,100,140,0.25)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement(GsLED, {
+    color: ent.unlocked ? GS.green : "#b060ff",
+    size: 5
+  }), /*#__PURE__*/React.createElement(GsMono, {
+    size: 10,
+    ls: 2,
+    color: "rgba(220,200,255,0.9)"
+  }, "Workshop Pass")), /*#__PURE__*/React.createElement("div", {
+    onClick: props.onClose,
+    style: {
+      width: 22,
+      height: 22,
+      borderRadius: 5,
+      background: "rgba(255,255,255,0.06)",
+      border: "1px solid rgba(160,100,255,0.25)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      cursor: "pointer",
+      color: "rgba(200,184,255,0.6)",
+      fontSize: 14,
+      lineHeight: 1
+    }
+  }, "\u2715")), ent.unlocked ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "18px 18px 20px",
+      display: "flex",
+      flexDirection: "column",
+      gap: 12,
+      alignItems: "center",
+      textAlign: "center",
+      fontFamily: "'Quicksand',sans-serif"
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "40",
+    height: "40",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: GS.green,
+    strokeWidth: "2.2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    style: {
+      filter: "drop-shadow(0 0 8px rgba(80,255,174,0.5))"
+    }
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "12",
+    cy: "12",
+    r: "9"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M8 12.5l2.5 2.5L16 9.5"
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'Exo 2', sans-serif",
+      fontSize: 18,
+      fontWeight: 700,
+      color: "#dfe9f3",
+      letterSpacing: 0.5
+    }
+  }, "Unlocked"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "rgba(180,200,220,0.7)",
+      fontSize: 12,
+      lineHeight: 1.55
+    }
+  }, status && status.text ? status.text : "Set mode, Solve levels 55 to 100 and every Workshop module are yours."), /*#__PURE__*/React.createElement("div", {
+    onClick: props.onClose,
+    style: {
+      marginTop: 4,
+      padding: "10px 28px",
+      borderRadius: 6,
+      background: "linear-gradient(180deg, #2c8a4a 0%, #1a5a32 100%)",
+      border: "1px solid #50ffae",
+      color: "#ffffff",
+      fontSize: 12,
+      fontWeight: 700,
+      letterSpacing: 1,
+      textTransform: "uppercase",
+      cursor: "pointer"
+    }
+  }, "Continue")) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "16px 18px 14px",
+      display: "flex",
+      flexDirection: "column",
+      gap: 12,
+      fontFamily: "'Quicksand',sans-serif"
+    }
+  }, props.reason && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "rgba(255,208,96,0.85)",
+      fontSize: 11.5,
+      lineHeight: 1.5,
+      textAlign: "center",
+      padding: "8px 10px",
+      borderRadius: 6,
+      background: "rgba(255,208,96,0.06)",
+      border: "1px solid rgba(255,208,96,0.18)"
+    }
+  }, props.reason), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'Exo 2', sans-serif",
+      fontSize: 19,
+      fontWeight: 700,
+      color: "#dfe9f3",
+      letterSpacing: 0.4,
+      lineHeight: 1.2
+    }
+  }, "Unlock the full Workshop"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "rgba(180,200,220,0.6)",
+      fontSize: 11.5,
+      marginTop: 4
+    }
+  }, "One purchase. No subscription. Yours on every device signed in to your Apple Account.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 6,
+      padding: "10px 12px",
+      borderRadius: 8,
+      background: GS.inset,
+      border: GS.ib,
+      boxShadow: GS.is
+    }
+  }, PASS_FEATURES.map(function (f, i) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 8,
+        color: "rgba(200,220,240,0.88)",
+        fontSize: 12,
+        lineHeight: 1.4
+      }
+    }, /*#__PURE__*/React.createElement("svg", {
+      width: "12",
+      height: "12",
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: V,
+      strokeWidth: "3",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      style: {
+        flexShrink: 0,
+        marginTop: 2
+      }
+    }, /*#__PURE__*/React.createElement("path", {
+      d: "M5 12.5l4.5 4.5L19 7"
+    })), f);
+  })), /*#__PURE__*/React.createElement("div", {
+    onClick: buy,
+    style: {
+      padding: "12px 0",
+      borderRadius: 6,
+      textAlign: "center",
+      background: busy ? "rgba(60,40,90,0.5)" : "linear-gradient(180deg, #3a2060 0%, #261040 100%)",
+      border: "2px solid rgba(160,100,255,0.55)",
+      color: "#ede8ff",
+      fontSize: 13,
+      fontWeight: 700,
+      letterSpacing: 1,
+      textTransform: "uppercase",
+      cursor: busy ? "default" : "pointer",
+      boxShadow: "0 0 14px rgba(160,100,255,0.25), inset 0 1px 0 rgba(255,255,255,0.1)",
+      opacity: busy ? 0.7 : 1
+    }
+  }, busy ? "Contacting the App Store…" : "Unlock" + (price ? "  ·  " + price : ent.native ? "" : "  ·  $4.99")), /*#__PURE__*/React.createElement("div", {
+    onClick: restore,
+    style: {
+      padding: "9px 0",
+      borderRadius: 6,
+      textAlign: "center",
+      background: PNL,
+      border: PNLB,
+      color: "rgba(200,210,220,0.8)",
+      fontSize: 10,
+      fontWeight: 700,
+      letterSpacing: 1,
+      textTransform: "uppercase",
+      cursor: busy ? "default" : "pointer",
+      opacity: busy ? 0.6 : 1
+    }
+  }, "Restore Purchases"), status && /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      fontSize: 11,
+      lineHeight: 1.5,
+      color: status.kind === "error" ? "#ff8866" : status.kind === "ok" ? "#80dd90" : "rgba(200,210,220,0.75)"
+    }
+  }, status.text), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "rgba(180,200,220,0.4)",
+      fontSize: 10,
+      lineHeight: 1.5,
+      textAlign: "center"
+    }
+  }, "Payment is charged to your Apple Account when you confirm. Bought it already? Restore Purchases brings it back on any device."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "center",
+      gap: 14,
+      fontSize: 10,
+      letterSpacing: 0.5
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    onClick: function () {
+      setShowPrivacy(true);
+    },
+    style: {
+      color: VD,
+      cursor: "pointer",
+      textDecoration: "underline"
+    }
+  }, "Privacy Policy"), /*#__PURE__*/React.createElement("a", {
+    href: APPLE_EULA_URL,
+    target: "_blank",
+    rel: "noopener",
+    style: {
+      color: VD,
+      textDecoration: "underline"
+    }
+  }, "Terms of Use"))))), showPrivacy && /*#__PURE__*/React.createElement("div", {
+    onClick: function (e) {
+      e.stopPropagation();
+      setShowPrivacy(false);
+    },
+    style: {
+      position: "fixed",
+      inset: 0,
+      zIndex: 530,
+      background: "rgba(0,0,0,0.78)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 12
+    }
+  }, /*#__PURE__*/React.createElement(GsPanel, {
+    style: {
+      width: 420,
+      maxWidth: "96vw",
+      height: "80vh",
+      padding: 0,
+      overflow: "hidden",
+      display: "flex",
+      flexDirection: "column"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    onClick: function (e) {
+      e.stopPropagation();
+    },
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      height: "100%"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "10px 14px",
+      borderBottom: "1px solid rgba(80,100,140,0.25)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement(GsMono, {
+    size: 10,
+    ls: 2,
+    color: "rgba(220,200,255,0.9)"
+  }, "Privacy Policy"), /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      setShowPrivacy(false);
+    },
+    style: {
+      width: 22,
+      height: 22,
+      borderRadius: 5,
+      background: "rgba(255,255,255,0.06)",
+      border: "1px solid rgba(160,100,255,0.25)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      cursor: "pointer",
+      color: "rgba(200,184,255,0.6)",
+      fontSize: 14,
+      lineHeight: 1
+    }
+  }, "\u2715")), /*#__PURE__*/React.createElement("iframe", {
+    src: "privacy.html",
+    title: "Privacy Policy",
+    style: {
+      flex: 1,
+      width: "100%",
+      border: "none",
+      background: "#0b0c1a"
+    }
+  })))));
+}
 function CreditsOverlay(props) {
   if (!props.open) return null;
   return /*#__PURE__*/React.createElement("div", {
@@ -7567,6 +8095,11 @@ function CosmicDriftGame() {
   var _sigOpen = useState(false),
     sigLevelsOpen = _sigOpen[0],
     setSigLevelsOpen = _sigOpen[1];
+  // Workshop Pass entitlement + paywall ({ reason } or null). See PassOverlay.
+  var ent = useEntitlement();
+  var _paywall = useState(null),
+    paywall = _paywall[0],
+    setPaywall = _paywall[1];
   var _npPopup = useState(false),
     showNewPlayerPopup = _npPopup[0],
     setShowNewPlayerPopup = _npPopup[1];
@@ -8494,6 +9027,7 @@ function CosmicDriftGame() {
     try {
       var playSetParam = new URLSearchParams(window.location.search).get("playset");
       if (!playSetParam) return;
+      if (!cdUnlocked()) return; // Set mode is part of the Workshop Pass
       if (window.history && window.history.replaceState) {
         window.history.replaceState({}, "", window.location.pathname);
       }
@@ -10892,6 +11426,12 @@ function CosmicDriftGame() {
         setShowVictoryCard(true);
         return;
       }
+      if (nl > FREE_SOLVE_MAX && !cdUnlocked()) {
+        stopMusic();
+        setScreen("splash");
+        setSigLevelsOpen(true);
+        return;
+      }
       baseCoresRef.current = 3;
       extraCoresRef.current = 0;
       setBaseCores(3);
@@ -12348,6 +12888,10 @@ function CosmicDriftGame() {
           setGameMenuOpen(false);
           return;
         }
+        if (paywall) {
+          setPaywall(null);
+          return;
+        }
         if (sigLevelsOpen) {
           setSigLevelsOpen(false);
           return;
@@ -12401,7 +12945,7 @@ function CosmicDriftGame() {
     return function () {
       document.removeEventListener("keydown", handleKbd);
     };
-  }, [creditsOpen, showTesterMenu, confirmOpen, showExitConfirm, showLevelClearExit, introCard, splashMenuOpen, gameMenuOpen, sigLevelsOpen, doRestart, customLevelMode]);
+  }, [creditsOpen, showTesterMenu, confirmOpen, showExitConfirm, showLevelClearExit, introCard, splashMenuOpen, gameMenuOpen, sigLevelsOpen, paywall, doRestart, customLevelMode]);
 
   // Target block position for level 3 hint (center of plus at row 1, col 6)
   var hintLeft = BOARD_PAD + 6 * (blockSize + GAP) - 3;
@@ -12896,7 +13440,7 @@ function CosmicDriftGame() {
       boxSizing: "border-box",
       textTransform: "uppercase"
     }
-  }, gameModeRef.current === "solve" && !getNextSigLevel(level) || gameModeRef.current === "set" && setModeIdxRef.current + 1 >= setModeLevelsRef.current.length ? "Back to Menu" : "Next Level"), bonusDone && customLevelMode && /*#__PURE__*/React.createElement("div", {
+  }, gameModeRef.current === "solve" && (!getNextSigLevel(level) || solveNextLocked(level)) || gameModeRef.current === "set" && setModeIdxRef.current + 1 >= setModeLevelsRef.current.length ? "Back to Menu" : "Next Level"), bonusDone && customLevelMode && /*#__PURE__*/React.createElement("div", {
     onClick: myLevelsQueueRef.current && myLevelsQueueRef.current.idx + 1 < myLevelsQueueRef.current.levels.length ? function () {
       var q = myLevelsQueueRef.current;
       var ni = q.idx + 1;
@@ -12933,7 +13477,7 @@ function CosmicDriftGame() {
       marginBottom: 8,
       letterSpacing: 1
     }
-  }, "Next: ", myLevelsQueueRef.current.levels[myLevelsQueueRef.current.idx + 1].name || "Untitled"), bonusDone && gameModeRef.current === "solve" && getNextSigLevel(level) && /*#__PURE__*/React.createElement("div", {
+  }, "Next: ", myLevelsQueueRef.current.levels[myLevelsQueueRef.current.idx + 1].name || "Untitled"), bonusDone && gameModeRef.current === "solve" && getNextSigLevel(level) && !solveNextLocked(level) && /*#__PURE__*/React.createElement("div", {
     style: {
       color: "rgba(200,220,240,0.35)",
       fontSize: 9,
@@ -12942,7 +13486,16 @@ function CosmicDriftGame() {
       marginBottom: 8,
       letterSpacing: 1
     }
-  }, "Next: ", FIXED_LEVELS[getNextSigLevel(level)].name), bonusDone && gameModeRef.current === "set" && setModeIdxRef.current + 1 < setModeLevelsRef.current.length && /*#__PURE__*/React.createElement("div", {
+  }, "Next: ", FIXED_LEVELS[getNextSigLevel(level)].name), bonusDone && gameModeRef.current === "solve" && solveNextLocked(level) && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "rgba(200,184,255,0.55)",
+      fontSize: 9,
+      fontWeight: 600,
+      textAlign: "center",
+      marginBottom: 8,
+      letterSpacing: 1
+    }
+  }, "Levels " + (FREE_SOLVE_MAX + 5) + " to 100 come with the Workshop Pass"), bonusDone && gameModeRef.current === "set" && setModeIdxRef.current + 1 < setModeLevelsRef.current.length && /*#__PURE__*/React.createElement("div", {
     style: {
       color: "rgba(200,220,240,0.35)",
       fontSize: 9,
@@ -13648,6 +14201,13 @@ function CosmicDriftGame() {
     open: creditsOpen,
     onClose: function () {
       setCreditsOpen(false);
+    }
+  }), /*#__PURE__*/React.createElement(PassOverlay, {
+    open: !!paywall,
+    reason: paywall ? paywall.reason : null,
+    ent: ent,
+    onClose: function () {
+      setPaywall(null);
     }
   }), introCard && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -14360,7 +14920,11 @@ function CosmicDriftGame() {
     size: 9,
     ls: 0.5,
     color: "rgba(255,208,96,0.7)"
-  }, activeSetInfo.name) : null), /*#__PURE__*/React.createElement(GsPanel, {
+  }, activeSetInfo.name) : gameMode === "solve" ? /*#__PURE__*/React.createElement(GsMono, {
+    size: 8,
+    ls: 0.5,
+    color: "rgba(200,184,255,0.5)"
+  }, ent.unlocked ? "Tap Solve again to pick a level" : "Levels 15 to " + FREE_SOLVE_MAX + " free  ·  tap Solve again to pick") : null), /*#__PURE__*/React.createElement(GsPanel, {
     style: {
       padding: "10px",
       display: "flex",
@@ -14456,6 +15020,10 @@ function CosmicDriftGame() {
     }
   }, "∞"), /*#__PURE__*/React.createElement("span", null, "INFINITE")), /*#__PURE__*/React.createElement("div", {
     onClick: function () {
+      if (gameModeRef.current === "solve") {
+        setSigLevelsOpen(true);
+        return;
+      }
       gameModeRef.current = "solve";
       setGameMode("solve");
     },
@@ -14523,6 +15091,12 @@ function CosmicDriftGame() {
     strokeLinecap: "round"
   })), /*#__PURE__*/React.createElement("span", null, "SOLVE")), /*#__PURE__*/React.createElement("div", {
     onClick: function () {
+      if (!ent.unlocked) {
+        setPaywall({
+          reason: "Set mode plays the level sets you build in the Workshop. It comes with the Workshop Pass."
+        });
+        return;
+      }
       if (!setHasLevels) {
         setShowSetModeMsg(true);
         setTimeout(function () {
@@ -14551,9 +15125,18 @@ function CosmicDriftGame() {
       flexDirection: "column",
       alignItems: "center",
       gap: 2,
-      opacity: setHasLevels ? 1 : 0.4
+      opacity: setHasLevels || !ent.unlocked ? 1 : 0.4,
+      position: "relative"
     }
-  }, /*#__PURE__*/React.createElement("svg", {
+  }, !ent.unlocked && /*#__PURE__*/React.createElement(LockGlyph, {
+    size: 9,
+    color: "#ffd060",
+    style: {
+      position: "absolute",
+      top: 3,
+      right: 5
+    }
+  }), /*#__PURE__*/React.createElement("svg", {
     width: "15",
     height: "15",
     viewBox: "0 0 24 24"
@@ -15398,7 +15981,9 @@ function CosmicDriftGame() {
       border: "1px solid rgba(80,200,255,0.2)",
       borderRadius: 10,
       padding: "16px 0 8px",
-      width: 220,
+      width: 240,
+      maxHeight: "80%",
+      overflowY: "auto",
       boxShadow: "0 8px 32px rgba(0,0,0,0.6)"
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -15430,9 +16015,14 @@ function CosmicDriftGame() {
     }
   }, "✕")), SIG_KEYS.map(function (k) {
     var fl = FIXED_LEVELS[k];
+    var locked = k > FREE_SOLVE_MAX && !ent.unlocked;
     return /*#__PURE__*/React.createElement("div", {
       key: k,
-      onClick: function () {
+      onClick: locked ? function () {
+        setPaywall({
+          reason: "Solve levels " + (FREE_SOLVE_MAX + 5) + " to 100 come with the Workshop Pass. Levels 15 to " + FREE_SOLVE_MAX + " are free."
+        });
+      } : function () {
         playSignatureLevel(k);
       },
       style: {
@@ -15441,21 +16031,48 @@ function CosmicDriftGame() {
         borderBottom: "1px solid rgba(60,60,80,0.25)",
         display: "flex",
         justifyContent: "space-between",
-        alignItems: "center"
+        alignItems: "center",
+        opacity: locked ? 0.6 : 1
       }
     }, /*#__PURE__*/React.createElement("span", {
       style: {
-        color: "#b0c8d8",
+        color: locked ? "rgba(200,184,255,0.8)" : "#b0c8d8",
         fontSize: 13,
-        fontWeight: 700
+        fontWeight: 700,
+        display: "flex",
+        alignItems: "center",
+        gap: 7
       }
-    }, fl.name), /*#__PURE__*/React.createElement("span", {
+    }, locked && /*#__PURE__*/React.createElement(LockGlyph, {
+      size: 11,
+      color: "#c8b8ff"
+    }), fl.name), /*#__PURE__*/React.createElement("span", {
       style: {
         color: "rgba(180,200,220,0.3)",
         fontSize: 10
       }
     }, "Lvl ", k));
-  }))), showNewPlayerPopup && /*#__PURE__*/React.createElement("div", {
+  }), !ent.unlocked && /*#__PURE__*/React.createElement("div", {
+    onClick: function () {
+      setPaywall({
+        reason: "Solve levels " + (FREE_SOLVE_MAX + 5) + " to 100 come with the Workshop Pass. Levels 15 to " + FREE_SOLVE_MAX + " are free."
+      });
+    },
+    style: {
+      margin: "8px 12px 2px",
+      padding: "8px 10px",
+      borderRadius: 6,
+      background: "rgba(160,100,255,0.08)",
+      border: "1px solid rgba(160,100,255,0.3)",
+      color: "#c8b8ff",
+      fontSize: 10,
+      fontWeight: 700,
+      letterSpacing: 1,
+      textTransform: "uppercase",
+      textAlign: "center",
+      cursor: "pointer"
+    }
+  }, "Unlock " + (FREE_SOLVE_MAX + 5) + " to 100 with the Pass"))), showNewPlayerPopup && /*#__PURE__*/React.createElement("div", {
     onClick: function () {
       setShowNewPlayerPopup(false);
     },

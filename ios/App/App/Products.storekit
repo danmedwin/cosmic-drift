@@ -1,0 +1,41 @@
+{
+  "identifier" : "CD0A1B2C",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "4.99",
+      "familyShareable" : false,
+      "internalID" : "CD0A1B2D",
+      "localizations" : [
+        {
+          "description" : "Unlimited saved levels, every Workshop module, Sets and Set mode, Solve levels 55 to 100.",
+          "displayName" : "Workshop Pass",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.medwin.cosmicdrift.workshoppass",
+      "referenceName" : "Workshop Pass",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "",
+    "_developerTeamID" : "VWM563A4P9",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 0,
+    "_locale" : "en_US",
+    "_storefront" : "USA",
+    "_storeKitErrors" : [
+
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

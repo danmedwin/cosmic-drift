@@ -57,6 +57,126 @@ var SCRNS = "inset 0 2px 6px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.05)";
 // Build-time flag (set by build.js): shows the For Testers menu and Erase All Data. Off in store builds.
 var DEV_MENU = (typeof window !== "undefined" && window.CD_DEV_MENU === true);
 
+// ── Workshop Pass (one-time purchase, see IAP.md). window.cdEntitlement is defined in build.js; on the plain
+// web build there is no store and everything is unlocked. Free tier: Level Builder with FREE_LEVEL_LIMIT saved
+// levels (imports always allowed, shared levels always playable); every other module opens to a locked screen.
+var FREE_LEVEL_LIMIT = 3;
+var LOCKED_MODULES = {
+  designer: { title: "Block Designer", color: "#c8b8ff", blurb: "Custom block skins" },
+  vfx: { title: "VFX Studio", color: "#ffb43c", blurb: "Tuned visual effects" },
+  ufo: { title: "UFO Customizer", color: "#64dcb4", blurb: "Your own alien hull" },
+  hangar: { title: "Hangar", color: "#ff8aaa", blurb: "Ship design" },
+  plasma: { title: "Plasma Lab", color: "#50c8ff", blurb: "Plasma effects" },
+  sets: { title: "My Sets", color: "#ffd060", blurb: "Bundles of levels and designs" }
+};
+var PASS_FEATURES = [
+  "Unlimited saved levels in the Level Builder",
+  "Block Designer, VFX Studio and UFO Customizer",
+  "Hangar and Plasma Lab",
+  "Sets here and Set mode in the game",
+  "Solve levels 55 to 100"
+];
+var APPLE_EULA_URL = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/";
+function cdUnlocked() { return !(window.cdEntitlement && !window.cdEntitlement.unlocked()); }
+function useEntitlement() {
+  var _e = useState(function() { return window.cdEntitlement ? Object.assign({}, window.cdEntitlement.get()) : { native: false, unlocked: true, known: true, product: null }; });
+  var ent = _e[0], setEnt = _e[1];
+  useEffect(function() {
+    if (!window.cdEntitlement) return;
+    return window.cdEntitlement.subscribe(function(st) { setEnt(Object.assign({}, st)); });
+  }, []);
+  return ent;
+}
+function WsLockIcon(props) {
+  var s = props.size || 11, c = props.color || "currentColor";
+  return React.createElement("svg", { width: s, height: s, viewBox: "0 0 24 24", fill: "none", stroke: c, strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round", style: props.style },
+    React.createElement("rect", { x: "4", y: "11", width: "16", height: "10", rx: "2" }),
+    React.createElement("path", { d: "M8 11V7a4 4 0 0 1 8 0v4" }));
+}
+// Small "PASS" chip that replaces the "N SAVED" count on locked splash tiles.
+function renderTileBadge(count, dimColor, accent, locked) {
+  if (!locked) return React.createElement(WsMono, { size: 9, ls: 0.5, color: dimColor }, count + " SAVED");
+  return React.createElement("span", { style: { display: "inline-flex", alignItems: "center", gap: 4, padding: "2px 6px", borderRadius: 4, border: "1px solid " + accent + "55", color: accent, fontFamily: "'JetBrains Mono', monospace", fontSize: 8, letterSpacing: 1 } },
+    React.createElement(WsLockIcon, { size: 9, color: accent }), "PASS");
+}
+
+// The Workshop Pass card: what the pass includes, the live App Store price, Buy, Restore, privacy and terms.
+// Rendered inline on a locked module screen (inline: true) or inside the paywall overlay. Owns its own
+// busy / status state so the two placements never fight.
+function WsPassCard(props) {
+  var ent = props.ent;
+  var _busy = useState(false), busy = _busy[0], setBusy = _busy[1];
+  var _st = useState(null), status = _st[0], setStatus = _st[1];
+  var _priv = useState(false), showPrivacy = _priv[0], setShowPrivacy = _priv[1];
+  var price = ent.product ? ent.product.displayPrice : null;
+  var V = "#c8b8ff", VD = "rgba(200,184,255,0.45)";
+  function buy() {
+    if (busy || !window.cdEntitlement) return;
+    setBusy(true); setStatus(null);
+    window.cdEntitlement.purchase().then(function(r) {
+      setBusy(false);
+      if (r && r.entitled) { setStatus({ kind: "ok", text: "Thank you. The whole Workshop is open." }); return; }
+      var st = r ? r.state : "failed";
+      if (st === "cancelled") { setStatus(null); return; }
+      if (st === "pending") setStatus({ kind: "info", text: "Purchase pending approval. The Workshop unlocks the moment it goes through." });
+      else if (st === "unavailable") setStatus({ kind: "error", text: "The App Store did not return the Workshop Pass. Check your connection and try again." });
+      else setStatus({ kind: "error", text: "The purchase did not complete." + (r && r.error ? " " + r.error : "") });
+    });
+  }
+  function restore() {
+    if (busy || !window.cdEntitlement) return;
+    setBusy(true); setStatus(null);
+    window.cdEntitlement.restore().then(function(r) {
+      setBusy(false);
+      if (r && r.entitled) setStatus({ kind: "ok", text: "Restored. The whole Workshop is open." });
+      else setStatus({ kind: "info", text: "No Workshop Pass found for this Apple Account." });
+    });
+  }
+  var header = React.createElement("div", { style: { padding: "12px 14px 10px", borderBottom: "1px solid rgba(160,100,255,0.15)", display: "flex", alignItems: "center", justifyContent: "space-between" } },
+    React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8 } },
+      React.createElement(WsLED, { color: ent.unlocked ? WS.green : "#b060ff", size: 5 }),
+      React.createElement(WsMono, { size: 10, ls: 2, color: "rgba(220,200,255,0.9)" }, "WORKSHOP PASS")),
+    props.onClose ? React.createElement("div", { onClick: props.onClose, style: { width: 22, height: 22, borderRadius: 5, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(160,100,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "rgba(200,170,255,0.5)", fontSize: 14, lineHeight: 1 } }, "\u2715") : React.createElement("div", { style: { width: 22 } }));
+  var body;
+  if (ent.unlocked) {
+    body = React.createElement("div", { style: { padding: "18px 18px 20px", display: "flex", flexDirection: "column", gap: 12, alignItems: "center", textAlign: "center" } },
+      React.createElement("svg", { width: "40", height: "40", viewBox: "0 0 24 24", fill: "none", stroke: WS.green, strokeWidth: "2.2", strokeLinecap: "round", strokeLinejoin: "round", style: { filter: "drop-shadow(0 0 8px rgba(80,255,174,0.5))" } },
+        React.createElement("circle", { cx: "12", cy: "12", r: "9" }), React.createElement("path", { d: "M8 12.5l2.5 2.5L16 9.5" })),
+      React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 18, fontWeight: 700, color: "#ede8ff", letterSpacing: 0.5 } }, "Unlocked"),
+      React.createElement("div", { style: { color: "rgba(200,190,220,0.7)", fontSize: 12, lineHeight: 1.55 } }, status && status.text ? status.text : "Every module, unlimited saved levels, Sets and Solve levels 55 to 100 are yours."),
+      props.onClose && React.createElement("div", { onClick: props.onClose, style: { marginTop: 4, padding: "10px 28px", borderRadius: 6, background: "linear-gradient(180deg, #2a5a3a, #1a3a28)", border: "2px solid rgba(80,200,100,0.4)", color: "#80dd90", fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", cursor: "pointer" } }, "Continue"));
+  } else {
+    body = React.createElement("div", { style: { padding: "16px 18px 14px", display: "flex", flexDirection: "column", gap: 12 } },
+      props.reason && React.createElement("div", { style: { color: "rgba(255,208,96,0.85)", fontSize: 11.5, lineHeight: 1.5, textAlign: "center", padding: "8px 10px", borderRadius: 6, background: "rgba(255,208,96,0.06)", border: "1px solid rgba(255,208,96,0.18)" } }, props.reason),
+      React.createElement("div", { style: { textAlign: "center" } },
+        React.createElement("div", { style: { fontFamily: "'Exo 2', sans-serif", fontSize: 19, fontWeight: 700, color: "#ede8ff", letterSpacing: 0.4, lineHeight: 1.2 } }, "Unlock the full Workshop"),
+        React.createElement("div", { style: { color: "rgba(200,190,220,0.6)", fontSize: 11.5, marginTop: 4 } }, "One purchase. No subscription. Yours on every device signed in to your Apple Account.")),
+      React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: 6, padding: "10px 12px", borderRadius: 8, background: "rgba(20,20,35,0.6)", border: "1px solid rgba(60,60,80,0.4)" } },
+        PASS_FEATURES.map(function(f, i) {
+          return React.createElement("div", { key: i, style: { display: "flex", alignItems: "flex-start", gap: 8, color: "rgba(220,210,240,0.88)", fontSize: 12, lineHeight: 1.4 } },
+            React.createElement("svg", { width: "12", height: "12", viewBox: "0 0 24 24", fill: "none", stroke: V, strokeWidth: "3", strokeLinecap: "round", strokeLinejoin: "round", style: { flexShrink: 0, marginTop: 2 } }, React.createElement("path", { d: "M5 12.5l4.5 4.5L19 7" })),
+            f);
+        })),
+      React.createElement("div", { onClick: buy, style: { padding: "12px 0", borderRadius: 6, textAlign: "center", background: busy ? "rgba(60,40,90,0.5)" : "linear-gradient(180deg, #3a2060 0%, #261040 100%)", border: "2px solid rgba(160,100,255,0.55)", color: "#ede8ff", fontSize: 13, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", cursor: busy ? "default" : "pointer", boxShadow: "0 0 14px rgba(160,100,255,0.25), inset 0 1px 0 rgba(255,255,255,0.1)", opacity: busy ? 0.7 : 1 } },
+        busy ? "Contacting the App Store\u2026" : ("Unlock" + (price ? "  \u00b7  " + price : (ent.native ? "" : "  \u00b7  $4.99")))),
+      React.createElement("div", { onClick: restore, style: { padding: "9px 0", borderRadius: 6, textAlign: "center", background: PNL, border: PNLB, color: "rgba(200,210,220,0.8)", fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", cursor: busy ? "default" : "pointer", opacity: busy ? 0.6 : 1 } }, "Restore Purchases"),
+      status && React.createElement("div", { style: { textAlign: "center", fontSize: 11, lineHeight: 1.5, color: status.kind === "error" ? "#ff8866" : (status.kind === "ok" ? "#80dd90" : "rgba(200,210,220,0.75)") } }, status.text),
+      React.createElement("div", { style: { color: "rgba(200,190,220,0.4)", fontSize: 10, lineHeight: 1.5, textAlign: "center" } },
+        "Payment is charged to your Apple Account when you confirm. Bought it already? Restore Purchases brings it back on any device."),
+      React.createElement("div", { style: { display: "flex", justifyContent: "center", gap: 14, fontSize: 10, letterSpacing: 0.5 } },
+        React.createElement("span", { onClick: function() { setShowPrivacy(true); }, style: { color: VD, cursor: "pointer", textDecoration: "underline" } }, "Privacy Policy"),
+        React.createElement("a", { href: APPLE_EULA_URL, target: "_blank", rel: "noopener", style: { color: VD, textDecoration: "underline" } }, "Terms of Use")));
+  }
+  return React.createElement(React.Fragment, null,
+    React.createElement(WsPanel, { onClick: function(e) { e.stopPropagation(); }, style: Object.assign({ width: 330, maxWidth: "94vw", padding: 0, overflow: "hidden" }, props.style || {}) }, header, body),
+    showPrivacy && React.createElement("div", { onClick: function(e) { e.stopPropagation(); setShowPrivacy(false); }, style: { position: "fixed", inset: 0, zIndex: 530, background: "rgba(0,0,0,0.78)", display: "flex", alignItems: "center", justifyContent: "center", padding: 12 } },
+      React.createElement(WsPanel, { onClick: function(e) { e.stopPropagation(); }, style: { width: 420, maxWidth: "96vw", height: "80vh", padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" } },
+        React.createElement("div", { style: { padding: "10px 14px", borderBottom: "1px solid rgba(160,100,255,0.15)", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 } },
+          React.createElement(WsMono, { size: 10, ls: 2, color: "rgba(220,200,255,0.9)" }, "PRIVACY POLICY"),
+          React.createElement("div", { onClick: function() { setShowPrivacy(false); }, style: { width: 22, height: 22, borderRadius: 5, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(160,100,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "rgba(200,170,255,0.5)", fontSize: 14, lineHeight: 1 } }, "\u2715")),
+        React.createElement("iframe", { src: "privacy.html", title: "Privacy Policy", style: { flex: 1, width: "100%", border: "none", background: "#0b0c1a" } }))));
+}
+
 // ── Animation CSS (subset needed for Workshop) ──
 var ANIM_CSS = "@keyframes starDrift{0%{transform:translateY(-50%)}100%{transform:translateY(0)}}\n@keyframes introFadeIn{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:translateY(0)}}\n@keyframes pulse{0%{opacity:0.6}50%{opacity:1}100%{opacity:0.6}}\n@keyframes ufoWarpOut{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}\n@keyframes ufoWarpIn{0%{transform:scale(0.05);opacity:0}60%{transform:scale(1.08);opacity:0.9}100%{transform:scale(1);opacity:1}}\n@keyframes ufoLightSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}\n@keyframes splashFloat{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}\n@keyframes splashGlow{0%{opacity:0.4}50%{opacity:0.8}100%{opacity:0.4}}@keyframes cdSplashEnterFromGame{0%{transform:scale(0.95);filter:brightness(0.5)}100%{transform:scale(1);filter:brightness(1)}}@keyframes cdSplashExitShrink{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(0.93);filter:brightness(0.55)}100%{transform:scale(0.93);filter:brightness(0.55)}}\n* { box-sizing: border-box; }\ninput[type=range] { -webkit-appearance: none; appearance: none; background: rgba(255,255,255,0.1); border-radius: 4px; height: 6px; outline: none; }\ninput[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }\ninput[type=range]::-moz-range-thumb { width: 32px; height: 32px; border-radius: 50%; background: #4488ff; border: 3px solid #88bbff; cursor: pointer; box-shadow: 0 0 8px rgba(68,136,255,0.4); }@keyframes vfxOozeDrip{0%{transform:scaleY(0);opacity:0}100%{transform:scaleY(1);opacity:0.85}}@keyframes vfxOozeWave{0%{transform:translateY(0)}100%{transform:translateY(50%)}}@keyframes vfxBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxRing{0%{transform:scale(0.1);opacity:1}100%{transform:scale(2.2);opacity:0}}@keyframes vfxFlash{0%{transform:scale(0.2);opacity:1}100%{transform:scale(1.8);opacity:0}}@keyframes vfxPop{0%{transform:scale(1);filter:brightness(1)}30%{transform:scale(1.2);filter:brightness(1.8)}100%{transform:scale(0);opacity:0}}@keyframes vfxBubble{0%{transform:translateY(0) scale(0.5);opacity:0}15%{opacity:0.55}85%{opacity:0.55}100%{transform:translateY(88px) scale(1);opacity:0}}@keyframes vfxSpark{0%{transform:translate(0,0) scale(1);opacity:1}35%{transform:translate(calc(var(--sx)*0.45),calc(var(--sy)*0.25 - 7px));opacity:0.9}100%{transform:translate(var(--sx),var(--sy)) scale(0.3);opacity:0}}@keyframes vfxBurnBlock{0%{opacity:1;filter:brightness(1)}10%{opacity:1;filter:brightness(2.3)}55%{opacity:0;filter:brightness(1)}100%{opacity:0;filter:brightness(1)}}@keyframes vfxShatter{0%{transform:translate(0,0) scale(1);opacity:0}15%{opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0);opacity:0}}@keyframes vfxDroneShard{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--bx),var(--by)) scale(0.2);opacity:0}}@keyframes plasmaZip{0%{transform:translate(0,0) scale(1);opacity:1}80%{opacity:1}100%{transform:translate(var(--endX),var(--endY)) scale(0.5);opacity:0}}@keyframes plasmaFlash{0%{transform:scale(0.5);opacity:1}16%{transform:scale(1.5);opacity:0}100%{transform:scale(1.5);opacity:0}}@keyframes vfxLightningBolt{0%{opacity:0;filter:brightness(1)}8%{opacity:1;filter:brightness(2.5)}50%{opacity:0.7;filter:brightness(1.3)}70%{opacity:0;filter:brightness(1)}100%{opacity:0}}";
 
@@ -1811,6 +1931,11 @@ export default function CosmicWorkshop() {
   var _wsTutsReset = useState(false), wsTutsReset = _wsTutsReset[0], setWsTutsReset = _wsTutsReset[1];
   var _wsEraseConfirm = useState(false), wsEraseConfirm = _wsEraseConfirm[0], setWsEraseConfirm = _wsEraseConfirm[1];
   var _wsMenu = useState(false), showWsMenu = _wsMenu[0], setShowWsMenu = _wsMenu[1];
+  // Workshop Pass: entitlement + the paywall overlay ({ reason } or null). See WsPassCard.
+  var ent = useEntitlement();
+  var entLocked = !ent.unlocked;
+  var _paywall = useState(null), paywall = _paywall[0], setPaywall = _paywall[1];
+  function openPaywall(reason) { setPaywall({ reason: reason || null }); }
   var builderDragRef = useRef(null);
   var builderTouchUsedRef = useRef(false);
   var _btour = useState(null), builderTourStep = _btour[0], setBuilderTourStep = _btour[1];
@@ -2809,9 +2934,19 @@ export default function CosmicWorkshop() {
   function lvDragEnd(e) { lvDragRef.current = null; setLvDragHover(null); }
 
   function doSaveLevel(id, name) {
-    if (savingRef.current) return;
-    savingRef.current = true;
+    if (savingRef.current) return false;
     var levelId = id || genUUID();
+    // Free tier: FREE_LEVEL_LIMIT saved levels. Re-saving an existing level is always fine; a new one past the
+    // limit opens the paywall and leaves the grid untouched so nothing is lost (Export still works).
+    if (!cdUnlocked()) {
+      var _exists = false;
+      for (var _ei = 0; _ei < savedLevels.length; _ei++) { if (savedLevels[_ei].id === levelId) { _exists = true; break; } }
+      if (!_exists && savedLevels.length >= FREE_LEVEL_LIMIT) {
+        openPaywall("The free Level Builder keeps " + FREE_LEVEL_LIMIT + " saved levels and you have " + savedLevels.length + ". Your level stays on screen: unlock to save it, or use Export to keep its code.");
+        return false;
+      }
+    }
+    savingRef.current = true;
     var now = Date.now();
     var nowStr = new Date().toISOString();
     var entry = { id: levelId, name: name || "Untitled Level", grid: builderGrid.slice(), shipStart: builderShipStart, startPlasma: builderPlasma, darkLevel: builderDarkLevel, created: now, modified: now, savedAt: nowStr };
@@ -2834,18 +2969,19 @@ export default function CosmicWorkshop() {
     setBuilderDirty(false);
     setBuilderWarn("Saved!" + (storageWorking.current ? "" : " (session only - use Export to keep)"));
     setTimeout(function() { setBuilderWarn(null); }, storageWorking.current ? 2000 : 4000);
+    return true;
   }
 
   function handleBuilderSave() {
-    if (!validateBuilderGrid(builderGrid)) { setBuilderWarn("Level has no destructible blocks and cannot be won."); return; }
-    if (editingLevelId) { doSaveLevel(editingLevelId, builderLevelName || "Untitled Level"); }
-    else { doSaveLevel(null, builderLevelName || "Untitled Level"); }
+    if (!validateBuilderGrid(builderGrid)) { setBuilderWarn("Level has no destructible blocks and cannot be won."); return false; }
+    if (editingLevelId) { return doSaveLevel(editingLevelId, builderLevelName || "Untitled Level"); }
+    return doSaveLevel(null, builderLevelName || "Untitled Level");
   }
 
   function handleBuilderSaveAndPlay() {
     if (!validateBuilderGrid(builderGrid)) { setBuilderWarn("Level has no destructible blocks and cannot be won."); return; }
     var levelId = editingLevelId || genUUID();
-    doSaveLevel(levelId, builderLevelName || "Untitled Level");
+    if (!doSaveLevel(levelId, builderLevelName || "Untitled Level")) return;
     // Brief delay so the level is persisted to storage before the game loads it.
     setTimeout(function() { navigateToGame(levelId); }, 60);
   }
@@ -5498,6 +5634,7 @@ export default function CosmicWorkshop() {
       var tag = document.activeElement ? document.activeElement.tagName : "";
       var isInput = tag === "INPUT" || tag === "TEXTAREA";
       if (key === "Escape") {
+        if (paywall) { setPaywall(null); return; }
         if (showWsCredits) { setShowWsCredits(false); return; }
         if (showWsTesterMenu) { setShowWsTesterMenu(false); return; }
         if (showWsGuide) { setShowWsGuide(false); return; }
@@ -5523,7 +5660,10 @@ export default function CosmicWorkshop() {
     }
     document.addEventListener("keydown", handleKbd);
     return function() { document.removeEventListener("keydown", handleKbd); };
-  }, [showWsCredits, showWsTesterMenu, showWsGuide, showWsMenu, bdImportConfirm, showImport, bdShowImport, vfxShowImport, ufoShowImport, shipShowImport, plasmaShowImport, setsShowImport, showBackWarn, bdShowBackWarn, vfxShowBackWarn, ufoShowBackWarn, shipShowBackWarn, plasmaShowBackWarn]);
+  }, [paywall, showWsCredits, showWsTesterMenu, showWsGuide, showWsMenu, bdImportConfirm, showImport, bdShowImport, vfxShowImport, ufoShowImport, shipShowImport, plasmaShowImport, setsShowImport, showBackWarn, bdShowBackWarn, vfxShowBackWarn, ufoShowBackWarn, shipShowBackWarn, plasmaShowBackWarn]);
+
+  // Free tier: a brand-new level cannot be saved once the slot limit is reached (existing levels re-save fine).
+  var builderSaveLocked = entLocked && !editingLevelId && savedLevels.length >= FREE_LEVEL_LIMIT;
 
   return React.createElement("div", { style: { position: "fixed", inset: 0, background: "#0b0c1a", fontFamily: "'Quicksand',sans-serif", overflow: "hidden" } },
     React.createElement("style", null, ANIM_CSS),
@@ -5591,7 +5731,7 @@ export default function CosmicWorkshop() {
                   React.createElement("div", { style: { color: "#ddf0ff", fontSize: 20, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Level Builder"),
                   React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between" } },
                     React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 12 } }, "Design custom grids"),
-                    React.createElement(WsMono, { size: 9, ls: 0.5, color: "rgba(128,221,255,0.45)" }, savedLevels.length + " SAVED")
+                    React.createElement(WsMono, { size: 9, ls: 0.5, color: "rgba(128,221,255,0.45)" }, savedLevels.length + (entLocked ? " / " + FREE_LEVEL_LIMIT : "") + " SAVED")
                   )
                 )
               ),
@@ -5612,7 +5752,7 @@ export default function CosmicWorkshop() {
                   React.createElement("div", { style: { color: "#ede8ff", fontSize: 20, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Block Designer"),
                   React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between" } },
                     React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 12 } }, "Custom block skins"),
-                    React.createElement(WsMono, { size: 9, ls: 0.5, color: "rgba(200,184,255,0.45)" }, bdSaved.length + " SAVED")
+                    renderTileBadge(bdSaved.length, "rgba(200,184,255,0.45)", "#c8b8ff", entLocked)
                   )
                 )
               ),
@@ -5631,7 +5771,7 @@ export default function CosmicWorkshop() {
                   React.createElement("div", { style: { color: "#fff3dd", fontSize: 20, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "VFX Studio"),
                   React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between" } },
                     React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 12 } }, "Tune visual effects"),
-                    React.createElement(WsMono, { size: 9, ls: 0.5, color: "rgba(255,180,60,0.45)" }, vfxSaved.length + " SAVED")
+                    renderTileBadge(vfxSaved.length, "rgba(255,180,60,0.45)", "#ffb43c", entLocked)
                   )
                 )
               ),
@@ -5653,7 +5793,7 @@ export default function CosmicWorkshop() {
                   React.createElement("div", { style: { color: "#ddffee", fontSize: 20, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "UFO Customizer"),
                   React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between" } },
                     React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 12 } }, "Configure the alien hull"),
-                    React.createElement(WsMono, { size: 9, ls: 0.5, color: "rgba(100,220,180,0.45)" }, ufoSaved.length + " SAVED")
+                    renderTileBadge(ufoSaved.length, "rgba(100,220,180,0.45)", "#64dcb4", entLocked)
                   )
                 )
               ),
@@ -5672,7 +5812,7 @@ export default function CosmicWorkshop() {
                   React.createElement("div", { style: { color: "#ffe0ea", fontSize: 20, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Hangar"),
                   React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between" } },
                     React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 12 } }, "Design your ship"),
-                    React.createElement(WsMono, { size: 9, ls: 0.5, color: "rgba(255,138,170,0.45)" }, shipSaved.length + " SAVED")
+                    renderTileBadge(shipSaved.length, "rgba(255,138,170,0.45)", "#ff8aaa", entLocked)
                   )
                 )
               ),
@@ -5700,7 +5840,7 @@ export default function CosmicWorkshop() {
                   React.createElement("div", { style: { color: "#d0f0ff", fontSize: 20, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Plasma Lab"),
                   React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between" } },
                     React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 12 } }, "Design plasma effects"),
-                    React.createElement(WsMono, { size: 9, ls: 0.5, color: "rgba(80,200,255,0.45)" }, plasmaSaved.length + " SAVED")
+                    renderTileBadge(plasmaSaved.length, "rgba(80,200,255,0.45)", "#50c8ff", entLocked)
                   )
                 )
               ),
@@ -5712,6 +5852,15 @@ export default function CosmicWorkshop() {
             )
           )
         ),
+
+        // WORKSHOP PASS (shown until the pass is owned)
+        entLocked && React.createElement(WsPanel, { onClick: function() { openPaywall(null); }, style: { padding: "10px 12px", display: "flex", alignItems: "center", gap: 10, cursor: "pointer", border: "1px solid rgba(160,100,255,0.45)", boxShadow: WS.ps + ", 0 0 14px rgba(160,100,255,0.18)" } },
+          React.createElement("div", { style: { width: 34, height: 34, borderRadius: 6, background: "linear-gradient(180deg, #3a2060 0%, #261040 100%)", border: "1px solid rgba(160,100,255,0.35)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 } },
+            React.createElement(WsLockIcon, { size: 15, color: "#c8b8ff" })),
+          React.createElement("div", { style: { flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 } },
+            React.createElement("div", { style: { color: "#ede8ff", fontFamily: "'Exo 2', sans-serif", fontSize: 15, fontWeight: 700, letterSpacing: 0.4, textTransform: "uppercase" } }, "Workshop Pass"),
+            React.createElement("div", { style: { color: "rgba(170,195,215,0.5)", fontSize: 11 } }, "Every module, unlimited levels, Sets, Solve 55 to 100")),
+          React.createElement(WsMono, { size: 9, ls: 0.5, color: "rgba(200,184,255,0.7)" }, ent.product ? ent.product.displayPrice : (ent.native ? "UNLOCK" : "$4.99"))),
 
         // SETS PANEL
         React.createElement(WsPanel, { onClick: function() { setScreen("sets"); setSetsView("list"); }, style: { padding: "10px", display: "flex", flexDirection: "column", cursor: "pointer" } },
@@ -5734,7 +5883,7 @@ export default function CosmicWorkshop() {
                 React.createElement("div", { style: { color: "#fff8dc", fontSize: 20, fontWeight: 700, letterSpacing: 0.3, fontFamily: "'Exo 2', sans-serif", textTransform: "uppercase" } }, "Set Editor"),
                 React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between" } },
                   React.createElement("div", { style: { color: "rgba(170,195,215,0.45)", fontSize: 12 } }, "Bundle and share designs"),
-                  React.createElement(WsMono, { size: 9, ls: 0.5, color: "rgba(255,208,96,0.45)" }, setsSaved.length + " SAVED")
+                  renderTileBadge(setsSaved.length, "rgba(255,208,96,0.45)", "#ffd060", entLocked)
                 )
               )
             ),
@@ -5800,7 +5949,7 @@ export default function CosmicWorkshop() {
 
     ),
     // ═══ SETS SCREEN ═══
-    screen === "sets" && React.createElement("div", { style: { display: "flex", flexDirection: "column", height: "100%", background: "linear-gradient(180deg, #0a0a14 0%, #12121e 100%)" } },
+    screen === "sets" && !entLocked && React.createElement("div", { style: { display: "flex", flexDirection: "column", height: "100%", background: "linear-gradient(180deg, #0a0a14 0%, #12121e 100%)" } },
       // ── LIST VIEW ──
       setsView === "list" && React.createElement(React.Fragment, null,
         React.createElement(WorkshopTopBar, { onBack: function() { if (setsMergeMode) { setSetsMergeMode(false); setSetsMergeIds([]); } else { setScreen("splash"); setSetsView("list"); } }, backLabel: setsMergeMode ? "Cancel" : "Workshop", title: "My Sets", color: "#ffd060",
@@ -6096,6 +6245,19 @@ export default function CosmicWorkshop() {
       )
     ),
 
+    // ═══ LOCKED MODULE (free tier): the module's top bar over the Workshop Pass card ═══
+    entLocked && LOCKED_MODULES[screen] && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", background: WS.brushed, backgroundBlendMode: "overlay" } },
+      React.createElement(WorkshopTopBar, { onBack: function() { setScreen("splash"); }, backLabel: "Workshop", title: LOCKED_MODULES[screen].title, color: LOCKED_MODULES[screen].color }),
+      React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "18px 12px 24px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14 } },
+        React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 8, color: LOCKED_MODULES[screen].color } },
+          React.createElement(WsLockIcon, { size: 14, color: LOCKED_MODULES[screen].color }),
+          React.createElement(WsMono, { size: 9, ls: 1.5, color: LOCKED_MODULES[screen].color }, LOCKED_MODULES[screen].blurb + "  \u00b7  with the Workshop Pass")),
+        React.createElement(WsPassCard, { ent: ent, reason: LOCKED_MODULES[screen].title + " is part of the Workshop Pass." }))),
+
+    // ═══ WORKSHOP PASS OVERLAY ═══
+    paywall && React.createElement("div", { onClick: function() { setPaywall(null); }, style: { position: "fixed", inset: 0, zIndex: 510, background: "rgba(0,0,0,0.76)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 12, overflowY: "auto" } },
+      React.createElement(WsPassCard, { ent: ent, reason: paywall.reason, onClose: function() { setPaywall(null); } })),
+
     // ═══ CREDITS OVERLAY ═══
     showWsCredits && React.createElement("div", { onClick: function() { setShowWsCredits(false); }, style: { position: "fixed", inset: 0, zIndex: 60, background: "rgba(0,0,0,0.72)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 } },
       React.createElement(WsPanel, { onClick: function(e) { e.stopPropagation(); }, style: { width: 300, maxWidth: "90vw", padding: 0, overflow: "hidden" } },
@@ -6154,6 +6316,11 @@ export default function CosmicWorkshop() {
           ),
           "Workshop Guide"
         ),
+        ent.native && React.createElement("div", { onClick: function() { setShowWsMenu(false); openPaywall(null); }, style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 } },
+          React.createElement(WsLockIcon, { size: 16, color: "rgba(200,170,255,0.6)" }),
+          React.createElement("span", { style: { flex: 1 } }, "Workshop Pass"),
+          ent.unlocked && React.createElement("span", { style: { width: 6, height: 6, borderRadius: 6, background: WS.green, boxShadow: "0 0 6px " + WS.green, flexShrink: 0 } })
+        ),
         React.createElement("div", { onClick: function() { setShowWsMenu(false); setShowWsCredits(true); }, style: { display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", cursor: "pointer", color: "rgba(200,210,220,0.85)", fontSize: 12, fontWeight: 600 } },
           React.createElement("svg", { width: "16", height: "16", viewBox: "0 0 24 24" },
             React.createElement("path", { d: "M4 6h16v2H4zm0 5h16v2H4zm0 5h10v2H4z", fill: "rgba(200,170,255,0.6)" })
@@ -6189,6 +6356,10 @@ export default function CosmicWorkshop() {
             React.createElement("div", { onClick: function() { setShowImport(true); setImportText(""); setImportError(""); }, style: BTN_TOPBAR_PURPLE }, "Import"),
             savedLevels.length > 0 && React.createElement("div", { onClick: exportAllLevels, style: Object.assign({}, BTN_TOPBAR, { color: "rgba(200,184,255,0.6)", fontSize: 8 }) }, "Exp All"),
             React.createElement("div", { onClick: function() { openBuilder(); }, style: Object.assign({}, BTN_TOPBAR_ACCENT, { background: "linear-gradient(180deg, #1a3a4a, #0f2a38)", boxShadow: "0 0 8px rgba(80,200,255,0.25), 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" }) }, "+ New")) }),
+        entLocked && !setsSelMode && React.createElement("div", { onClick: function() { openPaywall("The free Level Builder keeps " + FREE_LEVEL_LIMIT + " saved levels. Imported and shared levels always play in full."); }, style: { display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "6px 10px", margin: "6px 10px 0", borderRadius: 6, background: "rgba(160,100,255,0.07)", border: "1px solid rgba(160,100,255,0.22)", cursor: "pointer" } },
+          React.createElement(WsLockIcon, { size: 10, color: "rgba(200,184,255,0.7)" }),
+          React.createElement(WsMono, { size: 8, ls: 1, color: savedLevels.length >= FREE_LEVEL_LIMIT ? "rgba(255,208,96,0.85)" : "rgba(200,184,255,0.7)" }, "FREE: " + Math.min(savedLevels.length, FREE_LEVEL_LIMIT) + " OF " + FREE_LEVEL_LIMIT + " LEVEL SLOTS USED"),
+          React.createElement(WsMono, { size: 8, ls: 1, color: "rgba(200,184,255,0.45)" }, "\u00b7  PASS FOR UNLIMITED")),
         renderSetsSelBar("level", savedLevels.map(function(lv) { return lv.id; })),
         !setsSelMode && savedLevels.length > 1 && renderSortBar(sortMode, setSortMode, [["level_num", "Order"]]),
         React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "6px 10px 20px", position: "relative", zIndex: 1 }, onPointerMove: lvDragMove, onPointerUp: lvDragEnd },
@@ -6259,8 +6430,8 @@ export default function CosmicWorkshop() {
                 React.createElement("path", { d: "M15 14l5-5-5-5" }),
                 React.createElement("path", { d: "M20 9H9a5 5 0 0 0-5 5v0a5 5 0 0 0 5 5h3" })))),
           React.createElement("div", { ref: tourSaveRef, style: { display: "flex", gap: 5 } },
-            React.createElement("div", { onClick: handleBuilderSave, style: BTN_SAVE }, "Save"),
-            React.createElement("div", { onClick: handleBuilderSaveAndPlay, style: Object.assign({}, BTN_SAVE, { display: "flex", alignItems: "center", gap: 3 }) }, React.createElement("svg", { width: "8", height: "8", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M5 3 L20 12 L5 21 Z", fill: "currentColor" })), "Save & Play")),
+            React.createElement("div", { onClick: handleBuilderSave, style: Object.assign({}, BTN_SAVE, builderSaveLocked ? { display: "flex", alignItems: "center", gap: 4, border: "2px solid rgba(160,100,255,0.45)", color: "#c8b8ff", background: "linear-gradient(180deg, #2a2040, #1a1428)" } : {}) }, builderSaveLocked && React.createElement(WsLockIcon, { size: 9 }), "Save"),
+            React.createElement("div", { onClick: handleBuilderSaveAndPlay, style: Object.assign({}, BTN_SAVE, { display: "flex", alignItems: "center", gap: 3 }, builderSaveLocked ? { border: "2px solid rgba(160,100,255,0.45)", color: "#c8b8ff", background: "linear-gradient(180deg, #2a2040, #1a1428)" } : {}) }, builderSaveLocked ? React.createElement(WsLockIcon, { size: 9 }) : React.createElement("svg", { width: "8", height: "8", viewBox: "0 0 24 24" }, React.createElement("path", { d: "M5 3 L20 12 L5 21 Z", fill: "currentColor" })), "Save & Play")),
           React.createElement("div", { style: { flex: 1 } }),
           React.createElement("div", { onClick: function() { setBuilderTourStep(0); }, style: { width: 28, height: 28, borderRadius: 4, background: PNL, border: PNLB, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)" } }, React.createElement("svg", { width: "12", height: "12", viewBox: "0 0 16 16" }, React.createElement("circle", { cx: "8", cy: "8", r: "7", fill: "none", stroke: "rgba(180,200,220,0.5)", strokeWidth: "1.5" }), React.createElement("text", { x: "8", y: "12", textAnchor: "middle", fill: "rgba(180,200,220,0.5)", fontSize: "10", fontWeight: "700" }, "?")))),
         // ── Name input on its own row so the button row has room to breathe ──
@@ -6348,11 +6519,11 @@ export default function CosmicWorkshop() {
               builderTourStep < BUILDER_TOUR_STEPS.length - 1 ? React.createElement("div", { onClick: function() { setBuilderTourStep(null); builderTourSeenRef.current = true; try { window.storage.set("cosmic_drift_builder_tour", "seen"); } catch (e) {} }, style: { color: "rgba(180,200,220,0.35)", fontSize: 10, fontWeight: 600, cursor: "pointer" } }, "Skip") : React.createElement("div", { style: { width: 36 } })))),
         showBackWarn && renderBackWarnOverlay(
           function() { setShowBackWarn(false); },
-          function() { handleBuilderSave(); setShowBackWarn(false); loadSavedLevels(); setLbScreen("list"); },
+          function() { if (!handleBuilderSave()) { setShowBackWarn(false); return; } setShowBackWarn(false); loadSavedLevels(); setLbScreen("list"); },
           function() { setShowBackWarn(false); loadSavedLevels(); setLbScreen("list"); }))),
 
     // ═══ BLOCK DESIGNER ═══
-    screen === "designer" && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", background: WS.brushed, backgroundBlendMode: "overlay" } },
+    screen === "designer" && !entLocked && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", background: WS.brushed, backgroundBlendMode: "overlay" } },
       WsRivet({ bottom: 5, left: 5 }), WsRivet({ bottom: 5, right: 5 }),
 
       // ── MY DESIGNS LIST ──
@@ -6545,7 +6716,7 @@ export default function CosmicWorkshop() {
           function() { bdSaveCurrentDesign(); setBdShowBackWarn(false); setBdCurrentView("list"); },
           function() { setBdShowBackWarn(false); setBdCurrentView("list"); }))),
 
-    screen === "vfx" && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", background: WS.brushed, backgroundBlendMode: "overlay" } },
+    screen === "vfx" && !entLocked && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", background: WS.brushed, backgroundBlendMode: "overlay" } },
       WsRivet({ bottom: 5, left: 5 }), WsRivet({ bottom: 5, right: 5 }),
 
       // ── VFX EFFECTS LIST ──
@@ -6707,7 +6878,7 @@ export default function CosmicWorkshop() {
           function() { setVfxShowBackWarn(false); setVfxCurrentView("list"); }))),
 
     // ═══ UFO CUSTOMIZER ═══
-    screen === "ufo" && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", background: WS.brushed, backgroundBlendMode: "overlay" } },
+    screen === "ufo" && !entLocked && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", background: WS.brushed, backgroundBlendMode: "overlay" } },
       WsRivet({ bottom: 5, left: 5 }), WsRivet({ bottom: 5, right: 5 }),
 
       // ── LIST VIEW ──
@@ -6835,7 +7006,7 @@ export default function CosmicWorkshop() {
 ,
 
     // ═══ HANGAR ═══
-    screen === "hangar" && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", background: WS.brushed, backgroundBlendMode: "overlay" } },
+    screen === "hangar" && !entLocked && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", background: WS.brushed, backgroundBlendMode: "overlay" } },
       WsRivet({ bottom: 5, left: 5 }), WsRivet({ bottom: 5, right: 5 }),
 
       // ── LIST VIEW ──
@@ -7491,7 +7662,7 @@ export default function CosmicWorkshop() {
     ),
 
     // ═══ PLASMA LAB ═══
-    screen === "plasma" && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", background: WS.brushed, backgroundBlendMode: "overlay" } },
+    screen === "plasma" && !entLocked && React.createElement("div", { style: { position: "relative", zIndex: 1, display: "flex", flexDirection: "column", height: "100%", background: WS.brushed, backgroundBlendMode: "overlay" } },
       WsRivet({ bottom: 5, left: 5 }), WsRivet({ bottom: 5, right: 5 }),
 
       // ── LIST VIEW ──

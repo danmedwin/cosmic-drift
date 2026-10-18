@@ -28,4 +28,13 @@ for (var i = 0; i < files.length; i++) {
 for (var d = 0; d < dirs.length; d++) {
   fs.cpSync(path.join(root, dirs[d]), path.join(out, dirs[d]), { recursive: true });
 }
+// iCloud Drive sometimes resurrects a just-deleted file as "name 2.ext" while it syncs; drop those so they never ship.
+(function sweep(dir) {
+  var names = fs.readdirSync(dir);
+  for (var n = 0; n < names.length; n++) {
+    var full = path.join(dir, names[n]);
+    if (fs.statSync(full).isDirectory()) { sweep(full); continue; }
+    if (/ \d+\.[^.]+$/.test(names[n])) { fs.rmSync(full); console.warn("www-sync: removed iCloud duplicate " + path.relative(root, full)); }
+  }
+})(out);
 console.log("www-sync: " + files.length + " files + " + dirs.join(", ") + " -> www/");
