@@ -71,12 +71,15 @@ window.CDNative = (function () {
       return sh.share({ title: title, text: text, dialogTitle: title }).then(function () { return true; }).catch(function () { return false; });
     },
     leaderboardId: function (modeDiffKey) { return LB_PREFIX + String(modeDiffKey).replace("_", "."); },
+    // Only Infinite and Solve have Game Center boards; Set mode plays player-made level sets, so scores are not comparable.
+    hasLeaderboard: function (modeDiffKey) { return /^(infinite|solve)_(easy|regular|hard)$/.test(String(modeDiffKey)); },
     submitScore: function (modeDiffKey, score) {
-      var gc = plugin("GameCenter"); if (!gc) return;
+      var gc = plugin("GameCenter"); if (!gc || !api.hasLeaderboard(modeDiffKey)) return;
       try { gc.submitScore({ leaderboardId: api.leaderboardId(modeDiffKey), score: Math.round(Number(score) || 0) }).catch(function () {}); } catch (e) {}
     },
     showLeaderboard: function (modeDiffKey) {
       var gc = plugin("GameCenter"); if (!gc) return Promise.resolve(false);
+      if (modeDiffKey && !api.hasLeaderboard(modeDiffKey)) return Promise.resolve(false);
       var opts = modeDiffKey ? { leaderboardId: api.leaderboardId(modeDiffKey) } : {};
       return gc.showLeaderboard(opts).then(function (r) { return !!(r && r.shown); }).catch(function () { return false; });
     },
@@ -15566,7 +15569,7 @@ function CosmicDriftGame() {
       background: GS.green,
       boxShadow: "0 0 6px " + GS.green
     }
-  })))), window.CDNative && window.CDNative.hasGameCenter && /*#__PURE__*/React.createElement("div", {
+  })))), window.CDNative && window.CDNative.hasGameCenter && gameMode !== "set" && /*#__PURE__*/React.createElement("div", {
     onClick: function () {
       window.CDNative.showLeaderboard(gameModeRef.current + "_" + difficultyRef.current).then(function (shown) {
         if (!shown) {

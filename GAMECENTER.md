@@ -11,9 +11,10 @@ is not signed in to Game Center (the plugin just resolves `submitted: false`).
 
 ## IDs to create in App Store Connect
 
-App Store Connect → the app → **Game Center** → **Leaderboards** → **+**,
-type **Classic**, one per row. Score format: **Integer**, sort **High to Low**,
-no score range limits. Reference name and localized title are suggestions.
+All six were created in App Store Connect on 2026-10-18: type **Classic**,
+score format **Integer**, Best Score, sort **High to Low**, range 0 to
+1,000,000,000, English (U.S.) title as below with the suffix " pts". They sit
+in "Prepare for Submission" until the first app version ships.
 
 | Leaderboard ID | Reference name | Title (en) |
 |---|---|---|
@@ -23,15 +24,12 @@ no score range limits. Reference name and localized title are suggestions.
 | `com.medwin.cosmicdrift.lb.solve.easy` | Solve - Easy | Solve · Easy |
 | `com.medwin.cosmicdrift.lb.solve.regular` | Solve - Regular | Solve · Regular |
 | `com.medwin.cosmicdrift.lb.solve.hard` | Solve - Hard | Solve · Hard |
-| `com.medwin.cosmicdrift.lb.set.easy` | Set - Easy | Set · Easy |
-| `com.medwin.cosmicdrift.lb.set.regular` | Set - Regular | Set · Regular |
-| `com.medwin.cosmicdrift.lb.set.hard` | Set - Hard | Set · Hard |
 
 The ID is built in `build.js` (`CDNative.leaderboardId`):
 `"com.medwin.cosmicdrift.lb." + mode + "." + difficulty`. If you rename the
 prefix there, rename it here and in App Store Connect too.
 
-Optional: a leaderboard **set** called "Cosmic Drift" grouping all nine makes the
+Optional: a leaderboard **set** called "Cosmic Drift" grouping all six makes the
 Game Center sheet tidier; it is not required for submission to work.
 
 ## Enabling Game Center for the app
@@ -44,12 +42,12 @@ Game Center sheet tidier; it is not required for submission to work.
    Simulator once you sign in to a Game Center account (Settings → Game Center
    on the simulated device). Sandbox scores do not reach the live leaderboards.
 
-## Open question for Dan
+## Set mode
 
-**Set mode scores:** Set mode plays user-made level sets, so scores between two
-players are not comparable. The three `set.*` leaderboards exist because the
-plan asked for every mode, but it would be reasonable to leave them out of App
-Store Connect; the app simply gets `submitted: false` for an unknown ID.
+Set mode has no leaderboards: it plays player-made level sets, so scores between
+two players are not comparable. `CDNative.hasLeaderboard` in `build.js` only
+allows Infinite and Solve keys, so nothing is submitted for Set mode and the
+LEADERBOARDS button is hidden while Set mode is selected on the splash.
 
 ## Plugin
 

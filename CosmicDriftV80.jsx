@@ -3674,7 +3674,7 @@ function logUfo(msg) {
           </div>
         </div>
         {/* Leaderboards (Game Center, native app only) */}
-        {(window.CDNative && window.CDNative.hasGameCenter) && <div onClick={function () { window.CDNative.showLeaderboard(gameModeRef.current + "_" + difficultyRef.current).then(function (shown) { if (!shown) { setGcMsg(true); setTimeout(function () { setGcMsg(false); }, 2600); } }); }} style={{ position: "relative", marginTop: 6, height: 40, borderRadius: 10, background: GS.brushedSolid, border: GS.pbl, boxShadow: GS.ps, padding: "0 14px", display: "flex", alignItems: "center", gap: 10, overflow: "hidden", cursor: "pointer", flexShrink: 0, zIndex: 1 }}>
+        {(window.CDNative && window.CDNative.hasGameCenter && gameMode !== "set") && <div onClick={function () { window.CDNative.showLeaderboard(gameModeRef.current + "_" + difficultyRef.current).then(function (shown) { if (!shown) { setGcMsg(true); setTimeout(function () { setGcMsg(false); }, 2600); } }); }} style={{ position: "relative", marginTop: 6, height: 40, borderRadius: 10, background: GS.brushedSolid, border: GS.pbl, boxShadow: GS.ps, padding: "0 14px", display: "flex", alignItems: "center", gap: 10, overflow: "hidden", cursor: "pointer", flexShrink: 0, zIndex: 1 }}>
           <GsRivet pos={{ top: 4, left: 5 }} size={4} />
           <GsRivet pos={{ top: 4, right: 5 }} size={4} />
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffb43c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 8, filter: "drop-shadow(0 0 4px rgba(255,180,60,0.5))" }}><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z" /><path d="M7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3" /></svg>
