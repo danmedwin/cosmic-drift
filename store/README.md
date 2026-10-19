@@ -51,8 +51,13 @@ scales the rest.
 
 | Device slot in ASC | Size | Files |
 |---|---|---|
-| iPhone 6.9" Display | 1320 x 2868 | `iphone-01` to `iphone-08` |
-| iPad 13" Display | 2064 x 2752 | `ipad-01` to `ipad-08` |
+| iPhone with Dynamic Island (medium display), the required slot | 1206 x 2622 | `final/medium/iphone-01` to `iphone-08` |
+| iPhone with Dynamic Island (large display), optional | 1320 x 2868 | `final/iphone-01` to `iphone-08` |
+| iPad 13" display, required | 2064 x 2752 | `final/ipad-01` to `ipad-08` |
+
+App Store Connect rejects a 1320 x 2868 file in the medium slot ("File dimensions
+are invalid"), so upload the `medium/` set there. The large slot is optional; if it
+is not shown on the version page, skip it and Apple scales the medium set.
 
 The first three show in search results, so the order is: chain reaction,
 Workshop, Level Builder, then Block Designer, Hangar, Level Clear, title

@@ -33,6 +33,12 @@ DEVICES = {
     "ipad": dict(size=(2064, 2752), top=300, bottom=130, side=140, corner=0.030, font=150, patch_corner=True),
 }
 
+# App Store Connect's required iPhone slot is "iPhone with Dynamic Island (medium display)",
+# 1206 x 2622. The 1320 x 2868 set above fits the optional "large display" slot. The same
+# iphone-* raw captures are rendered a second time at the medium size into final/medium/.
+MEDIUM_IPHONE = dict(size=(1206, 2622), top=302, bottom=137, side=110, corner=0.115, font=113)
+FINAL_MEDIUM = os.path.join(FINAL, "medium")
+
 # file stem (after the device prefix) -> caption
 CAPTIONS = {
     "01-chain-reaction": "Fire. Chain. Clear.",
@@ -138,6 +144,12 @@ def main():
                        CAPTIONS[rest], DEVICES[device], ttf)
         print(f"{name}: {size[0]}x{size[1]}")
         made += 1
+        if device == "iphone":
+            os.makedirs(FINAL_MEDIUM, exist_ok=True)
+            size = compose(os.path.join(RAW, name), os.path.join(FINAL_MEDIUM, name),
+                           CAPTIONS[rest], MEDIUM_IPHONE, ttf)
+            print(f"medium/{name}: {size[0]}x{size[1]}")
+            made += 1
     print(made, "framed")
 
 
